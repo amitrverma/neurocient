@@ -5,6 +5,7 @@ import { Dialog } from "@headlessui/react";
 import { useAuth } from "../context/AuthContext";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../firebase";
+import { useNotification } from "./NotificationProvider";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const { notify } = useNotification();
 
   // 🔑 Google login flow
   const handleGoogleLogin = async () => {
@@ -38,7 +40,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
         onClose();
         if (onSuccess) onSuccess();
       } else if (data.preview) {
-        alert("You’re in preview mode (waitlist).");
+        notify("You’re in preview mode (waitlist).");
       }
     } catch (err) {
       console.error("Google login failed:", err);
@@ -64,7 +66,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
         onClose();
         if (onSuccess) onSuccess();
       } else {
-        alert("Failed to authenticate.");
+        notify("Failed to authenticate.", "error");
       }
     } finally {
       setLoading(false);

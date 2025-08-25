@@ -9,6 +9,7 @@ import type { PathwayId, ArticleRef } from "@/content/pathways";
 import Newsletter from "./Newsletter";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "./AuthModal";
+import { useNotification } from "./NotificationProvider";
 
 interface ResourceItem {
   title: string;
@@ -54,6 +55,7 @@ const ArticleLayout = ({
   const articleUrl = slug ? `${baseUrl}/${slug}` : baseUrl;
 
   const { token } = useAuth();
+  const { notify } = useNotification();
   const [showResources, setShowResources] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -116,7 +118,7 @@ const ArticleLayout = ({
       } else {
         const data = await res.json();
         console.error("❌ Failed to save/unsave:", data);
-        alert(data.detail || "Something went wrong");
+        notify(data.detail || "Something went wrong", "error");
       }
     } catch (err) {
       console.error("❌ Error saving article:", err);

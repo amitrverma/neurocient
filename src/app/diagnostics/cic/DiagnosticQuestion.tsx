@@ -60,29 +60,28 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
             <span>
               Step {currentIndex + 1} of {diagnosticQuestions.length}
             </span>
-            <span className="font-semibold text-[var(--color-brand-primary)]">
+            <span className="font-semibold text-brand-primary">
               Caveman at Work
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
             <div
-              className="h-2 rounded-full transition-all duration-500"
+              className="h-2 rounded-full transition-all duration-500 bg-brand-primary"
               style={{
                 width: `${((currentIndex + 1) / diagnosticQuestions.length) * 100}%`,
-                backgroundColor: "var(--color-brand-primary)",
               }}
             />
           </div>
         </div>
 
         {/* Question */}
-        <h2 className="text-2xl font-bold text-[var(--color-brand-dark)] mb-2">
+        <h2 className="text-2xl font-bold text-brand-dark mb-2">
           {question.title}
         </h2>
         <p className="text-lg text-gray-700 mb-6 whitespace-pre-line">
           {question.question.split("?")[0] + "?"}
           {"\n"}
-          <span className="block font-semibold text-[var(--color-brand-dark)] mt-2">
+          <span className="block font-semibold text-brand-dark mt-2">
             {question.question.split("?")[1]?.trim()}
           </span>
         </p>
@@ -99,8 +98,8 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
                     className={`w-full text-left px-4 py-3 rounded-lg border shadow-sm transition duration-150
                       ${
                         selectedOption === key
-                          ? "bg-[var(--color-brand-teal)] text-white border-[var(--color-brand-teal)] ring-2 ring-[var(--color-brand-teal)]/70"
-                          : "bg-white text-[var(--color-brand-dark)] border-gray-300 hover:bg-[var(--color-brand-secondary)]/20"
+                          ? "bg-brand-teal text-white border-brand-teal ring-2 ring-brand-teal/70"
+                          : "bg-white text-brand-dark border-gray-300 hover:bg-brand-secondary/20"
                       }`}
                   >
                     <span className="font-semibold">{key})</span> {value}
@@ -114,7 +113,7 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
               {currentIndex > 0 && (
                 <button
                   onClick={handlePrevious}
-                  className="px-4 py-2 bg-[var(--color-brand-teal)] text-white text-sm rounded hover:bg-[var(--color-brand-accent)] transition"
+                  className="px-4 py-2 bg-brand-teal text-white text-sm rounded hover:bg-brand-accent transition"
                 >
                   ← Previous
                 </button>
@@ -122,10 +121,10 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
               <button
                 onClick={handleNext}
                 disabled={!selectedOption}
-                className={`px-4 py-2 text-sm rounded transition 
+                className={`px-4 py-2 text-sm rounded transition
                   ${
                     selectedOption
-                      ? "bg-[var(--color-brand-teal)] text-white hover:bg-[var(--color-brand-accent)]"
+                      ? "bg-brand-teal text-white hover:bg-brand-accent"
                       : "bg-gray-200 text-gray-500 cursor-not-allowed"
                   }`}
               >

@@ -20,18 +20,17 @@ const FeedbackOverlay = ({ questionId, option }: Props) => {
 
   return (
     <div
-      className="relative bg-white border border-gray-200 rounded-2xl shadow-lg p-5 text-base text-[var(--color-brand-dark)]
-                 transition-all duration-300 transform hover:shadow-xl hover:-translate-y-1"
-      style={{ borderTop: `4px solid var(--color-brand-primary)` }}
+      className="relative bg-white border border-gray-200 rounded-2xl shadow-lg p-5 text-base text-brand-dark
+                 transition-all duration-300 transform hover:shadow-xl hover:-translate-y-1 border-t-4 border-t-brand-primary"
     >
       {/* Instinct Title */}
-      <p className="font-semibold text-[var(--color-brand-dark)] mb-1">
+      <p className="font-semibold text-brand-dark mb-1">
         Instinct: {insight.instinct}
       </p>
 
       {/* Motive */}
       {insight.motive && (
-        <p className="text-sm font-medium mb-4 text-[var(--color-brand-primary)]">
+        <p className="text-sm font-medium mb-4 text-brand-primary">
           Caveman Motive: {insight.motive}
         </p>
       )}
@@ -44,7 +43,7 @@ const FeedbackOverlay = ({ questionId, option }: Props) => {
         (!showDetail ? (
           <button
             onClick={() => setShowDetail(true)}
-            className="text-[var(--color-brand-teal)] underline text-sm mb-2 hover:text-[var(--color-brand-accent)] transition"
+            className="text-brand-teal underline text-sm mb-2 hover:text-brand-accent transition"
           >
             + See why this happens
           </button>
@@ -52,8 +51,8 @@ const FeedbackOverlay = ({ questionId, option }: Props) => {
           <div className="space-y-3 text-sm">
             <p>{insight.explanation}</p>
             {insight.microShift && (
-              <p className="text-[var(--color-brand-dark)]">
-                <strong className="text-[var(--color-brand-primary)]">
+              <p className="text-brand-dark">
+                <strong className="text-brand-primary">
                   Try this:
                 </strong>{" "}
                 {insight.microShift}

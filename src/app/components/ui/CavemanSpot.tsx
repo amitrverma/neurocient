@@ -2,28 +2,28 @@
 
 import { useState } from "react";
 import { useAuth } from "@/app/context/AuthContext";
+import AuthModal from "../AuthModal";
 import { useNotification } from "../NotificationProvider";
 
 interface CavemanSpotProps {
-  prompt?: string;  // now optional, we’ll add a default
-  onAuthRequired?: () => void;
+  prompt?: string; // now optional, we’ll add a default
   onAdded?: (spot: { date: string; description: string }) => void;
 }
 
 const CavemanSpot = ({
   prompt = "Notice a caveman instinct? Log it here 👇",
-  onAuthRequired,
   onAdded,
 }: CavemanSpotProps) => {
   const [note, setNote] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
 
   const { token } = useAuth();
   const { notify } = useNotification();
 
   const handleSubmit = async () => {
     if (!token) {
-      onAuthRequired?.();
+      setShowAuth(true);
       return;
     }
     if (!note.trim()) {
@@ -80,6 +80,7 @@ const CavemanSpot = ({
       {submitted && (
         <p className="mt-2 text-sm text-green-700 font-medium">✅ Spot logged!</p>
       )}
+      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
     </div>
   );
 };

@@ -4,10 +4,8 @@ import CavemanSpot from "../ui/CavemanSpot";
 
 const CavemanSpotting = ({
   spots,
-  onAuthRequired,
 }: {
   spots: { date: string; description: string }[];
-  onAuthRequired?: () => void;
 }) => {
   const [allSpots, setAllSpots] = useState(spots);
 
@@ -23,8 +21,6 @@ const CavemanSpotting = ({
       {/* ✅ Inline Add Spot form (reusing CavemanSpot in inline mode) */}
       <CavemanSpot
         prompt="What’s one caveman instinct you spotted just now?"
-        mode="inline"
-        onAuthRequired={onAuthRequired}
         onAdded={(spot) => setAllSpots((prev) => [spot, ...prev])}
       />
 

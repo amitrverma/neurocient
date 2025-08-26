@@ -14,12 +14,17 @@ const Newsletter = ({
   logoSrc = "/logo/newsletter.png",
 }: NewsletterProps) => {
   const [email, setEmail] = useState("");
+  const [subscribedEmail, setSubscribedEmail] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "subscribed">("idle");
 
   // ✅ Check localStorage on mount
   useEffect(() => {
-    if (typeof window !== "undefined" && localStorage.getItem("subscribed") === "true") {
-      setStatus("subscribed");
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("subscribedEmail");
+      if (stored) {
+        setSubscribedEmail(stored);
+        setStatus("subscribed");
+      }
     }
   }, []);
 
@@ -34,7 +39,8 @@ const Newsletter = ({
 
       const data = await res.json();
       if (data.status === "subscribed" || data.status === "already_subscribed") {
-        localStorage.setItem("subscribed", "true");
+        localStorage.setItem("subscribedEmail", email);
+        setSubscribedEmail(email);
         setStatus("subscribed");
       }
     } catch (err) {
@@ -80,9 +86,17 @@ const Newsletter = ({
             </button>
           </form>
         ) : (
-          <p className="text-xl text-brand-accent font-medium">
-            🎉 Thanks for joining! See you in your inbox.
-          </p>
+          <div className="flex flex-col items-center md:items-start gap-2">
+            <p className="text-xl text-brand-accent font-medium">
+              Subscribed as <span className="font-semibold">{subscribedEmail}</span>
+            </p>
+            <button
+              onClick={() => setStatus("idle")}
+              className="text-sm font-semibold px-3 py-1 rounded-lg bg-brand-secondary text-brand-dark hover:bg-brand-primary hover:text-background transition"
+            >
+              Subscribe with another email
+            </button>
+          </div>
         )}
       </div>
     </div>

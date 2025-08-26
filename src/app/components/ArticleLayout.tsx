@@ -81,11 +81,7 @@ const ArticleLayout = ({
     };
     checkSaved();
   }, [slug, token]);
-
-  useEffect(() => {
-  console.log("CavemanSpot mounted with prompt:", spotPrompt);
-}, [spotPrompt]);
-  
+ 
   // ✅ IntersectionObserver for sidebar
   useEffect(() => {
     if (!nextRef.current) return;

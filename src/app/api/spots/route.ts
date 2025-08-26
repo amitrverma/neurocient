@@ -5,29 +5,21 @@ const API_BASE_URL = process.env.API_BASE_URL;
 // GET /api/spots → list spots
 export async function GET(req: Request) {
   const token = req.headers.get("authorization");
-  
-  console.log("🔍 GET /api/spots - Token received:", token ? "Present" : "Missing");
 
   if (!token) {
-    console.log("❌ No token provided");
     return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    console.log("🚀 Forwarding to backend:", `${process.env.API_BASE_URL}/api/spots`);
-    
     const res = await fetch(`${process.env.API_BASE_URL}/api/spots`, {
-      headers: { 
+      headers: {
         Authorization: token,
         "Content-Type": "application/json"
       },
     });
 
-    console.log("📡 Backend response status:", res.status);
-    
     const data = await res.json();
-    console.log("📄 Backend response data:", data);
-    
+
     return NextResponse.json(data, { status: res.status });
   } catch (error) {
     console.error("❌ Error in GET route:", error);
@@ -45,16 +37,11 @@ export async function POST(req: Request) {
 
   const body = await req.json();
 
-  console.log("Received body:", body);
-
-
   // ✅ FIXED: Frontend already sends { description, date }, so pass it through directly
   const payload = {
     description: body.description,  // ✅ Frontend sends description, not note
-    
-  };
 
-  console.log("Payload being sent:", payload);
+  };
 
   const res = await fetch(`${API_BASE_URL}/api/spots`, {
     method: "POST",

@@ -10,6 +10,7 @@ import AuthModal from "./AuthModal";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const { user, logout } = useAuth();
 
   return (
@@ -34,20 +35,59 @@ const Navbar = () => {
             <Link href="/diagnostics" className="hover:text-brand-primary">Diagnostics</Link>
             <Link href="/services" className="hover:text-brand-primary">Services</Link>
             <Link href="/contact" className="hover:text-brand-primary">Contact</Link>
-              {user && (
-            <Link href="/saved" className="hover:text-brand-primary">Bookmarks</Link>
-          )}
+
             {/* Auth Section */}
             {user ? (
-              <>
-                <span className="text-sm text-gray-600">Hi, {user.email}</span>
+              <div className="relative">
+                {/* Profile Pic Button */}
                 <button
-                  onClick={logout}
-                  className="text-sm font-semibold px-3 py-1 rounded-lg bg-brand-secondary text-brand-dark hover:bg-brand-primary hover:text-white transition"
+                  onClick={() => setShowDropdown((prev) => !prev)}
+                  className="flex items-center focus:outline-none"
                 >
-                  Log out
+                  <Image
+                    src={user?.photoURL || "/assets/user.png"}
+                    alt="Profile"
+                    width={36}
+                    height={36}
+                    className="rounded-full border border-gray-300"
+                  />
                 </button>
-              </>
+
+                {/* Dropdown */}
+                {showDropdown && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border py-2 text-sm">
+                    <Link
+                      href="/tools"
+                      onClick={() => setShowDropdown(false)}
+                      className="block px-4 py-2 hover:bg-gray-100"
+                    >
+                      Dashboard
+                    </Link><Link
+                      href="/saved"
+                      onClick={() => setShowDropdown(false)}
+                      className="block px-4 py-2 hover:bg-gray-100"
+                    >
+                      Bookmarks
+                    </Link>
+                    <Link
+                      href="/profile"
+                      onClick={() => setShowDropdown(false)}
+                      className="block px-4 py-2 hover:bg-gray-100"
+                    >
+                      Profile
+                    </Link>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setShowDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <button
                 onClick={() => setShowAuth(true)}
@@ -82,15 +122,31 @@ const Navbar = () => {
 
             {/* Mobile Auth */}
             {user ? (
-              <button
-                onClick={() => {
-                  logout();
-                  setIsOpen(false);
-                }}
-                className="text-sm font-semibold px-3 py-1 rounded-lg bg-brand-secondary text-brand-dark hover:bg-brand-primary hover:text-white transition"
-              >
-                Log out
-              </button>
+              <>
+                <Link
+                  href="/saved"
+                  onClick={() => setIsOpen(false)}
+                  className="hover:text-brand-primary"
+                >
+                  Bookmarks
+                </Link>
+                <Link
+                  href="/profile"
+                  onClick={() => setIsOpen(false)}
+                  className="hover:text-brand-primary"
+                >
+                  Profile
+                </Link>
+                <button
+                  onClick={() => {
+                    logout();
+                    setIsOpen(false);
+                  }}
+                  className="text-sm font-semibold px-3 py-1 rounded-lg bg-brand-secondary text-brand-dark hover:bg-brand-primary hover:text-white transition"
+                >
+                  Sign out
+                </button>
+              </>
             ) : (
               <button
                 onClick={() => {

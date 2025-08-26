@@ -6,6 +6,8 @@ import { compileMDX } from "next-mdx-remote/rsc";
 import type { Metadata } from "next";
 import ArticleLayout from "../../components/ArticleLayout";
 import { pathways, type PathwayId, type Pathway, type ArticleRef } from "@/content/pathways";
+import MicrochallengeBox from "../../components/tools/MicrochallengeBox";
+import CavemanSpot from "../../components/ui/CavemanSpot";
 
 const insightsDir = path.join(process.cwd(), "src/content/insights");
 
@@ -48,10 +50,14 @@ export default async function InsightPage(
   const raw = fs.readFileSync(filePath, "utf-8");
   const { content, data } = matter(raw);
 
-  const { content: mdxContent } = await compileMDX({
-    source: content,
-    options: { parseFrontmatter: false },
-  });
+const { content: mdxContent } = await compileMDX({
+  source: content,
+  options: { parseFrontmatter: false },
+  components: {
+    MicrochallengeBox, // ✅ make available inside .mdx
+    CavemanSpot, 
+  },
+});
 
   const readingTime = getReadingTime(content);
 
@@ -108,6 +114,7 @@ export default async function InsightPage(
       pathway={pathwayData}   // ✅ pathway info
       prevInPath={prevInPath} // ✅ prev in pathway
       nextInPath={nextInPath} // ✅ next in pathway
+      spotPrompt={data.spotPrompt || null} // ✅ pass spot prompt if exists
     >
       <div className="prose prose-article max-w-none">{mdxContent}</div>
     </ArticleLayout>

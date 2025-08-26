@@ -35,6 +35,7 @@ interface ArticleLayoutProps {
   pathway?: { id: PathwayId; title: string } | null;
   prevInPath?: ArticleRef | null;
   nextInPath?: ArticleRef | null;
+  spotPrompt: string | null
 }
 
 const ArticleLayout = ({
@@ -50,6 +51,7 @@ const ArticleLayout = ({
   pathway,
   prevInPath,
   nextInPath,
+  spotPrompt,
 }: ArticleLayoutProps) => {
   const baseUrl = "https://amitrverma.com/insights";
   const articleUrl = slug ? `${baseUrl}/${slug}` : baseUrl;
@@ -80,6 +82,10 @@ const ArticleLayout = ({
     checkSaved();
   }, [slug, token]);
 
+  useEffect(() => {
+  console.log("CavemanSpot mounted with prompt:", spotPrompt);
+}, [spotPrompt]);
+  
   // ✅ IntersectionObserver for sidebar
   useEffect(() => {
     if (!nextRef.current) return;
@@ -236,7 +242,6 @@ const ArticleLayout = ({
 
         {/* MDX content */}
         <div className="prose prose-article text-[18px]">{children}</div>
-
         <div className="mt-12">
           <Newsletter
             subtext="Enjoyed this? Get one fresh insight each week straight to your inbox."

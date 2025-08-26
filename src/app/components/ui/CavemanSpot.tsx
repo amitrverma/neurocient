@@ -22,43 +22,47 @@ const CavemanSpot = ({
   const { notify } = useNotification();
 
   const handleSubmit = async () => {
-    if (!token) {
-      setShowAuth(true);
-      return;
+  if (!token) {
+    setShowAuth(true);
+    return;
+  }
+  if (!note.trim()) {
+    notify("Please write something before adding a spot", "info");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/spots", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        description: note,                           // ✅ correct field
+        
+      }),
+    });
+
+    if (res.ok) {
+      notify("✅ Spot saved!", "success");
+      setSubmitted(true);
+
+      // call parent update
+      onAdded?.({ date: new Date().toISOString(), description: note });
+
+      setNote("");
+      setTimeout(() => setSubmitted(false), 1500);
+    } else {
+      const data = await res.json();
+      notify(data.detail || "Failed to log spot", "error");
     }
-    if (!note.trim()) {
-      notify("Please write something before adding a spot", "info");
-      return;
-    }
+  } catch (err) {
+    console.error("❌ Error saving spot:", err);
+    notify("Something went wrong", "error");
+  }
+};
 
-    try {
-      const res = await fetch("/api/spots", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ note, prompt }),
-      });
-
-      if (res.ok) {
-        notify("✅ Spot saved!", "success");
-        setSubmitted(true);
-
-        // call parent update
-        onAdded?.({ date: new Date().toISOString(), description: note });
-
-        setNote("");
-        setTimeout(() => setSubmitted(false), 1500); // reset after feedback
-      } else {
-        const data = await res.json();
-        notify(data.detail || "Failed to log spot", "error");
-      }
-    } catch (err) {
-      console.error("❌ Error saving spot:", err);
-      notify("Something went wrong", "error");
-    }
-  };
 
   return (
     <div className="p-4 border rounded-lg bg-white shadow-sm mb-4">
@@ -77,9 +81,6 @@ const CavemanSpot = ({
         Add Spot →
       </button>
 
-      {submitted && (
-        <p className="mt-2 text-sm text-green-700 font-medium">✅ Spot logged!</p>
-      )}
       <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
     </div>
   );

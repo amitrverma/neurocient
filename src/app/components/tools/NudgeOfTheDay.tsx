@@ -21,7 +21,7 @@ const NudgeOfTheDay = () => {
   if (!nudge) return null;
 
   return (
-    <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-5 shadow-sm text-sm text-yellow-900 space-y-4 leading-relaxed">
+    <div className=" border border-yellow-300 rounded-lg p-5 shadow-sm text-md text-yellow-900 space-y-4 leading-relaxed">
       {nudge.title && <p className="font-semibold text-base">{nudge.title}</p>}
       {nudge.type === "text" ? (
         <p className="italic">“{nudge.paragraphs?.[0] || nudge.quote}”</p>

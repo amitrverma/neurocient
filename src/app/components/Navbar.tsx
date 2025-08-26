@@ -32,9 +32,7 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-6 font-medium text-background">
             <Link href="/about" className="hover:text-brand-primary">About</Link>
             <Link href="/resources" className="hover:text-brand-primary">Resources</Link>
-            <Link href="/diagnostics" className="hover:text-brand-primary">Diagnostics</Link>
             <Link href="/services" className="hover:text-brand-primary">Services</Link>
-            <Link href="/contact" className="hover:text-brand-primary">Contact</Link>
 
             {/* Auth Section */}
             {user ? (
@@ -116,9 +114,7 @@ const Navbar = () => {
           <div className="flex flex-col px-6 py-4 space-y-4 font-medium">
             <Link href="/about" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">About</Link>
             <Link href="/resources" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">Resources</Link>
-            <Link href="/diagnostics" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">Diagnostics</Link>
             <Link href="/services" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">Services</Link>
-            <Link href="/contact" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">Contact</Link>
 
             {/* Mobile Auth */}
             {user ? (

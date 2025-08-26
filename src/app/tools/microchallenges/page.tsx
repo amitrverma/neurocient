@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/app/context/AuthContext";
+import AuthModal from "../../components/AuthModal";
 
 const MicrochallengesPage = () => {
   // mock data
@@ -59,12 +61,19 @@ const MicrochallengesPage = () => {
 
   const [openId, setOpenId] = useState<number | null>(null);
   const [note, setNote] = useState("");
+  const [showAuth, setShowAuth] = useState(false);
+
+  const { token } = useAuth();
 
   const toggleOpen = (id: number) => {
     setOpenId(openId === id ? null : id);
   };
 
   const handleLog = () => {
+    if (!token) {
+      setShowAuth(true);
+      return;
+    }
     console.log("✔ Logged today!");
     setNote("");
   };
@@ -181,6 +190,7 @@ const MicrochallengesPage = () => {
           ← Back to Tools Dashboard
         </Link>
       </div>
+      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
     </div>
   );
 };

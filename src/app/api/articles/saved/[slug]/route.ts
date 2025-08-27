@@ -16,7 +16,7 @@ export async function GET(
     headers: { Authorization: token },
   });
 
-  let data: any;
+  let data: unknown;
   try {
     const text = await res.text();
     data = JSON.parse(text);

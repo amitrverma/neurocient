@@ -10,6 +10,8 @@ import Newsletter from "./Newsletter";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "./AuthModal";
 import { useNotification } from "./NotificationProvider";
+import { incrementUsage } from "../utils/usage";
+import MembershipModal from "./MembershipModal";
 
 interface ResourceItem {
   title: string;
@@ -51,7 +53,7 @@ const ArticleLayout = ({
   pathway,
   prevInPath,
   nextInPath,
-  spotPrompt,
+  spotPrompt, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: ArticleLayoutProps) => {
   const baseUrl = "https://amitrverma.com/insights";
   const articleUrl = slug ? `${baseUrl}/${slug}` : baseUrl;
@@ -61,6 +63,7 @@ const ArticleLayout = ({
   const [showResources, setShowResources] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [showMembership, setShowMembership] = useState(false);
   const nextRef = useRef<HTMLDivElement | null>(null);
 
   // ✅ Detect if article is already saved when component mounts
@@ -94,6 +97,14 @@ const ArticleLayout = ({
     observer.observe(nextRef.current);
     return () => observer.disconnect();
   }, []);
+
+  // 🚦 track article reads and enforce limits
+  useEffect(() => {
+    const { allowed } = incrementUsage("articles", !!token);
+    if (!allowed) {
+      if (token) setShowMembership(true); else setShowAuth(true);
+    }
+  }, [token]);
 
   const handleSave = async () => {
     if (!slug) return;
@@ -312,6 +323,10 @@ const ArticleLayout = ({
         isOpen={showAuth}
         onClose={() => setShowAuth(false)}
         onSuccess={handleSave} // retry saving after login
+      />
+      <MembershipModal
+        isOpen={showMembership}
+        onClose={() => setShowMembership(false)}
       />
     </div>
   );

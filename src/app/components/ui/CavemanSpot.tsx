@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "../AuthModal";
 import { useNotification } from "../NotificationProvider";
+import MembershipModal from "../MembershipModal";
+import { getUsage, incrementUsage, usageLimits } from "../../utils/usage";
 
 interface CavemanSpotProps {
   prompt?: string; // now optional, we’ll add a default
@@ -15,54 +17,69 @@ const CavemanSpot = ({
   onAdded,
 }: CavemanSpotProps) => {
   const [note, setNote] = useState("");
-  const [submitted, setSubmitted] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [showMembership, setShowMembership] = useState(false);
 
   const { token } = useAuth();
   const { notify } = useNotification();
 
   const handleSubmit = async () => {
-  if (!token) {
-    setShowAuth(true);
-    return;
-  }
-  if (!note.trim()) {
-    notify("Please write something before adding a spot", "info");
-    return;
-  }
-
-  try {
-    const res = await fetch("/api/spots", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        description: note,                           // ✅ correct field
-        
-      }),
-    });
-
-    if (res.ok) {
-      notify("✅ Spot saved!", "success");
-      setSubmitted(true);
-
-      // call parent update
-      onAdded?.({ date: new Date().toISOString(), description: note });
-
-      setNote("");
-      setTimeout(() => setSubmitted(false), 1500);
-    } else {
-      const data = await res.json();
-      notify(data.detail || "Failed to log spot", "error");
+    if (!token) {
+      setShowAuth(true);
+      return;
     }
-  } catch (err) {
-    console.error("❌ Error saving spot:", err);
-    notify("Something went wrong", "error");
-  }
-};
+    if (!note.trim()) {
+      notify("Please write something before adding a spot", "info");
+      return;
+    }
 
+    if (getUsage("spots", true) >= (usageLimits.user.spots || 0)) {
+      setShowMembership(true);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/spots", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          description: note,
+        }),
+      });
+
+      if (res.ok) {
+        incrementUsage("spots", true);
+        notify("✅ Spot saved!", "success");
+        onAdded?.({ date: new Date().toISOString(), description: note });
+        setNote("");
+      } else {
+        const data = await res.json();
+        notify(data.detail || "Failed to log spot", "error");
+      }
+    } catch (err) {
+      console.error("❌ Error saving spot:", err);
+      notify("Something went wrong", "error");
+    }
+  };
+
+
+  if (!token) {
+    return (
+      <div className="p-4 border rounded-lg bg-white shadow-sm mb-4 text-center">
+        <p className="text-sm text-gray-800 mb-2">Log in to track a Caveman Spot.</p>
+        <button
+          onClick={() => setShowAuth(true)}
+          className="text-xs font-semibold px-3 py-2 rounded-md bg-yellow-300 text-gray-800 hover:bg-yellow-400 transition"
+        >
+          Log in →
+        </button>
+        <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 border rounded-lg bg-white shadow-sm mb-4">
@@ -81,6 +98,10 @@ const CavemanSpot = ({
         Add Spot →
       </button>
 
+      <MembershipModal
+        isOpen={showMembership}
+        onClose={() => setShowMembership(false)}
+      />
       <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
     </div>
   );

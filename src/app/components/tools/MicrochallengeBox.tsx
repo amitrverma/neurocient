@@ -5,6 +5,8 @@ import { Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "../AuthModal";
+import MembershipModal from "../MembershipModal";
+import { getUsage, incrementUsage, usageLimits } from "../../utils/usage";
 
 interface MicrochallengeBoxProps {
   id: string; // changed to string since UUIDs are used in backend
@@ -19,6 +21,7 @@ interface Microchallenge {
 const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
   const { token } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
+  const [showMembership, setShowMembership] = useState(false);
   const [challenge, setChallenge] = useState<Microchallenge | null>(null);
 
   useEffect(() => {
@@ -35,7 +38,7 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
       }
     };
 
-    if (id) {
+    if (id && token) {
       fetchChallenge();
     }
   }, [id, token]);
@@ -44,8 +47,30 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
     if (!token) {
       e.preventDefault();
       setShowAuth(true);
+      return;
     }
+    if (getUsage("microchallenges", true) >= (usageLimits.user.microchallenges || 0)) {
+      e.preventDefault();
+      setShowMembership(true);
+      return;
+    }
+    incrementUsage("microchallenges", true);
   };
+
+  if (!token) {
+    return (
+      <div className="my-6 p-4 border rounded-lg bg-gray-50 border-gray-200 shadow-sm text-center">
+        <p className="text-sm text-gray-600 mb-2">Log in to view this microchallenge.</p>
+        <button
+          onClick={() => setShowAuth(true)}
+          className="text-sm font-semibold text-brand-primary hover:underline"
+        >
+          Log in →
+        </button>
+        <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
+      </div>
+    );
+  }
 
   if (!challenge) {
     return (
@@ -72,6 +97,10 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
         Try this Microchallenge →
       </Link>
 
+      <MembershipModal
+        isOpen={showMembership}
+        onClose={() => setShowMembership(false)}
+      />
       <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
     </div>
   );

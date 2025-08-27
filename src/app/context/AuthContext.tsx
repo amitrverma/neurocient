@@ -2,8 +2,12 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
+interface User {
+  [key: string]: unknown;
+}
+
 interface AuthContextType {
-  user: any;
+  user: User | null;
   token: string | null;
   login: (token: string) => void;
   logout: () => void;
@@ -12,7 +16,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {

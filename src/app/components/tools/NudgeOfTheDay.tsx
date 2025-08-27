@@ -2,8 +2,16 @@
 import React, { useEffect, useState } from "react";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
+interface Nudge {
+  title?: string;
+  type?: string;
+  paragraphs?: string[];
+  quote?: string;
+  link?: string;
+}
+
 const NudgeOfTheDay = () => {
-  const [nudge, setNudge] = useState<any>(null);
+  const [nudge, setNudge] = useState<Nudge | null>(null);
 
   useEffect(() => {
     const fetchNudge = async () => {

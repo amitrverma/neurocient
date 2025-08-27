@@ -103,7 +103,6 @@ const ArticleLayout = ({
   if (!slug) return;
 
   let incremented = false; // 👈 reset every time slug changes
-  let timeout: NodeJS.Timeout;
 
   const markAsRead = () => {
     if (incremented) return; // only once per article
@@ -119,7 +118,7 @@ const ArticleLayout = ({
     }
 
     window.removeEventListener("scroll", onScroll);
-    if (timeout) clearTimeout(timeout);
+    clearTimeout(timeout);
   };
 
   const onScroll = () => {
@@ -134,7 +133,7 @@ const ArticleLayout = ({
     }
   };
 
-  timeout = setTimeout(() => {
+  const timeout = setTimeout(() => {
     markAsRead();
   }, 15000);
 
@@ -142,7 +141,7 @@ const ArticleLayout = ({
 
   return () => {
     window.removeEventListener("scroll", onScroll);
-    if (timeout) clearTimeout(timeout);
+    clearTimeout(timeout);
   };
 }, [slug, token]); // 👈 runs fresh for each article
 

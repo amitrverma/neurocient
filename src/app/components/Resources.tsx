@@ -9,7 +9,7 @@ const Resources = () => {
   const { token } = useAuth(); // ✅ check auth
   const [showAuth, setShowAuth] = useState(false);
 
-  // helper to open login modal
+  // helper to open login modal for protected sections
   const handleProtectedClick = (e: React.MouseEvent) => {
     if (!token) {
       e.preventDefault();
@@ -55,20 +55,17 @@ const Resources = () => {
             <p className="text-black/70 text-sm">
               Practical frameworks, worksheets, and habit trackers to help you practice.
             </p>
-            <Link
-              href={token ? "/tools" : "#"}
-              onClick={handleProtectedClick}
-              className={`mt-auto inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition ${
-                token
-                  ? "bg-[#042a2b] text-white hover:bg-[#5eb1bf]"
-                  : "bg-gray-400 text-white hover:bg-gray-500"
-              }`}
-            >
-              {token ? "Start Now" : (<><Lock className="w-4 h-4" /> Log in to Access</>)}
-            </Link>
+         <Link
+            href={token ? "/tools" : "#"}
+            onClick={handleProtectedClick}
+            className="mt-auto inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition bg-[#042a2b] text-white hover:bg-[#5eb1bf]"
+          >
+            Explore Tools
+          </Link>
+
           </div>
 
-          {/* Diagnostics & Quizzes (login required) */}
+          {/* Diagnostics & Quizzes (open for all) */}
           <div className="p-6 border rounded-2xl shadow-sm hover:shadow-md transition flex flex-col items-center text-center space-y-4">
             <ClipboardList className="w-10 h-10 text-[#5eb1bf]" />
             <h2 className="text-xl font-semibold text-[#042a2b]">Diagnostics & Quizzes</h2>
@@ -76,13 +73,8 @@ const Resources = () => {
               Interactive tests to uncover your instinct patterns and caveman triggers.
             </p>
             <Link
-              href= "/diagnostics"
-              onClick={handleProtectedClick}
-              className={`mt-auto inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition ${
-                token
-                  ? "bg-[#042a2b] text-white hover:bg-[#5eb1bf]"
-                  : "bg-gray-400 text-white hover:bg-gray-500"
-              }`}
+              href="/diagnostics"
+              className="mt-auto inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition bg-[#042a2b] text-white hover:bg-[#5eb1bf]"
             >
               Take the Test
             </Link>
@@ -124,7 +116,7 @@ const Resources = () => {
         {!token && (
           <section className="text-center space-y-6">
             <p className="text-lg text-black/80">
-              Create a free account to unlock diagnostics and save your progress.
+              Create a free account to unlock your results and save your progress.
             </p>
             <button
               onClick={() => setShowAuth(true)}

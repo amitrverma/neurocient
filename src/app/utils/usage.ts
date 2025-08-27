@@ -8,7 +8,7 @@ interface UsageLimits {
 
 export const usageLimits: Record<"guest" | "user", UsageLimits> = {
   guest: { articles: 5 },
-  user: { articles: 20, spots: 20, microchallenges: 5 },
+  user: { articles: 20, spots: 15, microchallenges: 5 },
 };
 
 function storageKey(isLoggedIn: boolean) {

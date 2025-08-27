@@ -11,9 +11,10 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  disableEscape?: boolean; // 👈 new
 }
 
-const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
+const AuthModal = ({ isOpen, onClose, onSuccess, disableEscape = false }: AuthModalProps) => {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -74,7 +75,11 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
+    <Dialog
+      open={isOpen}
+      onClose={disableEscape ? () => {} : onClose} // 👈 block closing if disableEscape
+      className="relative z-50"
+    >
       <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg">

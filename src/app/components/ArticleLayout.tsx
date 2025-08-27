@@ -37,7 +37,7 @@ interface ArticleLayoutProps {
   pathway?: { id: PathwayId; title: string } | null;
   prevInPath?: ArticleRef | null;
   nextInPath?: ArticleRef | null;
-  spotPrompt: string | null
+  spotPrompt: string | null;
 }
 
 const ArticleLayout = ({
@@ -65,6 +65,7 @@ const ArticleLayout = ({
   const [showAuth, setShowAuth] = useState(false);
   const [showMembership, setShowMembership] = useState(false);
   const nextRef = useRef<HTMLDivElement | null>(null);
+  const trackedRef = useRef(false); // ✅ prevents double increments
 
   // ✅ Detect if article is already saved when component mounts
   useEffect(() => {
@@ -84,7 +85,7 @@ const ArticleLayout = ({
     };
     checkSaved();
   }, [slug, token]);
- 
+
   // ✅ IntersectionObserver for sidebar
   useEffect(() => {
     if (!nextRef.current) return;
@@ -98,13 +99,53 @@ const ArticleLayout = ({
     return () => observer.disconnect();
   }, []);
 
-  // 🚦 track article reads and enforce limits
   useEffect(() => {
-    const { allowed } = incrementUsage("articles", !!token);
+  if (!slug) return;
+
+  let incremented = false; // 👈 reset every time slug changes
+  let timeout: NodeJS.Timeout;
+
+  const markAsRead = () => {
+    if (incremented) return; // only once per article
+    incremented = true;
+
+    console.log("📖 Marking article as read");
+    const { allowed, count } = incrementUsage("articles", !!token);
+    console.log("Usage updated:", { count, allowed });
+
     if (!allowed) {
-      if (token) setShowMembership(true); else setShowAuth(true);
+      if (token) setShowMembership(true);
+      else setShowAuth(true);
     }
-  }, [token]);
+
+    window.removeEventListener("scroll", onScroll);
+    if (timeout) clearTimeout(timeout);
+  };
+
+  const onScroll = () => {
+    const scrollTop = window.scrollY;
+    const windowHeight = window.innerHeight;
+    const docHeight = document.documentElement.scrollHeight;
+
+    const scrolled = (scrollTop + windowHeight) / docHeight;
+
+    if (scrolled >= 0.3) {
+      markAsRead();
+    }
+  };
+
+  timeout = setTimeout(() => {
+    markAsRead();
+  }, 15000);
+
+  window.addEventListener("scroll", onScroll);
+
+  return () => {
+    window.removeEventListener("scroll", onScroll);
+    if (timeout) clearTimeout(timeout);
+  };
+}, [slug, token]); // 👈 runs fresh for each article
+
 
   const handleSave = async () => {
     if (!slug) return;
@@ -271,14 +312,20 @@ const ArticleLayout = ({
             </p>
             <div className="flex justify-between mt-3">
               {prevInPath ? (
-                <Link href={`/insights/${prevInPath.slug}`} className="hover:underline">
+                <Link
+                  href={`/insights/${prevInPath.slug}`}
+                  className="hover:underline"
+                >
                   ← {prevInPath.title}
                 </Link>
               ) : (
                 <span />
               )}
               {nextInPath ? (
-                <Link href={`/insights/${nextInPath.slug}`} className="hover:underline">
+                <Link
+                  href={`/insights/${nextInPath.slug}`}
+                  className="hover:underline"
+                >
                   {nextInPath.title} →
                 </Link>
               ) : (

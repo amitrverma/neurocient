@@ -8,7 +8,7 @@ import MembershipModal from "../MembershipModal";
 import { getUsage, incrementUsage, usageLimits } from "../../utils/usage";
 
 interface CavemanSpotProps {
-  prompt?: string; // now optional, we’ll add a default
+  prompt?: string; // now optional
   onAdded?: (spot: { date: string; description: string }) => void;
 }
 
@@ -25,9 +25,10 @@ const CavemanSpot = ({
 
   const handleSubmit = async () => {
     if (!token) {
-      setShowAuth(true);
+      setShowAuth(true); // ✅ prompt login only when adding
       return;
     }
+
     if (!note.trim()) {
       notify("Please write something before adding a spot", "info");
       return;
@@ -65,22 +66,6 @@ const CavemanSpot = ({
     }
   };
 
-
-  if (!token) {
-    return (
-      <div className="p-4 border rounded-lg bg-white shadow-sm mb-4 text-center">
-        <p className="text-sm text-gray-800 mb-2">Log in to track a Caveman Spot.</p>
-        <button
-          onClick={() => setShowAuth(true)}
-          className="text-xs font-semibold px-3 py-2 rounded-md bg-yellow-300 text-gray-800 hover:bg-yellow-400 transition"
-        >
-          Log in →
-        </button>
-        <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
-      </div>
-    );
-  }
-
   return (
     <div className="p-4 border rounded-lg bg-white shadow-sm mb-4">
       <p className="text-sm text-gray-800 mb-2">{prompt}</p>
@@ -98,11 +83,17 @@ const CavemanSpot = ({
         Add Spot →
       </button>
 
+      {/* Modals */}
       <MembershipModal
         isOpen={showMembership}
         onClose={() => setShowMembership(false)}
+        disableEscape
       />
-      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
+      <AuthModal
+        isOpen={showAuth}
+        onClose={() => setShowAuth(false)}
+        disableEscape
+      />
     </div>
   );
 };

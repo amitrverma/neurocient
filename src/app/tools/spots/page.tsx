@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import CavemanSpot from "../../components/ui/CavemanSpot";
+import MembershipModal from "../../components/MembershipModal";
+import { usageLimits } from "../../utils/usage";
 
 interface Spot {
   date: string;
@@ -14,6 +16,7 @@ const SpotsPage = () => {
   const [spots, setSpots] = useState<Spot[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAuth, setShowAuth] = useState(false);
+  const [showMembership, setShowMembership] = useState(false);
 
   const { token } = useAuth();
 
@@ -47,6 +50,9 @@ const SpotsPage = () => {
     fetchSpots();
   }, [token]);
 
+  const userLimit = usageLimits.user.spots || 0;
+  const hasReachedLimit = token && spots.length >= userLimit;
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-[#042a2b] mb-6">
@@ -58,10 +64,27 @@ const SpotsPage = () => {
       </p>
 
       {/* Add new spot box */}
-      <CavemanSpot
-        prompt="Notice a caveman instinct? Log it here 👇"
-        onAdded={(spot) => setSpots((prev) => [...prev, spot])}
-      />
+      {token && !hasReachedLimit && (
+        <CavemanSpot
+          prompt="Notice a caveman instinct? Log it here 👇"
+          onAdded={(spot) => setSpots((prev) => [...prev, spot])}
+        />
+      )}
+
+      {/* Show membership prompt if limit reached */}
+      {hasReachedLimit && (
+        <div className="p-4 border rounded-lg bg-yellow-50 text-center text-sm text-gray-800">
+          <p className="mb-2">
+            You’ve reached your free limit of {userLimit} spots.
+          </p>
+          <button
+            onClick={() => setShowMembership(true)}
+            className="px-4 py-2 bg-[#042a2b] text-white rounded-md font-semibold hover:bg-[#5eb1bf] transition"
+          >
+            Become a Member →
+          </button>
+        </div>
+      )}
 
       {loading ? (
         <p className="text-gray-500">Loading spots...</p>
@@ -128,6 +151,13 @@ const SpotsPage = () => {
           ← Back to Tools Dashboard
         </Link>
       </div>
+
+      {/* Membership Modal */}
+      <MembershipModal
+        isOpen={showMembership}
+        onClose={() => setShowMembership(false)}
+        disableEscape
+      />
     </div>
   );
 };

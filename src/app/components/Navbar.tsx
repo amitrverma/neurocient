@@ -34,6 +34,16 @@ const Navbar = () => {
             <Link href="/resources" className="hover:text-brand-teal">Resources</Link>
             <Link href="/services" className="hover:text-brand-teal">Services</Link>
 
+            {/* Unlock Full Access for logged-in users */}
+            {user && (
+              <Link
+                href="/membership"
+                className="text-sm font-semibold px-3 py-1 rounded-lg bg-brand-primary text-white border  hover:bg-brand-teal hover:text-white transition"
+              >
+                Unlock Full Access
+              </Link>
+            )}
+
             {/* Auth Section */}
             {user ? (
               <div className="relative">
@@ -60,7 +70,8 @@ const Navbar = () => {
                       className="block px-4 py-2 hover:bg-gray-100"
                     >
                       Dashboard
-                    </Link><Link
+                    </Link>
+                    <Link
                       href="/saved"
                       onClick={() => setShowDropdown(false)}
                       className="block px-4 py-2 hover:bg-gray-100"
@@ -88,12 +99,11 @@ const Navbar = () => {
               </div>
             ) : (
               <button
-  onClick={() => setShowAuth(true)}
-  className="text-sm font-semibold px-3 py-1 rounded-lg text-brand-dark border border-brand-dark hover:bg-brand-teal hover:border-white hover:text-white transition"
->
-  Sign in
-</button>
-
+                onClick={() => setShowAuth(true)}
+                className="text-sm font-semibold px-3 py-1 rounded-lg text-brand-dark border border-brand-dark hover:bg-brand-teal hover:border-white hover:text-white transition"
+              >
+                Sign in
+              </button>
             )}
           </div>
 
@@ -133,6 +143,13 @@ const Navbar = () => {
                   className="hover:text-brand-primary"
                 >
                   Profile
+                </Link>
+                <Link
+                  href="/membership"
+                  onClick={() => setIsOpen(false)}
+                  className="text-sm font-semibold px-3 py-1 rounded-lg bg-brand-secondary text-brand-dark hover:bg-brand-primary hover:text-white transition"
+                >
+                  Unlock Full Access
                 </Link>
                 <button
                   onClick={() => {

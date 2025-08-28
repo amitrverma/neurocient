@@ -68,63 +68,62 @@ const LandingPage = () => {
             Yes — even in {year}.
           </p>
         </div>
-                {/* Placeholder Articles/Links */}
- {/* ✅ Dynamic Social Proof Section */}
-        {/* ✅ Dynamic Social Proof Section */}
-{topArticles.length > 0 && (
-  <div className="mt-20 flex flex-col items-center text-center gap-6">
-    {/* Outer container with border */}
-    <div className="w-full max-w-5xl border border-brand-dark rounded-2xl p-8 flex flex-col gap-6">
-      {/* Section Heading inside box */}
-      <h4 className="text-lg md:text-xl font-semibold text-[#042a2b] text-center">
-        People working with their Inner Caveman are reading:
+        
+    {topArticles.length > 0 && (
+  <div className="mt-20 w-full max-w-5xl mx-auto">
+    {/* Top separator */}
+    <div className="border-t border-brand-dark pt-8 flex flex-col gap-6">
+      {/* Section Heading */}
+      <h4 className="text-lg md:text-xl text-brand-accent text-center">
+        People are recognizing and working with their Inner Caveman through these articles.
       </h4>
 
       {/* Cards grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {topArticles.map((a) => (
           <a
-  key={a.slug}
-  href={`/insights/${a.slug}`}
-  className="h-[220px] bg-white border border-brand-dark p-6 rounded-xl 
-             shadow-sm hover:shadow-md transition flex flex-col justify-between text-left"
->
-  <div>
-    {/* Title: 2 lines on mobile, 3 on md+ */}
-    <h5 className="text-[#ed254e] font-bold text-lg line-clamp-2 md:line-clamp-3">
-      {a.title}
-    </h5>
+            key={a.slug}
+            href={`/insights/${a.slug}`}
+            className="h-[220px] bg-white border border-brand-dark/10 p-6 rounded-xl 
+                       shadow-sm hover:shadow-md transition flex flex-col justify-between text-left"
+          >
+            <div>
+              <h5 className="text-brand-dark font-bold text-lg line-clamp-2 md:line-clamp-3">
+                {a.title}
+              </h5>
 
-    {a.excerpt && (
-      // Excerpt: 2 lines on mobile, 3 on md+, 4 on lg+
-      <p className="text-brand-dark/70 text-sm mt-2 line-clamp-2 md:line-clamp-3 lg:line-clamp-4">
-        {a.excerpt}
-      </p>
-    )}
-  </div>
-</a>
-
+              {a.excerpt && (
+                <p className="text-brand-dark/70 text-sm mt-2 line-clamp-2 md:line-clamp-3 lg:line-clamp-4">
+                  {a.excerpt}
+                </p>
+              )}
+            </div>
+          </a>
         ))}
       </div>
 
-      {/* CTA inside box at bottom */}
-      <p className="mt-4 text-sm md:text-base text-brand-dark/70 text-center">
-        👉 After reading, most people try the{" "}
-        <a href="/spot" className="font-semibold text-[#042a2b] hover:underline">
+      {/* CTA */}
+      <p className="mt-4 text-sm md:text-base text-brand-dark text-center">
+        Most people try the{" "}
+        <a href="/spot" className="font-semibold text-brand-accent hover:underline">
           Spot Your Caveman
         </a>{" "}
-        diagnostic or join a{" "}
-        <a href="/microchallenge" className="font-semibold text-[#042a2b] hover:underline">
+        to recognize their hidden patterns — and join a {" "}
+        <a href="/microchallenge" className="font-semibold text-brand-teal hover:underline">
           Microchallenge
-        </a>.
+        </a>{" "}to practice breaking them.
       </p>
+
+      {/* Bottom separator */}
+      <div className="border-b border-brand-dark mt-6"></div>
     </div>
   </div>
 )}
 
+
         <div className="max-w-5xl w-full mx-auto text-center space-y-12 mt-12">
           <h2 className="text-3xl md:text-5xl font-bold text-[#042a2b]">
-            But, what is this <span className="text-[#ed254e]">Inner Caveman?</span>
+            But, what is <span className="text-[#ed254e]">Inner Caveman?</span>
           </h2>
 
           {/* Block 1 */}

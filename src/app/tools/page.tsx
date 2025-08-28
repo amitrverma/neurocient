@@ -84,9 +84,9 @@ const ToolsPage = () => {
           <h2 className="font-semibold text-lg text-[#042a2b] mb-2">Caveman Spotting</h2>
 
           {loading ? (
-            <p className="text-sm text-gray-500">Loading spots…</p>
+            <p className="text-sm text-brand-dark">Loading spots…</p>
           ) : !token ? (
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-brand-dark">
               Please{" "}
               <button
                 onClick={() => setShowAuth(true)}
@@ -98,12 +98,12 @@ const ToolsPage = () => {
             </div>
           ) : (
             <>
-              <p className="text-sm text-gray-600 mb-2">
+              <p className="text-sm text-brand-dark mb-2">
                 You’ve logged <span className="font-bold">{spotCount}</span>{" "}
                 {spotCount === 1 ? "spot" : "spots"} so far.
               </p>
               {latestSpot && (
-                <p className="text-sm italic text-gray-500 mb-4">
+                <p className="text-sm italic text-brand-dark mb-4">
                   Latest: “{latestSpot.description}”
                 </p>
               )}
@@ -121,10 +121,10 @@ const ToolsPage = () => {
         {/* Microchallenges summary */}
         <div className="p-4 border rounded-lg shadow-sm bg-white">
           <h2 className="font-semibold text-lg text-[#042a2b] mb-2">Microchallenges</h2>
-          <p className="text-sm text-gray-600 mb-2">
+          <p className="text-sm text-brand-dark mb-2">
             {microSummary.completed}/{microSummary.total} challenges completed.
           </p>
-          <p className="text-sm italic text-gray-500 mb-4">
+          <p className="text-sm italic text-brand-dark mb-4">
             Current: “{microSummary.current}”
           </p>
           <Link

@@ -2,7 +2,7 @@
 import React from "react";
 
 const StreakBar = ({ current, longest }: { current: number; longest: number }) => (
-  <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+  <div className="bg-white rounded-lg p-4 shadow-sm border border-brand-dark">
     <div className="flex items-center justify-between">
       <div className="text-md font-semibold text-[#042a2b]">
         🔥 Current Streak:
@@ -10,7 +10,7 @@ const StreakBar = ({ current, longest }: { current: number; longest: number }) =
           {current} day{current !== 1 ? "s" : ""}
         </span>
       </div>
-      <div className="text-md text-gray-600">
+      <div className="text-md text-brand-dark">
         🏆 Longest:
         <span className="ml-1 font-medium">
           {longest} day{longest !== 1 ? "s" : ""}

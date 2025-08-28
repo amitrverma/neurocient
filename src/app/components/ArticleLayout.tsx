@@ -196,7 +196,7 @@ const ArticleLayout = ({
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Twitter size={20} className="text-gray-500 hover:text-brand-primary" />
+            <Twitter size={20} className="text-brand-dark hover:text-brand-primary" />
           </a>
           <a
             href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
@@ -205,17 +205,17 @@ const ArticleLayout = ({
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Linkedin size={20} className="text-gray-500 hover:text-brand-primary" />
+            <Linkedin size={20} className="text-brand-dark hover:text-brand-primary" />
           </a>
           <a href={`mailto:?subject=${title}&body=${articleUrl}`}>
-            <Mail size={20} className="text-gray-500 hover:text-brand-primary" />
+            <Mail size={20} className="text-brand-dark hover:text-brand-primary" />
           </a>
 
           {/* Save */}
           <button
             onClick={handleSave}
             className={`transition ${
-              isSaved ? "text-brand-primary" : "text-gray-500 hover:text-brand-primary"
+              isSaved ? "text-brand-primary" : "text-brand-dark hover:text-brand-primary"
             }`}
             title={isSaved ? "Remove from saved" : "Save for later"}
           >
@@ -238,7 +238,7 @@ const ArticleLayout = ({
           {/* Print */}
           <button
             onClick={() => window.print()}
-            className="text-gray-500 hover:text-brand-primary transition"
+            className="text-brand-dark hover:text-brand-primary transition"
             title="Print this article"
           >
             <svg
@@ -269,7 +269,7 @@ const ArticleLayout = ({
               {tag}
             </Link>
           ))}
-          {readingTime && <span className="text-gray-500">{readingTime}</span>}
+          {readingTime && <span className="text-brand-dark">{readingTime}</span>}
         </div>
 
         {/* Title */}
@@ -280,11 +280,11 @@ const ArticleLayout = ({
         </div>
 
         {/* Date */}
-        <p className="text-sm text-gray-500 mb-6">{date}</p>
+        <p className="text-sm text-brand-dark mb-6">{date}</p>
 
         {/* Excerpt */}
         {excerpt && (
-          <p className="text-lg text-gray-600 mb-8 italic">{excerpt}</p>
+          <p className="text-lg text-brand-dark mb-8 italic">{excerpt}</p>
         )}
 
         {/* MDX content */}
@@ -298,7 +298,7 @@ const ArticleLayout = ({
 
         {/* Pathway navigation */}
         {pathway && (
-          <div className="mt-16 border-t pt-8 text-sm text-gray-600">
+          <div className="mt-16 border-t pt-8 text-sm text-brand-dark">
             <p>
               This article is part of the{" "}
               <Link
@@ -337,7 +337,7 @@ const ArticleLayout = ({
         {/* Random Read Next */}
         {nextArticle && (
           <div ref={nextRef} className="mt-16 border-t pt-8">
-            <p className="text-sm text-gray-500 mb-2">You might also like:</p>
+            <p className="text-sm text-brand-dark mb-2">You might also like:</p>
             <Link
               href={`/insights/${nextArticle.slug}`}
               className="text-xl font-semibold text-brand-teal hover:text-brand-primary transition"
@@ -345,7 +345,7 @@ const ArticleLayout = ({
               {nextArticle.title}
             </Link>
             {nextArticle.excerpt && (
-              <p className="text-gray-600 text-sm mt-1">{nextArticle.excerpt}</p>
+              <p className="text-brand-dark text-sm mt-1">{nextArticle.excerpt}</p>
             )}
           </div>
         )}

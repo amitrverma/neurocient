@@ -56,7 +56,7 @@ export default function AllInsightsPage() {
                 className="flex justify-between text-sm text-[#042a2b] hover:text-[#ed254e] transition"
               >
                 <span>{tag}</span>
-                <span className="text-gray-500">{count}</span>
+                <span className="text-brand-dark">{count}</span>
               </Link>
             </li>
           ))}
@@ -75,9 +75,9 @@ export default function AllInsightsPage() {
             {article.title}
           </Link>
           {article.date && (
-            <p className="text-sm text-gray-500 mt-1">{article.date}</p>
+            <p className="text-sm text-brand-dark mt-1">{article.date}</p>
           )}
-          <p className="mt-2 text-black/70 leading-relaxed">{article.excerpt}</p>
+          <p className="mt-2 text-brand-dark/70 leading-relaxed">{article.excerpt}</p>
 
           <div className="mt-3 flex flex-wrap gap-2">
             {article.tags?.map((tag) => (

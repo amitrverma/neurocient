@@ -86,12 +86,12 @@ const MicrochallengesPage = () => {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-[#042a2b] mb-6">⚡ Microchallenges</h1>
 
-      <p className="text-gray-600 mb-6">
+      <p className="text-brand-dark mb-6">
         Track your weekly microchallenges here. Complete them to build consistency and strengthen new habits.
       </p>
 
       {challenges.length === 0 && (
-        <p className="text-gray-500">No microchallenges assigned yet.</p>
+        <p className="text-brand-dark">No microchallenges assigned yet.</p>
       )}
 
       <div className="space-y-4">
@@ -116,15 +116,15 @@ const MicrochallengesPage = () => {
           ? "bg-green-100 text-green-700"
           : c.status === "assigned"
           ? "bg-blue-100 text-blue-700"
-          : "bg-gray-100 text-gray-500"
+          : "bg-gray-100 text-brand-dark"
       }`}
     >
       {c.status}
     </span>
     {isOpen ? (
-      <ChevronUp className="w-4 h-4 text-gray-500" />
+      <ChevronUp className="w-4 h-4 text-brand-dark" />
     ) : (
-      <ChevronDown className="w-4 h-4 text-gray-500" />
+      <ChevronDown className="w-4 h-4 text-brand-dark" />
     )}
   </div>
 </button>

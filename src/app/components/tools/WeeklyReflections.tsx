@@ -32,10 +32,10 @@ const WeeklyReflections = () => {
   return (
     <div className="p-4 border rounded-lg bg-white shadow">
       <h3 className="text-lg font-semibold text-[#042a2b] mb-2">Weekly Reflection</h3>
-      {loading && <p className="text-sm text-gray-500">Loading...</p>}
+      {loading && <p className="text-sm text-brand-dark">Loading...</p>}
       {error && <p className="text-sm text-red-600">Error: {error}</p>}
       {!loading && !error && reflection && (
-        <div className="mt-2 bg-yellow-50 p-4 border-l-4 border-yellow-400 whitespace-pre-line text-[#333]">
+        <div className="mt-2 bg-yellow-50 p-4 border-l-4 border-yellow-400 whitespace-pre-line text-brand-dark">
           {reflection}
         </div>
       )}

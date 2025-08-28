@@ -20,7 +20,7 @@ const ProfilePage = () => {
           className={`px-4 py-2 font-semibold text-sm border-b-2 transition ${
             activeTab === "insights"
               ? "border-[#5eb1bf] text-[#042a2b]"
-              : "border-transparent text-gray-500 hover:text-[#042a2b]"
+              : "border-transparent text-brand-dark hover:text-[#042a2b]"
           }`}
         >
           Reflections & Nudge
@@ -30,7 +30,7 @@ const ProfilePage = () => {
           className={`px-4 py-2 font-semibold text-sm border-b-2 transition ${
             activeTab === "settings"
               ? "border-[#5eb1bf] text-[#042a2b]"
-              : "border-transparent text-gray-500 hover:text-[#042a2b]"
+              : "border-transparent text-brand-dark hover:text-[#042a2b]"
           }`}
         >
           Settings & Account
@@ -50,8 +50,8 @@ const ProfilePage = () => {
           <div className="space-y-4">
             <div>
               <h2 className="text-lg font-semibold text-[#042a2b] mb-2">User Details</h2>
-              <p className="text-sm text-gray-600">Name: {user?.name || "N/A"}</p>
-              <p className="text-sm text-gray-600">Email: {user?.email || "N/A"}</p>
+              <p className="text-sm text-brand-dark">Name: {user?.name || "N/A"}</p>
+              <p className="text-sm text-brand-dark">Email: {user?.email || "N/A"}</p>
             </div>
 
             <div>

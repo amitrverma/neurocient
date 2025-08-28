@@ -50,7 +50,7 @@ export default function SavedArticlesPage() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-3xl font-bold mb-6 text-center">Your Saved Articles</h1>
       {articles.length === 0 ? (
-        <p className="text-center text-gray-500">You haven’t saved any articles yet.</p>
+        <p className="text-center text-brand-dark">You haven’t saved any articles yet.</p>
       ) : (
         <ul className="space-y-6">
           {articles.map((a) => (
@@ -58,7 +58,7 @@ export default function SavedArticlesPage() {
               <Link href={`/insights/${a.slug}`} className="text-xl font-semibold text-brand-teal hover:text-brand-primary">
                 {a.title || a.slug}
               </Link>
-              {a.excerpt && <p className="text-gray-600 text-sm mt-1">{a.excerpt}</p>}
+              {a.excerpt && <p className="text-brand-dark text-sm mt-1">{a.excerpt}</p>}
             </li>
           ))}
         </ul>

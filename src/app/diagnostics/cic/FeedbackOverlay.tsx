@@ -20,7 +20,7 @@ const FeedbackOverlay = ({ questionId, option }: Props) => {
 
   return (
     <div
-      className="relative bg-white border border-gray-200 rounded-2xl shadow-lg p-5 text-base text-brand-dark
+      className="relative bg-white border border-brand-dark rounded-2xl shadow-lg p-5 text-base text-brand-dark
                  transition-all duration-300 transform hover:shadow-xl hover:-translate-y-1 border-t-4 border-t-brand-primary"
     >
       {/* Instinct Title */}

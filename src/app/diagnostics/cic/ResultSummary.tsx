@@ -74,7 +74,7 @@ const ResultSummary = ({ responses, onRestart }: Props) => {
         <h2 className="text-3xl font-bold text-accent mb-4">
           🧬 Your Caveman Profile
         </h2>
-        <p className="mb-4 text-lg text-gray-700">
+        <p className="mb-4 text-lg text-brand-dark">
           Based on your answers, here’s what your underlying behavioral drivers
           look like:
         </p>
@@ -88,12 +88,12 @@ const ResultSummary = ({ responses, onRestart }: Props) => {
           {sortedMotives.map(([motive, count]) => (
             <div
               key={motive}
-              className="bg-white border border-gray-200 rounded-xl shadow p-5"
+              className="bg-white border border-brand-dark rounded-xl shadow p-5"
             >
               <h3 className="text-xl font-semibold text-tertiary mb-1">
                 {motiveLabels[motive].icon} {motive} ({count} triggers)
               </h3>
-              <p className="text-sm text-gray-800 mb-2">
+              <p className="text-sm text-brand-dark mb-2">
                 {motiveLabels[motive].summary}
               </p>
               <p className="text-sm text-green-700">

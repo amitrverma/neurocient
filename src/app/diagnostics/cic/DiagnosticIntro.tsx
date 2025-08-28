@@ -6,14 +6,14 @@ interface Props {
 
 const DiagnosticIntro = ({ onStart }: Props) => {
   return (
-    <div className="max-w-2xl mx-auto p-6 text-gray-800">
+    <div className="max-w-2xl mx-auto p-6 text-brand-dark">
       <h1 className="text-3xl font-bold mb-4">Caveman in the Cubicle</h1>
       <p className="mb-4 text-lg">
         This diagnostic helps you spot ancient instincts behind modern workplace misfires.
         It’s not about blame or personality — it’s about design mismatches between your brain and your environment.
       </p>
 
-      <ul className="list-disc list-inside mb-4 text-gray-700">
+      <ul className="list-disc list-inside mb-4 text-brand-dark">
         <li>Why do smart teams still miss deadlines?</li>
         <li>Why does “alignment” unravel in execution?</li>
         <li>Why do people hold back, even in “safe” spaces?</li>

@@ -29,7 +29,7 @@ const Insights = () => {
           <h1 className="text-3xl md:text-5xl font-bold text-[#042a2b]">
             Insights & Articles
           </h1>
-          <p className="text-lg text-black/70 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-brand-dark/70 max-w-2xl mx-auto leading-relaxed">
             Short reads that explain how your inner caveman wiring shows up in everyday life —
             and what to do about it.
           </p>
@@ -44,7 +44,7 @@ const Insights = () => {
               className="p-6 border rounded-2xl shadow-sm hover:shadow-md transition flex flex-col space-y-4"
             >
               <h2 className="text-xl font-semibold text-[#042a2b]">{article.title}</h2>
-              <p className="text-sm text-black/70 leading-relaxed">{article.excerpt}</p>
+              <p className="text-sm text-brand-dark/70 leading-relaxed">{article.excerpt}</p>
               <span className="text-[#ed254e] font-medium text-sm mt-auto">Read more →</span>
             </Link>
           ))}

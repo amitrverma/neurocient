@@ -14,7 +14,7 @@ const Navbar = () => {
   const { user, logout } = useAuth();
 
   return (
-    <nav className="font-sans w-full fixed top-0 left-0 z-50 border-b border-gray-300/40 backdrop-blur-sm">
+    <nav className="font-sans w-full fixed top-0 left-0 z-50 border-b border-brand-dark/40 backdrop-blur-sm">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
@@ -29,10 +29,10 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-6 font-medium text-background">
-            <Link href="/about" className="hover:text-brand-primary">About</Link>
-            <Link href="/resources" className="hover:text-brand-primary">Resources</Link>
-            <Link href="/services" className="hover:text-brand-primary">Services</Link>
+          <div className="hidden md:flex items-center space-x-6 font-medium text-brand-dark">
+            <Link href="/about" className="hover:text-brand-teal">About</Link>
+            <Link href="/resources" className="hover:text-brand-teal">Resources</Link>
+            <Link href="/services" className="hover:text-brand-teal">Services</Link>
 
             {/* Auth Section */}
             {user ? (
@@ -43,11 +43,11 @@ const Navbar = () => {
                   className="flex items-center focus:outline-none"
                 >
                   <Image
-                    src={user?.photoURL || "/assets/user.png"}
+                    src={user?.photoURL ? String(user.photoURL) : "/assets/user.png"}
                     alt="Profile"
                     width={36}
                     height={36}
-                    className="rounded-full border border-gray-300"
+                    className="rounded-full border border-brand-dark"
                   />
                 </button>
 
@@ -88,11 +88,12 @@ const Navbar = () => {
               </div>
             ) : (
               <button
-                onClick={() => setShowAuth(true)}
-                className="text-sm font-semibold px-3 py-1 rounded-lg bg-brand-secondary text-brand-dark hover:bg-brand-primary hover:text-white transition"
-              >
-                Sign in
-              </button>
+  onClick={() => setShowAuth(true)}
+  className="text-sm font-semibold px-3 py-1 rounded-lg text-brand-dark border border-brand-dark hover:bg-brand-teal hover:border-white hover:text-white transition"
+>
+  Sign in
+</button>
+
             )}
           </div>
 
@@ -110,7 +111,7 @@ const Navbar = () => {
 
       {/* Mobile Dropdown */}
       {isOpen && (
-        <div className="md:hidden border-t border-gray-300/40 bg-background/90 backdrop-blur-sm text-foreground">
+        <div className="md:hidden border-t border-brand-dark/40 bg-background/90 backdrop-blur-sm text-brand-dark">
           <div className="flex flex-col px-6 py-4 space-y-4 font-medium">
             <Link href="/about" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">About</Link>
             <Link href="/resources" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">Resources</Link>

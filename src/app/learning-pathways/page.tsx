@@ -49,7 +49,7 @@ const LearningPathwaysPage = () => {
         <h1 className="text-5xl font-extrabold tracking-tight text-brand-dark mb-4">
           Learning Pathways
         </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-lg text-brand-dark max-w-2xl mx-auto leading-relaxed">
           Unsure where to begin? Explore curated pathways to understand and
           outsmart your Inner Caveman. Each pathway is a map of articles, books,
           research, and tools that build depth around a central theme.
@@ -66,7 +66,7 @@ const LearningPathwaysPage = () => {
               className={`rounded-xl border shadow-sm transition ${
                 active
                   ? "border-brand-primary shadow-md"
-                  : "border-gray-300 dark:border-gray-600 hover:shadow-md"
+                  : "border-brand-dark dark:border-brand-dark hover:shadow-md"
               } bg-transparent`}
             >
               <button
@@ -82,7 +82,7 @@ const LearningPathwaysPage = () => {
                 </h2>
                 <span
                   className={`text-2xl font-bold ${
-                    active ? "text-brand-primary" : "text-gray-500"
+                    active ? "text-brand-primary" : "text-brand-dark"
                   }`}
                 >
                   {active ? "−" : "+"}
@@ -96,7 +96,7 @@ const LearningPathwaysPage = () => {
                       <h3 className="font-semibold text-brand-primary mb-2">
                         Articles
                       </h3>
-                      <div className="space-y-2 text-base text-gray-700">
+                      <div className="space-y-2 text-base text-brand-dark">
                         {pathway.articles.map((a: Resource) =>
                           a.slug ? (
                             <Link
@@ -119,7 +119,7 @@ const LearningPathwaysPage = () => {
                       <h3 className="font-semibold text-brand-secondary mb-2">
                         Books
                       </h3>
-                      <div className="space-y-2 text-base text-gray-700">
+                      <div className="space-y-2 text-base text-brand-dark">
                         {pathway.books.map((b: string, i: number) => (
                           <p key={i}>{b}</p>
                         ))}
@@ -132,7 +132,7 @@ const LearningPathwaysPage = () => {
                       <h3 className="font-semibold text-brand-tertiary mb-2">
                         Research
                       </h3>
-                      <div className="space-y-2 text-base text-gray-700">
+                      <div className="space-y-2 text-base text-brand-dark">
                         {pathway.research.map((r: string, i: number) => (
                           <p key={i}>{r}</p>
                         ))}
@@ -145,7 +145,7 @@ const LearningPathwaysPage = () => {
                       <h3 className="font-semibold text-brand-accent mb-2">
                         Tools
                       </h3>
-                      <div className="space-y-2 text-base text-gray-700">
+                      <div className="space-y-2 text-base text-brand-dark">
                         {pathway.tools.map((t: Resource, i: number) =>
                           t.href ? (
                             <Link

@@ -59,7 +59,7 @@ const SpotsPage = () => {
         Caveman Spotting
       </h1>
 
-      <p className="text-gray-600 mb-6">
+      <p className="text-brand-dark mb-6">
         Here you’ll see all the spots you’ve logged, and you can add new ones anytime.
       </p>
 
@@ -73,7 +73,7 @@ const SpotsPage = () => {
 
       {/* Show membership prompt if limit reached */}
       {hasReachedLimit && (
-        <div className="p-4 border rounded-lg bg-yellow-50 text-center text-sm text-gray-800">
+        <div className="p-4 border rounded-lg bg-yellow-50 text-center text-sm text-brand-dark">
           <p className="mb-2">
             You’ve reached your free limit of {userLimit} spots.
           </p>
@@ -87,9 +87,9 @@ const SpotsPage = () => {
       )}
 
       {loading ? (
-        <p className="text-gray-500">Loading spots...</p>
+        <p className="text-brand-dark">Loading spots...</p>
       ) : !token ? (
-        <div className="text-center text-gray-500 p-6">
+        <div className="text-center text-brand-dark p-6">
           Please{" "}
           <button
             onClick={() => setShowAuth(true)}
@@ -100,12 +100,12 @@ const SpotsPage = () => {
           to view your Caveman Spots.
         </div>
       ) : spots.length === 0 ? (
-        <p className="text-gray-500">No spots logged yet.</p>
+        <p className="text-brand-dark">No spots logged yet.</p>
       ) : (
         <ul className="divide-y divide-gray-200 bg-white rounded-lg">
           {spots.map((s, i) => (
             <li key={i} className="p-4">
-              <div className="text-xs text-gray-500 mb-1">
+              <div className="text-xs text-brand-dark mb-1">
                 {new Date(s.date).toLocaleDateString("en-IN", {
                   weekday: "short",
                   month: "short",

@@ -56,7 +56,7 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
       <div className="max-w-6xl mx-auto px-6 py-12">
         {/* Progress Bar */}
         <div className="mb-4">
-          <div className="flex justify-between items-center text-sm text-gray-600 mb-1">
+          <div className="flex justify-between items-center text-sm text-brand-dark mb-1">
             <span>
               Step {currentIndex + 1} of {diagnosticQuestions.length}
             </span>
@@ -78,7 +78,7 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
         <h2 className="text-2xl font-bold text-brand-dark mb-2">
           {question.title}
         </h2>
-        <p className="text-lg text-gray-700 mb-6 whitespace-pre-line">
+        <p className="text-lg text-brand-dark mb-6 whitespace-pre-line">
           {question.question.split("?")[0] + "?"}
           {"\n"}
           <span className="block font-semibold text-brand-dark mt-2">
@@ -99,7 +99,7 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
                       ${
                         selectedOption === key
                           ? "bg-brand-teal text-white border-brand-teal ring-2 ring-brand-teal/70"
-                          : "bg-white text-brand-dark border-gray-300 hover:bg-brand-secondary/20"
+                          : "bg-white text-brand-dark border-brand-dark hover:bg-brand-secondary/20"
                       }`}
                   >
                     <span className="font-semibold">{key})</span> {value}
@@ -125,7 +125,7 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
                   ${
                     selectedOption
                       ? "bg-brand-teal text-white hover:bg-brand-accent"
-                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      : "bg-gray-200 text-brand-dark cursor-not-allowed"
                   }`}
               >
                 {currentIndex + 1 === diagnosticQuestions.length

@@ -59,20 +59,20 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
 
   if (!challenge) {
     return (
-      <div className="my-6 p-4 border rounded-lg bg-gray-50 border-gray-200 shadow-sm">
-        <p className="text-sm text-gray-500">Loading challenge...</p>
+      <div className="my-6 p-4 border rounded-lg border-brand-dark shadow-sm">
+        <p className="text-sm text-brand-dark">Loading challenge...</p>
       </div>
     );
   }
 
   return (
-    <div className="my-6 p-4 border rounded-lg bg-[#f0fdff] border-[#5eb1bf] shadow-sm">
+    <div className="my-6 p-4 border rounded-lg  border-[#5eb1bf] shadow-sm">
       <div className="flex items-center gap-2 mb-2">
         <Zap className="w-5 h-5 text-[#5eb1bf]" />
         <h3 className="text-lg font-semibold text-[#042a2b]">{challenge.title}</h3>
       </div>
 
-      <p className="text-sm text-gray-600 mb-3">{challenge.why}</p>
+      <p className="text-sm text-brand-dark mb-3">{challenge.why}</p>
 
       <Link
         href={`/tools/microchallenges#challenge-${challenge.id}`}

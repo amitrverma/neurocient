@@ -47,24 +47,24 @@ const LandingPage = () => {
             {/* Divider + tagline */}
             <div className="flex flex-col items-center gap-3">
               <span className="h-[2px] w-12 bg-[#042a2b]/60"></span>
-              <p className="text-sm md:text-base lg:text-lg text-black/70 leading-relaxed max-w-xl">
+              <p className="text-sm md:text-base lg:text-lg text-brand-dark leading-relaxed max-w-xl">
                 <i>Your ancient survival programs misfiring in today’s world.</i>
               </p>
             </div>
           </div>
 
           {/* Reframe */}
-          <h3 className="mt-12 text-2xl md:text-4xl lg:text-5xl text-[#7a2c3d] leading-snug">
+          <h3 className="mt-12 text-2xl md:text-4xl lg:text-5xl text-brand-accent leading-snug">
             The struggle isn’t your fault. <br /> It’s your <span className="underline">wiring.</span>
           </h3>
 
           {/* Punchline */}
-          <h1 className="mt-12 text-3xl md:text-5xl lg:text-6xl text-[#ed254e] leading-tight text-right">
-            Your Inner <span className="font-extrabold">Caveman</span> <br/>Still Runs the Show.
-          </h1>
+          <h2 className="mt-12 text-3xl md:text-5xl lg:text-6xl text-brand-dark leading-tight text-right">
+            Your <span className="font-extrabold"> Inner Caveman</span> <br/>Still Runs the Show.
+          </h2>
 
           {/* Year line */}
-          <p className="text-sm md:text-base lg:text-lg text-black/70 leading-relaxed italic text-right">
+          <p className="text-sm md:text-base lg:text-lg text-brand-accent leading-relaxed italic text-right">
             Yes — even in {year}.
           </p>
         </div>
@@ -74,7 +74,7 @@ const LandingPage = () => {
 {topArticles.length > 0 && (
   <div className="mt-20 flex flex-col items-center text-center gap-6">
     {/* Outer container with border */}
-    <div className="w-full max-w-5xl border border-gray-200 rounded-2xl p-8 flex flex-col gap-6">
+    <div className="w-full max-w-5xl border border-brand-dark rounded-2xl p-8 flex flex-col gap-6">
       {/* Section Heading inside box */}
       <h4 className="text-lg md:text-xl font-semibold text-[#042a2b] text-center">
         People working with their Inner Caveman are reading:
@@ -86,7 +86,7 @@ const LandingPage = () => {
           <a
   key={a.slug}
   href={`/insights/${a.slug}`}
-  className="h-[220px] bg-white border border-gray-200 p-6 rounded-xl 
+  className="h-[220px] bg-white border border-brand-dark p-6 rounded-xl 
              shadow-sm hover:shadow-md transition flex flex-col justify-between text-left"
 >
   <div>
@@ -97,7 +97,7 @@ const LandingPage = () => {
 
     {a.excerpt && (
       // Excerpt: 2 lines on mobile, 3 on md+, 4 on lg+
-      <p className="text-black/70 text-sm mt-2 line-clamp-2 md:line-clamp-3 lg:line-clamp-4">
+      <p className="text-brand-dark/70 text-sm mt-2 line-clamp-2 md:line-clamp-3 lg:line-clamp-4">
         {a.excerpt}
       </p>
     )}
@@ -108,7 +108,7 @@ const LandingPage = () => {
       </div>
 
       {/* CTA inside box at bottom */}
-      <p className="mt-4 text-sm md:text-base text-black/70 text-center">
+      <p className="mt-4 text-sm md:text-base text-brand-dark/70 text-center">
         👉 After reading, most people try the{" "}
         <a href="/spot" className="font-semibold text-[#042a2b] hover:underline">
           Spot Your Caveman
@@ -130,10 +130,10 @@ const LandingPage = () => {
           {/* Block 1 */}
           <div className="space-y-3">
             <Brain className="w-10 h-10 mx-auto text-[#7a2c3d]" />
-            <p className="text-xl md:text-2xl text-black/80 leading-snug">
+            <p className="text-xl md:text-2xl text-brand-dark/80 leading-snug">
               It’s the ancient brain beneath your modern life.
             </p>
-            <p className="text-lg text-black/60 italic">
+            <p className="text-lg text-brand-dark/60 italic">
               A survival program built for tribes, threats, and scarcity.
             </p>
           </div>
@@ -141,10 +141,10 @@ const LandingPage = () => {
           {/* Block 2 */}
           <div className="space-y-3">
             <Shield className="w-10 h-10 mx-auto text-[#5eb1bf]" />
-            <p className="text-xl md:text-2xl text-black/80 leading-snug">
+            <p className="text-xl md:text-2xl text-brand-dark/80 leading-snug">
               Back then, it kept you alive.
             </p>
-            <p className="text-lg text-black/60 italic">
+            <p className="text-lg text-brand-dark/60 italic">
               Today, it misfires.
             </p>
           </div>
@@ -153,22 +153,22 @@ const LandingPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
             <div className="flex flex-col items-center space-y-2">
               <Smartphone className="w-8 h-8 text-[#ed254e]" />
-              <p className="text-black/80">Scroll for approval<br/>instead of rest</p>
+              <p className="text-brand-dark/80">Scroll for approval<br/>instead of rest</p>
             </div>
             <div className="flex flex-col items-center space-y-2">
               <Slash className="w-8 h-8 text-[#ed254e]" />
-              <p className="text-black/80">Avoid conflict<br/>like it’s exile</p>
+              <p className="text-brand-dark/80">Avoid conflict<br/>like it’s exile</p>
             </div>
             <div className="flex flex-col items-center space-y-2">
               <Cookie className="w-8 h-8 text-[#ed254e]" />
-              <p className="text-black/80">Crave sugar<br/>when you just need calm</p>
+              <p className="text-brand-dark/80">Crave sugar<br/>when you just need calm</p>
             </div>
           </div>
 
           {/* Block 4 */}
           <div className="space-y-3">
             <Lightbulb className="w-10 h-10 mx-auto text-[#f9dc5c]" />
-            <p className="text-xl md:text-2xl text-black/80 leading-snug">
+            <p className="text-xl md:text-2xl text-brand-dark/80 leading-snug">
               It’s not a flaw. It’s your wiring.
             </p>
           </div>
@@ -197,7 +197,7 @@ const LandingPage = () => {
               The Reality
             </div>
             <div className="w-px bg-black/70 mx-auto h-full" />
-            <div className="text-lg md:text-xl text-black/80 leading-relaxed text-center md:text-left">
+            <div className="text-lg md:text-xl text-brand-dark/80 leading-relaxed text-center md:text-left">
               It’s the same survival wiring that kept us alive 200,000 years ago. <br />
               Back then, fear, comfort, and social approval meant safety. <br />
               Today, those same instincts misfire — keeping us scrolling, delaying, avoiding.
@@ -216,7 +216,7 @@ const LandingPage = () => {
             {/* Site purpose + CTA */}
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               {/* Left-aligned purpose text */}
-              <p className="text-base md:text-xl text-black/80 leading-relaxed text-left md:w-2/3">
+              <p className="text-base md:text-xl text-brand-dark/80 leading-relaxed text-left md:w-2/3">
                 That’s what this site is built for — <br />
                 a place to explore resources, insights, and tools <br />
                 so you can stop fighting your caveman brain <br />

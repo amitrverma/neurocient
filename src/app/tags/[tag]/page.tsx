@@ -62,13 +62,13 @@ export default async function TagPage({
       </h1>
 
       {articles.length === 0 ? (
-        <p className="text-gray-500">No articles found for this tag.</p>
+        <p className="text-brand-dark">No articles found for this tag.</p>
       ) : (
         <div className="space-y-10">
           {articles.map((article) => (
             <div
               key={article.slug}
-              className="border-b border-gray-200 pb-6 group transition-colors"
+              className="border-b border-brand-dark pb-6 group transition-colors"
             >
               {/* Title with hover effect */}
               <Link
@@ -80,12 +80,12 @@ export default async function TagPage({
 
               {/* Date */}
               {article.date && (
-                <p className="text-sm text-gray-500 mt-1">{article.date}</p>
+                <p className="text-sm text-brand-dark mt-1">{article.date}</p>
               )}
 
               {/* Excerpt */}
               {article.excerpt && (
-                <p className="mt-3 text-gray-700">{article.excerpt}</p>
+                <p className="mt-3 text-brand-dark">{article.excerpt}</p>
               )}
 
               {/* Read more link */}

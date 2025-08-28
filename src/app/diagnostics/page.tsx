@@ -9,14 +9,14 @@ const DiagnosticsPage = () => {
     <main className="min-h-screen bg-white px-6 py-16">
       <div className="max-w-3xl mx-auto relative">
         {/* Vertical line */}
-        <div className="absolute left-1/2 transform -translate-x-1/2 h-full border-l-2 border-gray-200" />
+        <div className="absolute left-1/2 transform -translate-x-1/2 h-full border-l-2 border-brand-dark" />
 
         {/* Intro */}
         <div className="mb-20 text-center relative z-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-brand-dark mb-4">
             Your Caveman Brain Still Runs the Show
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-brand-dark">
             Trace the path of your instincts.  
             At the end, choose where to explore them—your personal life or your work life.
           </p>
@@ -26,7 +26,7 @@ const DiagnosticsPage = () => {
         <div className="flex justify-center mb-16 relative z-10">
           <div className="bg-yellow-100 rounded-xl p-6 shadow-md w-80 text-center">
             <Brain className="mx-auto h-10 w-10 text-[#ed254e]" />
-            <p className="mt-3 text-gray-700">
+            <p className="mt-3 text-brand-dark">
               Ancient instincts—safety, status, belonging—still drive modern choices.
             </p>
           </div>
@@ -43,7 +43,7 @@ const DiagnosticsPage = () => {
               <h2 className="text-xl font-semibold mb-2 group-hover:text-[#ed254e]">
                 🪞 Caveman Scan
               </h2>
-              <p className="text-gray-600 text-sm">
+              <p className="text-brand-dark text-sm">
                 Quick 5-minute scan revealing instincts shaping your daily life.
               </p>
             </div>
@@ -58,7 +58,7 @@ const DiagnosticsPage = () => {
               <h2 className="text-xl font-semibold mb-2 group-hover:text-[#042a2b]">
                 💼 CIC Diagnostic
               </h2>
-              <p className="text-gray-600 text-sm">
+              <p className="text-brand-dark text-sm">
                 Workplace scan to uncover instincts shaping leadership & teamwork.
               </p>
             </div>
@@ -67,8 +67,8 @@ const DiagnosticsPage = () => {
 
         {/* Connector lines for fork */}
         <div className="absolute w-full flex justify-between top-[65%]">
-          <div className="w-1/2 border-t-2 border-gray-200 mr-4" />
-          <div className="w-1/2 border-t-2 border-gray-200 ml-4" />
+          <div className="w-1/2 border-t-2 border-brand-dark mr-4" />
+          <div className="w-1/2 border-t-2 border-brand-dark ml-4" />
         </div>
       </div>
     </main>

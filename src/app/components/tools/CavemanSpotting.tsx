@@ -28,7 +28,7 @@ const CavemanSpotting = ({
       <ul className="divide-y divide-red-500 max-h-64 overflow-y-auto pr-2">
         {sortedSpots.map((s, i) => (
           <li key={i} className="py-3">
-            <div className="text-xs text-gray-500 mb-1">
+            <div className="text-xs text-brand-dark mb-1">
               {new Date(s.date).toLocaleDateString("en-IN", {
                 weekday: "short",
                 month: "short",

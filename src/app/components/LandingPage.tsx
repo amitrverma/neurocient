@@ -1,17 +1,42 @@
 // app/components/LandingPage.tsx
+"use client";
 
+import { useEffect, useState } from "react";
 import AnimatedWords from "./ui/AnimatedWords";
 import Newsletter from "./Newsletter";
 import { Brain, Shield, Smartphone, Slash, Cookie, Lightbulb, Book } from "lucide-react";
 
+interface Article {
+  slug: string;
+  title: string;
+  excerpt?: string;
+  read_count: number;
+}
+
 const LandingPage = () => {
   const year = new Date().getFullYear();
+  const [topArticles, setTopArticles] = useState<Article[]>([]);
+
+  useEffect(() => {
+    const fetchTop = async () => {
+      try {
+        const res = await fetch("/api/articles/top");
+        if (res.ok) {
+          const data = await res.json();
+          setTopArticles(data);
+        }
+      } catch (err) {
+        console.error("❌ Failed to load top articles:", err);
+      }
+    };
+    fetchTop();
+  }, []);
 
   return (
-    <main className="flex flex-col font-serif bg-white">
+    <div className="flex flex-col font-serif bg-white">
 
       {/* Hero Section */}
-      <section className="relative flex flex-col px-6 pt-24 pb-16">
+      <section className="relative flex flex-col px-6 pb-16">
         <div className="max-w-6xl w-full mx-auto">
           <div className="flex flex-col items-center justify-center text-center gap-4">
             {/* Animated words */}
@@ -43,11 +68,61 @@ const LandingPage = () => {
             Yes — even in {year}.
           </p>
         </div>
-      </section>
+                {/* Placeholder Articles/Links */}
+ {/* ✅ Dynamic Social Proof Section */}
+        {/* ✅ Dynamic Social Proof Section */}
+{topArticles.length > 0 && (
+  <div className="mt-20 flex flex-col items-center text-center gap-6">
+    {/* Outer container with border */}
+    <div className="w-full max-w-5xl border border-gray-200 rounded-2xl p-8 flex flex-col gap-6">
+      {/* Section Heading inside box */}
+      <h4 className="text-lg md:text-xl font-semibold text-[#042a2b] text-center">
+        People working with their Inner Caveman are reading:
+      </h4>
 
-      {/* Inner Caveman Section */}
-      <section id="inner-caveman" className="relative flex flex-col px-6 py-20">
-        <div className="max-w-5xl w-full mx-auto text-center space-y-12">
+      {/* Cards grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {topArticles.map((a) => (
+          <a
+  key={a.slug}
+  href={`/insights/${a.slug}`}
+  className="h-[220px] bg-white border border-gray-200 p-6 rounded-xl 
+             shadow-sm hover:shadow-md transition flex flex-col justify-between text-left"
+>
+  <div>
+    {/* Title: 2 lines on mobile, 3 on md+ */}
+    <h5 className="text-[#ed254e] font-bold text-lg line-clamp-2 md:line-clamp-3">
+      {a.title}
+    </h5>
+
+    {a.excerpt && (
+      // Excerpt: 2 lines on mobile, 3 on md+, 4 on lg+
+      <p className="text-black/70 text-sm mt-2 line-clamp-2 md:line-clamp-3 lg:line-clamp-4">
+        {a.excerpt}
+      </p>
+    )}
+  </div>
+</a>
+
+        ))}
+      </div>
+
+      {/* CTA inside box at bottom */}
+      <p className="mt-4 text-sm md:text-base text-black/70 text-center">
+        👉 After reading, most people try the{" "}
+        <a href="/spot" className="font-semibold text-[#042a2b] hover:underline">
+          Spot Your Caveman
+        </a>{" "}
+        diagnostic or join a{" "}
+        <a href="/microchallenge" className="font-semibold text-[#042a2b] hover:underline">
+          Microchallenge
+        </a>.
+      </p>
+    </div>
+  </div>
+)}
+
+        <div className="max-w-5xl w-full mx-auto text-center space-y-12 mt-12">
           <h2 className="text-3xl md:text-5xl font-bold text-[#042a2b]">
             But, what is this <span className="text-[#ed254e]">Inner Caveman?</span>
           </h2>
@@ -106,11 +181,8 @@ const LandingPage = () => {
             </p>
           </div>
         </div>
-      </section>
 
-      {/* Contrast Section */}
-      <section className="px-6 py-20">
-        <div className="max-w-5xl mx-auto space-y-20">
+        <div className="max-w-5xl mx-auto space-y-20 mt-12">
 
           {/* Misdiagnosis text only */}
           <div className="text-lg md:text-xl text-[#7a2c3d] leading-relaxed text-center md:text-left">
@@ -134,41 +206,40 @@ const LandingPage = () => {
 
           {/* Shift & Next Step */}
 
+          <div className="space-y-8 max-w-5xl mx-auto">
+            {/* Right-aligned punchline */}
+            <p className="text-2xl md:text-3xl font-semibold text-[#ed254e] text-right">
+              Survival got us here. <br />
+              Thriving means updating how we work with that wiring.
+            </p>
 
-<div className="space-y-8 max-w-5xl mx-auto">
-  {/* Right-aligned punchline */}
-  <p className="text-2xl md:text-3xl font-semibold text-[#ed254e] text-right">
-    Survival got us here. <br />
-    Thriving means updating how we work with that wiring.
-  </p>
+            {/* Site purpose + CTA */}
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              {/* Left-aligned purpose text */}
+              <p className="text-base md:text-xl text-black/80 leading-relaxed text-left md:w-2/3">
+                That’s what this site is built for — <br />
+                a place to explore resources, insights, and tools <br />
+                so you can stop fighting your caveman brain <br />
+                and start working with it.
+              </p>
 
-  {/* Site purpose + CTA */}
-  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-    {/* Left-aligned purpose text */}
-    <p className="text-base md:text-xl text-black/80 leading-relaxed text-left md:w-2/3">
-      That’s what this site is built for — <br />
-      a place to explore resources, insights, and tools <br />
-      so you can stop fighting your caveman brain <br />
-      and start working with it.
-    </p>
-
-    {/* Right-aligned CTA */}
-    <a
-      href="/resources"
-      className="inline-flex items-center gap-2 px-6 py-3 bg-[#042a2b] text-white rounded-full text-lg font-semibold hover:bg-[#5eb1bf] transition"
-    >
-      <Book className="w-5 h-5" />
-      Explore Resources
-    </a>
-  </div>
-</div>
+              {/* Right-aligned CTA */}
+              <a
+                href="/resources"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#042a2b] text-white rounded-full text-lg font-semibold hover:bg-[#5eb1bf] transition"
+              >
+                <Book className="w-5 h-5" />
+                Explore Resources
+              </a>
+            </div>
+          </div>
         </div>
       </section>
-   <Newsletter
-            subtext="Get the weekly email full of insights to help you work with your inner caveman."
-            logoSrc="/logo/newsletter.png"
-          />
-    </main>
+      <Newsletter
+                subtext="Get the weekly email full of insights to help you work with your inner caveman."
+                logoSrc="/logo/newsletter.png"
+              />
+    </div>
   );
 };
 

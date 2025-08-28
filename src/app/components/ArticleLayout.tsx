@@ -65,7 +65,6 @@ const ArticleLayout = ({
   const [showAuth, setShowAuth] = useState(false);
   const [showMembership, setShowMembership] = useState(false);
   const nextRef = useRef<HTMLDivElement | null>(null);
-  const trackedRef = useRef(false); // ✅ prevents double increments
 
   // ✅ Detect if article is already saved when component mounts
   useEffect(() => {
@@ -99,53 +98,57 @@ const ArticleLayout = ({
     return () => observer.disconnect();
   }, []);
 
+  // ✅ Mark as read when scrolled/time passed
   useEffect(() => {
-  if (!slug) return;
+    if (!slug) return;
 
-  let incremented = false; // 👈 reset every time slug changes
+    let incremented = false; // ensure one increment per article
 
-  const markAsRead = () => {
-    if (incremented) return; // only once per article
-    incremented = true;
+    const markAsRead = async () => {
+      if (incremented) return;
+      incremented = true;
 
-    console.log("📖 Marking article as read");
-    const { allowed, count } = incrementUsage("articles", !!token);
-    console.log("Usage updated:", { count, allowed });
+      console.log("📖 Marking article as read");
+      const { allowed, count } = incrementUsage("articles", !!token);
+      console.log("Usage updated:", { count, allowed });
 
-    if (!allowed) {
-      if (token) setShowMembership(true);
-      else setShowAuth(true);
-    }
+      if (!allowed) {
+        if (token) setShowMembership(true);
+        else setShowAuth(true);
+      }
 
-    window.removeEventListener("scroll", onScroll);
-    clearTimeout(timeout);
-  };
+      // 🔥 call backend to increment read count
+      try {
+        await fetch(`/api/articles/${slug}/read`, {
+          method: "POST",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+      } catch (err) {
+        console.error("❌ Error incrementing read count:", err);
+      }
 
-  const onScroll = () => {
-    const scrollTop = window.scrollY;
-    const windowHeight = window.innerHeight;
-    const docHeight = document.documentElement.scrollHeight;
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(timeout);
+    };
 
-    const scrolled = (scrollTop + windowHeight) / docHeight;
+    const onScroll = () => {
+      const scrollTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+      const scrolled = (scrollTop + windowHeight) / docHeight;
+      if (scrolled >= 0.3) markAsRead();
+    };
 
-    if (scrolled >= 0.3) {
-      markAsRead();
-    }
-  };
+    const timeout = setTimeout(markAsRead, 15000);
+    window.addEventListener("scroll", onScroll);
 
-  const timeout = setTimeout(() => {
-    markAsRead();
-  }, 15000);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(timeout);
+    };
+  }, [slug, token]);
 
-  window.addEventListener("scroll", onScroll);
-
-  return () => {
-    window.removeEventListener("scroll", onScroll);
-    clearTimeout(timeout);
-  };
-}, [slug, token]); // 👈 runs fresh for each article
-
-
+  // ✅ Save / Unsave toggle
   const handleSave = async () => {
     if (!slug) return;
 
@@ -155,15 +158,12 @@ const ArticleLayout = ({
     }
 
     try {
-      const payload = { slug, title, excerpt };
-
       const res = await fetch(`/api/articles/save/${slug}`, {
         method: isSaved ? "DELETE" : "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: isSaved ? undefined : JSON.stringify(payload),
       });
 
       if (res.ok) {

@@ -19,9 +19,38 @@ export async function generateMetadata(
   const raw = fs.readFileSync(filePath, "utf-8");
   const { data } = matter(raw);
 
+  const title = data.title as string;
+  const description = (data.excerpt as string) || "An article from The Neurocient Labs.";
+  const url = `/insights/${slug}`;
+
   return {
-    title: `${data.title} | The Modern Caveman`,
-    description: data.excerpt || "An article from The Modern Caveman.",
+    title: title,
+    description,
+    openGraph: {
+      type: "article",
+      title,
+      description,
+      url,
+      siteName: "Neurocient Labs",
+      publishedTime: (data.date as string) || undefined,
+      tags: (data.tags as string[]) || undefined,
+      images: [
+        {
+          url: "/logo/neurocient.png",
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [
+        "/logo/neurocient.png",
+      ],
+    },
   };
 }
 

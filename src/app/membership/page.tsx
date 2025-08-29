@@ -17,6 +17,7 @@ export default function MembershipPage() {
           </p>
           <Link
             href="/subscribe"
+            data-cta="join-membership"
             className="inline-block px-8 py-3 text-lg font-semibold rounded-full bg-[#ed254e] text-white hover:bg-[#a93f55] transition"
           >
             Join Membership →
@@ -103,6 +104,7 @@ export default function MembershipPage() {
           </div>
           <Link
             href="/subscribe"
+            data-cta="join-membership"
             className="inline-block mt-4 px-6 py-3 text-lg font-semibold rounded-full bg-[#042a2b] text-white hover:bg-[#5eb1bf] transition"
           >
             Join Now →
@@ -129,6 +131,7 @@ export default function MembershipPage() {
           </p>
           <Link
             href="/subscribe"
+            data-cta="join-membership"
             className="inline-block px-8 py-3 text-lg font-semibold rounded-full bg-[#ed254e] text-white hover:bg-[#a93f55] transition"
           >
             Join Membership →

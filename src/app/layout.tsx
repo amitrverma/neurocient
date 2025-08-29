@@ -5,7 +5,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { AuthProvider } from "./context/AuthContext"; // ✅ global auth provider
 import { NotificationProvider } from "./components/NotificationProvider";
-import PostHogInit from "./_components/PostHogInit";
+import PostHogProvider from "./components/PostHogProvider";
 
 // 🎨 Fonts
 const quattrocento = Quattrocento({
@@ -33,17 +33,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-  <html lang="en" className={`${quattrocento.variable} ${montserrat.variable}`}>
-    <body className="antialiased bg-white text-[#042a2b]">
-      <NotificationProvider>
-        <AuthProvider>
-          <PostHogInit /> {/* ✅ Initialize PostHog globally */}
-          <Navbar />
-          <main className="pt-20 font-serif">{children}</main>
-          <Footer />
-        </AuthProvider>
-      </NotificationProvider>
-    </body>
-  </html>
-);
+    <html lang="en" className={`${quattrocento.variable} ${montserrat.variable}`}>
+      <body className="antialiased bg-white text-[#042a2b]">
+        <NotificationProvider>
+          <PostHogProvider />
+          <AuthProvider>
+            <Navbar />
+            <main className="pt-20 font-serif">{children}</main>
+            <Footer />
+          </AuthProvider>
+        </NotificationProvider>
+      </body>
+    </html>
+  );
 }

@@ -12,6 +12,7 @@ import AuthModal from "./AuthModal";
 import { useNotification } from "./NotificationProvider";
 import { incrementUsage } from "../utils/usage";
 import MembershipModal from "./MembershipModal";
+import { trackEvent } from "../utils/analytics";
 
 interface ResourceItem {
   title: string;
@@ -84,6 +85,13 @@ const ArticleLayout = ({
     };
     checkSaved();
   }, [slug, token]);
+
+  // Track article view
+  useEffect(() => {
+    if (slug) {
+      trackEvent("Article Viewed", { slug });
+    }
+  }, [slug]);
 
   // ✅ IntersectionObserver for sidebar
   useEffect(() => {
@@ -168,6 +176,9 @@ const ArticleLayout = ({
 
       if (res.ok) {
         setIsSaved(!isSaved);
+        if (!isSaved && slug) {
+          trackEvent("Article Saved", { slug });
+        }
       } else {
         const data = await res.json();
         console.error("❌ Failed to save/unsave:", data);

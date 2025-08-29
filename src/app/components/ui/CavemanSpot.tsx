@@ -6,6 +6,7 @@ import AuthModal from "../AuthModal";
 import { useNotification } from "../NotificationProvider";
 import MembershipModal from "../MembershipModal";
 import { getUsage, incrementUsage, usageLimits } from "../../utils/usage";
+import { trackEvent } from "../../utils/analytics";
 
 interface CavemanSpotProps {
   prompt?: string; // now optional
@@ -56,6 +57,7 @@ const CavemanSpot = ({
         notify("✅ Spot saved!", "success");
         onAdded?.({ date: new Date().toISOString(), description: note });
         setNote("");
+        trackEvent("Spot Added");
       } else {
         const data = await res.json();
         notify(data.detail || "Failed to log spot", "error");
@@ -78,6 +80,7 @@ const CavemanSpot = ({
       />
       <button
         onClick={handleSubmit}
+        data-cta="add-spot"
         className="text-xs font-semibold px-3 py-2 rounded-md bg-yellow-300 text-brand-dark hover:bg-yellow-400 transition"
       >
         Add Spot →

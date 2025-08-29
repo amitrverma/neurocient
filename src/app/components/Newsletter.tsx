@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { trackEvent } from "../utils/analytics";
 
 interface NewsletterProps {
   subtext?: string;
@@ -42,6 +43,7 @@ const Newsletter = ({
         localStorage.setItem("subscribedEmail", email);
         setSubscribedEmail(email);
         setStatus("subscribed");
+        trackEvent("Newsletter Signup");
       }
     } catch (err) {
       console.error("❌ Subscription failed:", err);
@@ -80,6 +82,7 @@ const Newsletter = ({
             />
             <button
               type="submit"
+              data-cta="newsletter-join"
               className="px-4 py-2 rounded-lg bg-brand-secondary text-brand-dark font-semibold hover:bg-brand-primary hover:text-background transition"
             >
               Join

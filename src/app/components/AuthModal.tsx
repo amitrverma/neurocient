@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../firebase";
 import { useNotification } from "./NotificationProvider";
+import { trackEvent } from "../utils/analytics";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -40,6 +41,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess, disableEscape = false }: AuthMo
         login(data.token);
         onClose();
         if (onSuccess) onSuccess();
+        trackEvent("Login Completed");
       } else if (data.preview) {
         notify("You’re in preview mode (waitlist).");
       }
@@ -66,6 +68,8 @@ const AuthModal = ({ isOpen, onClose, onSuccess, disableEscape = false }: AuthMo
         login(data.token);
         onClose();
         if (onSuccess) onSuccess();
+        if (mode === "signup") trackEvent("Signup Completed");
+        else trackEvent("Login Completed");
       } else {
         notify("Failed to authenticate.", "error");
       }

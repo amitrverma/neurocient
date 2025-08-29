@@ -7,6 +7,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "../AuthModal";
 import MembershipModal from "../MembershipModal";
 import { getUsage, incrementUsage, usageLimits } from "../../utils/usage";
+import { trackEvent } from "../../utils/analytics";
 
 interface MicrochallengeBoxProps {
   id: string; // UUID from backend
@@ -55,6 +56,7 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
       return;
     }
     incrementUsage("microchallenges", true);
+    trackEvent("Microchallenge Started", { id });
   };
 
   if (!challenge) {
@@ -78,6 +80,7 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
         href={`/tools/microchallenges#challenge-${challenge.id}`}
         className="text-sm font-semibold text-[#5eb1bf] hover:underline"
         onClick={handleClick}
+        data-cta="microchallenge-open"
       >
         Try this Microchallenge →
       </Link>

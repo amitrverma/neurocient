@@ -32,17 +32,7 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-6 font-medium text-brand-dark">
             <Link href="/about" className="hover:text-brand-teal">About</Link>
             <Link href="/resources" className="hover:text-brand-teal">Resources</Link>
-            <Link href="/services" className="hover:text-brand-teal">Services</Link>
-
-            {/* Unlock Full Access for logged-in users */}
-            {user && (
-              <Link
-                href="/membership"
-                className="text-sm font-semibold px-3 py-1 rounded-lg bg-brand-primary text-white border  hover:bg-brand-teal hover:text-white transition"
-              >
-                Unlock Full Access
-              </Link>
-            )}
+            <Link href="/programs" className="hover:text-brand-teal">Programs</Link>
 
             {/* Auth Section */}
             {user ? (
@@ -100,10 +90,20 @@ const Navbar = () => {
             ) : (
               <button
                 onClick={() => setShowAuth(true)}
-                className="text-sm font-semibold px-3 py-1 rounded-lg text-brand-dark border border-brand-dark hover:bg-brand-teal hover:border-white hover:text-white transition"
+                className="text-sm font-semibold px-3 py-1 rounded-lg text-brand-dark border border-brand-dark hover:bg-brand-primary hover:border-white hover:text-white transition"
               >
                 Sign in
               </button>
+            )}
+
+                        {/* Unlock Full Access for logged-in users */}
+            {user && (
+              <Link
+                href="/membership"
+                className="text-sm font-semibold px-3 py-1 rounded-lg bg-brand-primary text-white border  hover:bg-brand-teal hover:text-white transition"
+              >
+                Unlock Full Access
+              </Link>
             )}
           </div>
 

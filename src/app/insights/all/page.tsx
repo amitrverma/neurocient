@@ -95,7 +95,7 @@ export default function AllInsightsPage() {
             href={`/insights/${article.slug}`}
             className="block mt-3 text-[#ed254e] font-medium text-sm"
           >
-            Read more →
+            Read more
           </Link>
         </div>
       ))}

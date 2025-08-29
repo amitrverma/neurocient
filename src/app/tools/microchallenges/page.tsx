@@ -113,10 +113,10 @@ const MicrochallengesPage = () => {
     <span
       className={`text-xs font-semibold px-2 py-1 rounded ${
         c.status === "completed"
-          ? "bg-green-100 text-green-700"
+          ? "border text-green-700"
           : c.status === "assigned"
-          ? "bg-blue-100 text-blue-700"
-          : "bg-gray-100 text-brand-dark"
+          ? "border text-blue-700"
+          : "border text-brand-dark"
       }`}
     >
       {c.status}

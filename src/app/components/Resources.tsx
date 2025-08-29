@@ -42,7 +42,7 @@ const Resources = () => {
             </p>
             <Link
               href="/insights"
-              className="mt-auto px-4 py-2 bg-[#042a2b] text-white rounded-full text-sm font-semibold hover:bg-[#5eb1bf] transition"
+              className="mt-auto px-4 py-2 border text-brand-dark rounded-full text-sm font-semibold hover:bg-[#5eb1bf] hover:text-white transition"
             >
               Explore
             </Link>
@@ -58,7 +58,7 @@ const Resources = () => {
          <Link
             href={token ? "/tools" : "#"}
             onClick={handleProtectedClick}
-            className="mt-auto inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition bg-[#042a2b] text-white hover:bg-[#5eb1bf]"
+            className="mt-auto px-4 py-2 border text-brand-dark rounded-full text-sm font-semibold hover:bg-[#5eb1bf] hover:text-white transition"
           >
             Explore Tools
           </Link>
@@ -74,7 +74,7 @@ const Resources = () => {
             </p>
             <Link
               href="/diagnostics"
-              className="mt-auto inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition bg-[#042a2b] text-white hover:bg-[#5eb1bf]"
+              className="mt-auto px-4 py-2 border text-brand-dark rounded-full text-sm font-semibold hover:bg-[#5eb1bf] hover:text-white transition"
             >
               Take the Test
             </Link>
@@ -84,48 +84,15 @@ const Resources = () => {
         {/* CTA to Learning Pathways */}
         <div className="mt-12 text-center">
           <p className="text-lg text-brand-dark mb-4">
-            Unsure where to begin? Start with a guided roadmap.
+            Not sure where to start?
           </p>
           <Link
-            href="/learning-pathways"
-            className="inline-block px-6 py-3 text-lg font-semibold rounded-full bg-brand-primary text-brand-dark hover:bg-brand-secondary transition"
+            href="/pathways"
+            className="inline-block px-6 py-3 text-lg font-semibold rounded-full border text-brand-dark hover:bg-brand-primary hover:text-white transition"
           >
-            Explore Learning Pathways
+            Begin with a Guided Path
           </Link>
         </div>
-
-        {/* Featured Resource */}
-        <section className="p-8 bg-[#f9dc5c]/20 border border-[#f9dc5c] rounded-2xl shadow-md text-center space-y-6">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#042a2b]">
-            🌟 Spot Your Caveman
-          </h2>
-          <p className="text-lg text-brand-dark/80 max-w-2xl mx-auto leading-relaxed">
-            Find out which caveman runs your show with our interactive diagnostic quiz.
-            Get instant insights — and unlock personalized resources.
-          </p>
-          <Link
-            href="/diagnostics/spot-your-caveman"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[#ed254e] text-white rounded-full text-lg font-semibold hover:bg-[#a93f55] transition"
-          >
-            <ClipboardList className="w-5 h-5" />
-            Take the Quiz
-          </Link>
-        </section>
-
-        {/* Access / Account Section */}
-        {!token && (
-          <section className="text-center space-y-6">
-            <p className="text-lg text-brand-dark/80">
-              Create a free account to unlock your results and save your progress.
-            </p>
-            <button
-              onClick={() => setShowAuth(true)}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#042a2b] text-white rounded-full text-lg font-semibold hover:bg-[#5eb1bf] transition"
-            >
-              Sign Up / Log In
-            </button>
-          </section>
-        )}
       </div>
 
       {/* 🔑 Auth Modal */}

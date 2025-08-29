@@ -66,7 +66,7 @@ const Newsletter = ({
 
       {/* Text + Form or Thank You */}
       <div className="flex flex-col items-center md:items-start gap-4 w-full">
-        <p className="text-2xl text-brand-teal font-semibold text-center md:text-left">
+        <p className="text-2xl text-brand-dark font-semibold text-center md:text-left">
           {subtext}
         </p>
 
@@ -95,7 +95,7 @@ const Newsletter = ({
             </p>
             <button
               onClick={() => setStatus("idle")}
-              className="text-sm font-semibold px-3 py-1 rounded-lg bg-brand-secondary text-brand-dark hover:bg-brand-primary hover:text-background transition"
+              className="text-sm font-semibold px-3 py-1 rounded-lg border text-brand-dark hover:bg-brand-teal hover:text-white transition"
             >
               Subscribe with another email
             </button>

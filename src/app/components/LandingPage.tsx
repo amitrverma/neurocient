@@ -225,7 +225,7 @@ const LandingPage = () => {
               {/* Right-aligned CTA */}
               <a
                 href="/resources"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#042a2b] text-white rounded-full text-lg font-semibold hover:bg-[#5eb1bf] transition"
+                className="inline-flex items-center gap-2 px-6 py-3 border text-brand-dark rounded-full text-lg font-semibold hover:bg-[#5eb1bf] hover:text-white transition"
               >
                 <Book className="w-5 h-5" />
                 Explore Resources

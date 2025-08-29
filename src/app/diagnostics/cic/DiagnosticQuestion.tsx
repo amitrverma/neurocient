@@ -98,7 +98,7 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
                     className={`w-full text-left px-4 py-3 rounded-lg border shadow-sm transition duration-150
                       ${
                         selectedOption === key
-                          ? "bg-brand-teal text-white border-brand-teal ring-2 ring-brand-teal/70"
+                          ? " text-brand-dark border-brand-teal ring-1 ring-brand-teal/70"
                           : "bg-white text-brand-dark border-brand-dark hover:bg-brand-secondary/20"
                       }`}
                   >
@@ -113,7 +113,7 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
               {currentIndex > 0 && (
                 <button
                   onClick={handlePrevious}
-                  className="px-4 py-2 bg-brand-teal text-white text-sm rounded hover:bg-brand-accent transition"
+                  className="px-4 py-2 border text-brand-dark text-sm rounded hover:bg-brand-teal hover:text-white transition"
                 >
                   ← Previous
                 </button>
@@ -124,8 +124,8 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
                 className={`px-4 py-2 text-sm rounded transition
                   ${
                     selectedOption
-                      ? "bg-brand-teal text-white hover:bg-brand-accent"
-                      : "bg-gray-200 text-brand-dark cursor-not-allowed"
+                      ? "px-4 py-2 border text-brand-dark text-sm rounded hover:bg-brand-teal hover:text-white transition"
+                      : "border text-brand-dark cursor-not-allowed hover:bg-gray"
                   }`}
               >
                 {currentIndex + 1 === diagnosticQuestions.length

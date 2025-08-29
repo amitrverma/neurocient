@@ -28,7 +28,7 @@ export interface Pathway {
 export const pathways: Record<PathwayId, Pathway> = {
   foundation: {
     id: "foundation",
-    title: "🪨 Foundation – Inner Caveman 101",
+    title: "Foundation – Inner Caveman 101",
     description: "Get the big picture of why modern struggles feel ancient.",
     articles: [
       { slug: "modern-struggles", title: "Why Modern Struggles Feel So Ancient", order: 1 },
@@ -46,7 +46,7 @@ export const pathways: Record<PathwayId, Pathway> = {
 
   social: {
     id: "social",
-    title: "🧑‍🤝‍🧑 Social & Belonging",
+    title: "Social & Belonging",
     description: "Why connection feels thin in the digital age.",
     articles: [
       { slug: "disconnected", title: "Why You Feel Disconnected Even with Hundreds of Online Friends", order: 1 },
@@ -71,7 +71,7 @@ export const pathways: Record<PathwayId, Pathway> = {
 
   workplace: {
     id: "workplace",
-    title: "💼 Workplace & Leadership",
+    title: "Workplace & Leadership",
     description: "How ancient instincts shape teams, conflict, and decision-making.",
     articles: [
       { slug: "caveman-in-the-cubicle", title: "Caveman in the Cubicle", order: 1 },
@@ -95,7 +95,7 @@ export const pathways: Record<PathwayId, Pathway> = {
 
   health: {
     id: "health",
-    title: "🏃 Health & Habits",
+    title: "Health & Habits",
     description: "Your body is calibrated for survival, not modern routines.",
     articles: [
       { slug: "exercise-caveman-brain", title: "Why Exercise is Non-Negotiable for Your Caveman Brain", order: 1 },
@@ -117,7 +117,7 @@ export const pathways: Record<PathwayId, Pathway> = {
 
   deepDive: {
     id: "deepDive",
-    title: "🔍 Deep Dive & Advanced Thinking",
+    title: "Deep Dive & Advanced Thinking",
     description: "Bringing it all together — cognition, emotion, society, and health.",
     articles: [
       { slug: "silent-theft", title: "The Silent Theft: Humanity vs Digital Convenience", order: 1 },

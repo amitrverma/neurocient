@@ -64,7 +64,7 @@ export default function InsightsPage() {
                 {article.excerpt}
               </p>
               <span className="text-[#ed254e] font-medium text-sm mt-auto">
-                Read more →
+                Read more
               </span>
             </Link>
           ))}
@@ -74,9 +74,9 @@ export default function InsightsPage() {
         <div className="text-center mt-10">
           <Link
             href="/insights/all"
-            className="inline-block px-6 py-3 text-sm font-semibold text-white bg-[#ed254e] rounded-lg hover:bg-[#a93f55] transition"
+            className="inline-block px-6 py-3 text-lg font-semibold rounded-full border text-brand-dark hover:bg-brand-primary hover:text-white transition"
           >
-            View All Articles →
+            View All Articles
           </Link>
         </div>
       </div>

@@ -75,8 +75,8 @@ export default function AboutPage() {
           X
         </a>
         , and{" "}
-        <a href="https://amitrverma.com" target="_blank">
-          amitrverma.com
+        <a href="https://neurocient.com" target="_blank">
+          neurocient.com
         </a>
         .
       </p>

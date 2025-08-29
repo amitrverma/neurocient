@@ -69,8 +69,8 @@ const CavemanSpot = ({
   };
 
   return (
-    <div className="p-4 border rounded-lg bg-white shadow-sm mb-4">
-      <p className="text-sm text-brand-dark mb-2">{prompt}</p>
+    <div className="p-4 rounded-lg bg-white shadow-sm mb-4">
+      <p className="text-md text-brand-dark mb-2">{prompt}</p>
       <textarea
         value={note}
         onChange={(e) => setNote(e.target.value)}
@@ -81,9 +81,9 @@ const CavemanSpot = ({
       <button
         onClick={handleSubmit}
         data-cta="add-spot"
-        className="text-xs font-semibold px-3 py-2 rounded-md bg-yellow-300 text-brand-dark hover:bg-yellow-400 transition"
+        className="text-sm font-semibold px-3 py-2 rounded-md border text-brand-dark hover:bg-brand-teal hover:text-white  transition"
       >
-        Add Spot →
+        Add Spot
       </button>
 
       {/* Modals */}

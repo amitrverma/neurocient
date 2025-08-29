@@ -40,8 +40,8 @@ const Footer = () => {
           <Link href="/diagnostics" className="hover:text-brand-primary underline underline-offset-4">
             Diagnostics
           </Link>
-          <Link href="/services" className="hover:text-brand-primary underline underline-offset-4">
-            Services
+          <Link href="/programs" className="hover:text-brand-primary underline underline-offset-4">
+            Programs
           </Link>
           <Link href="/contact" className="hover:text-brand-primary underline underline-offset-4">
             Contact

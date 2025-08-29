@@ -20,17 +20,17 @@ const FeedbackOverlay = ({ questionId, option }: Props) => {
 
   return (
     <div
-      className="relative bg-white border border-brand-dark rounded-2xl shadow-lg p-5 text-base text-brand-dark
-                 transition-all duration-300 transform hover:shadow-xl hover:-translate-y-1 border-t-4 border-t-brand-primary"
+      className="relative bg-white rounded-2xl shadow-lg p-5 text-base text-brand-dark
+                 transition-all duration-300 transform hover:shadow-xl hover:-translate-y-1 border-t-4 "
     >
       {/* Instinct Title */}
-      <p className="font-semibold text-brand-dark mb-1">
+      <p className="font-semibold text-brand-accent mb-1">
         Instinct: {insight.instinct}
       </p>
 
       {/* Motive */}
       {insight.motive && (
-        <p className="text-sm font-medium mb-4 text-brand-primary">
+        <p className="text-md font-medium mb-4 text-brand-accent">
           Caveman Motive: {insight.motive}
         </p>
       )}
@@ -43,12 +43,12 @@ const FeedbackOverlay = ({ questionId, option }: Props) => {
         (!showDetail ? (
           <button
             onClick={() => setShowDetail(true)}
-            className="text-brand-teal underline text-sm mb-2 hover:text-brand-accent transition"
+            className="text-brand-accent text-sm mb-2 hover:text-brand-accent transition cursor-pointer"
           >
-            + See why this happens
+            why this happens?
           </button>
         ) : (
-          <div className="space-y-3 text-sm">
+          <div className="space-y-3 text-md">
             <p>{insight.explanation}</p>
             {insight.microShift && (
               <p className="text-brand-dark">

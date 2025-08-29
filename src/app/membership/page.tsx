@@ -20,7 +20,7 @@ export default function MembershipPage() {
             data-cta="join-membership"
             className="inline-block px-8 py-3 text-lg font-semibold rounded-full bg-[#ed254e] text-white hover:bg-[#a93f55] transition"
           >
-            Join Membership →
+            Join Membership
           </Link>
         </section>
 
@@ -107,7 +107,7 @@ export default function MembershipPage() {
             data-cta="join-membership"
             className="inline-block mt-4 px-6 py-3 text-lg font-semibold rounded-full bg-[#042a2b] text-white hover:bg-[#5eb1bf] transition"
           >
-            Join Now →
+            Join Now
           </Link>
         </section>
 
@@ -134,7 +134,7 @@ export default function MembershipPage() {
             data-cta="join-membership"
             className="inline-block px-8 py-3 text-lg font-semibold rounded-full bg-[#ed254e] text-white hover:bg-[#a93f55] transition"
           >
-            Join Membership →
+            Join Membership
           </Link>
         </section>
       </div>

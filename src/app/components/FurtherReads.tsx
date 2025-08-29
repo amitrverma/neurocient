@@ -20,9 +20,9 @@ const FurtherReads = ({ books = [], research = [], internal = [] }: ArticleResou
   return (
     <>
       {/* ✅ Desktop floating card */}
-      <aside className="hidden lg:block fixed bottom-8 right-8 w-72 bg-white shadow-lg rounded-xl p-4 border">
+      <aside className="hidden lg:block fixed bottom-8 right-8 w-78 bg-white shadow-lg rounded-xl p-4 border">
         <h3 className="text-lg font-bold mb-3">Further Reads</h3>
-        <div className="space-y-4 text-sm">
+        <div className="space-y-4 text-md">
           {books.length > 0 && (
             <div>
               <h4 className="font-semibold mb-1">Books</h4>

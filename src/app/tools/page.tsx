@@ -110,9 +110,9 @@ const ToolsPage = () => {
 
               <Link
                 href="/tools/spots"
-                className="text-sm font-semibold text-[#042a2b] hover:text-[#5eb1bf] underline"
+                className="inline-block border text-brand-dark font-semibold px-6 py-3 rounded-xl shadow hover:bg-brand-teal hover:text-white transition"
               >
-                View All →
+                View All
               </Link>
             </>
           )}
@@ -129,9 +129,9 @@ const ToolsPage = () => {
           </p>
           <Link
             href="/tools/microchallenges"
-            className="text-sm font-semibold text-[#042a2b] hover:text-[#5eb1bf] underline"
+            className="inline-block border text-brand-dark font-semibold px-6 py-3 rounded-xl shadow hover:bg-brand-teal hover:text-white transition"
           >
-            Go to Challenges →
+            Go to Challenges
           </Link>
         </div>
       </div>

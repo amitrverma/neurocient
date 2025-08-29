@@ -12,20 +12,20 @@ const motiveLabels: Record<
   { icon: string; summary: string; microShift: string }
 > = {
   "Safety & Self-Protection": {
-    icon: "🛡️",
+    icon: "",
     summary:
       "You may avoid risk, change, or uncertainty — even when it’s needed.",
     microShift:
       "Try building comfort with short-term discomfort through small experiments.",
   },
   "Status & Social Hierarchy": {
-    icon: "📈",
+    icon: "",
     summary: "You may prioritize how you're seen over what works best.",
     microShift:
       "Try creating safer ways to ask for help or revisit plans without judgment.",
   },
   "Affiliation & Belonging": {
-    icon: "🧑‍🤝‍🧑",
+    icon: "",
     summary: "You may avoid conflict to preserve group harmony.",
     microShift:
       "Try normalizing constructive dissent in meetings or feedback.",
@@ -72,7 +72,7 @@ const ResultSummary = ({ responses, onRestart }: Props) => {
     <div className="min-h-screen bg-gradient-to-b from-white to-[#f8fafc] font-sans text-dark">
       <div className="max-w-3xl mx-auto px-6 py-12">
         <h2 className="text-3xl font-bold text-accent mb-4">
-          🧬 Your Caveman Profile
+          Your Caveman Profile
         </h2>
         <p className="mb-4 text-lg text-brand-dark">
           Based on your answers, here’s what your underlying behavioral drivers
@@ -80,7 +80,7 @@ const ResultSummary = ({ responses, onRestart }: Props) => {
         </p>
 
         <p className="text-lg text-tertiary font-semibold mb-10">
-          🧠 {cavemanPercent}% Caveman in the Cubicle, {modernPercent}% Modern
+          {cavemanPercent}% Caveman in the Cubicle, {modernPercent}% Modern
           Human
         </p>
 
@@ -93,25 +93,19 @@ const ResultSummary = ({ responses, onRestart }: Props) => {
               <h3 className="text-xl font-semibold text-tertiary mb-1">
                 {motiveLabels[motive].icon} {motive} ({count} triggers)
               </h3>
-              <p className="text-sm text-brand-dark mb-2">
+              <p className="text-md text-brand-dark mb-2">
                 {motiveLabels[motive].summary}
               </p>
-              <p className="text-sm text-green-700">
-                <strong>🔄 Try this:</strong> {motiveLabels[motive].microShift}
+              <p className="text-md text-brand-primary">
+                <strong>Try this:</strong> {motiveLabels[motive].microShift}
               </p>
             </div>
           ))}
         </div>
 
         <div className="mt-10 flex gap-4 flex-wrap">
-          <button
-            onClick={onRestart}
-            className="px-5 py-2 bg-gray-100 text-sm rounded hover:bg-gray-200 transition"
-          >
-            Retake Diagnostic
-          </button>
-          <button className="px-5 py-2 bg-primary text-dark font-semibold rounded hover:bg-yellow-300 transition">
-            Start Your First DEI Loop →
+          <button className="inline-block border text-brand-dark font-semibold px-6 py-3 rounded-xl shadow hover:bg-brand-teal hover:text-white transition">
+            Start Your First DEI Loop
           </button>
         </div>
       </div>

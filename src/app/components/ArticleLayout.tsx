@@ -56,7 +56,7 @@ const ArticleLayout = ({
   nextInPath,
   spotPrompt, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: ArticleLayoutProps) => {
-  const baseUrl = "https://amitrverma.com/insights";
+  const baseUrl = "https://neurocient.com/insights";
   const articleUrl = slug ? `${baseUrl}/${slug}` : baseUrl;
 
   const { token } = useAuth();
@@ -309,11 +309,11 @@ const ArticleLayout = ({
 
         {/* Pathway navigation */}
         {pathway && (
-          <div className="mt-16 border-t pt-8 text-sm text-brand-dark">
+          <div className="mt-16 border-t pt-8 text-md text-brand-dark">
             <p>
               This article is part of the{" "}
               <Link
-                href={`/learning-pathways?open=${pathway.id}`}
+                href={`/pathways?open=${pathway.id}`}
                 className="text-brand-primary hover:underline"
               >
                 {pathway.title}
@@ -348,7 +348,7 @@ const ArticleLayout = ({
         {/* Random Read Next */}
         {nextArticle && (
           <div ref={nextRef} className="mt-16 border-t pt-8">
-            <p className="text-sm text-brand-dark mb-2">You might also like:</p>
+            <p className="text-md text-brand-dark mb-2">You might also like:</p>
             <Link
               href={`/insights/${nextArticle.slug}`}
               className="text-xl font-semibold text-brand-teal hover:text-brand-primary transition"
@@ -356,7 +356,7 @@ const ArticleLayout = ({
               {nextArticle.title}
             </Link>
             {nextArticle.excerpt && (
-              <p className="text-brand-dark text-sm mt-1">{nextArticle.excerpt}</p>
+              <p className="text-brand-dark text-md mt-1">{nextArticle.excerpt}</p>
             )}
           </div>
         )}

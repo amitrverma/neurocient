@@ -44,7 +44,8 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
   }, [id]);
 
   // 🚦 Click handler checks login + usage quota
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     if (!token) {
       e.preventDefault();
       setShowAuth(true);
@@ -68,22 +69,22 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
   }
 
   return (
-    <div className="my-6 p-4 border rounded-lg  border-[#5eb1bf] shadow-sm">
+    <div className="my-6 p-4 rounded-lg shadow-sm">
       <div className="flex items-center gap-2 mb-2">
         <Zap className="w-5 h-5 text-[#5eb1bf]" />
         <h3 className="text-lg font-semibold text-[#042a2b]">{challenge.title}</h3>
       </div>
 
-      <p className="text-sm text-brand-dark mb-3">{challenge.why}</p>
+      <p className="text-md text-brand-dark mb-3">{challenge.why}</p>
 
-      <Link
-        href={`/tools/microchallenges#challenge-${challenge.id}`}
-        className="text-sm font-semibold text-[#5eb1bf] hover:underline"
+      <button
         onClick={handleClick}
         data-cta="microchallenge-open"
+        className="text-sm font-semibold px-3 py-2 rounded-md border text-brand-dark hover:bg-brand-teal hover:text-white transition"
       >
-        Try this Microchallenge →
-      </Link>
+        Try this Microchallenge
+      </button>
+
 
       {/* Modals */}
       <MembershipModal

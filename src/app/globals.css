@@ -76,7 +76,7 @@ body {
 }
 
 .prose-article strong {
-  color: theme('colors.brand.primary');
+  color: theme('colors.brand.accent');
   font-weight: 700;
 }
 
@@ -116,7 +116,7 @@ body {
 }
 
 .prose-article li::marker {
-  color: theme('colors.brand.secondary');
+  color: theme('colors.brand.dark');
 }
 
 .prose-article hr {

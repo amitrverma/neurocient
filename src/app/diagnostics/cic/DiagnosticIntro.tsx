@@ -25,9 +25,9 @@ const DiagnosticIntro = ({ onStart }: Props) => {
 
       <button
         onClick={onStart}
-        className="bg-blue-600 text-white px-5 py-3 rounded hover:bg-blue-700"
+        className="inline-block border text-brand-dark font-semibold px-6 py-3 rounded-xl shadow hover:bg-brand-teal hover:text-white transition"
       >
-        Start Diagnostic →
+        Start Diagnostic
       </button>
     </div>
   );

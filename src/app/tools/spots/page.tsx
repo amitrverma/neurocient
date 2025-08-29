@@ -81,7 +81,7 @@ const SpotsPage = () => {
             onClick={() => setShowMembership(true)}
             className="px-4 py-2 bg-[#042a2b] text-white rounded-md font-semibold hover:bg-[#5eb1bf] transition"
           >
-            Become a Member →
+            Become a Member
           </button>
         </div>
       )}

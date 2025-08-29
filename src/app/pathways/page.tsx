@@ -7,7 +7,7 @@ import { pathways } from "@/content/pathways";
 
 type Resource = { slug?: string; title: string; href?: string; order?: number };
 
-const LearningPathwaysPage = () => {
+const PathwaysPage = () => {
   const searchParams = useSearchParams();
   const openParam = searchParams.get("open");
 
@@ -47,7 +47,7 @@ const LearningPathwaysPage = () => {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div className="text-center mb-14">
         <h1 className="text-5xl font-extrabold tracking-tight text-brand-dark mb-4">
-          Learning Pathways
+          Select your Journey
         </h1>
         <p className="text-lg text-brand-dark max-w-2xl mx-auto leading-relaxed">
           Unsure where to begin? Explore curated pathways to understand and
@@ -65,7 +65,7 @@ const LearningPathwaysPage = () => {
               key={pathway.id}
               className={`rounded-xl border shadow-sm transition ${
                 active
-                  ? "border-brand-primary shadow-md"
+                  ? "border-brand-dark shadow-md"
                   : "border-brand-dark dark:border-brand-dark hover:shadow-md"
               } bg-transparent`}
             >
@@ -75,14 +75,14 @@ const LearningPathwaysPage = () => {
               >
                 <h2
                   className={`text-xl font-semibold ${
-                    active ? "text-brand-primary" : "text-brand-dark"
+                    active ? "text-brand-dark" : "text-brand-dark"
                   }`}
                 >
                   {pathway.title}
                 </h2>
                 <span
                   className={`text-2xl font-bold ${
-                    active ? "text-brand-primary" : "text-brand-dark"
+                    active ? "text-brand-dark" : "text-brand-dark"
                   }`}
                 >
                   {active ? "−" : "+"}
@@ -93,7 +93,7 @@ const LearningPathwaysPage = () => {
                 <div className="px-6 pb-6 space-y-8 animate-fadeIn">
                   {pathway.articles?.length > 0 && (
                     <div>
-                      <h3 className="font-semibold text-brand-primary mb-2">
+                      <h3 className="font-semibold text-brand-accent mb-2">
                         Articles
                       </h3>
                       <div className="space-y-2 text-base text-brand-dark">
@@ -116,7 +116,7 @@ const LearningPathwaysPage = () => {
 
                   {pathway.books?.length > 0 && (
                     <div>
-                      <h3 className="font-semibold text-brand-secondary mb-2">
+                      <h3 className="font-semibold text-brand-accent mb-2">
                         Books
                       </h3>
                       <div className="space-y-2 text-base text-brand-dark">
@@ -129,7 +129,7 @@ const LearningPathwaysPage = () => {
 
                   {pathway.research?.length > 0 && (
                     <div>
-                      <h3 className="font-semibold text-brand-tertiary mb-2">
+                      <h3 className="font-semibold text-brand-accent mb-2">
                         Research
                       </h3>
                       <div className="space-y-2 text-base text-brand-dark">
@@ -172,4 +172,4 @@ const LearningPathwaysPage = () => {
   );
 };
 
-export default LearningPathwaysPage;
+export default PathwaysPage;

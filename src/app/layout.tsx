@@ -6,6 +6,7 @@ import Footer from "./components/Footer";
 import { AuthProvider } from "./context/AuthContext"; // ✅ global auth provider
 import { NotificationProvider } from "./components/NotificationProvider";
 import PostHogProvider from "./components/PostHogProvider";
+import PostHogInit from "./_components/PostHogInit";
 
 // 🎨 Fonts
 const quattrocento = Quattrocento({
@@ -36,6 +37,8 @@ export default function RootLayout({
     <html lang="en" className={`${quattrocento.variable} ${montserrat.variable}`}>
       <body className="antialiased bg-white text-[#042a2b]">
         <NotificationProvider>
+          {/* Initialize PostHog once, then attach global trackers */}
+          <PostHogInit />
           <PostHogProvider />
           <AuthProvider>
             <Navbar />

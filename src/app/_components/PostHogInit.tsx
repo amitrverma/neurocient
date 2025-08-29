@@ -12,9 +12,6 @@ const PostHogInit = () => {
         defaults: '2025-05-24',
         person_profiles: "identified_only", // only when user logs in
       });
-
-      // Track initial pageview
-      posthog.capture("$pageview");
     }
   }, []);
 

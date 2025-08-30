@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const res = await fetch(`${process.env.API_BASE_URL}/articles/top`, {
       headers: {
         "Content-Type": "application/json",
       },
-      // 👇 ensures Next.js doesn’t cache the response
-      cache: "no-store",
+      // 👇 ensures Next.js revalidates on every request
+      next: { revalidate: 0 },
     });
 
     const data = await res.json();

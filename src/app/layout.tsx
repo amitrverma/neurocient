@@ -13,28 +13,28 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   metadataBase: new URL("https://neurocient.com"),
   title: {
-    default: "The Neurocient Labsn",
-    template: "%s | The Neurocient Labsn",
+    default: "The Neurocient Labs",
+    template: "%s | The Neurocient Labs",
   },
   description: "Knowledge hub for your inner caveman",
   openGraph: {
     type: "website",
-    siteName: "The Neurocient Labsn",
+    siteName: "The Neurocient Labs",
     url: "https://neurocient.com",
-    title: "The Neurocient Labsn",
+    title: "The Neurocient Labs",
     description: "Knowledge hub for your inner caveman",
     images: [
       {
         url: "/logo/neurocient.png",
         width: 1200,
         height: 630,
-        alt: "The Neurocient Labsn",
+        alt: "The Neurocient Labs",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "The Neurocient Labsn",
+    title: "The Neurocient Labs",
     description: "Knowledge hub for your inner caveman",
     images: [
       "/logo/neurocient.png",

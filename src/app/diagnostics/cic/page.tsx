@@ -19,10 +19,6 @@ export default function CICDiagnosticPage() {
     setStage("summary");
     trackEvent("Diagnostic Completed", { type: "cic" });
   };
-  const handleRestart = () => {
-    setResponses({});
-    setStage("intro");
-  };
 
   return (
     <div className="min-h-screen bg-white">

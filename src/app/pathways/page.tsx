@@ -2,15 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { pathways } from "@/content/pathways";
 
 type Resource = { slug?: string; title: string; href?: string; order?: number };
 
 const PathwaysPage = () => {
-  const searchParams = useSearchParams();
-  const openParam = searchParams.get("open");
-
   const allowMultiple = false;
 
   const [open, setOpen] = useState<string | null>(null);
@@ -18,16 +14,17 @@ const PathwaysPage = () => {
 
   // ✅ On mount, check if ?open=xyz matches a pathway
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const openParam = params.get("open");
     if (openParam && pathways[openParam as keyof typeof pathways]) {
       setOpen(openParam);
       setOpenList([openParam]);
     } else {
-      // default → first pathway open
       const first = Object.values(pathways)[0].id;
       setOpen(first);
       setOpenList([first]);
     }
-  }, [openParam]);
+  }, []);
 
   const togglePathway = (id: string) => {
     if (allowMultiple) {

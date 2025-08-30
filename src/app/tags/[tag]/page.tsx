@@ -31,8 +31,9 @@ export async function generateStaticParams() {
 export default async function TagPage({
   params,
 }: {
-  params: { tag: string };
+  params: Promise<{ tag: string }>;
 }) {
+  const { tag } = await params;
   const files = fs.readdirSync(insightsDir);
 
  const articles: ArticleMeta[] = files
@@ -47,7 +48,7 @@ export default async function TagPage({
       tags: data.tags || [],
     };
   })
-  .filter((article) => article.tags?.includes(params.tag))
+  .filter((article) => article.tags?.includes(tag))
   .sort((a, b) => {
     if (!a.date) return 1;
     if (!b.date) return -1;
@@ -58,7 +59,7 @@ export default async function TagPage({
   return (
     <main className="max-w-4xl mx-auto px-6 py-12">
       <h1 className="text-3xl font-bold text-brand-dark mb-10">
-        {params.tag}
+        {tag}
       </h1>
 
       {articles.length === 0 ? (

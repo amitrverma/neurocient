@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Brain } from "lucide-react";
 
 const DiagnosticsPage = () => {
   return (

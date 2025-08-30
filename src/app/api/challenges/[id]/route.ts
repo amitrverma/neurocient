@@ -1,14 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const API_BASE_URL = process.env.API_BASE_URL;
 
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }   // 👈 match RouteHandlerConfig
 ) {
-  const token = req.headers.get("authorization");
+  const { id } = await context.params;          // 👈 await since it's a Promise
+  const token = request.headers.get("authorization");
 
-  const res = await fetch(`${API_BASE_URL}/challenges/${params.id}`, {
+  const res = await fetch(`${API_BASE_URL}/challenges/${id}`, {
     headers: token ? { Authorization: token } : {},
   });
 

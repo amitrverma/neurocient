@@ -59,14 +59,12 @@ const ToolsPage = () => {
   const spotCount = spots.length;
 
   let latestSpot: Spot | null = null;
-  let firstSpot: Spot | null = null;
 
   if (spotCount > 0) {
     // sort by date (ascending)
     const sorted = [...spots].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
-    firstSpot = sorted[0];
     latestSpot = sorted[sorted.length - 1];
   }
 

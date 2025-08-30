@@ -15,7 +15,7 @@ interface Spot {
 const SpotsPage = () => {
   const [spots, setSpots] = useState<Spot[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAuth, setShowAuth] = useState(false);
+  const [, setShowAuth] = useState(false);
   const [showMembership, setShowMembership] = useState(false);
 
   const { token } = useAuth();

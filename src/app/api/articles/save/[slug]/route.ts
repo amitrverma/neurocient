@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+type SaveBody = Record<string, unknown>;
+
 export async function POST(
   req: Request,
   context: { params: Promise<{ slug: string }> }
@@ -7,11 +9,11 @@ export async function POST(
   const { slug } = await context.params;
   const token = req.headers.get("authorization");
 
-  let body: any = {};
+  let body: SaveBody = {};
   try {
-    body = await req.json();
+    body = (await req.json()) as SaveBody;
   } catch {
-    body = {};
+    body = {} as SaveBody;
   }
 
   try {

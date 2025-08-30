@@ -1,5 +1,5 @@
 "use client";
-import { BookOpen, Wrench, ClipboardList, Lock } from "lucide-react";
+import { BookOpen, Wrench, ClipboardList } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/app/context/AuthContext";
 import { useState } from "react";

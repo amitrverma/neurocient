@@ -1,6 +1,4 @@
 "use client";
-
-import Link from "next/link";
 import { Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/app/context/AuthContext";

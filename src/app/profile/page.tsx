@@ -50,8 +50,8 @@ const ProfilePage = () => {
           <div className="space-y-4">
             <div>
               <h2 className="text-lg font-semibold text-[#042a2b] mb-2">User Details</h2>
-              <p className="text-sm text-brand-dark">Name: {user?.name || "N/A"}</p>
-              <p className="text-sm text-brand-dark">Email: {user?.email || "N/A"}</p>
+              <p className="text-sm text-brand-dark">Name: {String(user?.name || "N/A")}</p>
+              <p className="text-sm text-brand-dark">Email: {String(user?.email || "N/A")}</p>  
             </div>
 
             <div>

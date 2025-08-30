@@ -4,7 +4,6 @@ import { instinctMap } from "./instinctMap";
 
 interface Props {
   responses: Record<string, string>;
-  onRestart: () => void;
 }
 
 const motiveLabels: Record<
@@ -52,7 +51,7 @@ const countMotives = (responses: Record<string, string>) => {
   return { motiveCount, noIssueCount };
 };
 
-const ResultSummary = ({ responses, onRestart }: Props) => {
+const ResultSummary = ({ responses }: Props) => {
   const { motiveCount, noIssueCount } = countMotives(responses);
 
   const totalResponses =

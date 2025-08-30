@@ -29,7 +29,7 @@ export default function CICDiagnosticPage() {
       {stage === "intro" && <DiagnosticIntro onStart={handleStart} />}
       {stage === "questions" && <DiagnosticQuestion onComplete={handleComplete} />}
       {stage === "summary" && (
-        <ResultSummary responses={responses} onRestart={handleRestart} />
+        <ResultSummary responses={responses} />
       )}
     </div>
   );

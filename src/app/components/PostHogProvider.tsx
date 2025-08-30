@@ -1,20 +1,20 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { trackEvent } from "../utils/analytics";
 
 const PostHogProvider = () => {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   // Track page views on route changes
   useEffect(() => {
-    trackEvent("Page Viewed", { pathname, search: searchParams.toString() });
+    const search = typeof window !== "undefined" ? window.location.search : "";
+    trackEvent("Page Viewed", { pathname, search });
     if (typeof window !== "undefined" && window.posthog?.capture) {
       window.posthog.capture("$pageview");
     }
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   // Global listener for CTA clicks using data-cta attribute
   useEffect(() => {

@@ -5,6 +5,9 @@
 :root {
   --background: #ffffff;
   --foreground: #042a2b;
+  --font-quattrocento: 'Quattrocento', serif;
+  --font-montserrat: 'Montserrat', sans-serif;
+  --font-geist-mono: monospace;
 }
 
 /* 🌙 Dark mode overrides */
@@ -27,7 +30,7 @@
   --color-brand-teal: #5eb1bf;
   --color-brand-dark: #042a2b;
 
-  /* Fonts from next/font */
+  /* Fonts */
   --font-sans: var(--font-montserrat);
   --font-serif: var(--font-quattrocento);
   --font-mono: var(--font-geist-mono);

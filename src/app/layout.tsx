@@ -8,6 +8,7 @@ import { NotificationProvider } from "./components/NotificationProvider";
 import PostHogProvider from "./components/PostHogProvider";
 import PostHogInit from "./_components/PostHogInit";
 
+export const dynamic = "force-dynamic";
 // 📌 Metadata
 export const metadata: Metadata = {
   metadataBase: new URL("https://neurocient.com"),

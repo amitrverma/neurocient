@@ -147,7 +147,7 @@ const Navbar = () => {
                 <Link
                   href="/membership"
                   onClick={() => setIsOpen(false)}
-                  className="text-sm font-semibold px-3 py-1 rounded-lg bg-brand-secondary text-brand-dark hover:bg-brand-primary hover:text-white transition"
+                  className="text-sm font-semibold px-3 py-1 rounded-lg  text-brand-dark hover:bg-brand-primary hover:text-white transition"
                 >
                   Unlock Full Access
                 </Link>
@@ -156,7 +156,7 @@ const Navbar = () => {
                     logout();
                     setIsOpen(false);
                   }}
-                  className="text-sm font-semibold px-3 py-1 rounded-lg bg-brand-secondary text-brand-dark hover:bg-brand-primary hover:text-white transition"
+                  className="text-sm font-semibold px-3 py-1 rounded-lg text-brand-dark hover:bg-brand-primary hover:text-white transition"
                 >
                   Sign out
                 </button>
@@ -167,7 +167,7 @@ const Navbar = () => {
                   setShowAuth(true);
                   setIsOpen(false);
                 }}
-                className="text-sm font-semibold px-3 py-1 rounded-lg bg-brand-secondary text-brand-dark hover:bg-brand-primary hover:text-white transition"
+                className="text-sm font-semibold px-3 py-1 rounded-lg text-brand-dark hover:bg-brand-primary hover:text-white transition"
               >
                 Sign in
               </button>

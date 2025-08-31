@@ -68,34 +68,44 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
 
   return (
     <div className="my-6 p-4 rounded-lg shadow-sm">
-      <div className="flex items-center gap-2 mb-2">
-        <Zap className="w-5 h-5 text-[#5eb1bf]" />
-        <h3 className="text-lg font-semibold text-[#042a2b]">{challenge.title}</h3>
-      </div>
+  <div className="flex items-center gap-2 mb-2">
+    <h3 className="text-lg font-semibold text-brand-accent">
+     Ready for a Microchallenge? 
+    </h3>
+  </div>
 
-      <p className="text-md text-brand-dark mb-3">{challenge.why}</p>
+  {/* Microchallenge explainer */}
 
-      <button
-        onClick={handleClick}
-        data-cta="microchallenge-open"
-        className="text-sm font-semibold px-3 py-2 rounded-md border text-brand-dark hover:bg-brand-teal hover:text-white transition"
-      >
-        Try this Microchallenge
-      </button>
+    <p className="text-sm text-brand-dark mb-3">
+      A Microchallenge is a tiny, science-backed experiment for daily life.
+      They’re not about discipline—they’re small nudges that work with your
+      wiring. Think of them as playful tests of instinct: one small shift at a
+      time, building awareness and momentum.
+    </p>
+ 
+<p className="text-md text-brand-dark mb-3"><em>{challenge.title} </em>: {challenge.why}</p>
 
+  <button
+    onClick={handleClick}
+    data-cta="microchallenge-open"
+    className="text-sm font-semibold px-3 py-2 rounded-md border text-brand-dark hover:bg-brand-teal hover:text-white transition"
+  >
+    Try this Microchallenge
+  </button>
 
-      {/* Modals */}
-      <MembershipModal
-        isOpen={showMembership}
-        onClose={() => setShowMembership(false)}
-        disableEscape
-      />
-      <AuthModal
-        isOpen={showAuth}
-        onClose={() => setShowAuth(false)}
-        disableEscape
-      />
-    </div>
+  {/* Modals */}
+  <MembershipModal
+    isOpen={showMembership}
+    onClose={() => setShowMembership(false)}
+    disableEscape
+  />
+  <AuthModal
+    isOpen={showAuth}
+    onClose={() => setShowAuth(false)}
+    disableEscape
+  />
+</div>
+
   );
 };
 

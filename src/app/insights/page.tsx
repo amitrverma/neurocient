@@ -60,10 +60,10 @@ export default function InsightsPage() {
               <h2 className="text-xl font-semibold text-brand-dark">
                 {article.title}
               </h2>
-              <p className="text-sm text-brand-dark/70 leading-relaxed">
+              <p className="text-md text-brand-dark/70 leading-relaxed">
                 {article.excerpt}
               </p>
-              <span className="text-[#ed254e] font-medium text-sm mt-auto">
+              <span className="text-[#ed254e] text-sm mt-auto font-bold">
                 Read more
               </span>
             </Link>

@@ -24,7 +24,7 @@ const MembershipModal = ({ isOpen, onClose, disableEscape = false }: MembershipM
           </p>
           <a
             href="/membership"
-            className="inline-block bg-brand-secondary text-brand-dark px-4 py-2 rounded-lg font-semibold hover:bg-brand-primary hover:text-white transition"
+            className="inline-block text-brand-dark px-4 py-2 rounded-lg font-semibold hover:bg-brand-primary hover:text-white transition"
           >
             Join Membership &rarr;
           </a>

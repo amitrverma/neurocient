@@ -70,11 +70,13 @@ const CavemanSpot = ({
 
   return (
     <div className="p-4 rounded-lg bg-white shadow-sm mb-4">
+      <h3>Spot Your Inner Caveman</h3>
+      <p className="text-sm">Notice the moments when your inner caveman shows up in modern life. By naming these patterns, you build awareness and start steering with your wiring instead of against it.</p>
       <p className="text-md text-brand-dark mb-2">{prompt}</p>
       <textarea
         value={note}
         onChange={(e) => setNote(e.target.value)}
-        placeholder="Add a new spot..."
+        placeholder="Add your observation..."
         rows={2}
         className="w-full text-sm border rounded-md p-2 mb-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
       />
@@ -83,7 +85,7 @@ const CavemanSpot = ({
         data-cta="add-spot"
         className="text-sm font-semibold px-3 py-2 rounded-md border text-brand-dark hover:bg-brand-teal hover:text-white  transition"
       >
-        Add Spot
+        Log It
       </button>
 
       {/* Modals */}

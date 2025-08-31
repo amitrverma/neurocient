@@ -83,7 +83,7 @@ const Newsletter = ({
             <button
               type="submit"
               data-cta="newsletter-join"
-              className="px-4 py-2 rounded-lg bg-brand-secondary text-brand-dark font-semibold hover:bg-brand-primary hover:text-background transition"
+              className="px-4 py-2 rounded-lg  text-brand-dark font-semibold hover:bg-brand-primary hover:text-background transition"
             >
               Join
             </button>

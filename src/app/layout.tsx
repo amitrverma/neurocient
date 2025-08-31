@@ -36,9 +36,16 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "The Neurocient Labs",
     description: "Knowledge hub for your inner caveman",
-    images: [
-      "/logo/neurocient.png",
+    images: ["/logo/neurocient.png"],
+  },
+  /** 👇 Add this block */
+  icons: {
+    icon: [
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any", type: "image/x-icon" },
     ],
+    apple: "/favicon-32x32.png",
   },
 };
 

@@ -6,7 +6,6 @@ import Footer from "./components/Footer";
 import { AuthProvider } from "./context/AuthContext"; // ✅ global auth provider
 import { NotificationProvider } from "./components/NotificationProvider";
 import PostHogProvider from "./components/PostHogProvider";
-import PostHogInit from "./_components/PostHogInit";
 
 export const dynamic = "force-dynamic";
 // 📌 Metadata
@@ -71,13 +70,12 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-white text-[#042a2b]">
         <NotificationProvider>
-          {/* Initialize PostHog once, then attach global trackers */}
-          <PostHogInit />
-          <PostHogProvider />
           <AuthProvider>
-            <Navbar />
-            <main className="pt-20 font-serif">{children}</main>
-            <Footer />
+            <PostHogProvider>
+              <Navbar />
+              <main className="pt-20 font-serif">{children}</main>
+              <Footer />
+            </PostHogProvider>
           </AuthProvider>
         </NotificationProvider>
       </body>

@@ -109,7 +109,7 @@ const LandingPage = () => {
           Spot Your Caveman
         </a>{" "}
         to recognize their hidden patterns — and join a {" "}
-        <a href="/microchallenge" className="font-semibold text-brand-teal hover:underline">
+        <a href="/microchallenge" className="font-semibold text-brand-accent hover:underline">
           Microchallenge
         </a>{" "}to practice breaking them.
       </p>

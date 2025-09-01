@@ -84,7 +84,7 @@ const ToolsPage = () => {
   </h2>
 
   {spotCount < 5 ? (
-    <p className="text-sm text-brand-dark mb-4">
+    <p className="text-md text-brand-dark mb-4">
       Your brain runs on ancient wiring. Long before offices, deadlines, and
       smartphones, our ancestors relied on instincts that kept them alive in
       small tribes. Those instincts haven’t gone away—they’re still in you
@@ -109,7 +109,7 @@ const ToolsPage = () => {
       learning how to steer with—not against—your wiring.
     </p>
   ) : (
-    <p className="text-sm text-brand-dark mb-4">
+    <p className="text-md text-brand-dark mb-4">
       Spotting your caveman means noticing the moments when ancient instincts
       show up in modern life—like when one critique stings more than ten
       compliments or when you hold back in a meeting to play it safe. By naming
@@ -125,7 +125,7 @@ const ToolsPage = () => {
       Please{" "}
       <button
         onClick={() => setShowAuth(true)}
-        className="text-[#5eb1bf] font-semibold hover:underline"
+        className="text-brand-accent font-bold text-md hover:underline cursor-pointer"
       >
         log in
       </button>{" "}
@@ -153,56 +153,95 @@ const ToolsPage = () => {
   )}
 </div>
 
-
-        {/* Microchallenges summary */}
+{/* Microchallenges summary */}
 <div className="p-4 border rounded-lg shadow-sm bg-white">
   <h2 className="font-semibold text-lg text-[#042a2b] mb-2">
     Microchallenges
   </h2>
 
-  {microSummary.completed < 1 ? (
-    <p className="text-sm text-brand-dark mb-4">
-      Microchallenges are tiny, science-backed experiments for your daily life.
-      They’re not about willpower or discipline. They’re about nudges—small,
-      doable actions that work with your ancient wiring instead of against it.
-      <br /><br />
-      Your ancestors didn’t count calories, schedule gym sessions, or manage
-      digital distractions. But they did walk often, pause at sunset, drink
-      water when thirsty, and connect face-to-face. Microchallenges are built
-      from those timeless patterns, translated into modern habits.
-      <br /><br />
-      Each challenge is intentionally small: drink a glass of water before your
-      first coffee, put your phone away 30 minutes before bed, take a 5-minute
-      movement break every hour.
-      <br /><br />
-      This isn’t about adding pressure. It’s about experimenting playfully with
-      your wiring, one small challenge at a time.
-    </p>
-  ) : (
-    <p className="text-sm text-brand-dark mb-4">
-      Microchallenges are small, science-backed experiments that help you work
-      with your wiring. Think of them as tiny nudges—like a digital sunset, a
-      hydration break, or a movement pause—that build awareness and momentum
-      without relying on willpower.
-    </p>
-  )}
+  {!token ? (
+    <>
+      {/* Logged out → always long detailed about */}
+      <p className="text-md text-brand-dark mb-4">
+        Microchallenges are tiny, science-backed experiments for your daily life.
+        They’re not about willpower or discipline. They’re about nudges—small,
+        doable actions that work with your ancient wiring instead of against it.
+        <br /><br />
+        Your ancestors didn’t count calories, schedule gym sessions, or manage
+        digital distractions. But they did walk often, pause at sunset, drink
+        water when thirsty, and connect face-to-face. Microchallenges are built
+        from those timeless patterns, translated into modern habits.
+        <br /><br />
+        Each challenge is intentionally small: drink a glass of water before your
+        first coffee, put your phone away 30 minutes before bed, take a 5-minute
+        movement break every hour.
+        <br /><br />
+        This isn’t about adding pressure. It’s about experimenting playfully with
+        your wiring, one small challenge at a time.
+      </p>
 
-  <p className="text-sm text-brand-dark mb-2">
-    {microSummary.completed}/{microSummary.total} challenges completed.
-  </p>
-
-  <p className="text-sm italic text-brand-dark mb-4">
-    Current: “{microSummary.current}”
-  </p>
-
-  <Link
-    href="/tools/microchallenges"
-    className="inline-block border text-brand-dark font-semibold px-6 py-3 rounded-xl shadow hover:bg-brand-teal hover:text-white transition"
-  >
-    Go to Challenges
-  </Link>
-</div>
+      <div className="text-sm text-brand-dark">
+        Please{" "}
+        <button
+          onClick={() => setShowAuth(true)}
+          className="text-brand-accent font-bold text-md hover:underline cursor-pointer"
+        >
+          log in
+        </button>{" "}
+        to see your Microchallenges.
       </div>
+    </>
+  ) : (
+    <>
+      {/* Logged in → conditional text */}
+      {microSummary.completed < 1 ? (
+        <p className="text-md text-brand-dark mb-4">
+          Microchallenges are tiny, science-backed experiments for your daily life.
+          They’re not about willpower or discipline. They’re about nudges—small,
+          doable actions that work with your ancient wiring instead of against it.
+          <br /><br />
+          Your ancestors didn’t count calories, schedule gym sessions, or manage
+          digital distractions. But they did walk often, pause at sunset, drink
+          water when thirsty, and connect face-to-face. Microchallenges are built
+          from those timeless patterns, translated into modern habits.
+          <br /><br />
+          Each challenge is intentionally small: drink a glass of water before your
+          first coffee, put your phone away 30 minutes before bed, take a 5-minute
+          movement break every hour.
+          <br /><br />
+          This isn’t about adding pressure. It’s about experimenting playfully with
+          your wiring, one small challenge at a time.
+        </p>
+      ) : (
+        <p className="text-md text-brand-dark mb-4">
+          Microchallenges are small, science-backed experiments that help you work
+          with your wiring. Think of them as tiny nudges—like a digital sunset, a
+          hydration break, or a movement pause—that build awareness and momentum
+          without relying on willpower.
+        </p>
+      )}
+
+      {/* Progress + actions */}
+      <p className="text-sm text-brand-dark mb-2">
+        {microSummary.completed}/{microSummary.total} challenges completed.
+      </p>
+
+      {microSummary.current && (
+        <p className="text-sm italic text-brand-dark mb-4">
+          Current: “{microSummary.current}”
+        </p>
+      )}
+
+      <Link
+        href="/tools/microchallenges"
+        className="inline-block border text-brand-dark font-semibold px-6 py-3 rounded-xl shadow hover:bg-brand-teal hover:text-white transition"
+      >
+        Go to Challenges
+      </Link>
+    </>
+  )}
+</div>
+</div>
 
       <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
     </div>

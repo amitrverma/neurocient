@@ -121,7 +121,7 @@ const Navbar = () => {
 
       {/* Mobile Dropdown */}
       {isOpen && (
-        <div className="md:hidden border-t border-brand-dark/40 bg-background/90 backdrop-blur-sm text-brand-dark">
+        <div className="md:hidden border-t border-brand-dark/40 backdrop-blur-sm text-brand-dark">
           <div className="flex flex-col px-6 py-4 space-y-4 font-medium">
             <Link href="/about" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">About</Link>
             <Link href="/resources" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">Resources</Link>
@@ -145,32 +145,34 @@ const Navbar = () => {
                   Profile
                 </Link>
                 <Link
-                  href="/membership"
-                  onClick={() => setIsOpen(false)}
-                  className="text-sm font-semibold px-3 py-1 rounded-lg  text-brand-dark hover:bg-brand-primary hover:text-white transition"
-                >
-                  Unlock Full Access
-                </Link>
-                <button
+                  href="#"
                   onClick={() => {
                     logout();
                     setIsOpen(false);
                   }}
-                  className="text-sm font-semibold px-3 py-1 rounded-lg text-brand-dark hover:bg-brand-primary hover:text-white transition"
+                  className="hover:text-brand-primary"
                 >
-                  Sign out
-                </button>
+                  Sign out ({String(user.name || "User")})
+                </Link>
+                <Link
+                  href="/membership"
+                  onClick={() => setIsOpen(false)}
+                  className="text-sm font-semibold px-3 py-1 rounded-lg border bg-brand-primary text-white hover:bg-brand-teal hover:text-white transition"
+                >
+                  Unlock Full Access
+                </Link>                
               </>
             ) : (
-              <button
+              <Link
+                href={"#"}
                 onClick={() => {
                   setShowAuth(true);
                   setIsOpen(false);
                 }}
-                className="text-sm font-semibold px-3 py-1 rounded-lg text-brand-dark hover:bg-brand-primary hover:text-white transition"
+                className="hover:text-brand-primary rounded-lg border px-3 py-1"
               >
                 Sign in
-              </button>
+              </Link>
             )}
           </div>
         </div>

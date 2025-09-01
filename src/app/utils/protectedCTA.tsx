@@ -27,7 +27,7 @@ const ProtectedCTA = ({ children, redirect }: ProtectedCTAProps) => {
     <>
       <button
         onClick={handleClick}
-        className="px-6 py-3 bg-brand-dark text-white rounded-xl hover:bg-brand-accent"
+        className="px-6 py-3 border text-brand-dark rounded-xl hover:bg-brand-primary hover:text-white transition"
       >
         {children}
       </button>

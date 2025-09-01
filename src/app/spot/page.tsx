@@ -6,7 +6,7 @@ export default function SpotPage() {
   return (
     <main className="max-w-3xl mx-auto px-6 py-16">
       {/* WHY */}
-      <section className="text-center mb-12">
+      <section className=" mb-12">
         <h1 className="text-3xl font-bold text-brand-dark">Spot Your Caveman</h1>
         <p className="mt-4 text-lg text-gray-700">
           Your Inner Caveman still runs the show more often than you think.  

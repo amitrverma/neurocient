@@ -12,10 +12,15 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  disableEscape?: boolean; // 👈 new
+  disableEscape?: boolean;
 }
 
-const AuthModal = ({ isOpen, onClose, onSuccess, disableEscape = false }: AuthModalProps) => {
+const AuthModal = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  disableEscape = false,
+}: AuthModalProps) => {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,34 +30,36 @@ const AuthModal = ({ isOpen, onClose, onSuccess, disableEscape = false }: AuthMo
 
   // 🔑 Google login flow
   const handleGoogleLogin = async () => {
-  try {
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
 
-    // Force refresh token to avoid "Invalid Firebase token"
-    const idToken = await result.user.getIdToken(true); 
-    console.log("🔥 [Frontend] Firebase ID Token:", idToken.slice(0, 30), "...", idToken.length);
+      const idToken = await result.user.getIdToken(true);
 
-    const res = await fetch("/api/auth/firebase-login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken }),
-    });
+      const res = await fetch("/api/auth/firebase-login", {
+        method: "POST",
+        credentials: "include", // 👈 cookies flow
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
 
-    const data = await res.json();
-    if (data.token) {
-      login(data.token);
-      onClose();
-      if (onSuccess) onSuccess();
-      trackEvent("Login Completed");
-    } else if (data.preview) {
-      notify("You’re in preview mode (waitlist).");
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && !data.preview) {
+        await login(); // 👈 hydrate from /me
+        onClose();
+        onSuccess?.();
+        trackEvent("Login Completed");
+      } else if (data.preview) {
+        notify("You’re in preview mode (waitlist).");
+      } else {
+        notify("Google login failed.", "error");
+      }
+    } catch (err) {
+      console.error("🔥 Google login failed:", err);
+      notify("Google login failed", "error");
     }
-  } catch (err) {
-    console.error("Google login failed:", err);
-    notify("Google login failed", "error");
-  }
-};
+  };
 
   // 📧 Email/password login or signup
   const handleSubmit = async (e: React.FormEvent) => {
@@ -63,19 +70,19 @@ const AuthModal = ({ isOpen, onClose, onSuccess, disableEscape = false }: AuthMo
       const endpoint = mode === "signup" ? "/api/auth/signup" : "/api/auth/login";
       const res = await fetch(endpoint, {
         method: "POST",
+        credentials: "include", // 👈 cookies flow
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       if (res.ok) {
-        const data = await res.json();
-        login(data.token);
+        await login(); // 👈 hydrate from /me
         onClose();
-        if (onSuccess) onSuccess();
-        if (mode === "signup") trackEvent("Signup Completed");
-        else trackEvent("Login Completed");
+        onSuccess?.();
+        trackEvent(mode === "signup" ? "Signup Completed" : "Login Completed");
       } else {
-        notify("Failed to authenticate.", "error");
+        const errData = await res.json().catch(() => ({}));
+        notify(errData?.detail || "Failed to authenticate.", "error");
       }
     } finally {
       setLoading(false);
@@ -85,7 +92,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess, disableEscape = false }: AuthMo
   return (
     <Dialog
       open={isOpen}
-      onClose={disableEscape ? () => {} : onClose} // 👈 block closing if disableEscape
+      onClose={disableEscape ? () => {} : onClose}
       className="relative z-50"
     >
       <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
@@ -118,7 +125,11 @@ const AuthModal = ({ isOpen, onClose, onSuccess, disableEscape = false }: AuthMo
               className="w-full bg-brand-secondary text-brand-dark py-2 rounded-lg font-semibold hover:bg-brand-primary hover:text-white transition"
               disabled={loading}
             >
-              {loading ? "Please wait…" : mode === "login" ? "Log in" : "Sign up"}
+              {loading
+                ? "Please wait…"
+                : mode === "login"
+                ? "Log in"
+                : "Sign up"}
             </button>
           </form>
 

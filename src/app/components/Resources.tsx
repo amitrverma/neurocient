@@ -6,12 +6,12 @@ import { useState } from "react";
 import AuthModal from "./AuthModal";
 
 const Resources = () => {
-  const { token } = useAuth(); // ✅ check auth
+  const { user } = useAuth(); // ✅ use user instead of token
   const [showAuth, setShowAuth] = useState(false);
 
   // helper to open login modal for protected sections
   const handleProtectedClick = (e: React.MouseEvent) => {
-    if (!token) {
+    if (!user) {
       e.preventDefault();
       setShowAuth(true);
     }
@@ -55,14 +55,13 @@ const Resources = () => {
             <p className="text-brand-dark/70 text-sm">
               Practical frameworks, worksheets, and habit trackers to help you practice.
             </p>
-         <Link
-            href={token ? "/tools" : "#"}
-            onClick={handleProtectedClick}
-            className="mt-auto px-4 py-2 border text-brand-dark rounded-full text-sm font-semibold hover:bg-[#5eb1bf] hover:text-white transition"
-          >
-            Explore Tools
-          </Link>
-
+            <Link
+              href={user ? "/tools" : "#"}
+              onClick={handleProtectedClick}
+              className="mt-auto px-4 py-2 border text-brand-dark rounded-full text-sm font-semibold hover:bg-[#5eb1bf] hover:text-white transition"
+            >
+              Explore Tools
+            </Link>
           </div>
 
           {/* Diagnostics & Quizzes (open for all) */}

@@ -11,12 +11,12 @@ interface ProtectedCTAProps {
 }
 
 const ProtectedCTA = ({ children, redirect }: ProtectedCTAProps) => {
-  const { token } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const [showAuth, setShowAuth] = useState(false);
 
   const handleClick = () => {
-    if (token) {
+    if (user) {
       router.push(redirect); // ✅ already logged in
     } else {
       setShowAuth(true); // open modal

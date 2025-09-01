@@ -12,76 +12,84 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
-  login: (token: string) => void;
-  logout: () => void;
+  login: () => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
 
+  // On mount → try refresh first, then fallback to /me
   useEffect(() => {
-    const storedToken = localStorage.getItem("jwt");
-    if (storedToken) {
-      setToken(storedToken);
-      fetch("/api/auth/me", {
-        headers: { Authorization: `Bearer ${storedToken}` },
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to fetch user");
-          return res.json();
-        })
-        .then((u) => {
-          setUser(u);
-          // 🔹 Identify user in PostHog
-          if (u?.id) {
-            posthog.identify(u.id, {
-              email: u.email,
-              name: u.name,
-            });
+    const initAuth = async () => {
+      try {
+        // 1) Attempt silent refresh (rotates tokens if valid)
+        const refreshRes = await fetch("/api/auth/refresh", {
+          method: "POST",
+          credentials: "include",
+        });
+
+        if (refreshRes.ok) {
+          const data = await refreshRes.json();
+          if (data?.user) {
+            setUser(data.user);
+            if (data.user.id) {
+              posthog.identify(data.user.id, {
+                email: data.user.email,
+                name: data.user.name,
+              });
+            }
+            return;
           }
-        })
-        .catch(() => logout());
-    }
+        }
+
+        // 2) Fallback to /me if refresh didn’t work
+        const meRes = await fetch("/api/auth/me", { credentials: "include" });
+        if (meRes.ok) {
+          const u = await meRes.json();
+          setUser(u);
+          if (u?.id) {
+            posthog.identify(u.id, { email: u.email, name: u.name });
+          }
+        } else {
+          setUser(null);
+        }
+      } catch {
+        setUser(null);
+      }
+    };
+
+    initAuth();
   }, []);
 
-  const login = (newToken: string) => {
-    localStorage.setItem("jwt", newToken);
-    setToken(newToken);
-
-    fetch("/api/auth/me", {
-      headers: { Authorization: `Bearer ${newToken}` },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch user");
-        return res.json();
-      })
-      .then((u) => {
-        setUser(u);
-        // 🔹 Identify user in PostHog
-        if (u?.id) {
-          posthog.identify(u.id, {
-            email: u.email,
-            name: u.name,
-          });
-        }
-      })
-      .catch(() => logout());
+  const login = async () => {
+    // After login/signup/firebase-login, cookies are already set
+    const res = await fetch("/api/auth/me", { credentials: "include" });
+    if (res.ok) {
+      const u = await res.json();
+      setUser(u);
+      if (u?.id) {
+        posthog.identify(u.id, { email: u.email, name: u.name });
+      }
+    }
   };
 
-  const logout = () => {
-    localStorage.removeItem("jwt");
-    setToken(null);
-    setUser(null);
-    // 🔹 Reset PostHog session when logging out
-    posthog.reset();
+  const logout = async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } finally {
+      setUser(null);
+      posthog.reset();
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -18,7 +18,7 @@ interface Microchallenge {
 }
 
 const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
-  const { token } = useAuth();
+  const { user } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
   const [showMembership, setShowMembership] = useState(false);
   const [challenge, setChallenge] = useState<Microchallenge | null>(null);
@@ -44,7 +44,7 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
   // 🚦 Click handler checks login + usage quota
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (!token) {
+    if (!user) {
       e.preventDefault();
       setShowAuth(true);
       return;

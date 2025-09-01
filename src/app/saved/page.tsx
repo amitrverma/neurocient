@@ -11,12 +11,12 @@ interface SavedArticle {
 }
 
 export default function SavedArticlesPage() {
-  const { token } = useAuth();
+  const { user } = useAuth();
   const [articles, setArticles] = useState<SavedArticle[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) {
+    if (!user) {
       setLoading(false);
       return;
     }
@@ -24,7 +24,8 @@ export default function SavedArticlesPage() {
     const fetchSaved = async () => {
       try {
         const res = await fetch("/api/articles/saved", {
-          headers: { Authorization: `Bearer ${token}` },
+          method: "GET",
+          credentials: "include", // 👈 send cookies
         });
         if (res.ok) {
           const data = await res.json();
@@ -38,27 +39,40 @@ export default function SavedArticlesPage() {
     };
 
     fetchSaved();
-  }, [token]);
+  }, [user]); // ✅ depend on user, not token
 
-  if (!token) {
-    return <p className="text-center mt-12">Please log in to view saved articles.</p>;
+  if (!user) {
+    return (
+      <p className="text-center mt-12">
+        Please log in to view saved articles.
+      </p>
+    );
   }
 
   if (loading) return <p className="text-center mt-12">Loading...</p>;
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-3xl font-bold mb-6 text-center">Your Saved Articles</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        Your Saved Articles
+      </h1>
       {articles.length === 0 ? (
-        <p className="text-center text-brand-dark">You haven’t saved any articles yet.</p>
+        <p className="text-center text-brand-dark">
+          You haven’t saved any articles yet.
+        </p>
       ) : (
         <ul className="space-y-6">
           {articles.map((a) => (
             <li key={a.slug} className="border-b pb-4">
-              <Link href={`/insights/${a.slug}`} className="text-xl font-semibold text-brand-teal hover:text-brand-primary">
+              <Link
+                href={`/insights/${a.slug}`}
+                className="text-xl font-semibold text-brand-teal hover:text-brand-primary"
+              >
                 {a.title || a.slug}
               </Link>
-              {a.excerpt && <p className="text-brand-dark text-sm mt-1">{a.excerpt}</p>}
+              {a.excerpt && (
+                <p className="text-brand-dark text-sm mt-1">{a.excerpt}</p>
+              )}
             </li>
           ))}
         </ul>

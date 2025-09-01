@@ -2,10 +2,11 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
 const WeeklyReflections = () => {
-  const { token } = useAuth();
+  const { user } = useAuth(); // ✅ use user, not token
   const [loading, setLoading] = useState(true);
   const [reflection, setReflection] = useState("");
   const [error, setError] = useState("");
@@ -13,9 +14,13 @@ const WeeklyReflections = () => {
   useEffect(() => {
     const loadReflection = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/weekly-reflection/latest`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(
+          `${API_BASE_URL}/api/weekly-reflection/latest`,
+          {
+            method: "GET",
+            credentials: "include", // ✅ cookies for auth
+          }
+        );
         if (!res.ok) throw new Error("Failed to load reflection");
         const data = await res.json();
         setReflection(data.content);
@@ -26,12 +31,15 @@ const WeeklyReflections = () => {
         setLoading(false);
       }
     };
-    if (token) loadReflection();
-  }, [token]);
+
+    if (user) loadReflection(); // ✅ check for user
+  }, [user]);
 
   return (
     <div className="p-4 border rounded-lg bg-white shadow">
-      <h3 className="text-lg font-semibold text-[#042a2b] mb-2">Weekly Reflection</h3>
+      <h3 className="text-lg font-semibold text-[#042a2b] mb-2">
+        Weekly Reflection
+      </h3>
       {loading && <p className="text-sm text-brand-dark">Loading...</p>}
       {error && <p className="text-sm text-red-600">Error: {error}</p>}
       {!loading && !error && reflection && (

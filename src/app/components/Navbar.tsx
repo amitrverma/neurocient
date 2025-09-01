@@ -125,7 +125,7 @@ const Navbar = () => {
           <div className="flex flex-col px-6 py-4 space-y-4 font-medium">
             <Link href="/about" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">About</Link>
             <Link href="/resources" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">Resources</Link>
-            <Link href="/services" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">Services</Link>
+            <Link href="/programs" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">Programs</Link>
 
             {/* Mobile Auth */}
             {user ? (

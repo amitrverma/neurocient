@@ -25,30 +25,34 @@ const AuthModal = ({ isOpen, onClose, onSuccess, disableEscape = false }: AuthMo
 
   // 🔑 Google login flow
   const handleGoogleLogin = async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
 
-      const res = await fetch("/api/auth/firebase-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }),
-      });
+    // Force refresh token to avoid "Invalid Firebase token"
+    const idToken = await result.user.getIdToken(true); 
+    console.log("🔥 [Frontend] Firebase ID Token:", idToken.slice(0, 30), "...", idToken.length);
 
-      const data = await res.json();
-      if (data.token) {
-        login(data.token);
-        onClose();
-        if (onSuccess) onSuccess();
-        trackEvent("Login Completed");
-      } else if (data.preview) {
-        notify("You’re in preview mode (waitlist).");
-      }
-    } catch (err) {
-      console.error("Google login failed:", err);
+    const res = await fetch("/api/auth/firebase-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken }),
+    });
+
+    const data = await res.json();
+    if (data.token) {
+      login(data.token);
+      onClose();
+      if (onSuccess) onSuccess();
+      trackEvent("Login Completed");
+    } else if (data.preview) {
+      notify("You’re in preview mode (waitlist).");
     }
-  };
+  } catch (err) {
+    console.error("Google login failed:", err);
+    notify("Google login failed", "error");
+  }
+};
 
   // 📧 Email/password login or signup
   const handleSubmit = async (e: React.FormEvent) => {

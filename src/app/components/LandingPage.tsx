@@ -88,12 +88,12 @@ const LandingPage = () => {
                        shadow-sm hover:shadow-md transition flex flex-col justify-between text-left"
           >
             <div>
-              <h5 className="text-brand-dark font-bold text-lg line-clamp-2 md:line-clamp-3">
+              <h5 className="text-brand-dark font-bold text-lg line-clamp-3">
                 {a.title}
               </h5>
 
               {a.excerpt && (
-                <p className="text-brand-dark/70 text-sm mt-2 line-clamp-2 md:line-clamp-3 lg:line-clamp-4">
+                <p className="text-brand-dark/70 text-sm mt-2 line-clamp-4">
                   {a.excerpt}
                 </p>
               )}

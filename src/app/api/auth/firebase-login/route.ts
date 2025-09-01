@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    console.log("📨 [Proxy] Received token:", body.idToken?.slice(0, 30), "...", body.idToken?.length);
 
-    // proxy to backend
     const res = await fetch(`${process.env.API_BASE_URL}/auth/firebase-login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -1,8 +1,12 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import posthog from "posthog-js";
 
 interface User {
+  id?: string;
+  email?: string;
+  name?: string;
   [key: string]: unknown;
 }
 
@@ -30,7 +34,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           if (!res.ok) throw new Error("Failed to fetch user");
           return res.json();
         })
-        .then(setUser)
+        .then((u) => {
+          setUser(u);
+          // 🔹 Identify user in PostHog
+          if (u?.id) {
+            posthog.identify(u.id, {
+              email: u.email,
+              name: u.name,
+            });
+          }
+        })
         .catch(() => logout());
     }
   }, []);
@@ -46,7 +59,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (!res.ok) throw new Error("Failed to fetch user");
         return res.json();
       })
-      .then(setUser)
+      .then((u) => {
+        setUser(u);
+        // 🔹 Identify user in PostHog
+        if (u?.id) {
+          posthog.identify(u.id, {
+            email: u.email,
+            name: u.name,
+          });
+        }
+      })
       .catch(() => logout());
   };
 
@@ -54,6 +76,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.removeItem("jwt");
     setToken(null);
     setUser(null);
+    // 🔹 Reset PostHog session when logging out
+    posthog.reset();
   };
 
   return (

@@ -12,6 +12,7 @@ export async function GET(req: Request) {
       headers: {
         Cookie: cookie, // 👈 forward cookies
       },
+      credentials: "include",
     });
 
     const data = await res.json();

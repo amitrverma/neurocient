@@ -6,12 +6,14 @@ export async function POST(
 ) {
   try {
     const { slug } = await context.params; // ✅ await params
+    const cookie = req.headers.get("cookie") || "";
 
     const res = await fetch(
       `${process.env.API_BASE_URL}/articles/${slug}/read`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Cookie: cookie },
+        credentials: "include",
       }
     );
 

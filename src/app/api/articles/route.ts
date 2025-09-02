@@ -5,14 +5,12 @@ const API_BASE_URL = process.env.API_BASE_URL;
 
 // ✅ GET /api/spots → fetch spots
 export async function GET(req: Request) {
-  const token = req.headers.get("authorization");
-
-  if (!token) {
-    return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
-  }
+  const cookie = req.headers.get("cookie") || "";
 
   const res = await fetch(`${API_BASE_URL}/spots`, {
-    headers: { Authorization: token },
+    method: "GET",
+    headers: { Cookie: cookie },
+    credentials: "include",
   });
 
   const data = await res.json();
@@ -21,11 +19,7 @@ export async function GET(req: Request) {
 
 // ✅ POST /api/spots → create new spot
 export async function POST(req: Request) {
-  const token = req.headers.get("authorization");
-
-  if (!token) {
-    return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
-  }
+  const cookie = req.headers.get("cookie") || "";
 
   const body = await req.json();
 
@@ -33,8 +27,9 @@ export async function POST(req: Request) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: token,
+      Cookie: cookie,
     },
+    credentials: "include",
     body: JSON.stringify(body),
   });
 

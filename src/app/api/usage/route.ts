@@ -4,9 +4,11 @@ const API_BASE_URL = process.env.API_BASE_URL;
 
 // GET /api/usage -> fetch current usage counts
 export async function GET(req: Request) {
-  const token = req.headers.get("authorization") || "";
+  const cookie = req.headers.get("cookie") || "";
   const res = await fetch(`${API_BASE_URL}/usage`, {
-    headers: { Authorization: token },
+    method: "GET",
+    headers: { Cookie: cookie },
+    credentials: "include",
   });
   const data = await res.json();
   return NextResponse.json(data, { status: res.status });
@@ -14,14 +16,15 @@ export async function GET(req: Request) {
 
 // POST /api/usage -> record a usage event
 export async function POST(req: Request) {
-  const token = req.headers.get("authorization") || "";
+  const cookie = req.headers.get("cookie") || "";
   const body = await req.json();
   const res = await fetch(`${API_BASE_URL}/usage`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: token,
+      Cookie: cookie,
     },
+    credentials: "include",
     body: JSON.stringify(body),
   });
   const data = await res.json();

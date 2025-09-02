@@ -5,15 +5,13 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const token = req.headers.get("authorization");
-
-  if (!token) {
-    return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
-  }
+  const cookie = req.headers.get("cookie") || "";
 
   // Proxy to backend
   const res = await fetch(`${process.env.API_BASE_URL}/articles/saved/${slug}`, {
-    headers: { Authorization: token },
+    method: "GET",
+    headers: { Cookie: cookie },
+    credentials: "include",
   });
 
   let data: unknown;

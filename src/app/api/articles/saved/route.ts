@@ -1,18 +1,13 @@
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
-  const token = req.headers.get("authorization");
-
-  if (!token) {
-    return NextResponse.json(
-      { detail: "Unauthorized" },
-      { status: 401 }
-    );
-  }
+  const cookie = req.headers.get("cookie") || "";
 
   // Proxy to backend
   const res = await fetch(`${process.env.API_BASE_URL}/articles/saved`, {
-    headers: { Authorization: token },
+    method: "GET",
+    headers: { Cookie: cookie },
+    credentials: "include",
   });
 
   const data = await res.json();

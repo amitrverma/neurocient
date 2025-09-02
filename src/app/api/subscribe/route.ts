@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   const { email } = await req.json();
+  const cookie = req.headers.get("cookie") || "";
 
   try {
     const res = await fetch(`${process.env.API_BASE_URL}/api/subscribe`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Cookie: cookie },
       body: JSON.stringify({ email }),
-      // You can also forward cookies/auth headers if needed
+      credentials: "include",
     });
 
     const data = await res.json();

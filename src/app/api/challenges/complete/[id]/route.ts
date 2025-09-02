@@ -7,15 +7,12 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
-
-  const token = req.headers.get("authorization");
-  if (!token) {
-    return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
-  }
+  const cookie = req.headers.get("cookie") || "";
 
   const res = await fetch(`${API_BASE_URL}/challenges/assign/${id}`, {
     method: "POST",
-    headers: { Authorization: token },
+    headers: { Cookie: cookie },
+    credentials: "include",
   });
 
   const data = await res.json();

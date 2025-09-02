@@ -4,18 +4,16 @@ const API_BASE_URL = process.env.API_BASE_URL;
 
 // GET /api/spots → list spots
 export async function GET(req: Request) {
-  const token = req.headers.get("authorization");
-
-  if (!token) {
-    return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
-  }
+  const cookie = req.headers.get("cookie") || "";
 
   try {
     const res = await fetch(`${process.env.API_BASE_URL}/api/spots`, {
+      method: "GET",
       headers: {
-        Authorization: token,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        Cookie: cookie,
       },
+      credentials: "include",
     });
 
     const data = await res.json();
@@ -29,17 +27,13 @@ export async function GET(req: Request) {
 
 // POST /api/spots → create a new spot
 export async function POST(req: Request) {
-  const token = req.headers.get("authorization");
-
-  if (!token) {
-    return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
-  }
+  const cookie = req.headers.get("cookie") || "";
 
   const body = await req.json();
 
   // ✅ FIXED: Frontend already sends { description, date }, so pass it through directly
   const payload = {
-    description: body.description,  // ✅ Frontend sends description, not note
+    description: body.description, // ✅ Frontend sends description, not note
 
   };
 
@@ -47,8 +41,9 @@ export async function POST(req: Request) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: token,
+      Cookie: cookie,
     },
+    credentials: "include",
     body: JSON.stringify(payload),
   });
 

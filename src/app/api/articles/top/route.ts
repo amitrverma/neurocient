@@ -4,11 +4,13 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const cookie = req.headers.get("cookie") || "";
     const res = await fetch(`${process.env.API_BASE_URL}/articles/top`, {
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Cookie: cookie },
       cache: "no-store", // always fetch fresh, never cache at build
+      credentials: "include",
     });
 
     if (!res.ok) {

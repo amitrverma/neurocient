@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   const body = await req.json();
+  const cookie = req.headers.get("cookie") || "";
 
   const res = await fetch(`${process.env.API_BASE_URL}/auth/signup`, {
     method: "POST",
     credentials: "include",   // 👈 allow cookie exchange
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Cookie: cookie },
     body: JSON.stringify(body),
   });
 

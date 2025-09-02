@@ -3,13 +3,12 @@ import { NextResponse } from "next/server";
 const API_BASE_URL = process.env.API_BASE_URL;
 
 export async function GET(req: Request) {
-  const token = req.headers.get("authorization");
-  if (!token) {
-    return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
-  }
+  const cookie = req.headers.get("cookie") || "";
 
   const res = await fetch(`${API_BASE_URL}/challenges/my`, {
-    headers: { Authorization: token },
+    method: "GET",
+    headers: { Cookie: cookie },
+    credentials: "include",
   });
 
   const data = await res.json();

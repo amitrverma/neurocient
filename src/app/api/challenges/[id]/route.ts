@@ -7,10 +7,12 @@ export async function GET(
   context: { params: Promise<{ id: string }> }   // 👈 match RouteHandlerConfig
 ) {
   const { id } = await context.params;          // 👈 await since it's a Promise
-  const token = request.headers.get("authorization");
+  const cookie = request.headers.get("cookie") || "";
 
   const res = await fetch(`${API_BASE_URL}/challenges/${id}`, {
-    headers: token ? { Authorization: token } : {},
+    method: "GET",
+    headers: { Cookie: cookie },
+    credentials: "include",
   });
 
   const data = await res.json();

@@ -7,7 +7,7 @@ export async function POST(
   context: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await context.params;
-  const token = req.headers.get("authorization");
+  const cookie = req.headers.get("cookie") || "";
 
   let body: SaveBody = {};
   try {
@@ -21,8 +21,9 @@ export async function POST(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: token } : {}),
+        Cookie: cookie,
       },
+      credentials: "include",
       body: JSON.stringify(body),
     });
 
@@ -39,15 +40,16 @@ export async function DELETE(
   context: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await context.params;
-  const token = req.headers.get("authorization");
+  const cookie = req.headers.get("cookie") || "";
 
   try {
     const res = await fetch(`${process.env.API_BASE_URL}/articles/save/${slug}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: token } : {}),
+        Cookie: cookie,
       },
+      credentials: "include",
     });
 
     const data = await res.json();

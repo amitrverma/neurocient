@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    const cookie = req.headers.get("cookie") || "";
     console.log(
       "📨 [Proxy] Received token:",
       body.idToken?.slice(0, 30),
@@ -13,7 +14,7 @@ export async function POST(req: Request) {
     const res = await fetch(`${process.env.API_BASE_URL}/auth/firebase-login`, {
       method: "POST",
       credentials: "include", // 👈 cookie exchange
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Cookie: cookie },
       body: JSON.stringify(body),
     });
 

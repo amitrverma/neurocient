@@ -82,16 +82,38 @@ const ToolsPage = () => {
           </h2>
 
           {spotCount < 5 ? (
-            <p className="text-md text-brand-dark mb-4">
-              {/* long explanatory version */}
-              Your brain runs on ancient wiring...
-            </p>
+            <p className="text-sm text-brand-dark mb-4">
+      Your brain runs on ancient wiring. Long before offices, deadlines, and
+      smartphones, our ancestors relied on instincts that kept them alive in
+      small tribes. Those instincts haven’t gone away—they’re still in you
+      today.
+      <br /><br />
+      We call this your Inner Caveman. It’s the part of you that seeks safety,
+      status, belonging, quick rewards, and certainty—whether or not those
+      instincts actually serve you in modern life.
+      <br /><br />
+      Spotting your caveman is about noticing those moments when your ancient
+      wiring takes the wheel:
+      <br /><br />
+      – When one piece of criticism outweighs ten compliments. <br />
+      – When you check email instead of tackling strategy. <br />
+      – When you hold back an idea in a meeting to avoid standing out.
+      <br /><br />
+      By spotting these moments, you begin to see the patterns. And once you
+      see them, you can start working with them—designing habits, environments,
+      and choices that align with how your brain actually works.
+      <br /><br />
+      This isn’t about fighting your caveman. It’s about recognizing him, and
+      learning how to steer with—not against—your wiring.
+    </p>
           ) : (
-            <p className="text-md text-brand-dark mb-4">
-              {/* short version */}
-              Spotting your caveman means noticing the moments when instincts
-              show up in modern life...
-            </p>
+             <p className="text-sm text-brand-dark mb-4">
+      Spotting your caveman means noticing the moments when ancient instincts
+      show up in modern life—like when one critique stings more than ten
+      compliments or when you hold back in a meeting to play it safe. By naming
+      these patterns, you build awareness and start steering with your wiring
+      instead of against it.
+    </p>
           )}
 
           {loading ? (
@@ -137,9 +159,23 @@ const ToolsPage = () => {
           {!user ? (
             <>
               {/* logged out version */}
-              <p className="text-md text-brand-dark mb-4">
-                Microchallenges are tiny, science-backed experiments...
-              </p>
+                  <p className="text-sm text-brand-dark mb-4">
+      Microchallenges are tiny, science-backed experiments for your daily life.
+      They’re not about willpower or discipline. They’re about nudges—small,
+      doable actions that work with your ancient wiring instead of against it.
+      <br /><br />
+      Your ancestors didn’t count calories, schedule gym sessions, or manage
+      digital distractions. But they did walk often, pause at sunset, drink
+      water when thirsty, and connect face-to-face. Microchallenges are built
+      from those timeless patterns, translated into modern habits.
+      <br /><br />
+      Each challenge is intentionally small: drink a glass of water before your
+      first coffee, put your phone away 30 minutes before bed, take a 5-minute
+      movement break every hour.
+      <br /><br />
+      This isn’t about adding pressure. It’s about experimenting playfully with
+      your wiring, one small challenge at a time.
+    </p>
               <div className="text-sm text-brand-dark">
                 Please{" "}
                 <button
@@ -155,13 +191,30 @@ const ToolsPage = () => {
             <>
               {/* logged in version */}
               {microSummary.completed < 1 ? (
-                <p className="text-md text-brand-dark mb-4">
-                  Microchallenges are tiny, science-backed experiments...
-                </p>
+                <p className="text-sm text-brand-dark mb-4">
+      Microchallenges are tiny, science-backed experiments for your daily life.
+      They’re not about willpower or discipline. They’re about nudges—small,
+      doable actions that work with your ancient wiring instead of against it.
+      <br /><br />
+      Your ancestors didn’t count calories, schedule gym sessions, or manage
+      digital distractions. But they did walk often, pause at sunset, drink
+      water when thirsty, and connect face-to-face. Microchallenges are built
+      from those timeless patterns, translated into modern habits.
+      <br /><br />
+      Each challenge is intentionally small: drink a glass of water before your
+      first coffee, put your phone away 30 minutes before bed, take a 5-minute
+      movement break every hour.
+      <br /><br />
+      This isn’t about adding pressure. It’s about experimenting playfully with
+      your wiring, one small challenge at a time.
+    </p>
               ) : (
-                <p className="text-md text-brand-dark mb-4">
-                  Microchallenges are small nudges that build awareness...
-                </p>
+                  <p className="text-sm text-brand-dark mb-4">
+      Microchallenges are small, science-backed experiments that help you work
+      with your wiring. Think of them as tiny nudges—like a digital sunset, a
+      hydration break, or a movement pause—that build awareness and momentum
+      without relying on willpower.
+    </p>
               )}
               <p className="text-sm text-brand-dark mb-2">
                 {microSummary.completed}/{microSummary.total} challenges

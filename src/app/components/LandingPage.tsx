@@ -38,7 +38,7 @@ const LandingPage = () => {
       {/* Hero Section */}
       <section className="relative flex flex-col px-6 pb-16">
         <div className="max-w-6xl w-full mx-auto">
-          <div className="flex flex-col items-center justify-center text-center gap-4">
+          <div className="flex flex-col items-center justify-center text-center gap-4 mt-8">
             {/* Animated words */}
             <div className="w-full flex justify-center">
               <AnimatedWords />

@@ -3,28 +3,22 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/app/context/AuthContext";
-import StreakBar from "../../components/tools/StreakBar";
-import AuthModal from "../../components/AuthModal";
+import CavemanSpot from "../../components/ui/CavemanSpot";
+import MembershipModal from "../../components/MembershipModal";
+import { usageLimits } from "../../utils/usage";
 
 interface Spot {
   date: string;
   description: string;
 }
 
-const ToolsPage = () => {
+const SpotsPage = () => {
   const [spots, setSpots] = useState<Spot[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAuth, setShowAuth] = useState(false);
+  const [, setShowAuth] = useState(false);
+  const [showMembership, setShowMembership] = useState(false);
 
-  const { user } = useAuth();
-
-  // mock streak + microchallenge summary for now
-  const streak = { current: 7, longest: 15 };
-  const microSummary = {
-    completed: 3,
-    total: 5,
-    current: "Hydrate Like a Caveman",
-  };
+   const { user } = useAuth();
 
   useEffect(() => {
     const fetchSpots = async () => {
@@ -35,8 +29,8 @@ const ToolsPage = () => {
 
       try {
         const res = await fetch("/api/spots", {
-          method: "GET",
-          credentials: "include", // ✅ rely on cookies
+         method: "GET",
+          credentials: "include", // 👈 send cookies
         });
 
         if (!res.ok) {
@@ -46,146 +40,125 @@ const ToolsPage = () => {
         const data = await res.json();
         setSpots(data);
       } catch (err) {
-        console.error("Error loading spots:", err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchSpots();
-  }, [user]); // ✅ depend on user, not token
+  }, [user]);
 
-  const spotCount = spots.length;
-
-  let latestSpot: Spot | null = null;
-
-  if (spotCount > 0) {
-    const sorted = [...spots].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
-    latestSpot = sorted[sorted.length - 1];
-  }
+  const userLimit = usageLimits.user.spots || 0;
+  const hasReachedLimit = user && spots.length >= userLimit;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-      <h1 className="text-2xl font-bold text-[#042a2b] mb-4">🛠 Tools Dashboard</h1>
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold text-[#042a2b] mb-6">
+        Caveman Spotting
+      </h1>
 
-      {/* 1. Streak */}
-      <StreakBar current={streak.current} longest={streak.longest} />
+      <p className="text-brand-dark mb-6">
+        Here you’ll see all the spots you’ve logged, and you can add new ones anytime.
+      </p>
 
-      {/* 2. Grid of summaries */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Caveman Spotting summary */}
-        <div className="p-4 border rounded-lg shadow-sm bg-white">
-          <h2 className="font-semibold text-lg text-[#042a2b] mb-2">
-            Spot Your Inner Caveman
-          </h2>
+      {/* Add new spot box */}
+      {user && !hasReachedLimit && (
+        <CavemanSpot
+          prompt="Notice a caveman instinct? Log it here 👇"
+          onAdded={(spot) => setSpots((prev) => [...prev, spot])}
+        />
+      )}
 
-          {spotCount < 5 ? (
-            <p className="text-md text-brand-dark mb-4">
-              {/* long explanatory version */}
-              Your brain runs on ancient wiring...
-            </p>
-          ) : (
-            <p className="text-md text-brand-dark mb-4">
-              {/* short version */}
-              Spotting your caveman means noticing the moments when instincts
-              show up in modern life...
-            </p>
-          )}
-
-          {loading ? (
-            <p className="text-sm text-brand-dark">Loading spots…</p>
-          ) : !user ? (
-            <div className="text-sm text-brand-dark">
-              Please{" "}
-              <button
-                onClick={() => setShowAuth(true)}
-                className="text-brand-accent font-bold text-md hover:underline cursor-pointer"
-              >
-                log in
-              </button>{" "}
-              to see your Caveman Spots.
-            </div>
-          ) : (
-            <>
-              <p className="text-sm text-brand-dark mb-2">
-                You’ve logged <span className="font-bold">{spotCount}</span>{" "}
-                {spotCount === 1 ? "spot" : "spots"} so far.
-              </p>
-              {latestSpot && (
-                <p className="text-sm italic text-brand-dark mb-4">
-                  Latest: “{latestSpot.description}”
-                </p>
-              )}
-
-              <Link
-                href="/tools/spots"
-                className="inline-block border text-brand-dark font-semibold px-6 py-3 rounded-xl shadow hover:bg-brand-teal hover:text-white transition"
-              >
-                View All
-              </Link>
-            </>
-          )}
+      {/* Show membership prompt if limit reached */}
+      {hasReachedLimit && (
+        <div className="p-4 border rounded-lg bg-yellow-50 text-center text-md text-brand-dark">
+          <p className="mb-2">
+            You’ve reached your free limit of {userLimit} spots.
+          </p>
+<Link
+  href="/membership"
+  className="px-4 py-2 border text-brand-dark rounded-md hover:bg-brand-primary hover:text-white transition"
+>
+  Become a Member
+</Link>
         </div>
+      )}
 
-        {/* Microchallenges summary */}
-        <div className="p-4 border rounded-lg shadow-sm bg-white">
-          <h2 className="font-semibold text-lg text-[#042a2b] mb-2">
-            Microchallenges
-          </h2>
-          {!user ? (
-            <>
-              {/* logged out version */}
-              <p className="text-md text-brand-dark mb-4">
-                Microchallenges are tiny, science-backed experiments...
-              </p>
-              <div className="text-sm text-brand-dark">
-                Please{" "}
-                <button
-                  onClick={() => setShowAuth(true)}
-                  className="text-brand-accent font-bold text-md hover:underline cursor-pointer"
-                >
-                  log in
-                </button>{" "}
-                to see your Microchallenges.
+      {loading ? (
+        <p className="text-brand-dark">Loading spots...</p>
+      ) : !user ? (
+        <div className="text-center text-brand-dark p-6">
+          Please{" "}
+          <button
+            onClick={() => setShowAuth(true)}
+            className="text-[#5eb1bf] font-semibold hover:underline"
+          >
+            log in
+          </button>{" "}
+          to view your Caveman Spots.
+        </div>
+      ) : spots.length === 0 ? (
+        <p className="text-brand-dark">No spots logged yet.</p>
+      ) : (
+        <ul className="divide-y divide-gray-200 bg-white rounded-lg">
+          {spots.map((s, i) => (
+            <li key={i} className="p-4">
+              <div className="text-xs text-brand-dark mb-1">
+                {new Date(s.date).toLocaleDateString("en-IN", {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                })}
               </div>
-            </>
-          ) : (
-            <>
-              {/* logged in version */}
-              {microSummary.completed < 1 ? (
-                <p className="text-md text-brand-dark mb-4">
-                  Microchallenges are tiny, science-backed experiments...
-                </p>
-              ) : (
-                <p className="text-md text-brand-dark mb-4">
-                  Microchallenges are small nudges that build awareness...
-                </p>
-              )}
-              <p className="text-sm text-brand-dark mb-2">
-                {microSummary.completed}/{microSummary.total} challenges
-                completed.
-              </p>
-              {microSummary.current && (
-                <p className="text-sm italic text-brand-dark mb-4">
-                  Current: “{microSummary.current}”
-                </p>
-              )}
-              <Link
-                href="/tools/microchallenges"
-                className="inline-block border text-brand-dark font-semibold px-6 py-3 rounded-xl shadow hover:bg-brand-teal hover:text-white transition"
-              >
-                Go to Challenges
-              </Link>
-            </>
-          )}
-        </div>
+              <p className="text-sm text-[#042a2b]">{s.description}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* After spots list */}
+      <section className="mt-8">
+        <h2 className="text-xl font-semibold text-[#042a2b] mb-3">
+          Related Insights
+        </h2>
+        <ul className="space-y-2">
+          <li>
+            <Link
+              href="/insights/why-we-avoid-conflict"
+              className="text-sm text-[#5eb1bf] hover:underline"
+            >
+              Why We Avoid Conflict (and how to reframe it)
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/insights/the-hidden-cost-of-procrastination"
+              className="text-sm text-[#5eb1bf] hover:underline"
+            >
+              The Hidden Cost of Procrastination
+            </Link>
+          </li>
+        </ul>
+      </section>
+
+      <div className="mt-6">
+        <Link
+          href="/tools"
+          className="text-sm font-semibold text-[#042a2b] hover:text-[#5eb1bf] underline"
+        >
+          ← Back to Tools Dashboard
+        </Link>
       </div>
 
-      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
+      {/* Membership Modal */}
+      <MembershipModal
+        isOpen={showMembership}
+        onClose={() => setShowMembership(false)}
+        disableEscape
+      />
     </div>
   );
 };
 
-export default ToolsPage;
+export default SpotsPage;

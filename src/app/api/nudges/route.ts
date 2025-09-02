@@ -1,11 +1,28 @@
 // app/api/nudges/random/route.ts
 import { NextResponse } from "next/server";
 
-export async function GET() {
-  const res = await fetch(`${process.env.API_BASE_URL}/api/nudges/random`, {
-    credentials: "include",
-  });
+const API_BASE_URL = process.env.API_BASE_URL;
 
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
+export async function GET(req: Request) {
+  try {
+    // get cookies from incoming request
+    const cookie = req.headers.get("cookie") || "";
+
+    // forward them to FastAPI
+    const res = await fetch(`${API_BASE_URL}/api/nudges/random`, {
+      method: "GET",
+      headers: {
+        Cookie: cookie,
+      },
+    });
+
+    const data = await res.json();
+    return NextResponse.json(data, { status: res.status });
+  } catch (err) {
+    console.error("❌ Error in GET /api/nudges/random:", err);
+    return NextResponse.json(
+      { detail: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

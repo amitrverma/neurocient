@@ -77,7 +77,7 @@ const Navbar = () => {
                     </Link>
                     <button
                       onClick={() => {
-                        logout();
+                        logout(true);
                         setShowDropdown(false);
                       }}
                       className="w-full text-left px-4 py-2 hover:bg-gray-100"
@@ -147,7 +147,7 @@ const Navbar = () => {
                 <Link
                   href="#"
                   onClick={() => {
-                    logout();
+                    logout(true);
                     setIsOpen(false);
                   }}
                   className="hover:text-brand-primary"

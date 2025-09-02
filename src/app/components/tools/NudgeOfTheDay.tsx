@@ -16,7 +16,7 @@ const NudgeOfTheDay = () => {
     const fetchNudge = async () => {
       try {
         // 🔄 call your Next.js proxy route instead of hitting API_BASE_URL
-        const res = await fetch("/api/nudges/random", {
+        const res = await fetch("/api/nudges", {
           credentials: "include", // keep cookies flowing
         });
         if (!res.ok) throw new Error("Failed to fetch nudge");
@@ -32,7 +32,7 @@ const NudgeOfTheDay = () => {
   if (!nudge) return null;
 
   return (
-    <div className="border border-yellow-300 rounded-lg p-5 shadow-sm text-md text-yellow-900 space-y-4 leading-relaxed">
+    <div className="border rounded-lg p-5 shadow-sm text-md text-brand-dark space-y-4 leading-relaxed">
       {nudge.title && <p className="font-semibold text-base">{nudge.title}</p>}
       {nudge.type === "text" ? (
         <p className="italic">“{nudge.paragraphs?.[0] || nudge.quote}”</p>

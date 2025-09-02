@@ -13,8 +13,9 @@ interface User {
 interface AuthContextType {
   user: User | null;
   login: () => Promise<void>;
-  logout: () => Promise<void>;
+  logout: (redirect?: boolean) => Promise<void>;
 }
+
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -76,17 +77,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const logout = async () => {
-    try {
-      await fetch("/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-    } finally {
-      setUser(null);
-      posthog.reset();
+// inside AuthProvider
+
+const logout = async (redirect: boolean = false) => {
+  try {
+    const url = redirect
+      ? "/api/auth/logout?redirect=true"
+      : "/api/auth/logout";
+
+    await fetch(url, {
+      method: "POST",
+      credentials: "include",
+    });
+  } finally {
+    setUser(null);
+    posthog.reset();
+
+    if (redirect) {
+      // ensure redirect to landing page
+      window.location.href = "/";
+    } else {
+      // soft refresh to show logged-out state
+      window.location.reload();
     }
-  };
+  }
+};
+
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>

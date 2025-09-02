@@ -2,11 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
-
 const WeeklyReflections = () => {
-  const { user } = useAuth(); // ✅ use user, not token
+  const { user } = useAuth(); // ✅ only run when logged in
   const [loading, setLoading] = useState(true);
   const [reflection, setReflection] = useState("");
   const [error, setError] = useState("");
@@ -14,25 +11,22 @@ const WeeklyReflections = () => {
   useEffect(() => {
     const loadReflection = async () => {
       try {
-        const res = await fetch(
-          `${API_BASE_URL}/api/weekly-reflection/latest`,
-          {
-            method: "GET",
-            credentials: "include", // ✅ cookies for auth
-          }
-        );
+        // 🔄 now call your Next.js proxy
+        const res = await fetch("/api/weekly-reflection/latest", {
+          method: "GET",
+          credentials: "include", // ✅ keep cookies
+        });
         if (!res.ok) throw new Error("Failed to load reflection");
         const data = await res.json();
         setReflection(data.content);
       } catch (err) {
-        if (err instanceof Error) setError(err.message);
-        else setError("Failed to load reflection");
+        setError(err instanceof Error ? err.message : "Failed to load reflection");
       } finally {
         setLoading(false);
       }
     };
 
-    if (user) loadReflection(); // ✅ check for user
+    if (user) loadReflection();
   }, [user]);
 
   return (

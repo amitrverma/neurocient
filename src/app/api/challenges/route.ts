@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 // make sure it's defined, or fallback to localhost for dev
-const API_BASE_URL = process.env.API_BASE_URL || "http://127.0.0.1:8000";
+const API_BASE_URL = process.env.API_BASE_URL;
 
 // ⬇️ prevent Next from trying to prerender this at build time
 export const dynamic = "force-dynamic";

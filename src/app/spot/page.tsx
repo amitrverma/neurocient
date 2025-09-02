@@ -20,7 +20,7 @@ export default function SpotPage() {
       {/* WHAT */}
       <section className="mb-12">
         <h2 className="text-xl font-semibold text-brand-dark mb-4">What it is</h2>
-        <p className="text-gray-700">
+        <p className="text-gray-700 text-lg">
           Spot Your Caveman is a simple practice of pausing and logging when your
           caveman brain takes over. It’s not about judgment — it’s about building
           awareness of patterns you usually miss.
@@ -30,7 +30,7 @@ export default function SpotPage() {
       {/* HOW */}
       <section className="mb-12">
         <h2 className="text-xl font-semibold text-brand-dark mb-4">How it works</h2>
-        <ul className="list-disc list-inside space-y-2 text-gray-700">
+        <ul className="list-disc list-inside space-y-2 text-gray-700 text-lg">
           <li>Pause when you notice an unhelpful impulse or reaction.</li>
           <li>Reflect for a moment — what triggered it?</li>
           <li>Log it with a short note: time, situation, behavior.</li>
@@ -74,7 +74,7 @@ export default function SpotPage() {
       {/* CTA */}
       <div className="text-center">
          <ProtectedCTA redirect="/tools/spots">
-          Start Spotting Your Caveman →
+          Start Spotting Your Caveman
         </ProtectedCTA>
       </div>
     </main>

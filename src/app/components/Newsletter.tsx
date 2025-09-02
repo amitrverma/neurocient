@@ -78,7 +78,7 @@ const Newsletter = ({
               placeholder="Your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-teal text-background font-bold"
+              className="flex-1 px-3 py-2 border rounded-lg  text-brand-dark font-bold"
             />
             <button
               type="submit"

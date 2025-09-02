@@ -1,4 +1,4 @@
-export type UsageType = 'articles' | 'spots' | 'microchallenges';
+export type UsageType = "articles" | "spots" | "microchallenges";
 
 interface UsageLimits {
   articles: number;
@@ -12,17 +12,17 @@ export const usageLimits: Record<"guest" | "user", UsageLimits> = {
 };
 
 function storageKey(isLoggedIn: boolean) {
-  return isLoggedIn ? 'usage_user' : 'usage_guest';
+  return isLoggedIn ? "usage_user" : "usage_guest";
 }
 
 function readUsage(isLoggedIn: boolean) {
-  if (typeof window === 'undefined') return {} as Record<UsageType, number>;
+  if (typeof window === "undefined") return {} as Record<UsageType, number>;
   const raw = localStorage.getItem(storageKey(isLoggedIn));
   return raw ? JSON.parse(raw) : {};
 }
 
 function writeUsage(isLoggedIn: boolean, data: Record<UsageType, number>) {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   localStorage.setItem(storageKey(isLoggedIn), JSON.stringify(data));
 }
 
@@ -35,7 +35,7 @@ export function incrementUsage(type: UsageType, isLoggedIn: boolean) {
   const data = readUsage(isLoggedIn);
   data[type] = (data[type] || 0) + 1;
   writeUsage(isLoggedIn, data);
-  const limits = usageLimits[isLoggedIn ? 'user' : 'guest'];
+  const limits = usageLimits[isLoggedIn ? "user" : "guest"];
   const limit = (limits[type] as number | undefined) ?? Infinity;
   return { count: data[type], limit, allowed: data[type] <= limit };
 }

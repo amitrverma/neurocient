@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome against Next.js",
+      "url": "http://localhost:3000",    // 👈 Next.js default
+      "webRoot": "${workspaceFolder}"
+    }
+  ]
+}

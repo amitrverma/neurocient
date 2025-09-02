@@ -13,6 +13,7 @@ import { useNotification } from "./NotificationProvider";
 import { incrementUsage } from "../utils/usage";
 import MembershipModal from "./MembershipModal";
 import { trackEvent } from "../utils/analytics";
+import { slugifyTag } from "../utils/slug";
 
 interface ResourceItem {
   title: string;
@@ -73,7 +74,7 @@ const ArticleLayout = ({
       try {
         const res = await fetch(`/api/articles/saved/${slug}`, {
           method: "GET",
-          credentials: "include", // 👈 cookies
+          credentials: "include",
         });
         if (res.ok) {
           const data = await res.json();
@@ -86,61 +87,72 @@ const ArticleLayout = ({
     checkSaved();
   }, [slug, user]);
 
-  // Track article view
+  // ✅ Track article view
   useEffect(() => {
     if (slug) {
       trackEvent("Article Viewed", { slug });
     }
   }, [slug]);
 
-  // ✅ Mark as read
+  // ✅ Mark as read (only once per article)
   useEffect(() => {
     if (!slug) return;
     let incremented = false;
+
     const markAsRead = async () => {
       if (incremented) return;
       incremented = true;
+
       const { allowed } = incrementUsage("articles", !!user);
       if (!allowed) {
-        if (user) setShowMembership(true);
-        else setShowAuth(true);
+        if (user) {
+          setShowMembership(true);
+        } else {
+          setShowAuth(true);
+        }
       }
+
       try {
         await fetch(`/api/articles/${slug}/read`, {
           method: "POST",
-          credentials: "include", // 👈 send cookies
+          credentials: "include",
         });
       } catch (err) {
         console.error("❌ Error incrementing read count:", err);
       }
+
       window.removeEventListener("scroll", onScroll);
       clearTimeout(timeout);
     };
+
     const onScroll = () => {
       const scrolled =
         (window.scrollY + window.innerHeight) /
         document.documentElement.scrollHeight;
       if (scrolled >= 0.3) markAsRead();
     };
+
     const timeout = setTimeout(markAsRead, 15000);
     window.addEventListener("scroll", onScroll);
+
     return () => {
       window.removeEventListener("scroll", onScroll);
       clearTimeout(timeout);
     };
-  }, [slug, user]);
+    // 👇 notice: no `user` here, so effect runs once per article
+  }, [slug]);
 
   // ✅ Save / Unsave toggle
   const handleSave = async () => {
     if (!slug) return;
-    if (!user) {
-      setShowAuth(true);
-      return;
-    }
+      if (!user) {
+    console.log("[DEBUG] handleSave called but user not ready → skipping");
+    return; // 👈 don't reopen AuthModal here
+  }
     try {
       const res = await fetch(`/api/articles/save/${slug}`, {
         method: isSaved ? "DELETE" : "POST",
-        credentials: "include", // 👈 use cookies
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
       });
       if (res.ok) {
@@ -257,11 +269,11 @@ const ArticleLayout = ({
 
         {/* Meta row */}
         <div className="flex flex-wrap items-center gap-2 mb-4 text-xs uppercase tracking-wide font-semibold">
-          {tags.map((tag) => (
+          {tags?.map((tag) => (
             <Link
               key={tag}
-              href={`/tags/${encodeURIComponent(tag)}`}
-              className="px-2 py-0.5 rounded bg-brand-secondary/20 text-brand-dark hover:bg-brand-secondary hover:text-brand-dark transition"
+              href={`/tags/${slugifyTag(tag)}`} // 👈 fixes %20
+              className="px-2 py-1 text-xs bg-gray-100 rounded-md hover:bg-brand-secondary"
             >
               {tag}
             </Link>
@@ -369,10 +381,12 @@ const ArticleLayout = ({
         isOpen={showAuth}
         onClose={() => setShowAuth(false)}
         onSuccess={handleSave}
+        disableEscape
       />
       <MembershipModal
         isOpen={showMembership}
         onClose={() => setShowMembership(false)}
+        disableEscape
       />
     </div>
   );

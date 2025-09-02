@@ -33,12 +33,11 @@ const AuthModal = ({
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-
       const idToken = await result.user.getIdToken(true);
 
       const res = await fetch("/api/auth/firebase-login", {
         method: "POST",
-        credentials: "include", // 👈 cookies flow
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
       });
@@ -46,7 +45,7 @@ const AuthModal = ({
       const data = await res.json().catch(() => ({}));
 
       if (res.ok && !data.preview) {
-        await login(); // 👈 hydrate from /me
+        await login(); // 👈 hydrate user
         onClose();
         onSuccess?.();
         trackEvent("Login Completed");
@@ -67,16 +66,18 @@ const AuthModal = ({
     setLoading(true);
 
     try {
-      const endpoint = mode === "signup" ? "/api/auth/signup" : "/api/auth/login";
+      const endpoint =
+        mode === "signup" ? "/api/auth/signup" : "/api/auth/login";
+
       const res = await fetch(endpoint, {
         method: "POST",
-        credentials: "include", // 👈 cookies flow
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       if (res.ok) {
-        await login(); // 👈 hydrate from /me
+        await login();
         onClose();
         onSuccess?.();
         trackEvent(mode === "signup" ? "Signup Completed" : "Login Completed");
@@ -92,7 +93,9 @@ const AuthModal = ({
   return (
     <Dialog
       open={isOpen}
-      onClose={disableEscape ? () => {} : onClose}
+      onClose={() => {
+        if (!disableEscape) onClose(); // block escape/backdrop if disabled
+      }}
       className="relative z-50"
     >
       <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
@@ -122,7 +125,7 @@ const AuthModal = ({
             />
             <button
               type="submit"
-              className="w-full bg-brand-secondary text-brand-dark py-2 rounded-lg font-semibold hover:bg-brand-primary hover:text-white transition"
+              className="w-full bg-brand-secondary text-brand-dark py-2 rounded-lg font-semibold hover:bg-brand-primary hover:text-white transition cursor-pointer"
               disabled={loading}
             >
               {loading
@@ -146,7 +149,7 @@ const AuthModal = ({
             {mode === "login" ? "New here?" : "Already have an account?"}{" "}
             <button
               onClick={() => setMode(mode === "login" ? "signup" : "login")}
-              className="text-brand-primary font-semibold"
+              className="text-brand-primary font-semibold cursor-pointer"
             >
               {mode === "login" ? "Sign up" : "Log in"}
             </button>

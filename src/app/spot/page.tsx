@@ -73,7 +73,7 @@ export default function SpotPage() {
 
       {/* CTA */}
       <div className="text-center">
-         <ProtectedCTA redirect="/tools/spots">
+         <ProtectedCTA redirect="/tools/spots" context="start spotting your caveman">
           Start Spotting Your Caveman
         </ProtectedCTA>
       </div>

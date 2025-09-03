@@ -77,7 +77,7 @@ export default function MicrochallengePage() {
 
       {/* CTA */}
       <div className="text-center">
-         <ProtectedCTA redirect="/tools/microchallenges">
+         <ProtectedCTA redirect="/tools/microchallenges" context="start microchallenges">
           Join a Microchallenge
         </ProtectedCTA>
       </div>

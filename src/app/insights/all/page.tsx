@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import Link from "next/link";
+import { slugifyTag } from "../../utils/slug";
 
 interface ArticleMeta {
   slug: string;
@@ -52,7 +53,7 @@ export default function AllInsightsPage() {
           {Object.entries(tagCounts).map(([tag, count]) => (
             <li key={tag}>
               <Link
-                href={`/tags/${tag}`}
+                href={`/tags/${slugifyTag(tag)}`}
                 className="flex justify-between text-sm text-[#042a2b] hover:text-[#ed254e] transition"
               >
                 <span>{tag}</span>
@@ -83,7 +84,7 @@ export default function AllInsightsPage() {
             {article.tags?.map((tag) => (
               <Link
                 key={tag}
-                href={`/tags/${tag}`}
+                href={`/tags/${slugifyTag(tag)}`}
                 className="px-2 py-1 text-xs rounded bg-brand-secondary/20 text-brand-dark hover:bg-brand-secondary/30 transition"
               >
                 {tag}

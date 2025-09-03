@@ -57,7 +57,7 @@ const ArticleLayout = ({
   prevInPath,
   nextInPath,
 }: ArticleLayoutProps) => {
-  const baseUrl = "https://neurocient.com/insights";
+  const baseUrl = "https://www.neurocient.com/insights";
   const articleUrl = slug ? `${baseUrl}/${slug}` : baseUrl;
 
   const { user, ready } = useAuth();

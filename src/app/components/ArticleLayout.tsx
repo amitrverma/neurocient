@@ -11,7 +11,7 @@ import Newsletter from "./Newsletter";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "./AuthModal";
 import { useNotification } from "./NotificationProvider";
-import { incrementUsage } from "../utils/usage";
+import { incrementUsage, usageLimits } from "../utils/usage";
 import MembershipModal from "./MembershipModal";
 import { trackEvent } from "../utils/analytics";
 import { slugifyTag } from "../utils/slug";
@@ -106,21 +106,27 @@ const ArticleLayout = ({
       if (incremented) return;
       incremented = true;
 
-      const { allowed } = incrementUsage("articles", !!user);
-      if (!allowed) {
-        if (user) {
-          setShowMembership(true);
-        } else {
-          setAuthContext("continue reading");
-          setShowAuth(true);
-        }
-      }
-
       try {
-        await fetch(`/api/articles/${slug}/read`, {
+        const res = await fetch(`/api/articles/${slug}/read`, {
           method: "POST",
           credentials: "include",
         });
+
+        if (user) {
+          if (res.ok) {
+            const data = await res.json();
+            const limit = usageLimits.user.articles;
+            if (data.read_count > limit) {
+              setShowMembership(true);
+            }
+          }
+        } else {
+          const { allowed } = incrementUsage("articles", false);
+          if (!allowed) {
+            setAuthContext("continue reading");
+            setShowAuth(true);
+          }
+        }
       } catch (err) {
         console.error("❌ Error incrementing read count:", err);
       }

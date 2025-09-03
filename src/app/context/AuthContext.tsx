@@ -14,6 +14,7 @@ interface AuthContextType {
   user: User | null;
   login: () => Promise<void>;
   logout: (redirect?: boolean) => Promise<void>;
+  ready: boolean;
 }
 
 
@@ -21,6 +22,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [ready, setReady] = useState(false);
 
   // On mount → try refresh first, then fallback to /me
   useEffect(() => {
@@ -59,6 +61,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       } catch {
         setUser(null);
+      } finally {
+        setReady(true);
       }
     };
 
@@ -105,7 +109,7 @@ const logout = async (redirect: boolean = false) => {
 
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, ready }}>
       {children}
     </AuthContext.Provider>
   );

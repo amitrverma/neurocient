@@ -8,14 +8,16 @@ import AuthModal from "../components/AuthModal";
 interface ProtectedCTAProps {
   children: React.ReactNode;
   redirect: string; // where to go after auth
+  context?: string;
 }
 
-const ProtectedCTA = ({ children, redirect }: ProtectedCTAProps) => {
-  const { user } = useAuth();
+const ProtectedCTA = ({ children, redirect, context }: ProtectedCTAProps) => {
+  const { user, ready } = useAuth();
   const router = useRouter();
   const [showAuth, setShowAuth] = useState(false);
 
   const handleClick = () => {
+    if (!ready) return;
     if (user) {
       router.push(redirect); // ✅ already logged in
     } else {
@@ -36,6 +38,7 @@ const ProtectedCTA = ({ children, redirect }: ProtectedCTAProps) => {
       <AuthModal
         isOpen={showAuth}
         onClose={() => setShowAuth(false)}
+        context={context}
         onSuccess={() => {
           setShowAuth(false);
           router.push(redirect); // ✅ redirect after successful login/signup

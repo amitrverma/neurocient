@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/app/context/AuthContext";
+import AuthModal from "../components/AuthModal";
 
 interface SavedArticle {
   slug: string;
@@ -11,11 +12,13 @@ interface SavedArticle {
 }
 
 export default function SavedArticlesPage() {
-  const { user } = useAuth();
+  const { user, ready } = useAuth();
   const [articles, setArticles] = useState<SavedArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAuth, setShowAuth] = useState(false);
 
   useEffect(() => {
+    if (!ready) return;
     if (!user) {
       setLoading(false);
       return;
@@ -43,9 +46,20 @@ export default function SavedArticlesPage() {
 
   if (!user) {
     return (
-      <p className="text-center mt-12">
-        Please log in to view saved articles.
-      </p>
+      <div className="text-center mt-12">
+        Please
+        <button
+          onClick={() => setShowAuth(true)}
+          className="text-[#5eb1bf] font-semibold hover:underline ml-1"
+        >
+          log in
+        </button>{" "}
+        to view saved articles.
+        <AuthModal
+          isOpen={showAuth}
+          onClose={() => setShowAuth(false)}
+        />
+      </div>
     );
   }
 

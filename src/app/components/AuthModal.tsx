@@ -13,6 +13,7 @@ interface AuthModalProps {
   onClose: () => void;
   onSuccess?: () => void;
   disableEscape?: boolean;
+  context?: string;
 }
 
 const AuthModal = ({
@@ -20,6 +21,7 @@ const AuthModal = ({
   onClose,
   onSuccess,
   disableEscape = false,
+  context,
 }: AuthModalProps) => {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
@@ -103,6 +105,7 @@ const AuthModal = ({
         <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg">
           <Dialog.Title className="text-xl font-bold mb-4 text-center">
             {mode === "login" ? "Log in" : "Sign up"}
+            {context ? ` to ${context}` : ""}
           </Dialog.Title>
 
           {/* Email/password form */}

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import CavemanSpot from "../../components/ui/CavemanSpot";
 import MembershipModal from "../../components/MembershipModal";
+import AuthModal from "../../components/AuthModal";
 import { usageLimits } from "../../utils/usage";
 
 interface Spot {
@@ -15,13 +16,14 @@ interface Spot {
 const SpotsPage = () => {
   const [spots, setSpots] = useState<Spot[]>([]);
   const [loading, setLoading] = useState(true);
-  const [, setShowAuth] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
   const [showMembership, setShowMembership] = useState(false);
 
-   const { user } = useAuth();
+   const { user, ready } = useAuth();
 
   useEffect(() => {
     const fetchSpots = async () => {
+      if (!ready) return;
       if (!user) {
         setLoading(false);
         return;
@@ -156,6 +158,11 @@ const SpotsPage = () => {
         isOpen={showMembership}
         onClose={() => setShowMembership(false)}
         disableEscape
+      />
+      <AuthModal
+        isOpen={showAuth}
+        onClose={() => setShowAuth(false)}
+        context="start spotting your caveman"
       />
     </div>
   );

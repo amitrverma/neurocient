@@ -21,10 +21,11 @@ const CavemanSpot = ({
   const [showAuth, setShowAuth] = useState(false);
   const [showMembership, setShowMembership] = useState(false);
 
-  const { user } = useAuth();
+  const { user, ready } = useAuth();
   const { notify } = useNotification();
 
   const handleSubmit = async () => {
+    if (!ready) return;
     if (!user) {
       setShowAuth(true); // ✅ prompt login only when adding
       return;
@@ -101,6 +102,7 @@ const CavemanSpot = ({
       <AuthModal
         isOpen={showAuth}
         onClose={() => setShowAuth(false)}
+        context="start spotting your caveman"
         disableEscape
       />
     </div>

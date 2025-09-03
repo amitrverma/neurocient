@@ -28,10 +28,11 @@ const MicrochallengesPage = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const { user } = useAuth();
+  const { user, ready } = useAuth();
 
   useEffect(() => {
     const fetchChallenges = async () => {
+      if (!ready) return;
       if (!user) {
         setLoading(false);
         return;
@@ -59,6 +60,7 @@ const MicrochallengesPage = () => {
   };
 
   const handleLog = async (challengeId: string) => {
+    if (!ready) return;
     if (!user) {
       setShowAuth(true);
       return;
@@ -197,7 +199,11 @@ const MicrochallengesPage = () => {
         </Link>
       </div>
 
-      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
+      <AuthModal
+        isOpen={showAuth}
+        onClose={() => setShowAuth(false)}
+        context="start microchallenges"
+      />
     </div>
   );
 };

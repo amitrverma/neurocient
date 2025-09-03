@@ -148,6 +148,7 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
       <AuthModal
         isOpen={showAuth}
         onClose={() => setShowAuth(false)}
+        context="view the result"
         onSuccess={() => {
           setShowAuth(false);
           onComplete(responses); // resume after login

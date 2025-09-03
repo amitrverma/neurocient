@@ -6,6 +6,7 @@ import AuthModal from "../AuthModal";
 import MembershipModal from "../MembershipModal";
 import { getUsage, incrementUsage, usageLimits } from "../../utils/usage";
 import { trackEvent } from "../../utils/analytics";
+import { useRouter } from "next/navigation";
 
 interface MicrochallengeBoxProps {
   id: string; // UUID from backend
@@ -18,7 +19,8 @@ interface Microchallenge {
 }
 
 const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
-  const { user } = useAuth();
+  const { user, ready } = useAuth();
+  const router = useRouter();
   const [showAuth, setShowAuth] = useState(false);
   const [showMembership, setShowMembership] = useState(false);
   const [challenge, setChallenge] = useState<Microchallenge | null>(null);
@@ -42,20 +44,27 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
   }, [id]);
 
   // 🚦 Click handler checks login + usage quota
+  const startChallenge = () => {
+    incrementUsage("microchallenges", true);
+    trackEvent("Microchallenge Started", { id });
+    router.push("/tools/microchallenges");
+  };
+
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    if (!ready) return;
     if (!user) {
-      e.preventDefault();
       setShowAuth(true);
       return;
     }
-    if (getUsage("microchallenges", true) >= (usageLimits.user.microchallenges || 0)) {
-      e.preventDefault();
+    if (
+      getUsage("microchallenges", true) >=
+      (usageLimits.user.microchallenges || 0)
+    ) {
       setShowMembership(true);
       return;
     }
-    incrementUsage("microchallenges", true);
-    trackEvent("Microchallenge Started", { id });
+    startChallenge();
   };
 
   if (!challenge) {
@@ -102,6 +111,11 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
   <AuthModal
     isOpen={showAuth}
     onClose={() => setShowAuth(false)}
+    context="start microchallenges"
+    onSuccess={() => {
+      setShowAuth(false);
+      startChallenge();
+    }}
     disableEscape
   />
 </div>

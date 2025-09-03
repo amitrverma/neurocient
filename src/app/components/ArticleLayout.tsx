@@ -59,12 +59,14 @@ const ArticleLayout = ({
   const baseUrl = "https://neurocient.com/insights";
   const articleUrl = slug ? `${baseUrl}/${slug}` : baseUrl;
 
-  const { user } = useAuth();
+  const { user, ready } = useAuth();
   const { notify } = useNotification();
   const [showResources, setShowResources] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showMembership, setShowMembership] = useState(false);
+  const [authContext, setAuthContext] = useState<string | null>(null);
+  const [authCallback, setAuthCallback] = useState<(() => void) | null>(null);
   const nextRef = useRef<HTMLDivElement | null>(null);
 
   // ✅ Detect if article is already saved
@@ -96,7 +98,7 @@ const ArticleLayout = ({
 
   // ✅ Mark as read (only once per article)
   useEffect(() => {
-    if (!slug) return;
+    if (!slug || !ready) return;
     let incremented = false;
 
     const markAsRead = async () => {
@@ -108,6 +110,7 @@ const ArticleLayout = ({
         if (user) {
           setShowMembership(true);
         } else {
+          setAuthContext("continue reading");
           setShowAuth(true);
         }
       }
@@ -140,15 +143,17 @@ const ArticleLayout = ({
       clearTimeout(timeout);
     };
     // 👇 notice: no `user` here, so effect runs once per article
-  }, [slug]);
+  }, [slug, ready]);
 
   // ✅ Save / Unsave toggle
   const handleSave = async () => {
-    if (!slug) return;
-      if (!user) {
-    console.log("[DEBUG] handleSave called but user not ready → skipping");
-    return; // 👈 don't reopen AuthModal here
-  }
+    if (!slug || !ready) return;
+    if (!user) {
+      setAuthContext("save this article");
+      setAuthCallback(() => handleSave);
+      setShowAuth(true);
+      return;
+    }
     try {
       const res = await fetch(`/api/articles/save/${slug}`, {
         method: isSaved ? "DELETE" : "POST",
@@ -380,7 +385,12 @@ const ArticleLayout = ({
       <AuthModal
         isOpen={showAuth}
         onClose={() => setShowAuth(false)}
-        onSuccess={handleSave}
+        context={authContext || undefined}
+        onSuccess={() => {
+          setShowAuth(false);
+          authCallback?.();
+          setAuthCallback(null);
+        }}
         disableEscape
       />
       <MembershipModal

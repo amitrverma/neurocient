@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode, useEffect, useRef, useState } from "react";
+import type React from "react";
 import Link from "next/link";
 import { Twitter, Linkedin, Mail } from "lucide-react";
 import ScrollProgress from "./ui/ScrollProgress";
@@ -146,11 +147,15 @@ const ArticleLayout = ({
   }, [slug, ready]);
 
   // ✅ Save / Unsave toggle
-  const handleSave = async () => {
+  const handleSave = async (
+    e?: React.MouseEvent<HTMLButtonElement>,
+    skipAuthCheck = false,
+  ) => {
+    e?.preventDefault();
     if (!slug || !ready) return;
-    if (!user) {
+    if (!skipAuthCheck && !user) {
       setAuthContext("save this article");
-      setAuthCallback(() => handleSave);
+      setAuthCallback(() => () => handleSave(undefined, true));
       setShowAuth(true);
       return;
     }

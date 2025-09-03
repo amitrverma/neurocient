@@ -26,12 +26,13 @@ const SpotsPage = () => {
       if (!ready) return;
       if (!user) {
         setLoading(false);
+        setShowAuth(true);
         return;
       }
 
       try {
         const res = await fetch("/api/spots", {
-         method: "GET",
+          method: "GET",
           credentials: "include", // 👈 send cookies
         });
 
@@ -49,7 +50,7 @@ const SpotsPage = () => {
     };
 
     fetchSpots();
-  }, [user]);
+  }, [user, ready]);
 
   const userLimit = usageLimits.user.spots || 0;
   const hasReachedLimit = user && spots.length >= userLimit;

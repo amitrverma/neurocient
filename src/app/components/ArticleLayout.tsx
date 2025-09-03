@@ -146,11 +146,11 @@ const ArticleLayout = ({
   }, [slug, ready]);
 
   // ✅ Save / Unsave toggle
-  const handleSave = async () => {
+  const handleSave = async (skipAuthCheck = false) => {
     if (!slug || !ready) return;
-    if (!user) {
+    if (!user && !skipAuthCheck) {
       setAuthContext("save this article");
-      setAuthCallback(() => handleSave);
+      setAuthCallback(() => () => handleSave(true));
       setShowAuth(true);
       return;
     }

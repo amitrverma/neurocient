@@ -388,8 +388,12 @@ const ArticleLayout = ({
         context={authContext || undefined}
         onSuccess={() => {
           setShowAuth(false);
-          authCallback?.();
-          setAuthCallback(null);
+          if (authCallback) {
+            setTimeout(() => {
+              authCallback();
+              setAuthCallback(null);
+            }, 0);
+          }
         }}
         disableEscape
       />

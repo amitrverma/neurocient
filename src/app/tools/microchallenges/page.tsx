@@ -35,6 +35,7 @@ const MicrochallengesPage = () => {
       if (!ready) return;
       if (!user) {
         setLoading(false);
+        setShowAuth(true);
         return;
       }
       try {
@@ -53,7 +54,7 @@ const MicrochallengesPage = () => {
     };
 
     fetchChallenges();
-  }, [user]); // ✅ depend on user
+  }, [user, ready]);
 
   const toggleOpen = (id: string) => {
     setOpenId(openId === id ? null : id);

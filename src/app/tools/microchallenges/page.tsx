@@ -28,6 +28,10 @@ const MicrochallengesPage = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // new state for inline carousel
+  const [showNewChallenge, setShowNewChallenge] = useState(false);
+  const [available, setAvailable] = useState<Microchallenge[]>([]);
+
   const { user, ready } = useAuth();
 
   useEffect(() => {
@@ -83,6 +87,38 @@ const MicrochallengesPage = () => {
       setNote("");
     } catch (err) {
       console.error("❌ Error completing challenge:", err);
+    }
+  };
+
+const handleToggleCarousel = async () => {
+  if (!showNewChallenge) {
+    try {
+      const res = await fetch("/api/challenges/all", {
+        method: "GET",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to fetch all challenges");
+      const data = await res.json();
+      setAvailable(data);
+    } catch (err) {
+      console.error("❌ Error fetching all challenges:", err);
+    }
+  }
+  setShowNewChallenge(!showNewChallenge);
+};
+
+
+  const handleStartChallenge = async (challenge: Microchallenge) => {
+    try {
+      const res = await fetch(`/api/challenges/start/${challenge.challenge_id}`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to start challenge");
+      setShowNewChallenge(false);
+      setChallenges((prev) => [...prev, { ...challenge, status: "assigned" }]);
+    } catch (err) {
+      console.error("❌ Error starting challenge:", err);
     }
   };
 
@@ -170,18 +206,24 @@ const MicrochallengesPage = () => {
 
                   <p className="pt-2 font-semibold">{c.closing}</p>
 
-                  <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                  <div className="flex items-center gap-4 mt-4">
                     <button
-                      className="bg-[#5eb1bf] hover:bg-[#4aa2af] text-white font-semibold px-6 py-2 rounded-lg"
                       onClick={() => handleLog(c.challenge_id)}
+                      className="px-5 py-3 bg-brand-teal text-white font-semibold rounded-lg shadow-sm 
+                                 hover:bg-brand-dark transition-colors focus:outline-none focus:ring-2 
+                                 focus:ring-brand-teal focus:ring-offset-1"
                     >
-                      ✔ I Did It Today
+                      ✓ I Did It Today
                     </button>
+
                     <textarea
-                      className="border rounded-md p-2 w-full md:w-60"
-                      placeholder="Add notes (optional)..."
                       value={note}
                       onChange={(e) => setNote(e.target.value)}
+                      placeholder="Add notes (optional)..."
+                      rows={1}
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg shadow-sm 
+                                focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-brand-teal 
+                                resize-none text-sm"
                     />
                   </div>
                 </div>
@@ -189,6 +231,71 @@ const MicrochallengesPage = () => {
             </div>
           );
         })}
+      </div>
+
+      {/* Start a New Microchallenge */}
+      <div className="mt-10">
+        <div className="flex justify-center">
+          <button
+            onClick={handleToggleCarousel}
+            className="px-6 py-3 bg-brand-primary text-white font-semibold rounded-lg shadow-sm 
+                       hover:bg-brand-dark transition-colors focus:outline-none focus:ring-2 
+                       focus:ring-brand-primary focus:ring-offset-1"
+          >
+            {showNewChallenge ? "✕ Close" : "➕ Start a New Microchallenge"}
+          </button>
+        </div>
+
+        {showNewChallenge && (
+          <div className="mt-6">
+            {available.length === 0 ? (
+              <p className=" text-center">
+                No challenges available right now.
+              </p>
+            ) : (
+              <div className="space-y-6">
+  {available.map((c) => {
+    const alreadyAssigned = challenges.some(
+      (assigned) => assigned.challenge_id === c.id
+    );
+
+    return (
+      <div
+        key={c.id}
+        className="border rounded-lg p-6  shadow-sm flex flex-col"
+      >
+        <h3 className="text-lg font-semibold text-brand-dark">{c.title}</h3>
+
+        <div className="mt-2 space-y-2 text-md">
+          {c.intro.map((line, idx) => (
+            <p key={idx}>{line}</p>
+          ))}
+        </div>
+
+        {/* Action aligned bottom-right */}
+        <div className="mt-auto self-end">
+          {alreadyAssigned ? (
+            <span className="inline-block px-3 py-2 text-xs font-semibold text-gray-600 border rounded">
+              ✅ Already Assigned
+            </span>
+          ) : (
+            <button
+              onClick={() => handleStartChallenge(c)}
+              className="px-4 py-2 bg-brand-teal text-white rounded-lg shadow-sm 
+                         hover:bg-brand-dark transition"
+            >
+              Start This Challenge
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  })}
+</div>
+
+            )}
+          </div>
+        )}
       </div>
 
       <div className="mt-6">

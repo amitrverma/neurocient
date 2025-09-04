@@ -21,12 +21,15 @@ interface Microchallenge {
 const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
   const { user, ready } = useAuth();
   const router = useRouter();
-  const { notify } = useNotification(); // ✅ moved inside component
+  const { notify } = useNotification();
+
   const [showAuth, setShowAuth] = useState(false);
   const [showMembership, setShowMembership] = useState(false);
   const [challenge, setChallenge] = useState<Microchallenge | null>(null);
+  const [assigning, setAssigning] = useState(false); // ⏳ disable button while assigning
+  const [alreadyAssigned, setAlreadyAssigned] = useState(false); // ✅ state for active challenge
 
-  // 🔄 Fetch challenge data (open to all, no login required)
+  // 🔄 Fetch challenge data (public)
   useEffect(() => {
     const fetchChallenge = async () => {
       try {
@@ -35,15 +38,16 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
         const data = await res.json();
         setChallenge(data);
       } catch (err) {
-        console.error("Error fetching challenge:", err);
+        console.error("❌ Error fetching challenge:", err);
       }
     };
 
     if (id) fetchChallenge();
   }, [id]);
 
-  // 🚦 Click handler checks login + usage quota
+  // 🚦 Try assigning challenge
   const startChallenge = async () => {
+    setAssigning(true);
     incrementUsage("microchallenges", true);
     trackEvent("Microchallenge Started", { id });
 
@@ -53,21 +57,26 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
         credentials: "include",
       });
 
-      if (!res.ok) throw new Error("Failed to start challenge");
-      const data = await res.json();
-
-      if (data.already_assigned) {
-        notify(
-          "You have already started this Microchallenge. Check your dashboard to track your progress.",
-          "info"
-        );
-      } else {
-        notify("Microchallenge started successfully!", "success");
-        router.push("/tools/microchallenges");
+      if (!res.ok) {
+        const errData = await res.json();
+        if (errData.detail === "You already have an active challenge") {
+          setAlreadyAssigned(true);
+          notify(
+            "⚡ You already have an active challenge. Track it in your dashboard.",
+            "info"
+          );
+          return;
+        }
+        throw new Error(errData.detail || "Failed to start challenge");
       }
+
+      notify("🎉 Microchallenge started successfully!", "success");
+      router.push("/tools/microchallenges");
     } catch (err) {
       console.error("❌ Error starting challenge:", err);
       notify("Something went wrong while starting the challenge.", "error");
+    } finally {
+      setAssigning(false);
     }
   };
 
@@ -97,14 +106,14 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
   }
 
   return (
-    <div className="my-6 p-4 rounded-lg shadow-sm">
+    <div className="my-6 p-4 rounded-lg shadow-sm border">
       <div className="flex items-center gap-2 mb-2">
         <h3 className="text-lg font-semibold text-brand-accent">
           Ready for a Microchallenge?
         </h3>
       </div>
 
-      {/* Microchallenge explainer */}
+      {/* Explainer */}
       <p className="text-sm text-brand-dark mb-3">
         A Microchallenge is a tiny, science-backed experiment for daily life.
         They’re not about discipline—they’re small nudges that work with your
@@ -116,13 +125,31 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
         <em>{challenge.title}</em>: {challenge.why}
       </p>
 
-      <button
-        onClick={handleClick}
-        data-cta="microchallenge-open"
-        className="text-sm font-semibold px-3 py-2 rounded-md border text-brand-dark hover:bg-brand-teal hover:text-white transition"
-      >
-        Try this Microchallenge
-      </button>
+      {alreadyAssigned ? (
+        <p className="text-sm text-gray-600">
+          ⚡ You’ve already started this microchallenge.{" "}
+          <button
+            onClick={() => router.push("/tools/microchallenges")}
+            className="text-brand-teal underline hover:text-brand-dark"
+          >
+            View progress in your dashboard →
+          </button>
+        </p>
+      ) : (
+        <button
+          onClick={handleClick}
+          data-cta="microchallenge-open"
+          disabled={assigning}
+          className={`text-sm font-semibold px-3 py-2 rounded-md border shadow-sm transition
+            ${
+              assigning
+                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                : "text-brand-dark hover:bg-brand-teal hover:text-white"
+            }`}
+        >
+          {assigning ? "Starting..." : "Try this Microchallenge"}
+        </button>
+      )}
 
       {/* Modals */}
       <MembershipModal

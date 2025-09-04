@@ -6,12 +6,14 @@ import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "../../components/AuthModal";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useNotification } from "../../components/NotificationProvider";
+import ConfettiCelebration from "../../components/ui/ConfettiCelebration";
+
 
 // 🔹 Assigned challenges (from /challenges/my)
 interface AssignedChallenge {
   assignment_id: string;  // UserMicrochallenge.id
   challenge_id: string;   // MicrochallengeDefinition.id
-  status: "active" | "completed" | "removed";
+  status: "active" | "success" | "removed" | "failed";
   started_at: string;
   completed_at?: string | null;
 
@@ -41,6 +43,7 @@ const MicrochallengesPage = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showNewChallenge, setShowNewChallenge] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const { user, ready } = useAuth();
   const { notify } = useNotification();
@@ -109,15 +112,24 @@ const MicrochallengesPage = () => {
       const todayKey = new Date().toISOString().slice(0, 10);
       localStorage.setItem("loggedToday", todayKey);
 
+        if (data.status === "success") {
+          setShowConfetti(true);
+          setTimeout(() => setShowConfetti(false), 5000); // stop after 5s
+        }
       // ✅ update state
       setChallenges((prev) =>
-        prev.map((c) =>
-          c.assignment_id === assignment.assignment_id
-            ? { ...c, progress: Math.round(data.progress), loggedToday: true }
-            : c
-        )
-      );
-
+      prev.map((c) =>
+        c.assignment_id === assignment.assignment_id
+          ? { 
+              ...c, 
+              progress: Math.round(data.progress), 
+              loggedToday: true,
+              status: data.status, // ✅ update status
+              completed_at: data.completed_at || c.completed_at
+            }
+          : c
+      )
+    );
       notify("✅ Logged successfully!", "success");
       setNote("");
     } catch (err) {
@@ -250,7 +262,7 @@ const MicrochallengesPage = () => {
                 <div className="flex items-center gap-2">
                   <span
                     className={`text-xs font-semibold px-2 py-1 rounded ${
-                      c.status === "completed"
+                      c.status === "success"
                         ? "border text-green-700"
                         : c.status === "active"
                         ? "border text-blue-700"
@@ -308,40 +320,56 @@ const MicrochallengesPage = () => {
                   {c.closing && <p className="pt-2 font-semibold">{c.closing}</p>}
 
                   <div className="flex flex-col gap-4 mt-4">
-                    {/* Progress bar */}
-                    {typeof c.progress === "number" && (
-                      <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                        <div
-                          className="bg-brand-teal h-3 transition-all"
-                          style={{ width: `${Math.min(100, Math.round(c.progress))}%` }}
-                        />
-                      </div>
-                    )}
-                    {c.status === "active" && (<div className="flex items-center gap-4">
-                      <button
-                        onClick={() => handleLog(c)}
-                        disabled={c.loggedToday}
-                        className={`px-5 py-3 rounded-lg shadow-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1
-                          ${
-                            c.loggedToday
-                              ? "bg-gray-400 text-white cursor-not-allowed"
-                              : "bg-brand-teal text-white hover:bg-brand-dark focus:ring-brand-teal"
-                          }`}
-                      >
-                        {c.loggedToday ? "✓ Logged Today" : "✓ I Did It Today"}
-                      </button>
+  {/* Progress bar with % */}
+  {typeof c.progress === "number" && (
+    <div className="flex items-center gap-3">
+      <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+        <div
+          className="bg-brand-teal h-3 rounded-full transition-all duration-700 ease-out"
+          style={{ width: `${Math.min(100, Math.round(c.progress))}%` }}
+        />
+      </div>
+      <span className="text-sm font-semibold text-brand-dark min-w-[3ch]">
+        {Math.min(100, Math.round(c.progress))}%
+      </span>
+    </div>
+  )}
 
-                      <textarea
-                        value={note}
-                        onChange={(e) => setNote(e.target.value)}
-                        placeholder="Add notes (optional)..."
-                        rows={1}
-                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg shadow-sm 
-                                  focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-brand-teal 
-                                  resize-none text-sm"
-                      />
-                    </div>)}
-                  </div>
+  {c.status === "active" && (
+    <div className="flex items-center gap-4">
+      {/* Checkbox for daily log */}
+      <label className="flex items-center gap-2 cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={c.loggedToday}
+          onChange={() => handleLog(c)}
+          disabled={c.loggedToday}
+          className="h-5 w-5 accent-brand-teal rounded-md cursor-pointer disabled:opacity-60"
+        />
+        <span
+          className={`font-semibold ${
+            c.loggedToday ? "text-gray-500 line-through" : "text-brand-dark"
+          }`}
+        >
+          {c.loggedToday ? "Yes, done!" : "I Did It Today"}
+        </span>
+      </label>
+
+      {/* Notes */}
+      <textarea
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        placeholder="Write a quick reflection (optional)..."
+        rows={1}
+        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg shadow-sm 
+                   focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-brand-teal 
+                   resize-none text-sm"
+      />
+    </div>
+  )}
+</div>
+
+
                 </div>
               )}
             </div>
@@ -444,6 +472,7 @@ const MicrochallengesPage = () => {
         onClose={() => setShowAuth(false)}
         context="start microchallenges"
       />
+      <ConfettiCelebration trigger={showConfetti} />
     </div>
   );
 };

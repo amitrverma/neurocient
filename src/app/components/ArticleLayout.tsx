@@ -103,37 +103,39 @@ const ArticleLayout = ({
     let incremented = false;
 
     const markAsRead = async () => {
-      if (incremented) return;
-      incremented = true;
+  if (incremented) return;
+  incremented = true;
 
-      try {
-        const res = await fetch(`/api/articles/${slug}/read`, {
-          method: "POST",
-          credentials: "include",
-        });
+  try {
+    await fetch(`/api/articles/${slug}/read`, {
+      method: "POST",
+      credentials: "include",
+    });
 
-        if (user) {
-          if (res.ok) {
-            const data = await res.json();
-            const limit = usageLimits.user.articles;
-            if (data.read_count > limit) {
-              setShowMembership(true);
-            }
-          }
-        } else {
-          const { allowed } = incrementUsage("articles", false);
-          if (!allowed) {
-            setAuthContext("continue reading");
-            setShowAuth(true);
-          }
-        }
-      } catch (err) {
-        console.error("❌ Error incrementing read count:", err);
+    if (user) {
+      // 🔑 Check localStorage instead of backend response
+      const usage = JSON.parse(localStorage.getItem("usage_user") || "{}");
+      const articlesRead = usage.articles || 0;
+      const limit = usageLimits.user.articles;
+
+      if (articlesRead >= limit) {
+        setShowMembership(true);
       }
+    } else {
+      const { allowed } = incrementUsage("articles", false);
+      if (!allowed) {
+        setAuthContext("continue reading");
+        setShowAuth(true);
+      }
+    }
+  } catch (err) {
+    console.error("❌ Error incrementing read count:", err);
+  }
 
-      window.removeEventListener("scroll", onScroll);
-      clearTimeout(timeout);
-    };
+  window.removeEventListener("scroll", onScroll);
+  clearTimeout(timeout);
+};
+
 
     const onScroll = () => {
       const scrolled =

@@ -110,7 +110,7 @@ const handleToggleCarousel = async () => {
 
   const handleStartChallenge = async (challenge: Microchallenge) => {
     try {
-      const res = await fetch(`/api/challenges/start/${challenge.challenge_id}`, {
+      const res = await fetch(`/api/challenges/assign/${challenge.id}`, {
         method: "POST",
         credentials: "include",
       });
@@ -238,11 +238,11 @@ const handleToggleCarousel = async () => {
         <div className="flex justify-center">
           <button
             onClick={handleToggleCarousel}
-            className="px-6 py-3 bg-brand-primary text-white font-semibold rounded-lg shadow-sm 
-                       hover:bg-brand-dark transition-colors focus:outline-none focus:ring-2 
-                       focus:ring-brand-primary focus:ring-offset-1"
+            className="px-6 py-3 border text-brand-dark font-semibold rounded-lg shadow-sm 
+                       hover:bg-brand-primary transition-colors
+                       hover:text-white"
           >
-            {showNewChallenge ? "✕ Close" : "➕ Start a New Microchallenge"}
+            {showNewChallenge ? "✕ Close" : "Start a New Microchallenge"}
           </button>
         </div>
 

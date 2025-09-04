@@ -1,12 +1,12 @@
 "use client";
-import { Zap } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "../AuthModal";
 import MembershipModal from "../MembershipModal";
 import { getUsage, incrementUsage, usageLimits } from "../../utils/usage";
 import { trackEvent } from "../../utils/analytics";
-import { useRouter } from "next/navigation";
+import { useNotification } from "../NotificationProvider";
 
 interface MicrochallengeBoxProps {
   id: string; // UUID from backend
@@ -21,6 +21,7 @@ interface Microchallenge {
 const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
   const { user, ready } = useAuth();
   const router = useRouter();
+  const { notify } = useNotification(); // ✅ moved inside component
   const [showAuth, setShowAuth] = useState(false);
   const [showMembership, setShowMembership] = useState(false);
   const [challenge, setChallenge] = useState<Microchallenge | null>(null);
@@ -38,16 +39,36 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
       }
     };
 
-    if (id) {
-      fetchChallenge();
-    }
+    if (id) fetchChallenge();
   }, [id]);
 
   // 🚦 Click handler checks login + usage quota
-  const startChallenge = () => {
+  const startChallenge = async () => {
     incrementUsage("microchallenges", true);
     trackEvent("Microchallenge Started", { id });
-    router.push("/tools/microchallenges");
+
+    try {
+      const res = await fetch(`/api/challenges/assign/${id}`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Failed to start challenge");
+      const data = await res.json();
+
+      if (data.already_assigned) {
+        notify(
+          "You have already started this Microchallenge. Check your dashboard to track your progress.",
+          "info"
+        );
+      } else {
+        notify("Microchallenge started successfully!", "success");
+        router.push("/tools/microchallenges");
+      }
+    } catch (err) {
+      console.error("❌ Error starting challenge:", err);
+      notify("Something went wrong while starting the challenge.", "error");
+    }
   };
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -77,49 +98,49 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
 
   return (
     <div className="my-6 p-4 rounded-lg shadow-sm">
-  <div className="flex items-center gap-2 mb-2">
-    <h3 className="text-lg font-semibold text-brand-accent">
-     Ready for a Microchallenge? 
-    </h3>
-  </div>
+      <div className="flex items-center gap-2 mb-2">
+        <h3 className="text-lg font-semibold text-brand-accent">
+          Ready for a Microchallenge?
+        </h3>
+      </div>
 
-  {/* Microchallenge explainer */}
+      {/* Microchallenge explainer */}
+      <p className="text-sm text-brand-dark mb-3">
+        A Microchallenge is a tiny, science-backed experiment for daily life.
+        They’re not about discipline—they’re small nudges that work with your
+        wiring. Think of them as playful tests of instinct: one small shift at a
+        time, building awareness and momentum.
+      </p>
 
-    <p className="text-sm text-brand-dark mb-3">
-      A Microchallenge is a tiny, science-backed experiment for daily life.
-      They’re not about discipline—they’re small nudges that work with your
-      wiring. Think of them as playful tests of instinct: one small shift at a
-      time, building awareness and momentum.
-    </p>
- 
-<p className="text-md text-brand-dark mb-3"><em>{challenge.title} </em>: {challenge.why}</p>
+      <p className="text-md text-brand-dark mb-3">
+        <em>{challenge.title}</em>: {challenge.why}
+      </p>
 
-  <button
-    onClick={handleClick}
-    data-cta="microchallenge-open"
-    className="text-sm font-semibold px-3 py-2 rounded-md border text-brand-dark hover:bg-brand-teal hover:text-white transition"
-  >
-    Try this Microchallenge
-  </button>
+      <button
+        onClick={handleClick}
+        data-cta="microchallenge-open"
+        className="text-sm font-semibold px-3 py-2 rounded-md border text-brand-dark hover:bg-brand-teal hover:text-white transition"
+      >
+        Try this Microchallenge
+      </button>
 
-  {/* Modals */}
-  <MembershipModal
-    isOpen={showMembership}
-    onClose={() => setShowMembership(false)}
-    disableEscape
-  />
-  <AuthModal
-    isOpen={showAuth}
-    onClose={() => setShowAuth(false)}
-    context="start microchallenges"
-    onSuccess={() => {
-      setShowAuth(false);
-      startChallenge();
-    }}
-    disableEscape
-  />
-</div>
-
+      {/* Modals */}
+      <MembershipModal
+        isOpen={showMembership}
+        onClose={() => setShowMembership(false)}
+        disableEscape
+      />
+      <AuthModal
+        isOpen={showAuth}
+        onClose={() => setShowAuth(false)}
+        context="start microchallenges"
+        onSuccess={() => {
+          setShowAuth(false);
+          startChallenge();
+        }}
+        disableEscape
+      />
+    </div>
   );
 };
 

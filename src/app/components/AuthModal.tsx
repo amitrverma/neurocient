@@ -7,6 +7,7 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../firebase";
 import { useNotification } from "./NotificationProvider";
 import { trackEvent } from "../utils/analytics";
+import usePushNotifications from "@/app/hooks/usePushNotifications";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -29,6 +30,8 @@ const AuthModal = ({
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const { notify } = useNotification();
+    // ✅ use hook inside component
+  const { subscribe } = usePushNotifications(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!);
 
   // 🔑 Google login flow
   const handleGoogleLogin = async () => {
@@ -46,13 +49,20 @@ const AuthModal = ({
 
       const data = await res.json().catch(() => ({}));
 
-      if (res.ok && !data.preview) {
+      if (res.ok) {
         await login(); // 👈 hydrate user
         onClose();
         onSuccess?.();
         trackEvent("Login Completed");
-      } else if (data.preview) {
-        notify("You’re in preview mode (waitlist).");
+
+        // 🔔 Push permission check
+
+        if (Notification.permission === "granted") {
+          await subscribe(); // no userId needed anymore
+        } else {
+          notify("Push notifications are disabled. You can enable them anytime from Profile → Preferences.");
+        }
+
       } else {
         notify("Google login failed.", "error");
       }
@@ -79,10 +89,20 @@ const AuthModal = ({
       });
 
       if (res.ok) {
+        const data = await res.json().catch(() => ({}));
         await login();
         onClose();
         onSuccess?.();
         trackEvent(mode === "signup" ? "Signup Completed" : "Login Completed");
+
+      // 🔔 Push permission check
+        
+           if (Notification.permission === "granted") {
+              await subscribe(); // no userId needed anymore
+            } else {
+              notify("Push notifications are disabled. You can enable them anytime from Profile → Preferences.");
+            }
+        
       } else {
         const errData = await res.json().catch(() => ({}));
         notify(errData?.detail || "Failed to authenticate.", "error");

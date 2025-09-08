@@ -13,30 +13,44 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState<"insights" | "settings" | "preferences">("insights");
   const { user, logout } = useAuth();
 
-  const { permission, subscribe, unsubscribe } = usePushNotifications(VAPID_PUBLIC_KEY);
+  const { subscribe, unsubscribe } = usePushNotifications(VAPID_PUBLIC_KEY);
   const { notify } = useNotification();
   // Preferences state
   const [nudgeEnabled, setNudgeEnabled] = useState(true);
   const [challengeEnabled, setChallengeEnabled] = useState(true);
   const [whatsAppEnabled, setWhatsAppEnabled] = useState(false);
   const [whatsAppNumber, setWhatsAppNumber] = useState("");
-  // Add pushEnabled state
   const [pushEnabled, setPushEnabled] = useState(false);
+  const [initialPrefs, setInitialPrefs] = useState<{
+    nudgeEnabled: boolean;
+    challengeEnabled: boolean;
+    pushEnabled: boolean;
+    whatsAppEnabled: boolean;
+    whatsAppNumber: string;
+  } | null>(null);
   // Load preferences from backend
   // Load from backend
 useEffect(() => {
   fetch("/api/user/preferences")
-    .then(res => res.json())
-    .then(data => {
+    .then((res) => res.json())
+    .then((data) => {
       if (data) {
-        setNudgeEnabled(data.nudge_enabled);
-        setChallengeEnabled(data.microchallenge_enabled);
-        setWhatsAppEnabled(!!data.whatsapp_number);
-        setWhatsAppNumber(data.whatsapp_number || "");
-        setPushEnabled(data.notif_channel === "push"); // ✅ map DB state
+        const prefs = {
+          nudgeEnabled: data.nudge_enabled,
+          challengeEnabled: data.microchallenge_enabled,
+          whatsAppEnabled: !!data.whatsapp_number,
+          whatsAppNumber: data.whatsapp_number || "",
+          pushEnabled: data.notif_channel === "push",
+        };
+        setNudgeEnabled(prefs.nudgeEnabled);
+        setChallengeEnabled(prefs.challengeEnabled);
+        setWhatsAppEnabled(prefs.whatsAppEnabled);
+        setWhatsAppNumber(prefs.whatsAppNumber);
+        setPushEnabled(prefs.pushEnabled);
+        setInitialPrefs(prefs);
       }
     })
-    .catch(err => console.error("❌ Failed to load preferences", err));
+    .catch((err) => console.error("❌ Failed to load preferences", err));
 }, []);
 
   // Save preferences helper
@@ -50,6 +64,55 @@ useEffect(() => {
     } catch (err) {
       console.error("❌ Failed to save preferences", err);
     }
+  };
+
+  const hasChanges = initialPrefs
+    ? nudgeEnabled !== initialPrefs.nudgeEnabled ||
+      challengeEnabled !== initialPrefs.challengeEnabled ||
+      pushEnabled !== initialPrefs.pushEnabled ||
+      whatsAppEnabled !== initialPrefs.whatsAppEnabled ||
+      (whatsAppEnabled && whatsAppNumber !== initialPrefs.whatsAppNumber)
+    : false;
+
+  const handleSave = async () => {
+    if (!initialPrefs) return;
+
+    const updates = {
+      nudge_enabled: nudgeEnabled,
+      microchallenge_enabled: challengeEnabled,
+      notif_channel: pushEnabled ? "push" : null,
+      whatsapp_number: whatsAppEnabled ? whatsAppNumber : null,
+    };
+
+    if (pushEnabled && !initialPrefs.pushEnabled) {
+      if (Notification.permission === "default") {
+        const result = await Notification.requestPermission();
+        if (result !== "granted") {
+          notify("Please enable push in browser settings.", "error");
+          return;
+        }
+      } else if (Notification.permission === "denied") {
+        notify(
+          "Push is blocked in your browser. Please allow it from site settings.",
+          "error"
+        );
+        return;
+      }
+      await subscribe();
+    }
+
+    if (!pushEnabled && initialPrefs.pushEnabled) {
+      await unsubscribe();
+    }
+
+    await savePrefs(updates);
+    setInitialPrefs({
+      nudgeEnabled,
+      challengeEnabled,
+      pushEnabled,
+      whatsAppEnabled,
+      whatsAppNumber,
+    });
   };
 
   return (
@@ -123,10 +186,7 @@ useEffect(() => {
               <input
                 type="checkbox"
                 checked={nudgeEnabled}
-                onChange={(e) => {
-                  setNudgeEnabled(e.target.checked);
-                  savePrefs({ nudge_enabled: e.target.checked });
-                }}
+                onChange={(e) => setNudgeEnabled(e.target.checked)}
                 className="h-4 w-4"
               />
             </div>
@@ -137,10 +197,7 @@ useEffect(() => {
               <input
                 type="checkbox"
                 checked={challengeEnabled}
-                onChange={(e) => {
-                  setChallengeEnabled(e.target.checked);
-                  savePrefs({ microchallenge_enabled: e.target.checked });
-                }}
+                onChange={(e) => setChallengeEnabled(e.target.checked)}
                 className="h-4 w-4"
               />
             </div>
@@ -150,30 +207,7 @@ useEffect(() => {
   <input
     type="checkbox"
     checked={pushEnabled}
-    onChange={async (e) => {
-      const enabled = e.target.checked;
-
-      if (enabled) {
-        if (Notification.permission === "default") {
-          const result = await Notification.requestPermission();
-          if (result !== "granted") {
-            notify("Please enable push in browser settings.","error");
-            return;
-          }
-        } else if (Notification.permission === "denied") {
-          notify("Push is blocked in your browser. Please allow it from site settings.","error");
-          return;
-        }
-
-        await subscribe(); // registers + saves
-        await savePrefs({ notif_channel: "push" });
-        setPushEnabled(true);
-      } else {
-        await unsubscribe(); // removes sub
-        await savePrefs({ notif_channel: null });
-        setPushEnabled(false);
-      }
-    }}
+    onChange={(e) => setPushEnabled(e.target.checked)}
     className="h-4 w-4"
   />
 </div>
@@ -185,10 +219,7 @@ useEffect(() => {
                 <input
                   type="checkbox"
                   checked={whatsAppEnabled}
-                  onChange={(e) => {
-                    setWhatsAppEnabled(e.target.checked);
-                    savePrefs({ whatsapp_number: e.target.checked ? whatsAppNumber : null });
-                  }}
+                  onChange={(e) => setWhatsAppEnabled(e.target.checked)}
                   className="h-4 w-4"
                 />
               </label>
@@ -197,14 +228,18 @@ useEffect(() => {
                   type="tel"
                   placeholder="+91 98765 43210"
                   value={whatsAppNumber}
-                  onChange={(e) => {
-                    setWhatsAppNumber(e.target.value);
-                    savePrefs({ whatsapp_number: e.target.value });
-                  }}
+                  onChange={(e) => setWhatsAppNumber(e.target.value)}
                   className="mt-2 w-full border rounded-md px-2 py-1 text-sm"
                 />
               )}
             </div>
+            <button
+              onClick={handleSave}
+              disabled={!hasChanges}
+              className="px-4 py-2 bg-[#042a2b] text-white rounded-md text-sm hover:bg-[#5eb1bf] transition disabled:opacity-50"
+            >
+              Save
+            </button>
           </div>
         )}
       </div>

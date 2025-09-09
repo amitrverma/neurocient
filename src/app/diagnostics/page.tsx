@@ -13,7 +13,7 @@ const DiagnosticsPage = () => {
           Your Caveman Brain Still Runs the Show
         </h2>
         <p className="mt-4">
-          Beneath our modern life, ancient instincts—safety, status, belonging—
+          Beneath our modern life, ancient instincts—safety, status, Belonging—
           still guide how we think, feel, and act. Our diagnostics help you see
           these instincts clearly and choose where to explore them—your personal
           life or your work life.
@@ -57,7 +57,7 @@ const DiagnosticsPage = () => {
         </h2>
         <p className="mt-4">
           A diagnostic tool for leaders and teams to uncover instincts shaping
-          workplace dynamics. From status games to conflict avoidance, see how
+          Workplace Dynamics. From status games to conflict avoidance, see how
           ancient wiring drives modern collaboration.
         </p>
         <div className="mt-4">

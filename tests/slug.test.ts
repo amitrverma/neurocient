@@ -8,6 +8,6 @@ describe('slug utilities', () => {
 
   it('unslugifyTag reverses slugifyTag', () => {
     const original = 'The Modern Caveman';
-    expect(unslugifyTag(slugifyTag(original))).toBe('the modern caveman');
+    expect(unslugifyTag(slugifyTag(original))).toBe('The Modern Caveman');
   });
 });

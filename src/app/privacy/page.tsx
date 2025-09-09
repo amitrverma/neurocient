@@ -33,8 +33,8 @@ export default function PrivacyPage() {
       </ul>
       <p>
         If you have questions or requests about your data, email us at:{" "}
-        <a href="mailto:privacy@neurocientlabs.com">
-          privacy@neurocientlabs.com
+        <a href="mailto:privacy@neurocient.com">
+          support@neurocient.com
         </a>
         .
       </p>

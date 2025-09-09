@@ -79,28 +79,34 @@ const LandingPage = () => {
       </h4>
 
       {/* Cards grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {topArticles.map((a) => (
-          <a
-            key={a.slug}
-            href={`/insights/${a.slug}`}
-            className="h-[220px] bg-white border border-brand-dark/10 p-6 rounded-xl 
-                       shadow-sm hover:shadow-md transition flex flex-col justify-between text-left"
-          >
-            <div>
-              <h5 className="text-brand-dark font-bold text-lg line-clamp-3">
-                {a.title}
-              </h5>
+<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+  {topArticles.map((a) => (
+    <a
+      key={a.slug}
+      href={`/insights/${a.slug}`}
+      className="h-[240px] bg-white border border-brand-dark/10 p-6 rounded-xl 
+                 shadow-sm hover:shadow-md transition flex flex-col justify-between text-left"
+    >
+      <div>
+        <h5 className="text-brand-dark font-bold text-lg line-clamp-3">
+          {a.title}
+        </h5>
 
-              {a.excerpt && (
-                <p className="text-brand-dark/70 text-sm mt-2 line-clamp-4">
-                  {a.excerpt}
-                </p>
-              )}
-            </div>
-          </a>
-        ))}
+        {a.excerpt && (
+          <p className="text-brand-dark/70 text-sm mt-2 line-clamp-4">
+            {a.excerpt}
+          </p>
+        )}
       </div>
+
+      {/* Read More link */}
+      <span className="mt-4 text-brand-primary font-semibold text-sm hover:underline">
+        Read More
+      </span>
+    </a>
+  ))}
+</div>
+
 
       {/* CTA */}
       <p className="mt-4 text-sm md:text-base text-brand-dark text-center">

@@ -36,8 +36,8 @@ export default function TermsPage() {
       </p>
       <p>
         For questions:{" "}
-        <a href="mailto:support@neurocientlabs.com">
-          support@neurocientlabs.com
+        <a href="mailto:support@neurocient.com">
+          support@neurocient.com
         </a>
       </p>
     </div>

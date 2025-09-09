@@ -97,14 +97,14 @@ const Navbar = () => {
             )}
 
                         {/* Unlock Full Access for logged-in users */}
-            {user && (
+{/*             {user && (
               <Link
                 href="/membership"
                 className="text-sm font-semibold px-3 py-1 rounded-lg bg-brand-primary text-white border  hover:bg-brand-teal hover:text-white transition"
               >
                 Unlock Full Access
               </Link>
-            )}
+            )} */}
           </div>
 
           {/* Mobile Hamburger */}
@@ -154,13 +154,13 @@ const Navbar = () => {
                 >
                   Sign out ({String(user.name || "User")})
                 </Link>
-                <Link
+{/*                 <Link
                   href="/membership"
                   onClick={() => setIsOpen(false)}
                   className="text-sm font-semibold px-3 py-1 rounded-lg border bg-brand-primary text-white hover:bg-brand-teal hover:text-white transition"
                 >
                   Unlock Full Access
-                </Link>                
+                </Link>   */}              
               </>
             ) : (
               <Link

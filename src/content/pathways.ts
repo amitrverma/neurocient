@@ -31,17 +31,11 @@ export const pathways: Record<PathwayId, Pathway> = {
     title: "Foundation – Inner Caveman 101",
     description: "Get the big picture of why modern struggles feel ancient.",
     articles: [
-      { slug: "modern-struggles", title: "Why Modern Struggles Feel So Ancient", order: 1 },
+      { slug: "evolutionary-lag", title: "Still Running on Caveman Code", order: 1 },
     ],
-    books: [
-      "The Story of the Human Body – Daniel Lieberman",
-    ],
-    research: [
-      "Lieberman et al. (2013) – Evolutionary mismatch and modern health",
-    ],
-    tools: [
-      { title: "Spot Your Caveman Quiz", href: "/tools/caveman-quiz" },
-    ],
+    books: ["The Story of the Human Body – Daniel Lieberman"],
+    research: ["Lieberman et al. (2013) – Evolutionary mismatch and modern health"],
+    tools: [{ title: "Spot Your Caveman Quiz", href: "/diagnostics/caveman-scan" }],
   },
 
   social: {
@@ -49,9 +43,9 @@ export const pathways: Record<PathwayId, Pathway> = {
     title: "Social & Belonging",
     description: "Why connection feels thin in the digital age.",
     articles: [
-      { slug: "disconnected", title: "Why You Feel Disconnected Even with Hundreds of Online Friends", order: 1 },
-      { slug: "tribes", title: "Why Your Brain Still Thinks in Tribes", order: 2 },
-      { slug: "social-feeds", title: "Why Social Feeds Don’t Feed Belonging", order: 3 },
+      { slug: "connections", title: "We’ve Never Been More Connected – Yet Why Are We Lonelier Than Ever?", order: 1 },
+      { slug: "silent-team", title: "The Status Threat That Keeps Teams Quiet", order: 2 },
+      { slug: "spotlight-bias", title: "All Eyes on Me?", order: 3 },
     ],
     books: [
       "The Village Effect – Susan Pinker",
@@ -64,9 +58,7 @@ export const pathways: Record<PathwayId, Pathway> = {
       "Turkle (2011) – Alone Together",
       "Primack et al. (2019) – Digital Media Use and Perceived Social Isolation",
     ],
-    tools: [
-      { title: "Spot Your Caveman Quiz", href: "/tools/caveman-quiz" },
-    ],
+    tools: [{ title: "Spot Your Caveman Quiz", href: "/diagnostics/caveman-scan" }],
   },
 
   workplace: {
@@ -74,9 +66,11 @@ export const pathways: Record<PathwayId, Pathway> = {
     title: "Workplace & Leadership",
     description: "How ancient instincts shape teams, conflict, and decision-making.",
     articles: [
-      { slug: "caveman-in-the-cubicle", title: "Caveman in the Cubicle", order: 1 },
-      { slug: "planning-fallacy", title: "Why Teams Fall into the Planning Fallacy", order: 2 },
-      { slug: "groupthink", title: "The Hidden Danger of Groupthink", order: 3 },
+      { slug: "lnd-workshops", title: "From Inspiration to Inaction: The Workshop Trap", order: 1 },
+      { slug: "planning-fallacy", title: "Why Smart People Still Miss Deadlines", order: 2 },
+      { slug: "groupthink", title: "Conformity Over Creativity: The Groupthink Trap", order: 3 },
+      { slug: "performance-reviews", title: "When Feedback Feels Like Fight-or-Flight", order: 4 },
+      { slug: "team-building", title: "From Campfires to Conference Rooms: The Mismatch in Team-Building", order: 5 },
     ],
     books: [
       "Behave – Robert Sapolsky",
@@ -88,9 +82,7 @@ export const pathways: Record<PathwayId, Pathway> = {
       "Janis – Groupthink",
       "Gino & Staats (2012) – Why Organizations Don’t Learn",
     ],
-    tools: [
-      { title: "CIC Diagnostic Tool", href: "/tools/cic" },
-    ],
+    tools: [{ title: "CIC Diagnostic Tool", href: "/diagnostics/cic" }],
   },
 
   health: {
@@ -98,8 +90,11 @@ export const pathways: Record<PathwayId, Pathway> = {
     title: "Health & Habits",
     description: "Your body is calibrated for survival, not modern routines.",
     articles: [
-      { slug: "exercise-caveman-brain", title: "Why Exercise is Non-Negotiable for Your Caveman Brain", order: 1 },
-      { slug: "silent-theft-body", title: "The Silent Theft (on physical erosion from digital ease)", order: 2 },
+      { slug: "struggle-to-exercise", title: "The Ancient Instinct That Keeps You Off the Treadmill", order: 1 },
+      { slug: "stress-comfort-food", title: "Why Stress Sends You to Sugar and Snacks", order: 2 },
+      { slug: "willpower", title: "Why Willpower Isn’t the Answer", order: 3 },
+      { slug: "doomscrolling", title: "Why Do You Scroll Endlessly on Social Media?", order: 4 },
+      { slug: "binge-watch", title: "Why our Inner Caveman can’t resist Next Episode", order: 5 },
     ],
     books: [
       "Spark – John Ratey",
@@ -110,9 +105,7 @@ export const pathways: Record<PathwayId, Pathway> = {
       "Lieberman et al. (2005) – Evolutionary fitness & mismatch",
       "Studies on sedentary lifestyle impact on cognition",
     ],
-    tools: [
-      { title: "IKEA Framework Installer", href: "/tools/ikea" },
-    ],
+     tools: [],
   },
 
   deepDive: {
@@ -120,8 +113,11 @@ export const pathways: Record<PathwayId, Pathway> = {
     title: "Deep Dive & Advanced Thinking",
     description: "Bringing it all together — cognition, emotion, society, and health.",
     articles: [
-      { slug: "silent-theft", title: "The Silent Theft: Humanity vs Digital Convenience", order: 1 },
-      { slug: "modern-struggles", title: "Why Modern Struggles Feel So Ancient", order: 2 },
+      { slug: "negativity-bias", title: "Why Our Minds Hold On to Criticism", order: 1 },
+      { slug: "false-patterns", title: "Faces in the Clouds, Tigers in the Grass: Why We See Patterns", order: 2 },
+      { slug: "loss-aversion", title: "Why Loss Hurts Twice as Much as Gain Feels Good", order: 3 },
+      { slug: "replay-arguments", title: "The Real Reason You Keep Replaying Arguments", order: 4 },
+      { slug: "big-numbers", title: "Stone Age Minds in a Statistical World", order: 5 },
     ],
     books: [
       "How Emotions Are Made – Lisa Feldman Barrett",
@@ -137,3 +133,4 @@ export const pathways: Record<PathwayId, Pathway> = {
     tools: [],
   },
 };
+

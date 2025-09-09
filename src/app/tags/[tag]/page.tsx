@@ -36,7 +36,7 @@ export default async function TagPage({
 }: {
   params: { tag: string };
 }) {
-  const decodedTag = unslugifyTag(params.tag); // "the-modern-caveman" → "the modern caveman"
+  const decodedTag = unslugifyTag(params.tag); // "the-modern-caveman" → "The Modern Caveman"
 
   const files = fs.readdirSync(insightsDir);
 

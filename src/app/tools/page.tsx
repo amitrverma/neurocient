@@ -89,7 +89,7 @@ const ToolsPage = () => {
       today.
       <br /><br />
       We call this your Inner Caveman. It’s the part of you that seeks safety,
-      status, belonging, quick rewards, and certainty—whether or not those
+      status, Belonging, quick rewards, and certainty—whether or not those
       instincts actually serve you in modern life.
       <br /><br />
       Spotting your caveman is about noticing those moments when your ancient

@@ -106,69 +106,70 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
   }
 
   return (
-    <div className="my-6 p-4 rounded-lg shadow-sm border">
-      <div className="flex items-center gap-2 mb-2">
-        <h3 className="text-lg font-semibold text-brand-accent">
-          Ready for a Microchallenge?
-        </h3>
-      </div>
+  <div className="my-6 p-4 rounded-lg shadow-sm border border-brand-accent bg-brand-teal/10">
+    <div className="flex items-center gap-2 mb-2">
+      <h3 className="text-lg font-semibold text-brand-accent">
+        Ready for Microchallenge?
+      </h3>
+    
 
-      {/* Explainer */}
-      <p className="text-sm text-brand-dark mb-3">
-        A Microchallenge is a tiny, science-backed experiment for daily life.
-        They’re not about discipline—they’re small nudges that work with your
-        wiring. Think of them as playful tests of instinct: one small shift at a
-        time, building awareness and momentum.
-      </p>
+    {/* Explainer */}
+    <p className="text-md text-brand-dark mb-3">
+      A Microchallenge is a tiny, science-backed experiment for daily life.
+      They’re not about discipline—they’re small nudges that work with your
+      wiring. Think of them as playful tests of instinct: one small shift at a
+      time, building awareness and momentum.
+    </p>
+</div>
+    <p className="text-md text-brand-dark mb-3">
+      <strong>{challenge.title}</strong>: {challenge.why}
+    </p>
 
-      <p className="text-md text-brand-dark mb-3">
-        <em>{challenge.title}</em>: {challenge.why}
-      </p>
-
-      {alreadyAssigned ? (
-        <p className="text-sm text-gray-600">
-          ⚡ You’ve already started this microchallenge.{" "}
-          <button
-            onClick={() => router.push("/tools/microchallenges")}
-            className="text-brand-teal underline hover:text-brand-dark"
-          >
-            View progress in your dashboard →
-          </button>
-        </p>
-      ) : (
+    {alreadyAssigned ? (
+      <p className="text-sm text-gray-600">
+        ⚡ You’ve already started this microchallenge.{" "}
         <button
-          onClick={handleClick}
-          data-cta="microchallenge-open"
-          disabled={assigning}
-          className={`text-sm font-semibold px-3 py-2 rounded-md border shadow-sm transition
-            ${
-              assigning
-                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                : "text-brand-dark hover:bg-brand-teal hover:text-white"
-            }`}
+          onClick={() => router.push("/tools/microchallenges")}
+          className="text-brand-teal underline hover:text-brand-dark"
         >
-          {assigning ? "Starting..." : "Try this Microchallenge"}
+          View progress in your dashboard →
         </button>
-      )}
+      </p>
+    ) : (
+      <button
+        onClick={handleClick}
+        data-cta="microchallenge-open"
+        disabled={assigning}
+        className={`text-sm font-semibold px-3 py-2 rounded-md border shadow-sm transition
+          ${
+            assigning
+              ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+              : "border-brand-accent text-brand-dark hover:bg-brand-teal hover:text-white"
+          }`}
+      >
+        {assigning ? "Starting..." : "Try this Microchallenge"}
+      </button>
+    )}
 
-      {/* Modals */}
-      <MembershipModal
-        isOpen={showMembership}
-        onClose={() => setShowMembership(false)}
-        disableEscape
-      />
-      <AuthModal
-        isOpen={showAuth}
-        onClose={() => setShowAuth(false)}
-        context="start microchallenges"
-        onSuccess={() => {
-          setShowAuth(false);
-          startChallenge();
-        }}
-        disableEscape
-      />
-    </div>
-  );
+    {/* Modals */}
+    <MembershipModal
+      isOpen={showMembership}
+      onClose={() => setShowMembership(false)}
+      disableEscape
+    />
+    <AuthModal
+      isOpen={showAuth}
+      onClose={() => setShowAuth(false)}
+      context="start microchallenges"
+      onSuccess={() => {
+        setShowAuth(false);
+        startChallenge();
+      }}
+      disableEscape
+    />
+  </div>
+);
+
 };
 
 export default MicrochallengeBox;

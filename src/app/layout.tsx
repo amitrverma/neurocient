@@ -15,6 +15,9 @@ export const metadata: Metadata = {
     default: "The Neurocient Labs",
     template: "%s | The Neurocient Labs",
   },
+  alternates: {
+    canonical: "https://neurocient.com",  // 👈 canonical link
+  },
   description: "Knowledge hub for your inner caveman",
   openGraph: {
     type: "website",

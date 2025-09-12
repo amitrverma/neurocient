@@ -1,21 +1,22 @@
-import createMDX from '@next/mdx'
-import withPWAInit from 'next-pwa'
+import createMDX from "@next/mdx";
+import nextPWA from "next-pwa";
 
-const withMDX = createMDX({
-  extension: /\.mdx?$/,
-})
+const withMDX = createMDX({ extension: /\.mdx?$/ });
+const isProd = process.env.NODE_ENV === "production";
 
-// ✅ configure next-pwa
-const withPWA = withPWAInit({
-  dest: 'public',
-  register: true,
-  skipWaiting: true,
-})
+const withPWA = (config) =>
+  isProd
+    ? nextPWA({
+        dest: "public",
+        swSrc: "src/service-worker.js", // 👈 our custom SW
+        sw: "service-worker.js",        // 👈 output filename in /public
+        register: true,
+        skipWaiting: true,
+      })(config)
+    : config;
 
-/** @type {import('next').NextConfig} */
 const nextConfig = {
-  pageExtensions: ['ts', 'tsx', 'mdx'],
-}
+  pageExtensions: ["ts", "tsx", "mdx"],
+};
 
-// ✅ compose MDX + PWA
-export default withPWA(withMDX(nextConfig))
+export default withPWA(withMDX(nextConfig));

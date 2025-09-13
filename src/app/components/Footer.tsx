@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { Instagram, Twitter, Linkedin, Youtube } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -49,14 +50,47 @@ const Footer = () => {
         </div>
 
         {/* 📌 Right: Social */}
-        <div className="flex flex-col items-center md:items-end gap-3">
-          <p className="font-medium">Stay connected:</p>
-          <div className="flex gap-4">
-            <a href="#" aria-label="Twitter" className="hover:text-brand-primary transition">Twitter</a>
-            <a href="#" aria-label="LinkedIn" className="hover:text-brand-primary transition">LinkedIn</a>
-            <a href="#" aria-label="YouTube" className="hover:text-brand-primary transition">YouTube</a>
-          </div>
-        </div>
+<div className="flex flex-col items-center md:items-end gap-3">
+  <p className="font-medium">Stay connected:</p>
+  <div className="flex gap-4 text-brand-dark">
+    <a
+      href="https://x.com/neurocient"
+      aria-label="Twitter"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="hover:text-brand-primary transition"
+    >
+      <Twitter className="w-5 h-5" />
+    </a>
+    <a
+      href="https://www.linkedin.com/company/neurocient"
+      aria-label="LinkedIn"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="hover:text-brand-primary transition"
+    >
+      <Linkedin className="w-5 h-5" />
+    </a>
+    <a
+      href="https://www.youtube.com/@neurocient"
+      aria-label="YouTube"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="hover:text-brand-primary transition"
+    >
+      <Youtube className="w-5 h-5" />
+    </a>
+    <a
+      href="https://www.instagram.com/neurocient/"
+      aria-label="Instagram"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="hover:text-brand-primary transition"
+    >
+      <Instagram className="w-5 h-5" />
+    </a>
+  </div>
+</div>
       </div>
     </footer>
   );

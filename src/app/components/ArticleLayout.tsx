@@ -112,6 +112,9 @@ const ArticleLayout = ({
       credentials: "include",
     });
 
+    // 🔹 Track article read
+    trackEvent("Article Read", { slug });
+
     if (user) {
       // 🔑 Check localStorage instead of backend response
       const usage = JSON.parse(localStorage.getItem("usage_user") || "{}");

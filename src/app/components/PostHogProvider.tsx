@@ -28,18 +28,57 @@ export default function PostHogProvider({ children }: { children: React.ReactNod
     posthog.capture("$pageview");
   }, [pathname]);
 
-  // 🔹 Track CTA clicks (elements with data-cta attr)
+  // 🔹 Track CTA clicks, generic button/link clicks
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      const target = (e.target as HTMLElement).closest("[data-cta]") as HTMLElement | null;
-      if (target) {
-        const cta = target.getAttribute("data-cta") || "unknown";
+      const target = e.target as HTMLElement;
+
+      // CTA elements explicitly tagged
+      const ctaTarget = target.closest("[data-cta]") as HTMLElement | null;
+      if (ctaTarget) {
+        const cta = ctaTarget.getAttribute("data-cta") || "unknown";
         trackEvent("CTA Clicked", { cta });
         posthog.capture("CTA Clicked", { cta });
       }
+
+      // Generic button tracking
+      const button = target.closest("button");
+      if (button) {
+        const label =
+          button.getAttribute("aria-label") || button.textContent?.trim() || "unknown";
+        trackEvent("Button Clicked", { label });
+        posthog.capture("Button Clicked", { label });
+      }
+
+      // Generic link tracking
+      const link = target.closest("a");
+      if (link) {
+        const href = link.getAttribute("href") || "";
+        const label = link.textContent?.trim() || href || "unknown";
+        trackEvent("Link Clicked", { href, label });
+        posthog.capture("Link Clicked", { href, label });
+      }
     };
+
     document.addEventListener("click", handler);
     return () => document.removeEventListener("click", handler);
+  }, []);
+
+  // 🔹 Track form submissions
+  useEffect(() => {
+    const handleSubmit = (e: Event) => {
+      const form = e.target as HTMLFormElement;
+      const formName =
+        form.getAttribute("name") ||
+        form.getAttribute("id") ||
+        form.getAttribute("action") ||
+        "unknown";
+      trackEvent("Form Submitted", { form: formName });
+      posthog.capture("Form Submitted", { form: formName });
+    };
+
+    document.addEventListener("submit", handleSubmit);
+    return () => document.removeEventListener("submit", handleSubmit);
   }, []);
 
   return <>{children}</>;

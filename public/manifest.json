@@ -1,7 +1,7 @@
 {
   "name": "The Neurocient Labs",
   "short_name": "Neurocient",
-  "description": "Knowledge hub for your inner caveman",
+  "description": "Uncover. Discover. Work with your Inner Caveman.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",

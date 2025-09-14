@@ -19,13 +19,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://neurocient.com", // 👈 canonical link
   },
-  description: "Knowledge hub for your inner caveman",
+  description: "Uncover. Discover. Work with your Inner Caveman.",
   openGraph: {
     type: "website",
     siteName: "The Neurocient Labs",
     url: "https://neurocient.com",
     title: "The Neurocient Labs",
-    description: "Knowledge hub for your inner caveman",
+    description: "Uncover. Discover. Work with your Inner Caveman.",
     images: [
       {
         url: "/logo/neurocient.png",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "The Neurocient Labs",
-    description: "Knowledge hub for your inner caveman",
+    description: "Uncover. Discover. Work with your Inner Caveman.",
     images: ["/logo/neurocient.png"],
   },
   icons: {

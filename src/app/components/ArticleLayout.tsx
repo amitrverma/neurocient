@@ -200,6 +200,7 @@ const ArticleLayout = ({
         )}&text=${encodeURIComponent(title)}`}
         target="_blank"
         rel="noopener noreferrer"
+        title="Share on Twitter"
       >
         <Twitter
           size={20}
@@ -213,6 +214,7 @@ const ArticleLayout = ({
         )}`}
         target="_blank"
         rel="noopener noreferrer"
+        title="Share on LinkedIn"
       >
         <Linkedin
           size={20}
@@ -220,7 +222,12 @@ const ArticleLayout = ({
         />
       </a>
       {/* Share: Email */}
-      <a href={`mailto:?subject=${title}&body=${articleUrl}`}>
+      <a 
+        href={`mailto:?subject=${title}&body=${articleUrl}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Share via Email"
+      >
         <Mail size={20} className="text-brand-dark hover:text-brand-primary" />
       </a>
       {/* Save */}

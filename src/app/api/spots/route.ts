@@ -40,6 +40,7 @@ export async function POST(req: Request) {
         Cookie: cookie, // 👈 forward cookies
       },
       body: JSON.stringify(payload),
+      credentials: "include",
     });
 
     const data = await res.json();

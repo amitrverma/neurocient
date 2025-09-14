@@ -5,6 +5,7 @@ import { diagnosticQuestions } from "./questions";
 import FeedbackOverlay from "./FeedbackOverlay";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "../../components/AuthModal";
+import { trackEvent } from "@/app/utils/analytics";
 
 interface Props {
   onComplete: (responses: Record<string, string>) => void;
@@ -34,6 +35,11 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
     if (!selectedOption) return;
 
     if (currentIndex + 1 < diagnosticQuestions.length) {
+      trackEvent("Diagnostic Step Completed", {
+        step: currentIndex + 1,
+        questionId: question.id,
+        answer: selectedOption,
+      });
       setCurrentIndex((prev) => prev + 1);
     } else {
       // ✅ Protect finish behind login
@@ -41,6 +47,7 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
         setShowAuth(true);
         return;
       }
+      trackEvent("Diagnostic Completed", { responses });
       onComplete(responses);
     }
   };

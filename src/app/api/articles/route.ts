@@ -1,9 +1,9 @@
-// app/api/spots/route.ts
+// app/api/spots//route.ts
 import { NextResponse } from "next/server";
 
 const API_BASE_URL = process.env.API_BASE_URL;
 
-// ✅ GET /api/spots → fetch spots
+// ✅ GET /api/spots/ → fetch spots
 export async function GET(req: Request) {
   const cookie = req.headers.get("cookie") || "";
 
@@ -17,7 +17,7 @@ export async function GET(req: Request) {
   return NextResponse.json(data, { status: res.status });
 }
 
-// ✅ POST /api/spots → create new spot
+// ✅ POST /api/spots/ → create new spot
 export async function POST(req: Request) {
   const cookie = req.headers.get("cookie") || "";
 

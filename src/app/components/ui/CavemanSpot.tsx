@@ -42,7 +42,7 @@ const CavemanSpot = ({
     }
 
     try {
-      const res = await fetch("/api/spots", {
+      const res = await fetch("/api/spots/", {
         method: "POST",
         credentials: "include", // ✅ send cookies for auth
         headers: {

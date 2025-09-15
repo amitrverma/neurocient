@@ -31,7 +31,7 @@ const SpotsPage = () => {
       }
 
       try {
-        const res = await fetch("/api/spots", {
+        const res = await fetch("/api/spots/", {
           method: "GET",
           credentials: "include", // 👈 send cookies
         });

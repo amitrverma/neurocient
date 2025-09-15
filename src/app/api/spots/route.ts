@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 
 const API_BASE_URL = process.env.API_BASE_URL;
 
-// ✅ GET /api/spots → list spots
+// ✅ GET /api/spots/ → list spots
 export async function GET(req: Request) {
   try {
     const cookie = req.headers.get("cookie") || "";
 
-    const res = await fetch(`${API_BASE_URL}/api/spots`, {
+    const res = await fetch(`${API_BASE_URL}/api/spots/`, {
       method: "GET",
       headers: {
         Cookie: cookie, // 👈 forward cookies
@@ -18,12 +18,12 @@ export async function GET(req: Request) {
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
   } catch (error) {
-    console.error("❌ Error in GET /api/spots:", error);
+    console.error("❌ Error in GET /api/spots/:", error);
     return NextResponse.json({ detail: "Internal server error" }, { status: 500 });
   }
 }
 
-// ✅ POST /api/spots → create a new spot
+// ✅ POST /api/spots/ → create a new spot
 export async function POST(req: Request) {
   try {
     const cookie = req.headers.get("cookie") || "";
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       description: body.description, // ✅ consistent with frontend
     };
 
-    const res = await fetch(`${API_BASE_URL}/api/spots`, {
+    const res = await fetch(`${API_BASE_URL}/api/spots/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
   } catch (error) {
-    console.error("❌ Error in POST /api/spots:", error);
+    console.error("❌ Error in POST /api/spots/:", error);
     return NextResponse.json({ detail: "Internal server error" }, { status: 500 });
   }
 }

@@ -4,6 +4,7 @@ import matter from "gray-matter";
 import { notFound } from "next/navigation";
 import { compileMDX } from "next-mdx-remote/rsc";
 import type { Metadata } from "next";
+import Script from "next/script"; // 👈 import Script
 import ArticleLayout from "../../components/ArticleLayout";
 import { pathways, type PathwayId, type Pathway, type ArticleRef } from "@/content/pathways";
 import MicrochallengeBox from "../../components/tools/MicrochallengeBox";
@@ -20,12 +21,20 @@ export async function generateMetadata(
   const { data } = matter(raw);
 
   const title = data.title as string;
-  const description = (data.excerpt as string) || "An article from The Neurocient Labs.";
-  const url = `/insights/${slug}`;
+  const description =
+    (data.description as string) ||
+    (data.excerpt as string) ||
+    "An article from Neurocient Labs.";
+  const keywords = (data.keywords as string[]) || [];
+  const url = `https://neurocient.com/insights/${slug}`;
 
   return {
-    title: title,
+    title,
     description,
+    keywords, // ✅ <meta name="keywords">
+    alternates: {
+      canonical: url, // ✅ dynamic canonical tag
+    },
     openGraph: {
       type: "article",
       title,
@@ -36,7 +45,7 @@ export async function generateMetadata(
       tags: (data.tags as string[]) || undefined,
       images: [
         {
-          url: "/logo/neurocient.png",
+          url: "https://neurocient.com/logo/neurocient.png",
           width: 1200,
           height: 630,
           alt: title,
@@ -47,9 +56,7 @@ export async function generateMetadata(
       card: "summary_large_image",
       title,
       description,
-      images: [
-        "/logo/neurocient.png",
-      ],
+      images: ["https://neurocient.com/logo/neurocient.png"],
     },
   };
 }
@@ -79,18 +86,18 @@ export default async function InsightPage(
   const raw = fs.readFileSync(filePath, "utf-8");
   const { content, data } = matter(raw);
 
-const { content: mdxContent } = await compileMDX({
-  source: content,
-  options: { parseFrontmatter: false },
-  components: {
-    MicrochallengeBox, // ✅ make available inside .mdx
-    CavemanSpot, 
-  },
-});
+  const { content: mdxContent } = await compileMDX({
+    source: content,
+    options: { parseFrontmatter: false },
+    components: {
+      MicrochallengeBox, // ✅ make available inside .mdx
+      CavemanSpot,
+    },
+  });
 
   const readingTime = getReadingTime(content);
 
-  // --- 📚 Random "Read Next" (outside pathways) ---
+  // --- 📚 Random "Read Next"
   const allFiles = fs.readdirSync(insightsDir).filter((f) => f.endsWith(".mdx"));
   const otherFiles = allFiles.filter((f) => f.replace(/\.mdx$/, "") !== slug);
 
@@ -107,7 +114,7 @@ const { content: mdxContent } = await compileMDX({
     };
   }
 
-  // --- 🧭 Pathway navigation ---
+  // --- 🧭 Pathway navigation
   let pathwayData: { id: PathwayId; title: string } | null = null;
   let prevInPath: ArticleRef | null = null;
   let nextInPath: ArticleRef | null = null;
@@ -130,22 +137,55 @@ const { content: mdxContent } = await compileMDX({
     }
   }
 
+  // ✅ JSON-LD for structured data
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: data.title,
+    description: data.description || data.excerpt,
+    author: {
+      "@type": "Person",
+      name: data.author || "Amit R Verma",
+    },
+    datePublished: data.date,
+    keywords: (data.keywords || []).join(", "),
+    url: `https://neurocient.com/insights/${slug}`,
+    image: ["https://neurocient.com/logo/neurocient.png"],
+    publisher: {
+      "@type": "Organization",
+      name: "Neurocient Labs",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://neurocient.com/logo/neurocient.png",
+      },
+    },
+  };
+
   return (
-    <ArticleLayout
-      title={data.title}
-      date={data.date}
-      excerpt={data.excerpt}
-      tags={data.tags}
-      readingTime={readingTime}
-      slug={slug}
-      nextArticle={randomNext}
-      resources={data.resources}
-      pathway={pathwayData}   // ✅ pathway info
-      prevInPath={prevInPath} // ✅ prev in pathway
-      nextInPath={nextInPath} // ✅ next in pathway
-      spotPrompt={data.spotPrompt || null} // ✅ pass spot prompt if exists
-    >
-      <div className="prose prose-article max-w-none">{mdxContent}</div>
-    </ArticleLayout>
+    <>
+      <ArticleLayout
+        title={data.title}
+        date={data.date}
+        excerpt={data.excerpt}
+        tags={data.tags}
+        readingTime={readingTime}
+        slug={slug}
+        nextArticle={randomNext}
+        resources={data.resources}
+        pathway={pathwayData}
+        prevInPath={prevInPath}
+        nextInPath={nextInPath}
+        spotPrompt={data.spotPrompt || null}
+      >
+        <div className="prose prose-article max-w-none">{mdxContent}</div>
+      </ArticleLayout>
+
+      {/* ✅ JSON-LD structured data */}
+      <Script
+        id="article-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+    </>
   );
 }

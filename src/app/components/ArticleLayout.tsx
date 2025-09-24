@@ -3,6 +3,7 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import type React from "react";
 import Link from "next/link";
+import Script from "next/script"; // ✅ JSON-LD injection
 import { Twitter, Linkedin, Mail } from "lucide-react";
 import ScrollProgress from "./ui/ScrollProgress";
 import FurtherReads from "./FurtherReads";
@@ -31,6 +32,9 @@ interface ArticleLayoutProps {
   title: string;
   date: string;
   excerpt?: string;
+  description?: string;   // ✅ SEO + JSON-LD
+  keywords?: string[];    // ✅ SEO + JSON-LD
+  author?: string;        // ✅ JSON-LD schema
   tags?: string[];
   readingTime?: string;
   slug?: string;
@@ -47,6 +51,9 @@ const ArticleLayout = ({
   title,
   date,
   excerpt,
+  description,
+  keywords = [],
+  author = "Amit R Verma",
   tags = [],
   readingTime,
   slug,
@@ -56,9 +63,31 @@ const ArticleLayout = ({
   pathway,
   prevInPath,
   nextInPath,
+  spotPrompt,
 }: ArticleLayoutProps) => {
-  const baseUrl = "https://www.neurocient.com/insights";
+  const baseUrl = "https://neurocient.com/insights";
   const articleUrl = slug ? `${baseUrl}/${slug}` : baseUrl;
+
+  // ✅ JSON-LD structured data
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: title,
+    description: description || excerpt,
+    author: { "@type": "Person", name: author },
+    datePublished: date,
+    keywords: [...keywords, ...(tags || [])].join(", "),
+    url: articleUrl,
+    image: ["https://neurocient.com/logo/neurocient.png"],
+    publisher: {
+      "@type": "Organization",
+      name: "Neurocient Labs",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://neurocient.com/logo/neurocient.png",
+      },
+    },
+  };
 
   const { user, ready } = useAuth();
   const { notify } = useNotification();
@@ -70,7 +99,7 @@ const ArticleLayout = ({
   const [authCallback, setAuthCallback] = useState<(() => void) | null>(null);
   const nextRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ Detect if article is already saved
+  // ✅ Detect if saved
   useEffect(() => {
     if (!user || !slug) return;
     const checkSaved = async () => {
@@ -92,53 +121,42 @@ const ArticleLayout = ({
 
   // ✅ Track article view
   useEffect(() => {
-    if (slug) {
-      trackEvent("Article Viewed", { slug });
-    }
+    if (slug) trackEvent("Article Viewed", { slug });
   }, [slug]);
 
-  // ✅ Mark as read (only once per article)
+  // ✅ Mark as read
   useEffect(() => {
     if (!slug || !ready) return;
     let incremented = false;
 
     const markAsRead = async () => {
-  if (incremented) return;
-  incremented = true;
+      if (incremented) return;
+      incremented = true;
+      try {
+        await fetch(`/api/articles/${slug}/read`, {
+          method: "POST",
+          credentials: "include",
+        });
+        trackEvent("Article Read", { slug });
 
-  try {
-    await fetch(`/api/articles/${slug}/read`, {
-      method: "POST",
-      credentials: "include",
-    });
-
-    // 🔹 Track article read
-    trackEvent("Article Read", { slug });
-
-    if (user) {
-      // 🔑 Check localStorage instead of backend response
-      const usage = JSON.parse(localStorage.getItem("usage_user") || "{}");
-      const articlesRead = usage.articles || 0;
-      const limit = usageLimits.user.articles;
-
-      if (articlesRead >= limit) {
-        setShowMembership(true);
+        if (user) {
+          const usage = JSON.parse(localStorage.getItem("usage_user") || "{}");
+          const articlesRead = usage.articles || 0;
+          const limit = usageLimits.user.articles;
+          if (articlesRead >= limit) setShowMembership(true);
+        } else {
+          const { allowed } = incrementUsage("articles", false);
+          if (!allowed) {
+            setAuthContext("continue reading");
+            setShowAuth(true);
+          }
+        }
+      } catch (err) {
+        console.error("❌ Error incrementing read count:", err);
       }
-    } else {
-      const { allowed } = incrementUsage("articles", false);
-      if (!allowed) {
-        setAuthContext("continue reading");
-        setShowAuth(true);
-      }
-    }
-  } catch (err) {
-    console.error("❌ Error incrementing read count:", err);
-  }
-
-  window.removeEventListener("scroll", onScroll);
-  clearTimeout(timeout);
-};
-
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(timeout);
+    };
 
     const onScroll = () => {
       const scrolled =
@@ -154,10 +172,9 @@ const ArticleLayout = ({
       window.removeEventListener("scroll", onScroll);
       clearTimeout(timeout);
     };
-    // 👇 notice: no `user` here, so effect runs once per article
   }, [slug, ready]);
 
-  // ✅ Save / Unsave toggle
+  // ✅ Save / Unsave
   const handleSave = async (
     e?: React.MouseEvent<HTMLButtonElement>,
     skipAuthCheck = false,
@@ -178,9 +195,7 @@ const ArticleLayout = ({
       });
       if (res.ok) {
         setIsSaved(!isSaved);
-        if (!isSaved && slug) {
-          trackEvent("Article Saved", { slug });
-        }
+        if (!isSaved) trackEvent("Article Saved", { slug });
       } else {
         const data = await res.json();
         notify(data.detail || "Something went wrong", "error");
@@ -190,10 +205,9 @@ const ArticleLayout = ({
     }
   };
 
-  // 🔄 Render reusable action icons
+  // 🔄 Actions
   const renderActions = (extraClasses = "") => (
     <div className={`flex gap-4 ${extraClasses}`}>
-      {/* Share: Twitter */}
       <a
         href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
           articleUrl
@@ -202,12 +216,8 @@ const ArticleLayout = ({
         rel="noopener noreferrer"
         title="Share on Twitter"
       >
-        <Twitter
-          size={20}
-          className="text-brand-dark hover:text-brand-primary"
-        />
+        <Twitter size={20} className="text-brand-dark hover:text-brand-primary" />
       </a>
-      {/* Share: LinkedIn */}
       <a
         href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
           articleUrl
@@ -216,13 +226,9 @@ const ArticleLayout = ({
         rel="noopener noreferrer"
         title="Share on LinkedIn"
       >
-        <Linkedin
-          size={20}
-          className="text-brand-dark hover:text-brand-primary"
-        />
+        <Linkedin size={20} className="text-brand-dark hover:text-brand-primary" />
       </a>
-      {/* Share: Email */}
-      <a 
+      <a
         href={`mailto:?subject=${title}&body=${articleUrl}`}
         target="_blank"
         rel="noopener noreferrer"
@@ -230,7 +236,6 @@ const ArticleLayout = ({
       >
         <Mail size={20} className="text-brand-dark hover:text-brand-primary" />
       </a>
-      {/* Save */}
       <button
         onClick={handleSave}
         className={`transition ${
@@ -247,15 +252,9 @@ const ArticleLayout = ({
           viewBox="0 0 24 24"
           stroke="currentColor"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 5v14l7-7 7 7V5a2 2 0 00-2-2H7a2 2 0 00-2 2z"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5v14l7-7 7 7V5a2 2 0 00-2-2H7a2 2 0 00-2 2z" />
         </svg>
       </button>
-      {/* Print */}
       <button
         onClick={() => window.print()}
         className="text-brand-dark hover:text-brand-primary transition"
@@ -268,12 +267,7 @@ const ArticleLayout = ({
           viewBox="0 0 24 24"
           stroke="currentColor"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M6 9V2h12v7M6 18h12v4H6v-4zM6 14h12"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 9V2h12v7M6 18h12v4H6v-4zM6 14h12" />
         </svg>
       </button>
     </div>
@@ -281,16 +275,14 @@ const ArticleLayout = ({
 
   return (
     <div className="relative">
-      {/* 🔝 Sticky scroll progress */}
       <div className="sticky top-16 z-50 w-full bg-white dark:bg-brand-dark">
         <ScrollProgress />
       </div>
 
       <article className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* 👉 Mobile actions bar */}
+        {/* 👉 Mobile actions */}
         <div className="flex lg:hidden mb-6">{renderActions()}</div>
-
-        {/* 👉 Desktop floating sidebar */}
+        {/* 👉 Desktop actions */}
         <div className="hidden lg:flex flex-col gap-4 absolute -left-16 top-20">
           {renderActions("flex-col")}
         </div>
@@ -300,33 +292,24 @@ const ArticleLayout = ({
           {tags?.map((tag) => (
             <Link
               key={tag}
-              href={`/tags/${slugifyTag(tag)}`} // 👈 fixes %20
+              href={`/tags/${slugifyTag(tag)}`}
               className="px-2 py-1 text-xs bg-gray-100 rounded-md hover:bg-brand-secondary"
             >
               {tag}
             </Link>
           ))}
-          {readingTime && (
-            <span className="text-brand-dark">{readingTime}</span>
-          )}
+          {readingTime && <span className="text-brand-dark">{readingTime}</span>}
         </div>
 
-        {/* Title */}
-        <h1 className="text-4xl font-bold tracking-tight text-brand-dark mb-2">
-          {title}
-        </h1>
-
-        {/* Date */}
+        {/* Title / Date / Excerpt */}
+        <h1 className="text-4xl font-bold tracking-tight text-brand-dark mb-2">{title}</h1>
         <p className="text-sm text-brand-dark mb-6">{date}</p>
+        {excerpt && <p className="text-lg text-brand-dark mb-8 italic">{excerpt}</p>}
 
-        {/* Excerpt */}
-        {excerpt && (
-          <p className="text-lg text-brand-dark mb-8 italic">{excerpt}</p>
-        )}
-
-        {/* MDX content */}
+        {/* Content */}
         <div className="prose prose-article text-[18px]">{children}</div>
 
+        {/* Newsletter */}
         <div className="mt-12">
           <Newsletter
             subtext="Enjoyed this? Get one fresh insight each week straight to your inbox."
@@ -334,7 +317,7 @@ const ArticleLayout = ({
           />
         </div>
 
-        {/* Pathway navigation */}
+        {/* Pathway nav */}
         {pathway && (
           <div className="mt-16 border-t pt-8 text-md text-brand-dark">
             <p>
@@ -349,20 +332,14 @@ const ArticleLayout = ({
             </p>
             <div className="flex justify-between mt-3">
               {prevInPath ? (
-                <Link
-                  href={`/insights/${prevInPath.slug}`}
-                  className="hover:underline"
-                >
+                <Link href={`/insights/${prevInPath.slug}`} className="hover:underline">
                   ← {prevInPath.title}
                 </Link>
               ) : (
                 <span />
               )}
               {nextInPath ? (
-                <Link
-                  href={`/insights/${nextInPath.slug}`}
-                  className="hover:underline"
-                >
+                <Link href={`/insights/${nextInPath.slug}`} className="hover:underline">
                   {nextInPath.title} →
                 </Link>
               ) : (
@@ -372,7 +349,7 @@ const ArticleLayout = ({
           </div>
         )}
 
-        {/* Random Read Next */}
+        {/* Random read next */}
         {nextArticle && (
           <div ref={nextRef} className="mt-16 border-t pt-8">
             <p className="text-md text-brand-dark mb-2">You might also like:</p>
@@ -383,14 +360,12 @@ const ArticleLayout = ({
               {nextArticle.title}
             </Link>
             {nextArticle.excerpt && (
-              <p className="text-brand-dark text-md mt-1">
-                {nextArticle.excerpt}
-              </p>
+              <p className="text-brand-dark text-md mt-1">{nextArticle.excerpt}</p>
             )}
           </div>
         )}
 
-        {/* ✅ Mobile Further Reads */}
+        {/* Mobile further reads */}
         {resources && (
           <div className="lg:hidden mt-6">
             <FurtherReads {...resources} />
@@ -398,13 +373,14 @@ const ArticleLayout = ({
         )}
       </article>
 
-      {/* ✅ Desktop sidebar Further Reads */}
+      {/* Desktop further reads */}
       {resources && showResources && (
         <div className="hidden lg:block absolute right-0 bottom-24 w-72">
           <FurtherReads {...resources} />
         </div>
       )}
 
+      {/* Auth / Membership */}
       <AuthModal
         isOpen={showAuth}
         onClose={() => setShowAuth(false)}
@@ -424,6 +400,13 @@ const ArticleLayout = ({
         isOpen={showMembership}
         onClose={() => setShowMembership(false)}
         disableEscape
+      />
+
+      {/* ✅ JSON-LD */}
+      <Script
+        id="article-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
     </div>
   );

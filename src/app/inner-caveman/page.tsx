@@ -8,7 +8,7 @@ import Script from "next/script";
 const insightsDir = path.join(process.cwd(), "src/content/insights");
 
 export const metadata: Metadata = {
-  title: "Inner Caveman: What It Is and How To Work With It | Neurocient Labs",
+  title: "The Complete Guide to Your Inner Caveman",
   description:
     "Inner Caveman is your ancient survival brain running modern life. Learn what it is, how to spot it, and how to work with it using Neurocient Labs tools.",
   keywords: [
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     type: "website",
     url: "https://neurocient.com/inner-caveman",
     siteName: "Neurocient Labs",
-    title: "Inner Caveman at Neurocient Labs",
+    title: "The Complete Guide to Your Inner Caveman",
     description:
       "Understand your Inner Caveman and use practical tools to work with it.",
     images: [
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Inner Caveman at Neurocient Labs",
+    title: "The Complete Guide to Your Inner Caveman",
     description:
       "Understand your Inner Caveman and use practical tools to work with it.",
     images: ["https://neurocient.com/logo/neurocient.png"],
@@ -119,7 +119,7 @@ export default function InnerCavemanPage() {
   return (
     <main className="max-w-4xl mx-auto px-6 py-12">
       <h1 className="text-4xl font-bold text-brand-dark mb-4">
-        Inner Caveman
+        The Complete Guide to Your Inner Caveman
       </h1>
       <p className="text-lg text-brand-dark/80 max-w-3xl">
         Your Inner Caveman is the ancient survival brain—wired for threats,
@@ -178,6 +178,70 @@ export default function InnerCavemanPage() {
         </div>
       </section>
 
+      {/* Definitive guide sections */}
+      <section className="mt-12 space-y-6">
+        <h2 className="text-2xl font-bold text-brand-dark">What Is The Inner Caveman? (The Science)</h2>
+        <div className="space-y-3">
+          <p className="text-brand-dark/80">
+            Your "Inner Caveman" is shorthand for ancient survival circuits that still shape modern behavior. Three systems play the biggest roles:
+          </p>
+          <ul className="list-disc pl-6 text-brand-dark/80">
+            <li><strong>Amygdala:</strong> rapid threat detection, triggers fear and vigilance.</li>
+            <li><strong>Limbic system:</strong> emotion, reward, memory; learns habits and cravings.</li>
+            <li><strong>Prefrontal cortex:</strong> planning and self-control; can be hijacked by threat and stress.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section className="mt-12 space-y-6">
+        <h2 className="text-2xl font-bold text-brand-dark">How It Shows Up Day to Day</h2>
+        <div className="grid grid-cols-1 gap-6">
+          <div className="border rounded-xl p-6">
+            <h3 className="text-xl font-semibold text-brand-dark">Common patterns</h3>
+            <ul className="list-disc pl-6 text-brand-dark/80 mt-2">
+              <li>Procrastination when stakes feel social or ambiguous</li>
+              <li>Doomscrolling for approval and belonging</li>
+              <li>Conflict avoidance as if disagreement equals exile</li>
+              <li>Cravings and comfort eating under stress</li>
+              <li>Over-checking, rumination, and replaying arguments</li>
+            </ul>
+          </div>
+          <div className="border rounded-xl p-6">
+            <h3 className="text-xl font-semibold text-brand-dark">Why these happen</h3>
+            <p className="text-brand-dark/80 mt-2">
+              In ancestral environments, fear, comfort, and approval meant survival. Today the same wiring misfires in digital, abundant, always-on contexts.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-12 space-y-6">
+        <h2 className="text-2xl font-bold text-brand-dark">How To Work With It (Not Against It)</h2>
+        <div className="grid grid-cols-1 gap-6">
+          <div className="border rounded-xl p-6">
+            <h3 className="text-xl font-semibold text-brand-dark">Mindfulness and threat reduction</h3>
+            <ul className="list-disc pl-6 text-brand-dark/80 mt-2">
+              <li>Name the instinct in real time: “Ah, Inner Caveman wants safety.”</li>
+              <li>Lower perceived threat: smaller steps, safer context, clearer next action.</li>
+              <li>Breathing and grounding to rebalance the amygdala–PFC loop.</li>
+            </ul>
+          </div>
+          <div className="border rounded-xl p-6">
+            <h3 className="text-xl font-semibold text-brand-dark">Cognitive tools and tiny reps</h3>
+            <ul className="list-disc pl-6 text-brand-dark/80 mt-2">
+              <li>Reframe: from “I must perform” to “I can learn one thing.”</li>
+              <li>Implementation intentions: “If X, then I do Y for 2 minutes.”</li>
+              <li>Shape the environment: remove friction for the next tiny action.</li>
+            </ul>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Link href="/spot" className="px-4 py-2 rounded-lg border text-brand-dark hover:bg-brand-primary hover:text-white transition">Spot Your Caveman</Link>
+          <Link href="/microchallenge" className="px-4 py-2 rounded-lg border text-brand-dark hover:bg-brand-teal hover:text-white transition">Try a Microchallenge</Link>
+          <Link href="/diagnostics/caveman-scan" className="px-4 py-2 rounded-lg border text-brand-dark hover:bg-brand-primary hover:text-white transition">Take the Caveman Scan</Link>
+        </div>
+      </section>
+
       {related.length > 0 && (
         <section className="mt-12">
           <h2 className="text-2xl font-bold text-brand-dark mb-4">
@@ -209,4 +273,3 @@ export default function InnerCavemanPage() {
     </main>
   );
 }
-

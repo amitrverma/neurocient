@@ -57,7 +57,7 @@ const Newsletter = ({
       {logoSrc && (
         <Image
           src={logoSrc}
-          alt="Mind The Gap Logo"
+          alt="Neurocient Labs Newsletter — Inner Caveman insights"
           width={150}
           height={150}
           className="object-contain flex-shrink-0"

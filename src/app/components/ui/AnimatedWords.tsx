@@ -29,16 +29,17 @@ const AnimatedWords = () => {
   return (
     <div className="flex justify-center">
       <AnimatePresence mode="wait">
-        <motion.h1
+        <motion.span
           key={words[index]}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.6 }}
           className="text-4xl md:text-6xl text-brand-primary text-center font-bold"
+          aria-hidden="true"
         >
           {words[index]}
-        </motion.h1>
+        </motion.span>
       </AnimatePresence>
     </div>
   );

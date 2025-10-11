@@ -13,7 +13,7 @@ const Footer = () => {
         <div className="flex flex-col gap-2 max-w-sm">
           <Image
             src="/logo/neurocient.png" // replace with your footer logo
-            alt="The Modern Caveman"
+            alt="Neurocient Labs — Inner Caveman"
             width={48}
             height={48}
             className="object-contain"

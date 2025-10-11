@@ -54,14 +54,14 @@ const LandingPage = () => {
           </div>
 
           {/* Reframe */}
-          <h3 className="mt-12 text-2xl md:text-4xl lg:text-5xl text-brand-accent leading-snug">
-            The struggle isn’t your fault. <br /> It’s your <span className="underline">wiring.</span>
-          </h3>
-
-          {/* Punchline */}
-          <h2 className="mt-12 text-3xl md:text-5xl lg:text-6xl text-brand-dark leading-tight text-right">
-            Your <span className="font-extrabold"> Inner Caveman</span> <br/>Still Runs the Show.
+          <h2 className="mt-12 text-2xl md:text-4xl lg:text-5xl text-brand-accent leading-snug">
+            The struggle isn't your fault. <br /> It's your <span className="underline">wiring.</span>
           </h2>
+
+          {/* Punchline (Primary H1) */}
+          <h1 className="mt-12 text-3xl md:text-5xl lg:text-6xl text-brand-dark leading-tight text-right">
+            Your <span className="font-extrabold"> Inner Caveman</span> <br/>Still Runs the Show.
+          </h1>
 
           {/* Year line */}
           <p className="text-sm md:text-base lg:text-lg text-brand-accent leading-relaxed italic text-right">

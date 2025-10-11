@@ -6,6 +6,7 @@ import Footer from "./components/Footer";
 import { AuthProvider } from "./context/AuthContext"; // ✅ global auth provider
 import { NotificationProvider } from "./components/NotificationProvider";
 import PostHogProvider from "./components/PostHogProvider";
+import OrgSchema from "./components/OrgSchema";
 
 export const dynamic = "force-dynamic";
 
@@ -76,6 +77,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
       <body className="antialiased bg-white text-[#042a2b]">
+        <OrgSchema />
         <NotificationProvider>
           <AuthProvider>
             <PostHogProvider>

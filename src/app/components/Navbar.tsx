@@ -123,6 +123,7 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden border-t border-brand-dark/40 backdrop-blur-sm text-brand-dark">
           <div className="flex flex-col px-6 py-4 space-y-4 font-medium">
+            <Link href="/inner-caveman" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">Inner Caveman</Link>
             <Link href="/about" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">About</Link>
             <Link href="/resources" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">Resources</Link>
             <Link href="/programs" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">Programs</Link>

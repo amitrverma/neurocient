@@ -32,17 +32,15 @@ const Footer = () => {
 
         {/* 📌 Middle: Navigation */}
         <div className="flex flex-col md:flex-row md:items-center gap-4 text-center md:text-left">
+
           <Link href="/about" className="hover:text-brand-primary underline underline-offset-4">
             About
           </Link>
-          <Link href="/resources" className="hover:text-brand-primary underline underline-offset-4">
-            Resources
+          <Link href="/inner-caveman" className="hover:text-brand-primary underline underline-offset-4">
+            Inner Caveman
           </Link>
           <Link href="/diagnostics" className="hover:text-brand-primary underline underline-offset-4">
             Diagnostics
-          </Link>
-          <Link href="/programs" className="hover:text-brand-primary underline underline-offset-4">
-            Programs
           </Link>
           <Link href="/contact" className="hover:text-brand-primary underline underline-offset-4">
             Contact

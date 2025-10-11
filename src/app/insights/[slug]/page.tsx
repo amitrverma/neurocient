@@ -12,6 +12,11 @@ import CavemanSpot from "../../components/ui/CavemanSpot";
 
 const insightsDir = path.join(process.cwd(), "src/content/insights");
 
+// Ensure SEO title contains the root term "Inner Caveman"
+function ensureInnerCaveman(title: string): string {
+  return /inner\s*caveman/i.test(title) ? title : `${title} | Inner Caveman`;
+}
+
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
@@ -20,7 +25,8 @@ export async function generateMetadata(
   const raw = fs.readFileSync(filePath, "utf-8");
   const { data } = matter(raw);
 
-  const title = data.title as string;
+  const baseTitle = (data.title as string) || slug;
+  const title = ensureInnerCaveman(baseTitle);
   const description =
     (data.description as string) ||
     (data.excerpt as string) ||
@@ -96,6 +102,7 @@ export default async function InsightPage(
   });
 
   const readingTime = getReadingTime(content);
+  const displayTitle = (data.displayTitle as string) || (data.title as string) || slug;
 
   // --- 📚 Random "Read Next"
   const allFiles = fs.readdirSync(insightsDir).filter((f) => f.endsWith(".mdx"));
@@ -141,7 +148,7 @@ export default async function InsightPage(
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: data.title,
+    headline: (data.title as string) || slug,
     description: data.description || data.excerpt,
     author: {
       "@type": "Person",
@@ -164,7 +171,7 @@ export default async function InsightPage(
   return (
     <>
       <ArticleLayout
-        title={data.title}
+        title={displayTitle}
         date={data.date}
         excerpt={data.excerpt}
         tags={data.tags}

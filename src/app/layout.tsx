@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "The Neurocient Labs",
     url: "https://neurocient.com",
-    title: "The Neurocient Labs",
+    title: "The Neurocient Labs | Inner Caveman",
     description: "Uncover. Discover. Work with your Inner Caveman.",
     images: [
       {
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "The Neurocient Labs",
+    title: "The Neurocient Labs | Inner Caveman",
     description: "Uncover. Discover. Work with your Inner Caveman.",
     images: ["/logo/neurocient.png"],
   },

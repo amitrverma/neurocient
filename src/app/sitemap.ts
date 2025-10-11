@@ -5,6 +5,7 @@ import path from "path";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = "https://neurocient.com";
 
+  const now = new Date();
   const routes: MetadataRoute.Sitemap = [
     { path: "", changeFrequency: "daily", priority: 0.9 },
     { path: "/about", changeFrequency: "monthly", priority: 0.4 },
@@ -18,7 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/insights/all", changeFrequency: "daily", priority: 0.7 },
     { path: "/tags/inner-caveman", changeFrequency: "weekly", priority: 0.6 },
     { path: "/inner-caveman", changeFrequency: "weekly", priority: 0.6 },
-  ].map((e) => ({ url: `${base}${e.path}`, changeFrequency: e.changeFrequency as MetadataRoute.Sitemap[0]["changeFrequency"], priority: e.priority }));
+  ].map((e) => ({ url: `${base}${e.path}`, lastModified: now, changeFrequency: e.changeFrequency as MetadataRoute.Sitemap[0]["changeFrequency"], priority: e.priority }));
 
   const insightsDir = path.join(process.cwd(), "src/content/insights");
   const entries: MetadataRoute.Sitemap = [];
@@ -30,10 +31,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const file of files) {
       const slug = file.replace(/\.mdx$/, "");
       const fullPath = path.join(insightsDir, file);
-      let lastModified: string | undefined;
+      let lastModified: Date | undefined;
       try {
         const stats = fs.statSync(fullPath);
-        lastModified = stats.mtime.toISOString();
+        lastModified = stats.mtime;
       } catch {}
       entries.push({
         url: `${base}/insights/${slug}`,

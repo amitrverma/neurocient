@@ -178,13 +178,21 @@ const LandingPage = () => {
             </p>
           </div>
 
-          {/* Final Punch */}
-          <div className="mt-12">
-            <p className="text-2xl md:text-3xl font-semibold text-[#ed254e] leading-snug">
-              Once you see it, you stop fighting yourself —<br/>
-              and start working with it.
-            </p>
-          </div>
+<div className="mt-12">
+  <p className="text-2xl md:text-3xl font-semibold text-[#ed254e] leading-snug">
+    Once you see it, you stop fighting yourself —
+    <br />
+    and start working with it.
+    <br />
+    <a
+      href="/inner-caveman"
+      className="block mt-3 text-base md:text-lg font-medium text-[#5eb1bf] hover:text-[#042a2b] transition-colors duration-200"
+    >
+      Read The Complete Guide to Your Inner Caveman
+    </a>
+  </p>
+</div>
+
         </div>
 
         <div className="max-w-5xl mx-auto space-y-20 mt-12">

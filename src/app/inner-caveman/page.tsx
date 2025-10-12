@@ -33,7 +33,7 @@ export const metadata: Metadata = {
       "Your Inner Caveman is ancient wiring shaping modern life. Understand its science and train your brain with Neurocient Labs’ behavioral frameworks.",
     images: [
       {
-        url: "https://neurocient.com/logo/neurocient.png",
+        url: "https://neurocient.com/assets/inner-caveman-logo.png",
         width: 1200,
         height: 630,
         alt: "Neurocient Labs",
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     title: "The Complete Guide to Your Inner Caveman",
     description:
       "Your Inner Caveman is ancient wiring shaping modern life. Understand its science and train your brain with Neurocient Labs’ behavioral frameworks.",
-    images: ["https://neurocient.com/logo/neurocient.png"],
+    images: ["https://neurocient.com/assets/inner-caveman-logo.png"],
   },
 };
 
@@ -100,7 +100,7 @@ export default function InnerCavemanPage() {
       name: "Neurocient Labs",
       logo: {
         "@type": "ImageObject",
-        url: "https://neurocient.com/logo/neurocient.png",
+        url: "https://neurocient.com/assets/inner-caveman-logo.png",
       },
     },
     mainEntityOfPage: {

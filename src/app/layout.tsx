@@ -3,10 +3,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import { AuthProvider } from "./context/AuthContext"; // ✅ global auth provider
+import { AuthProvider } from "./context/AuthContext";
 import { NotificationProvider } from "./components/NotificationProvider";
 import PostHogProvider from "./components/PostHogProvider";
 import OrgSchema from "./components/OrgSchema";
+
+import { Toaster } from "react-hot-toast";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +20,7 @@ export const metadata: Metadata = {
     template: "%s | The Neurocient Labs",
   },
   alternates: {
-    canonical: "https://neurocient.com", // 👈 canonical link
+    canonical: "https://neurocient.com",
   },
   description: "Uncover. Discover. Work with your Inner Caveman.",
   openGraph: {
@@ -48,7 +50,7 @@ export const metadata: Metadata = {
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
       { url: "/favicon.ico", sizes: "any", type: "image/x-icon" },
     ],
-    apple: "/icons/icon-192.png", // 👈 better than favicon
+    apple: "/icons/icon-192.png",
   },
 };
 
@@ -71,13 +73,26 @@ export default function RootLayout({
           rel="stylesheet"
         />
 
-        {/* ✅ PWA essentials */}
+        {/* PWA essentials */}
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#042a2b" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
+
       <body className="antialiased bg-white text-[#042a2b]">
         <OrgSchema />
+
+        {/* 🔥 Place toaster here — globally available, no provider restrictions */}
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            duration: 3500,
+            style: {
+              fontFamily: "var(--font-montserrat)",
+            },
+          }}
+        />
+
         <NotificationProvider>
           <AuthProvider>
             <PostHogProvider>

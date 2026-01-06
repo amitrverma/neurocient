@@ -59,8 +59,7 @@ export default function InnerCavemanPage() {
         name: "What is the Inner Caveman?",
         acceptedAnswer: {
           "@type": "Answer",
-          text:
-            "It's your ancient survival circuitry—fear, comfort, and social instincts—still running modern life. The Inner Caveman is not a flaw, but a foundation of human behavior.",
+          text: "It's your ancient survival circuitry—fear, comfort, and social instincts—still running modern life. The Inner Caveman is not a flaw, but a foundation of human behavior.",
         },
       },
       {
@@ -68,8 +67,7 @@ export default function InnerCavemanPage() {
         name: "Why does the Inner Caveman matter today?",
         acceptedAnswer: {
           "@type": "Answer",
-          text:
-            "Our brains evolved for small tribes and visible dangers, not for abstract modern stressors. Understanding the Inner Caveman helps us work with our instincts rather than against them.",
+          text: "Our brains evolved for small tribes and visible dangers, not for abstract modern stressors. Understanding the Inner Caveman helps us work with our instincts rather than against them.",
         },
       },
       {
@@ -77,8 +75,7 @@ export default function InnerCavemanPage() {
         name: "How can I understand my Inner Caveman better?",
         acceptedAnswer: {
           "@type": "Answer",
-          text:
-            "By observing emotional reactions, body sensations, and social patterns that arise under stress. Awareness of these ancient circuits is the first step toward integration.",
+          text: "By observing emotional reactions, body sensations, and social patterns that arise under stress. Awareness of these ancient circuits is the first step toward integration.",
         },
       },
     ],
@@ -111,7 +108,6 @@ export default function InnerCavemanPage() {
 
   return (
     <main className="max-w-3xl mx-auto p-6 text-lg leading-relaxed font-serif text-brand-dark">
-
       <h1 className="text-4xl font-sans font-bold text-brand-accent mb-6">
         The Complete Guide to Your Inner Caveman
       </h1>
@@ -128,6 +124,36 @@ export default function InnerCavemanPage() {
           className="rounded-xl shadow-md"
         />
       </div>
+
+      {/* Conversation Version */}
+      <section className="my-10 border-y border-gray-300 py-6">
+        <div className="text-base text-brand-dark/90">
+          <div className="mb-2 font-sans font-medium">
+            🎧 Conversation version
+          </div>
+
+          <p className="mb-3 text-brand-dark/80">
+            A 12-minute audio conversation exploring this idea.
+          </p>
+
+          <audio
+            controls
+            preload="metadata"
+            playsInline
+            className="w-full mb-3"
+          >
+            <source
+              src="https://neurocientblob.blob.core.windows.net/audio/inner-caveman-conversation.mp3?sp=r&st=2026-01-06T13:11:31Z&se=2029-01-06T21:26:31Z&spr=https&sv=2024-11-04&sr=b&sig=UWR0WYQ4IaR%2B1eX%2FUcwzzjq%2BJNJ%2Fg%2FbSHcH7jXQyIWI%3D"
+              type="audio/mpeg"
+            />
+            Your browser does not support the audio element.
+          </audio>
+
+          <p className="italic text-sm text-brand-dark/70">
+            Some ideas only settle when spoken.
+          </p>
+        </div>
+      </section>
 
       <p className="mb-6">
         We inhabit an age of breathtaking complexity—machines that translate
@@ -166,8 +192,8 @@ export default function InnerCavemanPage() {
       <p className="mb-6">
         These layers of brain architecture evolved for tribes of a hundred
         people, not for the eight billion strangers that now share the planet.
-        They understood seasons, predators, and social hierarchies you could
-        see and touch. Today they confront invisible currencies: deadlines,
+        They understood seasons, predators, and social hierarchies you could see
+        and touch. Today they confront invisible currencies: deadlines,
         notifications, credit scores, metrics of worth. To your Inner Caveman, a
         delayed reply can feel like exile, a critical comment like a predator’s
         shadow.
@@ -241,14 +267,14 @@ export default function InnerCavemanPage() {
       </h2>
 
       <p className="mb-6">
-        Modern culture worships intellect, yet the <strong>Inner Caveman</strong>{" "}
-        proves that insight alone rarely changes behavior. Under stress, blood
-        flow shifts away from the prefrontal cortex—the rational seat of
-        decision-making—toward older survival circuits. The mind that solves
-        equations is literally disabled by fear. This is why willpower collapses
-        at midnight in front of a fridge, why clarity in calm moments vanishes
-        under pressure. The ancient brain seizes control the instant it senses
-        threat, real or imagined.
+        Modern culture worships intellect, yet the{" "}
+        <strong>Inner Caveman</strong> proves that insight alone rarely changes
+        behavior. Under stress, blood flow shifts away from the prefrontal
+        cortex—the rational seat of decision-making—toward older survival
+        circuits. The mind that solves equations is literally disabled by fear.
+        This is why willpower collapses at midnight in front of a fridge, why
+        clarity in calm moments vanishes under pressure. The ancient brain
+        seizes control the instant it senses threat, real or imagined.
       </p>
 
       <p className="mb-6">
@@ -356,9 +382,6 @@ export default function InnerCavemanPage() {
       </p>
 
       <section className="mt-20 pt-10 border-t border-gray-300">
-
-
-
         <p className="mb-6">
           <strong>Neurocient Labs</strong> is a behavioral science studio
           exploring the gap between how our brains evolved and how we live
@@ -366,7 +389,6 @@ export default function InnerCavemanPage() {
           evolutionary biology into frameworks that make everyday behavior more
           understandable—and more humane.
         </p>
-
 
         <p className="mb-6">
           At Neurocient, we don’t believe in willpower revolutions or quick
@@ -379,6 +401,11 @@ export default function InnerCavemanPage() {
         <p className="italic text-brand-dark/80">
           Neurocient Labs — bridging the gap between who we are wired to be and
           the world we live in today.
+        </p>
+
+        <p className="mt-16 italic text-brand-dark/70">
+          If you moved through this quickly, the conversation version lingers
+          longer than the text.
         </p>
       </section>
 

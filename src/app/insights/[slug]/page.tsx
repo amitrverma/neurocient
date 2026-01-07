@@ -9,8 +9,16 @@ import ArticleLayout from "../../components/ArticleLayout";
 import { pathways, type PathwayId, type Pathway, type ArticleRef } from "@/content/pathways";
 import MicrochallengeBox from "../../components/tools/MicrochallengeBox";
 import CavemanSpot from "../../components/ui/CavemanSpot";
+import ConversationVersion from "../../components/ConversationVersion";
+import { generateAudioSasUrl } from "@/lib/azureAudioSas";
 
 const insightsDir = path.join(process.cwd(), "src/content/insights");
+
+type ConversationFrontmatter = {
+  blobName: string;
+  duration?: string;
+  reflection?: string;
+};
 
 // Ensure SEO title contains the root term "Inner Caveman"
 function ensureInnerCaveman(title: string): string {
@@ -91,6 +99,15 @@ export default async function InsightPage(
 
   const raw = fs.readFileSync(filePath, "utf-8");
   const { content, data } = matter(raw);
+
+  const conversation = data.conversation as ConversationFrontmatter | undefined;
+  const conversationBlobName = conversation?.blobName;
+  const normalizedBlobName = conversationBlobName
+    ? conversationBlobName.replace(/^\/+/, "").replace(/^audio\//, "")
+    : null;
+  const conversationAudioUrl = normalizedBlobName
+    ? generateAudioSasUrl(normalizedBlobName)
+    : null;
 
   const { content: mdxContent } = await compileMDX({
     source: content,
@@ -184,7 +201,16 @@ export default async function InsightPage(
         nextInPath={nextInPath}
         spotPrompt={data.spotPrompt || null}
       >
-        <div className="prose prose-article max-w-none">{mdxContent}</div>
+        <>
+          {conversationAudioUrl && (
+            <ConversationVersion
+              audioUrl={conversationAudioUrl}
+              duration={conversation?.duration}
+              reflection={conversation?.reflection}
+            />
+          )}
+          <div className="prose prose-article max-w-none">{mdxContent}</div>
+        </>
       </ArticleLayout>
 
       {/* ✅ JSON-LD structured data */}

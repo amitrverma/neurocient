@@ -141,9 +141,10 @@ export default function InnerCavemanPage() {
             preload="metadata"
             playsInline
             className="w-full mb-3"
+            controlsList="nodownload"
           >
             <source
-              src="https://neurocientblob.blob.core.windows.net/audio/inner-caveman-conversation.mp3?sp=r&st=2026-01-06T13:11:31Z&se=2029-01-06T21:26:31Z&spr=https&sv=2024-11-04&sr=b&sig=UWR0WYQ4IaR%2B1eX%2FUcwzzjq%2BJNJ%2Fg%2FbSHcH7jXQyIWI%3D"
+              src="https://neurocientblob.blob.core.windows.net/audio/inner-caveman.mp3?sp=r&st=2026-01-07T13:14:30Z&se=2029-01-07T21:29:30Z&spr=https&sv=2024-11-04&sr=b&sig=VBMEjoqZ06UnnDktbcRTOwyH%2BTdcq6QyHlpMWejuwc4%3D"
               type="audio/mpeg"
             />
             Your browser does not support the audio element.

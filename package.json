@@ -10,6 +10,7 @@
     "test": "vitest run --coverage"
   },
   "dependencies": {
+    "@azure/storage-blob": "^12.29.1",
     "@headlessui/react": "^2.2.7",
     "@mdx-js/loader": "^3.1.0",
     "@mdx-js/react": "^3.1.0",

@@ -151,7 +151,7 @@ export default function InnerCavemanPage() {
           </audio>
 
           <p className="italic text-sm text-brand-dark/70">
-            Some ideas only settle when spoken.
+            Ideas worth listening to!
           </p>
         </div>
       </section>

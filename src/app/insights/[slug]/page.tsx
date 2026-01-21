@@ -132,6 +132,8 @@ export default async function InsightPage(
 
   const readingTime = getReadingTime(content);
   const displayTitle = (data.displayTitle as string) || (data.title as string) || slug;
+  const orgId = "https://neurocient.com/#/org/neurocient-labs";
+  const personId = "https://neurocient.com/#/person/amit-r-verma";
 
   // --- 📚 Random "Read Next"
   const allFiles = fs.readdirSync(insightsDir).filter((f) => f.endsWith(".mdx"));
@@ -190,16 +192,17 @@ export default async function InsightPage(
     "@type": "Article",
     headline: (data.title as string) || slug,
     description: data.description || data.excerpt,
-    author: {
-      "@type": "Person",
-      name: data.author || "Amit R Verma",
-    },
+    author:
+      (data.author as string) === "Amit R Verma" || !data.author
+        ? { "@type": "Person", "@id": personId, name: data.author || "Amit R Verma" }
+        : { "@type": "Person", name: data.author },
     datePublished: data.date,
     keywords: (data.keywords || []).join(", "),
     url: `https://neurocient.com/insights/${slug}`,
     image: ["https://neurocient.com/logo/neurocient.png"],
     publisher: {
       "@type": "Organization",
+      "@id": orgId,
       name: "Neurocient Labs",
       logo: {
         "@type": "ImageObject",

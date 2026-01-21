@@ -2,6 +2,7 @@ export default function OrgSchema() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": "https://neurocient.com/#/org/neurocient-labs",
     name: "Neurocient Labs",
     url: "https://neurocient.com",
     logo: "https://neurocient.com/logo/neurocient.png",
@@ -20,4 +21,3 @@ export default function OrgSchema() {
     />
   );
 }
-

@@ -7,6 +7,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { NotificationProvider } from "./components/NotificationProvider";
 import PostHogProvider from "./components/PostHogProvider";
 import OrgSchema from "./components/OrgSchema";
+import PersonSchema from "./components/PersonSchema";
 
 import { Toaster } from "react-hot-toast";
 
@@ -81,6 +82,7 @@ export default function RootLayout({
 
       <body className="antialiased bg-white text-[#042a2b]">
         <OrgSchema />
+        <PersonSchema />
 
         {/* 🔥 Place toaster here — globally available, no provider restrictions */}
         <Toaster

@@ -67,6 +67,8 @@ const ArticleLayout = ({
 }: ArticleLayoutProps) => {
   const baseUrl = "https://neurocient.com/insights";
   const articleUrl = slug ? `${baseUrl}/${slug}` : baseUrl;
+  const orgId = "https://neurocient.com/#/org/neurocient-labs";
+  const personId = "https://neurocient.com/#/person/amit-r-verma";
 
   // ✅ JSON-LD structured data
   const jsonLd = {
@@ -74,13 +76,17 @@ const ArticleLayout = ({
     "@type": "Article",
     headline: title,
     description: description || excerpt,
-    author: { "@type": "Person", name: author },
+    author:
+      author === "Amit R Verma"
+        ? { "@type": "Person", "@id": personId, name: author }
+        : { "@type": "Person", name: author },
     datePublished: date,
     keywords: [...keywords, ...(tags || [])].join(", "),
     url: articleUrl,
     image: ["https://neurocient.com/logo/neurocient.png"],
     publisher: {
       "@type": "Organization",
+      "@id": orgId,
       name: "Neurocient Labs",
       logo: {
         "@type": "ImageObject",

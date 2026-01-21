@@ -89,6 +89,18 @@ function getReadingTime(text: string) {
   return `${minutes} min read`;
 }
 
+function toIsoDuration(value?: string) {
+  if (!value) return null;
+  const match = value.trim().match(
+    /^(\d+(?:\.\d+)?)\s*(h|hr|hrs|hour|hours|m|min|mins|minute|minutes|s|sec|secs|second|seconds)$/i
+  );
+  if (!match) return null;
+  const amount = match[1];
+  const unit = match[2].toLowerCase();
+  const designator = unit.startsWith("h") ? "H" : unit.startsWith("m") ? "M" : "S";
+  return `PT${amount}${designator}`;
+}
+
 export default async function InsightPage(
   { params }: { params: Promise<{ slug: string }> }
 ) {
@@ -161,6 +173,17 @@ export default async function InsightPage(
     }
   }
 
+  const isoAudioDuration = toIsoDuration(conversation?.duration);
+  const audioObject = conversationAudioUrl
+    ? {
+        "@type": "AudioObject",
+        contentUrl: conversationAudioUrl,
+        encodingFormat: "audio/mpeg",
+        name: `${displayTitle} audio overview`,
+        ...(isoAudioDuration ? { duration: isoAudioDuration } : {}),
+      }
+    : null;
+
   // ✅ JSON-LD for structured data
   const jsonLd = {
     "@context": "https://schema.org",
@@ -183,6 +206,7 @@ export default async function InsightPage(
         url: "https://neurocient.com/logo/neurocient.png",
       },
     },
+    ...(audioObject ? { audio: audioObject } : {}),
   };
 
   return (

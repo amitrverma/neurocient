@@ -6,6 +6,8 @@ import Script from "next/script";
 import Image from "next/image";
 
 const insightsDir = path.join(process.cwd(), "src/content/insights");
+const innerCavemanAudioUrl =
+  "https://neurocientblob.blob.core.windows.net/audio/inner-caveman.mp3?sp=r&st=2026-01-07T13:14:30Z&se=2029-01-07T21:29:30Z&spr=https&sv=2024-11-04&sr=b&sig=VBMEjoqZ06UnnDktbcRTOwyH%2BTdcq6QyHlpMWejuwc4%3D";
 
 export const metadata: Metadata = {
   title: "The Complete Guide to Your Inner Caveman",
@@ -100,6 +102,13 @@ export default function InnerCavemanPage() {
         url: "https://neurocient.com/assets/inner-caveman-logo.png",
       },
     },
+    audio: {
+      "@type": "AudioObject",
+      contentUrl: innerCavemanAudioUrl,
+      encodingFormat: "audio/mpeg",
+      duration: "PT12M",
+      name: "The Complete Guide to Your Inner Caveman audio conversation",
+    },
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": "https://neurocient.com/inner-caveman",
@@ -144,14 +153,14 @@ export default function InnerCavemanPage() {
             controlsList="nodownload"
           >
             <source
-              src="https://neurocientblob.blob.core.windows.net/audio/inner-caveman.mp3?sp=r&st=2026-01-07T13:14:30Z&se=2029-01-07T21:29:30Z&spr=https&sv=2024-11-04&sr=b&sig=VBMEjoqZ06UnnDktbcRTOwyH%2BTdcq6QyHlpMWejuwc4%3D"
+              src={innerCavemanAudioUrl}
               type="audio/mpeg"
             />
             Your browser does not support the audio element.
           </audio>
 
           <p className="italic text-sm text-brand-dark/70">
-            Ideas worth listening to!
+            Ideas worth listening to !
           </p>
         </div>
       </section>

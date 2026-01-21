@@ -13,11 +13,11 @@ export default function ConversationVersion({
     <section className="my-10 border-y border-gray-300 py-6">
       <div className="text-base text-brand-dark/90">
         <div className="mb-2 font-sans font-medium">
-          🎧 Conversation version
+          🎧 Prefer listening?
         </div>
 
         <p className="mb-3 text-brand-dark/80">
-          {duration} audio conversation exploring this idea.
+          Here’s the {duration} audio conversation exploring this idea.
         </p>
 
         <audio
@@ -31,7 +31,7 @@ export default function ConversationVersion({
         </audio>
 
         {reflection && (
-          <p className="italic text-sm text-brand-dark/70">
+          <p className="italic text-md text-brand-dark/70">
             {reflection}
           </p>
         )}

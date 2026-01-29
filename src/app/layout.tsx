@@ -8,6 +8,7 @@ import { NotificationProvider } from "./components/NotificationProvider";
 import PostHogProvider from "./components/PostHogProvider";
 import OrgSchema from "./components/OrgSchema";
 import PersonSchema from "./components/PersonSchema";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { Toaster } from "react-hot-toast";
 
@@ -104,6 +105,7 @@ export default function RootLayout({
             </PostHogProvider>
           </AuthProvider>
         </NotificationProvider>
+        <SpeedInsights />
       </body>
     </html>
   );

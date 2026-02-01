@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1200" viewBox="0 0 800 1200">
+  <rect width="800" height="1200" fill="#f4f1ea"/>
+  <rect x="40" y="40" width="720" height="1120" fill="#ffffff" stroke="#1f1f1f" stroke-width="6"/>
+  <rect x="40" y="40" width="60" height="1120" fill="#1f1f1f"/>
+  <text x="140" y="220" font-family="Georgia, 'Times New Roman', serif" font-size="46" fill="#1f1f1f">
+    Neurocient Library
+  </text>
+  <text x="140" y="280" font-family="Georgia, 'Times New Roman', serif" font-size="28" fill="#5a5a5a">
+    Book Cover Placeholder
+  </text>
+  <rect x="140" y="360" width="520" height="8" fill="#1f1f1f" opacity="0.15"/>
+  <text x="140" y="430" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#6a6a6a">
+    Replace with the official cover art.
+  </text>
+</svg>

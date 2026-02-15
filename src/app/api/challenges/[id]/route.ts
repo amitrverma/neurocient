@@ -4,9 +4,9 @@ const API_BASE_URL = process.env.API_BASE_URL;
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }   // 👈 plain object, not Promise
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;                   // ✅ no await needed
+  const { id } = await params;
   const cookie = request.headers.get("cookie") || "";
 
   try {

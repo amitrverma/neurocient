@@ -311,6 +311,7 @@ const ArticleLayout = ({
         <h1 className="text-4xl font-bold tracking-tight text-brand-dark mb-2">{title}</h1>
         <p className="text-sm text-brand-dark mb-6">{date}</p>
         {excerpt && <p className="text-lg text-brand-dark mb-8 italic">{excerpt}</p>}
+        <div className="article-lead-separator" aria-hidden="true" />
 
         {/* Content */}
         <div className="prose prose-article text-[18px]">{children}</div>

@@ -10,6 +10,7 @@ import { pathways, type PathwayId, type Pathway, type ArticleRef } from "@/conte
 import MicrochallengeBox from "../../components/tools/MicrochallengeBox";
 import CavemanSpot from "../../components/ui/CavemanSpot";
 import ConversationVersion from "../../components/ConversationVersion";
+import InnerCavemanHighlighter from "../../components/InnerCavemanHighlighter";
 import { generateAudioSasUrl } from "@/lib/azureAudioSas";
 
 const insightsDir = path.join(process.cwd(), "src/content/insights");
@@ -111,6 +112,8 @@ export default async function InsightPage(
 
   const raw = fs.readFileSync(filePath, "utf-8");
   const { content, data } = matter(raw);
+  const typographyVariant = (data.typographyVariant as string | undefined) || "";
+  const isPrologue = typographyVariant === "prologue";
 
   const conversation = data.conversation as ConversationFrontmatter | undefined;
   const conversationBlobName = conversation?.blobName;
@@ -127,11 +130,23 @@ export default async function InsightPage(
     components: {
       MicrochallengeBox, // ✅ make available inside .mdx
       CavemanSpot,
+      ConversationBreak: () =>
+        isPrologue && conversationAudioUrl ? (
+          <ConversationVersion
+            audioUrl={conversationAudioUrl}
+            duration={conversation?.duration}
+            reflection={conversation?.reflection}
+          />
+        ) : null,
     },
   });
 
   const readingTime = getReadingTime(content);
   const displayTitle = (data.displayTitle as string) || (data.title as string) || slug;
+  const articleProseClass = typographyVariant
+    ? `prose prose-article prose-variant-${typographyVariant} max-w-none`
+    : "prose prose-article max-w-none";
+  const contentId = `insight-content-${slug}`;
   const orgId = "https://neurocient.com/#/org/neurocient-labs";
   const personId = "https://neurocient.com/#/person/amit-r-verma";
 
@@ -229,14 +244,17 @@ export default async function InsightPage(
         spotPrompt={data.spotPrompt || null}
       >
         <>
-          {conversationAudioUrl && (
+          {conversationAudioUrl && !isPrologue && (
             <ConversationVersion
               audioUrl={conversationAudioUrl}
               duration={conversation?.duration}
               reflection={conversation?.reflection}
             />
           )}
-          <div className="prose prose-article max-w-none">{mdxContent}</div>
+          <div id={contentId} className={articleProseClass}>
+            <InnerCavemanHighlighter targetId={contentId} />
+            {mdxContent}
+          </div>
         </>
       </ArticleLayout>
 

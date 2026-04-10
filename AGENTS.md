@@ -53,17 +53,22 @@ Avoid:
 - adding distracting nav widgets if user flags distraction
 
 ## Variant Pattern (Recommended)
-- Add `typographyVariant: "name"` in article frontmatter.
+- For newer long-form insight articles, default to `typographyVariant: "prologue"` unless a different treatment is explicitly needed.
+- Treat `prologue` as the shared premium long-form typography system, not as a one-off style for `the-past-is-prologue`.
+- Add `typographyVariant: "name"` in article frontmatter when a genuinely separate article treatment is needed.
 - In `src/app/insights/[slug]/page.tsx`, compute class:
   - `prose prose-article prose-variant-${typographyVariant} max-w-none`
 - Implement styles in `globals.css` under:
   - `.prose-article.prose-variant-name { ... }`
 
-This keeps experiments isolated to one article.
+The `prologue` variant is the default baseline for new premium essays. Keep experiments isolated only when a piece needs something materially different.
 
 ## Lists and Line Breaks
 If user requests "separate lines without bullets":
 - Use plain lines with `<br />` inside wrapper blocks.
+- Prefer the shared utility wrapper:
+  - `<div className="article-line-stack">...</div>`
+- Legacy `prologue-line-stack` is still supported for backward compatibility.
 - Do not render `ul/li` bullets.
 
 ## Further Reading Conventions
@@ -71,6 +76,10 @@ Preferred rich format for dense educational articles:
 - table with columns `Author` and `Work`
 - clear row separators
 - responsive behavior on mobile
+- Prefer the shared wrappers:
+  - `.article-reading-list`
+  - `.article-reading-table`
+- Legacy `prologue-reading-list` / `prologue-reading-table` remain supported.
 
 ## QA Checklist Before Finalizing
 - Article renders without encoding artifacts (`�`, mojibake).
@@ -86,4 +95,3 @@ Preferred rich format for dense educational articles:
 3. If needed, add variant-scoped typography in `globals.css`.
 4. Wire variant behavior in `page.tsx` only.
 5. Verify with grep/status and visual sanity checks.
-

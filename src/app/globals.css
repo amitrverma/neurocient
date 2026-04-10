@@ -154,7 +154,7 @@ body {
   white-space: nowrap;
 }
 
-/* Article-specific typography variant: The Past Is Prologue */
+/* Shared premium long-form typography variant for newer insight articles */
 .prose-article.prose-variant-prologue {
   color: #13262f;
   max-width: 72ch;
@@ -277,7 +277,8 @@ body {
   margin: 0.4em 0;
 }
 
-.prose-article.prose-variant-prologue .prologue-line-stack {
+.prose-article.prose-variant-prologue .prologue-line-stack,
+.prose-article.prose-variant-prologue .article-line-stack {
   margin: 1.1em 0 1.2em;
   padding: 0.8em 0.9em;
   border-left: 3px solid #5eb1bf;
@@ -287,7 +288,8 @@ body {
   line-height: 1.65;
 }
 
-.prose-article.prose-variant-prologue .prologue-reading-list {
+.prose-article.prose-variant-prologue .prologue-reading-list,
+.prose-article.prose-variant-prologue .article-reading-list {
   margin-top: 1.4em;
   padding: 0.7em 0.75em 0.75em;
   border: 1px solid #d7dee1;
@@ -298,14 +300,16 @@ body {
   line-height: 1.62;
 }
 
-.prose-article.prose-variant-prologue .prologue-reading-table {
+.prose-article.prose-variant-prologue .prologue-reading-table,
+.prose-article.prose-variant-prologue .article-reading-table {
   width: 100%;
   border-collapse: collapse;
   margin: 0;
   font-size: 0.95em;
 }
 
-.prose-article.prose-variant-prologue .prologue-reading-table thead th {
+.prose-article.prose-variant-prologue .prologue-reading-table thead th,
+.prose-article.prose-variant-prologue .article-reading-table thead th {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.71em;
@@ -315,26 +319,31 @@ body {
   border-bottom: 1px solid #cfd7da;
 }
 
-.prose-article.prose-variant-prologue .prologue-reading-table tbody tr {
+.prose-article.prose-variant-prologue .prologue-reading-table tbody tr,
+.prose-article.prose-variant-prologue .article-reading-table tbody tr {
   border-bottom: 1px dashed #d8dfe2;
   transition: background-color 180ms ease, transform 180ms ease;
 }
 
-.prose-article.prose-variant-prologue .prologue-reading-table tbody tr:last-child {
+.prose-article.prose-variant-prologue .prologue-reading-table tbody tr:last-child,
+.prose-article.prose-variant-prologue .article-reading-table tbody tr:last-child {
   border-bottom: 0;
 }
 
-.prose-article.prose-variant-prologue .prologue-reading-table tbody tr:hover {
+.prose-article.prose-variant-prologue .prologue-reading-table tbody tr:hover,
+.prose-article.prose-variant-prologue .article-reading-table tbody tr:hover {
   background-color: rgba(94, 177, 191, 0.09);
 }
 
-.prose-article.prose-variant-prologue .prologue-reading-table td {
+.prose-article.prose-variant-prologue .prologue-reading-table td,
+.prose-article.prose-variant-prologue .article-reading-table td {
   padding: 0.74rem 0.62rem;
   vertical-align: top;
   line-height: 1.45;
 }
 
-.prose-article.prose-variant-prologue .prologue-reading-table td:first-child {
+.prose-article.prose-variant-prologue .prologue-reading-table td:first-child,
+.prose-article.prose-variant-prologue .article-reading-table td:first-child {
   color: #0f3c4e;
   font-weight: 700;
   white-space: nowrap;
@@ -371,11 +380,13 @@ body {
     font-size: 2.7em;
   }
 
-  .prose-article.prose-variant-prologue .prologue-reading-table {
+  .prose-article.prose-variant-prologue .prologue-reading-table,
+  .prose-article.prose-variant-prologue .article-reading-table {
     font-size: 0.9em;
   }
 
-  .prose-article.prose-variant-prologue .prologue-reading-table td:first-child {
+  .prose-article.prose-variant-prologue .prologue-reading-table td:first-child,
+  .prose-article.prose-variant-prologue .article-reading-table td:first-child {
     white-space: normal;
     width: 40%;
   }
@@ -383,7 +394,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .prose-article.prose-variant-prologue .prologue-reading-table tbody tr {
+  .prose-article.prose-variant-prologue .prologue-reading-table tbody tr,
+  .prose-article.prose-variant-prologue .article-reading-table tbody tr {
     transition: none;
   }
 }

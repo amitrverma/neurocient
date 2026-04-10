@@ -113,7 +113,7 @@ export default async function InsightPage(
   const raw = fs.readFileSync(filePath, "utf-8");
   const { content, data } = matter(raw);
   const typographyVariant = (data.typographyVariant as string | undefined) || "";
-  const isPrologue = typographyVariant === "prologue";
+  const usesStandardLongformVariant = typographyVariant === "prologue";
 
   const conversation = data.conversation as ConversationFrontmatter | undefined;
   const conversationBlobName = conversation?.blobName;
@@ -131,7 +131,7 @@ export default async function InsightPage(
       MicrochallengeBox, // ✅ make available inside .mdx
       CavemanSpot,
       ConversationBreak: () =>
-        isPrologue && conversationAudioUrl ? (
+        usesStandardLongformVariant && conversationAudioUrl ? (
           <ConversationVersion
             audioUrl={conversationAudioUrl}
             duration={conversation?.duration}
@@ -244,7 +244,7 @@ export default async function InsightPage(
         spotPrompt={data.spotPrompt || null}
       >
         <>
-          {conversationAudioUrl && !isPrologue && (
+          {conversationAudioUrl && !usesStandardLongformVariant && (
             <ConversationVersion
               audioUrl={conversationAudioUrl}
               duration={conversation?.duration}

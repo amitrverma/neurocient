@@ -90,7 +90,7 @@ const Navbar = () => {
             ) : (
               <button
                 onClick={() => setShowAuth(true)}
-                className="text-sm font-semibold px-3 py-1 rounded-lg text-brand-dark border border-brand-dark hover:bg-brand-primary hover:border-white hover:text-white transition"
+                className="text-sm font-semibold px-3 py-1 rounded-lg text-brand-dark border border-brand-dark hover:bg-brand-dark hover:border-white hover:text-white transition"
               >
                 Sign in
               </button>

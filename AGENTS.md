@@ -18,6 +18,10 @@ Do not apply article-specific styling globally unless explicitly requested.
 - Save MDX files as UTF-8 (avoid cp1252 encoding artifacts like `�`).
 - Keep changes scoped to the target article when experimenting.
 
+## Brand Background Colors
+- Use only two brand background colors for page and section backgrounds: white/background (`--background: #ffffff`, exposed as `--color-background`) and `brand-dark` (`--color-brand-dark: #042a2b`), as defined in `src/app/globals.css`.
+- Do not introduce additional background color treatments unless the user explicitly requests them.
+
 ## Standard Article Frontmatter
 Use these fields unless user requests otherwise:
 - `title`

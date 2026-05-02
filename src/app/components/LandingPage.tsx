@@ -17,64 +17,64 @@ import {
 
 const struggles = [
   {
-    title: "Procrastination",
-    eyebrow: "Safety disguised as delay",
-    lead: "You know what needs to be done. You may even want to do it.",
+    title: "Escaping Into the Scroll",
+    eyebrow: "One more check",
+    lead: "The work is right there.",
     detail:
-      "But the task carries friction: uncertainty, exposure, the possibility of failing in public or proving something uncomfortable to yourself.",
+      "You tell yourself you'll start in a minute: just one check, one tab, one video. Something small, something harmless. And then another. Time passes without resistance. It doesn't feel like a choice. It feels like something you slipped into. When you look up, the task is still there.",
     close:
-      "Your body reads that discomfort as risk, so delay starts to feel like the safer move.",
+      "Only now, it feels heavier than before.",
   },
   {
-    title: "Endless Distraction",
-    eyebrow: "Relief beats intention",
-    lead: "You sit down to focus and find yourself deep in content you never meant to open.",
+    title: "Pressure That Never Switches Off",
+    eyebrow: "Always in the background",
+    lead: "There's always something in the background.",
     detail:
-      "The work asks for effort, ambiguity, and patience. The feed offers quick reward with almost no cost of entry.",
+      "Something unfinished. Something pending. Something you should get to next. Even in the quieter moments, it doesn't fully leave. It stays: subtle, but present. You move from one thing to another, carrying it along.",
     close:
-      "Your reward system is not choosing what matters most. It is choosing what feels easier to regulate right now.",
+      "Not urgent enough to act on. Not distant enough to ignore.",
   },
   {
-    title: "The Comparison Spiral",
-    eyebrow: "Status scanning on repeat",
-    lead: "You track who is ahead, who is liked, who is winning.",
+    title: "Keep Measuring Yourself Against Others",
+    eyebrow: "Status scanning",
+    lead: "You're doing your thing, and then something shifts.",
     detail:
-      "Part of your mind keeps checking for rank, relevance, and social position because those signals once shaped access, safety, and belonging.",
+      "Someone else is ahead. Moving faster. Doing it better. At least, it looks that way. You weren't thinking about it a moment ago. Now you are. Your pace feels slower. Your progress feels smaller. What you have doesn't land the same anymore. Nothing has changed.",
     close:
-      "The old status system keeps asking where you stand, even when the scoreboard is exhausting and mostly imaginary.",
+      "But it feels like you've fallen behind.",
   },
   {
-    title: "Social Anxiety",
-    eyebrow: "Belonging still feels high-stakes",
-    lead: "A presentation, difficult conversation, or new group can feel far bigger than it is.",
+    title: "Rest That Doesn't Restore",
+    eyebrow: "Recovery that doesn't land",
+    lead: "You sleep. You take breaks. You step away when you can.",
     detail:
-      "Modern situations rarely threaten survival, but your nervous system still treats social exposure as something with real consequences.",
+      "But it doesn't quite land. The day starts a little lower than it should. Simple things take more effort. By the time you get to what matters, there isn't much left.",
     close:
-      "Belonging once meant protection, so being seen, judged, or excluded can still trigger an outsized alarm.",
+      "It's not that you're doing nothing. It just never feels like you've recovered.",
   },
   {
-    title: "The Motivation Trap",
-    eyebrow: "Waiting for certainty",
-    lead: "You wait to feel ready before starting.",
+    title: "Waiting to Feel Ready",
+    eyebrow: "The moving start line",
+    lead: "You know what needs to be done.",
     detail:
-      "The problem is that readiness is often a false condition. Hard things usually begin before they feel emotionally safe or fully mapped.",
+      "It isn't unclear. You've thought about it enough times already. But you wait. For the right mood. The right clarity. The sense that now is the moment to begin. The start keeps moving.",
     close:
-      "The older system keeps holding out for certainty, so action gets postponed in the name of preparation.",
+      "And with it, everything that depends on it.",
   },
 ];
 
 const shallowFixes = [
   {
     name: "Productivity systems",
-    why: "Organize the list, but rarely explain why the list feels threatening.",
+    why: "Help organize what to do, but rarely explain why the work feels heavy in the first place.",
   },
   {
     name: "Motivation hacks",
-    why: "Work until novelty fades and the older system takes over again.",
+    why: "Create short bursts of energy, until older patterns quietly take over again.",
   },
   {
     name: "Self-discipline advice",
-    why: "Treats resistance as weakness instead of information.",
+    why: "Treat resistance as something to fight, instead of something to understand.",
   },
 ];
 
@@ -191,43 +191,43 @@ const LandingPage = () => {
     <div className="flex flex-col bg-white font-serif text-brand-dark">
       <section className="relative flex min-h-[calc(100vh-5rem)] items-center overflow-hidden border-b border-brand-dark/10 bg-white px-6 py-16 md:px-10 md:py-20">
         <div className="relative mx-auto w-full max-w-6xl">
-          <div className="max-w-3xl">
-            <p className="mb-6 font-sans text-xs font-semibold uppercase tracking-[0.2em] text-brand-teal">
-              The Neurocient Labs
-            </p>
-            <h1 className="max-w-4xl text-5xl font-bold leading-[1.04] text-brand-dark md:text-7xl">
+          <div className="max-w-5xl">
+            <div className="mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">
+              <span className="h-px w-12 bg-brand-dark" />
+              <span>The Neurocient Labs</span>
+            </div>
+            <h1 className="max-w-5xl text-[clamp(3.5rem,7vw,6.75rem)] font-bold leading-[1.02] text-brand-dark">
               Your brain is
               <br />
               <span className="italic text-brand-accent">
                 200,000 years old.
               </span>
               <br />
-              Your problems aren&apos;t.
+              Your world isn&apos;t.
             </h1>
-            <p className="mt-6 max-w-2xl font-sans text-base leading-8 text-brand-dark/72 md:text-lg">
-              Modern life keeps asking ancient brains to handle endless feeds,
-              vague deadlines, constant comparison, and invisible social
-              pressure. Before we reveal the older system underneath, start with
-              the question it leaves behind.
+            <p className="mt-8 max-w-3xl border-l-4 border-brand-secondary pl-5 font-sans text-lg leading-8 text-brand-dark/74 md:text-xl md:leading-9">
+              Constant distraction. Persistent pressure. Social comparison.
+              <br />
+              Low energy. Cognitive overload.
+              <br />
+              You weren&apos;t built for this.
+              <br />
+              Before anything else, start with the question modern life ignores.
             </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="#struggle"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-6 py-3 font-sans text-sm font-semibold text-white shadow-sm transition hover:border-brand-primary"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-7 py-3.5 font-sans text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
               >
                 Start here
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/programs"
-                className="inline-flex items-center justify-center rounded-full border border-brand-dark/35 bg-white px-6 py-3 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-teal"
+                className="inline-flex items-center justify-center rounded-full border border-brand-dark/35 bg-white px-7 py-3.5 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-teal hover:text-brand-teal"
               >
                 See programs
               </Link>
-            </div>
-            <div className="mt-5 hidden items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark/45 md:flex">
-              <span className="h-px w-10 bg-brand-dark/30" />
-              <span>Scroll to understand</span>
             </div>
           </div>
         </div>
@@ -242,10 +242,9 @@ const LandingPage = () => {
           Why do I do that?
         </h2>
         <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-brand-dark/72">
-          You&apos;ve read the books. Tried the habits. Downloaded the apps. But
-          something keeps pulling you back to the scroll, the snack, the safe
-          choice.
-          Sound familiar?
+          You know what needs to be done. You may even want to do it. And yet,
+          you don&apos;t. Not always. Not completely. But often enough to notice a
+          pattern. That&apos;s the part worth paying attention to.
         </p>
         <div className="mt-10">
           <SplitStruggleShowcase
@@ -259,52 +258,174 @@ const LandingPage = () => {
 
       <section className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
         <SectionLabel>Why modern fixes fall short</SectionLabel>
-        <div className="grid overflow-hidden rounded-lg border border-brand-dark/10 shadow-sm md:grid-cols-2">
-          <div className="bg-white p-6 md:p-8">
+        <div className="grid gap-8 md:grid-cols-[0.9fr_1.1fr] md:items-end">
+          <div>
+            <h2 className="max-w-xl text-[clamp(2.65rem,5vw,5.4rem)] font-bold leading-[0.94] tracking-[-0.03em] text-brand-dark">
+              Why Modern Fixes Fall Short
+            </h2>
+          </div>
+          <div className="border-l-4 border-brand-secondary pl-5">
             <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark/50">
               The usual move
             </p>
-            <h2 className="mt-3 text-2xl font-bold text-brand-dark md:text-3xl">
-              Try harder. Optimize more. Blame yourself.
-            </h2>
-            <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72 md:text-base">
-              More information can help, but it often stays above the real
-              system. You can know the right thing and still feel your body pull
-              away from it.
-            </p>
-          </div>
-          <div className="bg-white p-6 md:p-8">
-            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark/50">
-              What it misses
-            </p>
-            <h2 className="mt-3 text-2xl font-bold text-brand-dark md:text-3xl">
-              The drive underneath the behaviour.
-            </h2>
-            <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72 md:text-base">
-              Avoidance may be safety. Comparison may be status monitoring.
-              Scrolling may be belonging and reward. The behaviour makes more
-              sense when you know which ancient button got pressed.
+            <p className="mt-3 text-3xl font-bold leading-tight text-brand-dark md:text-4xl">
+              Try harder.
+              <br />
+              Optimize more.
+              <br />
+              Fix yourself.
             </p>
           </div>
         </div>
 
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
-          {shallowFixes.map((fix) => (
-            <article
-              key={fix.name}
-              className="rounded-lg border border-brand-dark/10 bg-white p-5 shadow-sm transition hover:border-brand-teal/50"
-            >
-              <span className="flex h-7 w-7 items-center justify-center rounded-full border border-brand-primary/30 bg-white text-brand-primary">
-                <X className="h-4 w-4" />
-              </span>
-              <h3 className="mt-4 font-sans text-sm font-semibold text-brand-dark">
-                {fix.name}
-              </h3>
-              <p className="mt-2 font-sans text-sm leading-6 text-brand-dark/62">
-                {fix.why}
+        <div className="mt-12">
+          <div className="space-y-10">
+            <div className="grid gap-6 md:grid-cols-[0.76fr_1fr] md:items-start">
+              <p className="text-2xl leading-9 text-brand-dark md:text-3xl md:leading-10">
+                When something isn&rsquo;t working, the response is almost automatic.
               </p>
-            </article>
-          ))}
+              <div className="space-y-5 font-sans text-base leading-8 text-brand-dark/72">
+                <p>
+                  Read more. Learn better systems. Build discipline. Stay consistent.
+                </p>
+                <p>And for a while, it does help.</p>
+                <p>
+                  You organize the list. You set the plan. You feel a brief sense of control.
+                </p>
+                <p>
+                  But it doesn&rsquo;t last. Because the tools are working on the surface.
+                </p>
+              </div>
+            </div>
+
+            <div className="border-y border-brand-dark/12 py-8">
+              <p className="max-w-3xl text-2xl font-bold leading-9 text-brand-dark md:text-3xl md:leading-10">
+                Most advice operates at the level of behaviour &mdash; what you do,
+                how you do it, how often you do it.
+              </p>
+              <div className="mt-6 grid gap-5 font-sans text-base leading-8 text-brand-dark/72 md:grid-cols-2">
+                <p>
+                  It assumes that once you know better, you will do better.
+                  <br />
+                  But that is not how it plays out.
+                </p>
+              </div>
+              <p className="mt-6 max-w-3xl border-l-4 border-brand-teal pl-5 text-2xl leading-9 text-brand-dark">
+                You can understand exactly what needs to be done,
+                <br />
+                and still feel a quiet resistance pulling you away from it.
+              </p>
+            </div>
+
+            <div className="grid gap-8 rounded-lg border border-brand-dark/10 bg-white p-6 shadow-sm md:grid-cols-[0.74fr_1.26fr] md:p-8 lg:p-10">
+              <div>
+                <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark/50">
+                  What it misses
+                </p>
+                <h3 className="mt-4 max-w-sm text-3xl font-bold leading-[1.08] tracking-[-0.015em] text-brand-dark md:text-4xl">
+                  The drive underneath the behaviour.
+                </h3>
+              </div>
+              <div className="space-y-7">
+                <div className="space-y-3 border-l-4 border-brand-secondary pl-5 text-xl leading-8 text-brand-dark md:text-2xl md:leading-9">
+                  <p>What looks like procrastination may be protection.</p>
+                  <p>What feels like distraction may be relief.</p>
+                  <p>What shows up as comparison may be status tracking.</p>
+                </div>
+
+                <p className="max-w-2xl text-2xl font-bold leading-tight text-brand-dark md:text-3xl">
+                  The behaviour is not random.
+                  <br />
+                  It is solving something &mdash; just not the thing you think.
+                </p>
+
+                <p className="max-w-2xl font-sans text-base leading-8 text-brand-dark/72">
+                  Most conventional approaches don&rsquo;t account for this layer.
+                  They try to change the action without understanding what the action
+                  is doing for you.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div className="mt-14 grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+          <div>
+            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
+              So the cycle repeats.
+            </p>
+            <p className="mt-4 text-3xl font-bold leading-tight text-brand-dark md:text-4xl">
+              You apply the fix.
+              <br />
+              It works briefly.
+              <br />
+              It fades.
+            </p>
+            <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-brand-dark/72">
+              And slowly, the problem starts to feel like you.
+            </p>
+            <p className="mt-5 border-l-4 border-brand-secondary pl-5 text-2xl leading-9 text-brand-dark">
+              Not disciplined enough.
+              <br />
+              Not focused enough.
+              <br />
+              Not consistent enough.
+            </p>
+          </div>
+
+          <div>
+            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark/50">
+              Where things break
+            </p>
+            <div className="mt-5 grid gap-4">
+              {shallowFixes.map((fix) => (
+                <article
+                  key={fix.name}
+                  className="rounded-lg border border-brand-dark/10 bg-white p-5 shadow-sm transition hover:border-brand-teal/50"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-brand-primary/30 bg-white text-brand-primary">
+                      <X className="h-4 w-4" />
+                    </span>
+                    <h3 className="font-sans text-sm font-semibold text-brand-dark">
+                      {fix.name}
+                    </h3>
+                  </div>
+                  <p className="mt-2 font-sans text-sm leading-6 text-brand-dark/62">
+                    {fix.why}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-14 grid gap-8 border-t border-brand-dark/12 pt-10 md:grid-cols-[0.7fr_1fr] md:items-start">
+          <div>
+            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark/50">
+              The deeper issue
+            </p>
+            <h3 className="mt-3 text-3xl font-bold leading-tight text-brand-dark md:text-4xl">
+              Most solutions are built for a version of you that is fully rational.
+            </h3>
+          </div>
+          <div className="space-y-5 font-sans text-base leading-8 text-brand-dark/72">
+            <p>
+              But your behaviour isn&rsquo;t just driven by logic.
+              <br />
+              It is shaped by older systems &mdash; faster, quieter, and far more
+              influential.
+            </p>
+            <p>
+              So when the usual fixes don&rsquo;t stick,
+              <br />
+              the problem may not be effort.
+            </p>
+            <p className="border-l-4 border-brand-secondary pl-5 text-lg leading-8 text-brand-dark">
+              It may be that you&rsquo;re solving for the wrong layer.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -312,21 +433,30 @@ const LandingPage = () => {
         <div className="mx-auto max-w-6xl">
           <SectionLabel tone="dark">A different perspective</SectionLabel>
           <h2 className="max-w-3xl text-3xl font-bold leading-tight md:text-5xl">
-            What if it is not a <span className="italic text-brand-secondary">character flaw?</span>
+            What if it is not a <span className="italic text-brand-secondary">personal failing?</span>
           </h2>
           <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-white/72">
-            We have been taught to treat these struggles as personal failures:
-            things to overcome through willpower and discipline. But what if the
-            real explanation is not moral? What if it is biological?
+            We have been taught to treat these struggles as things to fix
+            through effort.
+            <br />
+            To push harder. Stay disciplined. Do better.
+          </p>
+          <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-white/72">
+            But what if the explanation sits elsewhere?
+          </p>
+          <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-white/72">
+            What if the pattern is not a lack of will,
+            <br />
+            but something built deeper into how we operate?
           </p>
           <blockquote className="mt-8 max-w-3xl border-l-4 border-brand-secondary bg-white/[0.04] py-4 pl-6 pr-5 text-2xl italic leading-10 text-white/92">
-            We think our struggles are personal. They are often ancient programs
+            We think our struggles are personal. They are often older patterns
             running in an environment they were never built for.
           </blockquote>
           <p className="mt-8 max-w-2xl font-sans text-base leading-8 text-white/72">
-            Every pattern you fight, the avoidance, craving, comparison, or
-            fear, was once a feature. It kept your ancestors alive. The problem
-            is not you. The problem is the mismatch.
+            Every pattern you fight &mdash; avoidance, craving, comparison, fear &mdash;
+            was once a feature. It helped you survive. The problem is not you.
+            It&rsquo;s that the world changed faster than those patterns did.
           </p>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             <Stat number="5" label="Core survival drives still shaping modern behavior." />
@@ -341,26 +471,45 @@ const LandingPage = () => {
       <section className="bg-white px-6 py-16 md:py-24">
         <div className="mx-auto grid w-full max-w-6xl gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-center">
           <div>
-            <SectionLabel>Meet the culprit</SectionLabel>
+            <SectionLabel>A closer look</SectionLabel>
             <h2 className="text-3xl font-bold leading-tight text-brand-dark md:text-5xl">
-              Your <span className="italic text-brand-accent">Inner Caveman</span> still runs the show.
+              Your <span className="italic text-brand-accent">Inner Caveman</span> is still in charge.
             </h2>
             <p className="mt-5 font-sans text-base leading-8 text-brand-dark/72">
-              Beneath your rational, modern mind lives an ancient brain. It does
-              not care about your productivity plan for its own sake. It cares
-              about five fundamental drives: belonging, kin care, status,
-              attachment, and safety.
+              Beneath your rational, modern mind is an older system.
+              <br />
+              Faster. Automatic. Always scanning, always responding.
             </p>
             <p className="mt-4 font-sans text-base leading-8 text-brand-dark/72">
-              The Inner Caveman is not an enemy. He is a protector operating on
-              outdated information. Once you can see which drive is active, you
-              can work with it instead of against yourself.
+              It doesn&rsquo;t care about your plans for their own sake.
+              <br />
+              It cares about something more basic &mdash; staying safe, staying
+              connected, staying relevant.
+            </p>
+            <p className="mt-4 font-sans text-base leading-8 text-brand-dark/72">
+              And most of the time, it acts before you even notice.
+            </p>
+            <p className="mt-4 font-sans text-base leading-8 text-brand-dark/72">
+              The Inner Caveman is not an enemy.
+              <br />
+              It is a protector &mdash; working with patterns that once made sense.
+            </p>
+            <p className="mt-4 font-sans text-base leading-8 text-brand-dark/72">
+              The problem is not that it exists.
+              <br />
+              It&rsquo;s that it&rsquo;s operating in a world very different from the one it
+              was built for.
+            </p>
+            <p className="mt-4 font-sans text-base leading-8 text-brand-dark/72">
+              Once you begin to see which pattern is active,
+              <br />
+              you can work with it instead of against yourself.
             </p>
             <Link
               href="/inner-caveman"
               className="mt-6 inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-primary hover:underline"
             >
-              Explore the full framework
+              The Complete Guide to Your Inner Caveman
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -614,26 +763,36 @@ const SplitStruggleShowcase = ({
 
   return (
     <>
-      <div className="hidden overflow-hidden rounded-[1.35rem] border border-brand-dark/10 bg-white shadow-[0_20px_60px_rgba(4,42,43,0.06)] md:grid md:grid-cols-[1fr_6.5rem] md:items-stretch">
-        <div className="grid grid-rows-[1fr_auto] px-8 py-8">
-          <div className="max-w-3xl self-start pt-3">
-            <p className="max-w-2xl text-[2rem] leading-[1.45] text-brand-dark">
+      <div className="hidden overflow-hidden rounded-[1.35rem] border border-brand-dark/10 bg-white shadow-[0_20px_60px_rgba(4,42,43,0.06)] md:grid md:grid-cols-[1fr_5.25rem] md:items-stretch">
+        <article className="px-8 py-8 lg:px-10 lg:py-9">
+          <div className="flex items-start justify-between gap-8 border-b border-brand-dark/10 pb-7">
+            <div>
+              <p className="font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary">
+                {struggles[safeActiveStruggle].eyebrow}
+              </p>
+              <h3 className="mt-3 text-3xl font-bold leading-tight tracking-[-0.02em] text-brand-dark lg:text-5xl">
+                {struggles[safeActiveStruggle].title}
+              </h3>
+            </div>
+            <span className="font-serif text-5xl font-bold leading-none text-brand-primary/18">
+              {String(safeActiveStruggle + 1).padStart(2, "0")}
+            </span>
+          </div>
+
+          <div className="mt-8 grid gap-8 lg:grid-cols-[0.62fr_1fr] lg:items-start">
+            <p className="max-w-md text-3xl leading-tight text-brand-dark lg:text-4xl">
               {struggles[safeActiveStruggle].lead}
             </p>
-            <div className="mt-8 max-w-2xl space-y-5 font-sans text-base leading-8 text-brand-dark/64">
+            <div className="max-w-3xl space-y-6 font-sans text-base leading-8 text-brand-dark/68">
               <p>{struggles[safeActiveStruggle].detail}</p>
-              <p>{struggles[safeActiveStruggle].close}</p>
+              <p className="border-l-4 border-brand-secondary pl-5 text-lg leading-8 text-brand-dark">
+                {struggles[safeActiveStruggle].close}
+              </p>
             </div>
           </div>
+        </article>
 
-          <div className="mt-12 border-t border-brand-dark/10 pt-8">
-            <h3 className="text-3xl font-bold leading-tight tracking-[-0.02em] text-brand-dark md:text-5xl whitespace-nowrap">
-              {struggles[safeActiveStruggle].title}
-            </h3>
-          </div>
-        </div>
-
-        <div className="grid h-full auto-rows-fr border-l border-brand-dark/10 bg-brand-dark/[0.03]">
+        <div className="grid h-full auto-rows-fr border-l border-brand-dark bg-brand-dark">
           {struggles.map((item, index) => {
             const isActive = index === safeActiveStruggle;
 
@@ -643,15 +802,15 @@ const SplitStruggleShowcase = ({
                 type="button"
                 aria-expanded={isActive}
                 onClick={() => onSelect(index)}
-                className={`flex h-full w-full items-center justify-center border-b border-brand-dark/10 px-3 py-5 text-center transition last:border-b-0 ${
+                className={`flex h-full w-full items-center justify-center border-b border-white/15 px-3 py-5 text-center transition last:border-b-0 ${
                   isActive
                     ? "bg-white"
-                    : "text-brand-dark/62 hover:bg-white/75 hover:text-brand-dark"
+                    : "text-white/55 hover:text-white"
                 }`}
               >
                 <span
                   className={`font-serif text-3xl font-bold leading-none ${
-                    isActive ? "text-brand-primary" : "text-brand-primary/30"
+                    isActive ? "text-brand-dark" : "text-white/55"
                   }`}
                 >
                   {String(index + 1).padStart(2, "0")}
@@ -677,44 +836,62 @@ const MobileStruggleAccordion = ({
   activeStruggle: number;
   onSelect: (index: number) => void;
 }) => (
-  <div className="md:hidden">
+  <div className="space-y-3 md:hidden">
     {struggles.map((item, index) => {
       const isActive = index === activeStruggle;
 
       return (
         <article
           key={item.title}
-          className="border-b border-brand-dark/10 last:border-b-0"
+          className={`overflow-hidden border border-brand-dark/10 ${
+            isActive ? "rounded-2xl shadow-[0_16px_45px_rgba(4,42,43,0.07)]" : ""
+          }`}
         >
           <button
             type="button"
             aria-expanded={isActive}
             onClick={() => onSelect(index)}
-            className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left"
+            className={`flex w-full items-center justify-between gap-4 px-5 py-5 text-left transition ${
+              isActive ? "bg-brand-dark text-white" : "bg-white text-brand-dark"
+            }`}
           >
             <div>
-              <span className="font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-dark/35">
+              <span
+                className={`font-sans text-xs font-semibold uppercase tracking-[0.18em] ${
+                  isActive ? "text-white/55" : "text-brand-dark/35"
+                }`}
+              >
                 {String(index + 1).padStart(2, "0")}
               </span>
-              <h3 className="mt-2 font-sans text-base font-semibold text-brand-dark">
+              <h3
+                className={`mt-2 font-sans text-base font-semibold ${
+                  isActive ? "text-white" : "text-brand-dark"
+                }`}
+              >
                 {item.title}
               </h3>
             </div>
-            <span className="font-serif text-4xl font-bold leading-none text-brand-primary/18">
+            <span
+              className={`font-serif text-4xl font-bold leading-none ${
+                isActive ? "text-white/18" : "text-brand-primary/18"
+              }`}
+            >
               {index + 1}
             </span>
           </button>
           {isActive && (
-            <div className="border-t border-brand-dark/8 px-5 pb-5 pt-4">
-              <p className="font-sans text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-brand-primary/70">
+            <div className="bg-white px-5 pb-6 pt-5">
+              <p className="font-sans text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-brand-primary">
                 {item.eyebrow}
               </p>
-              <p className="mt-3 text-xl leading-8 text-brand-dark">
+              <p className="mt-3 text-2xl leading-8 text-brand-dark">
                 {item.lead}
               </p>
-              <div className="mt-4 space-y-3 font-sans text-sm leading-7 text-brand-dark/62">
+              <div className="mt-5 space-y-4 font-sans text-sm leading-7 text-brand-dark/66">
                 <p>{item.detail}</p>
-                <p>{item.close}</p>
+                <p className="border-l-4 border-brand-secondary pl-4 text-base leading-7 text-brand-dark">
+                  {item.close}
+                </p>
               </div>
             </div>
           )}

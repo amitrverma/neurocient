@@ -34,9 +34,10 @@ export async function generateStaticParams() {
 export default async function TagPage({
   params,
 }: {
-  params: { tag: string };
+  params: Promise<{ tag: string }>;
 }) {
-  const decodedTag = unslugifyTag(params.tag); // "the-modern-caveman" → "The Modern Caveman"
+  const { tag } = await params;
+  const decodedTag = unslugifyTag(tag);
 
   const files = fs.readdirSync(insightsDir);
 

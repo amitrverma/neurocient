@@ -1,12 +1,11 @@
-// src/utils/slug.ts
 export function slugifyTag(tag: string) {
   return tag
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, "") // remove special chars
-    .replace(/\s+/g, "-");    // spaces → dashes
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-");
 }
 
-export function unslugifyTag(slug: string) {
+export function unslugifyTag(slug = "") {
   return slug.replace(/-/g, " ");
 }

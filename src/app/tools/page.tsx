@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ArrowRight, ClipboardList, Lock, NotebookPen } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
 import StreakBar from "../components/tools/StreakBar";
 import AuthModal from "../components/AuthModal";
@@ -11,6 +12,12 @@ interface Spot {
   description: string;
 }
 
+const spotIntro =
+  "Notice the moments when ancient wiring takes the wheel: avoidance, comparison, overreaction, status scanning, or the pull toward easy relief.";
+
+const microIntro =
+  "Small, science-backed experiments that help you practice with your wiring instead of relying on willpower.";
+
 const ToolsPage = () => {
   const [spots, setSpots] = useState<Spot[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +25,6 @@ const ToolsPage = () => {
 
   const { user } = useAuth();
 
-  // mock streak + microchallenge summary for now
   const streak = { current: 7, longest: 15 };
   const microSummary = {
     completed: 3,
@@ -36,7 +42,7 @@ const ToolsPage = () => {
       try {
         const res = await fetch("/api/spots/", {
           method: "GET",
-          credentials: "include", // ✅ rely on cookies
+          credentials: "include",
         });
 
         if (!res.ok) {
@@ -53,192 +59,225 @@ const ToolsPage = () => {
     };
 
     fetchSpots();
-  }, [user]); // ✅ depend on user, not token
+  }, [user]);
 
   const spotCount = spots.length;
+  const latestSpot =
+    spotCount > 0
+      ? [...spots].sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+        )[spotCount - 1]
+      : null;
 
-  let latestSpot: Spot | null = null;
+  return (
+    <main className="bg-white font-serif text-brand-dark">
+      <section className="mx-auto w-full max-w-6xl px-6 py-12 md:py-16">
+        <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
+          <div>
+            <SectionLabel>Tools</SectionLabel>
+            <h1 className="text-[clamp(2.6rem,4.8vw,5rem)] font-bold leading-[0.98] tracking-[-0.03em] text-brand-dark">
+              Practice the
+              <br />
+              <span className="italic text-brand-accent">new response.</span>
+            </h1>
+            <p className="mt-6 max-w-xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark">
+              A working space for spotting patterns, running micro-experiments,
+              and building awareness through repetition.
+            </p>
+          </div>
 
-  if (spotCount > 0) {
-    const sorted = [...spots].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          <div className="space-y-5">
+            <StreakBar current={streak.current} longest={streak.longest} />
+            {!user ? (
+              <div className="rounded-lg border border-brand-dark/10 bg-white p-5 shadow-sm">
+                <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
+                  Sign in required
+                </p>
+                <p className="mt-2 font-sans text-sm leading-7 text-brand-dark/72">
+                  Log in to view your saved spots, assigned microchallenges,
+                  and progress.
+                </p>
+                <button
+                  onClick={() => setShowAuth(true)}
+                  className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:opacity-90"
+                >
+                  Log in
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-6xl px-6 pb-14 md:pb-20">
+        <div className="grid gap-5 lg:grid-cols-2">
+          <ToolCard
+            eyebrow="Awareness log"
+            title="Spot Your Inner Caveman"
+            icon={<NotebookPen className="h-5 w-5" />}
+            description={spotIntro}
+            href="/tools/spots"
+            cta="Open spots"
+            disabled={!user}
+            onRequireAuth={() => setShowAuth(true)}
+            stat={
+              loading
+                ? "Loading spots..."
+                : user
+                  ? `${spotCount} ${spotCount === 1 ? "spot" : "spots"} logged`
+                  : "Log in to view your spots"
+            }
+          >
+            {user && latestSpot ? (
+              <p className="mt-4 border-l-4 border-brand-secondary pl-4 font-sans text-sm leading-7 text-brand-dark/72">
+                Latest: "{latestSpot.description}"
+              </p>
+            ) : null}
+          </ToolCard>
+
+          <ToolCard
+            eyebrow="Daily experiment"
+            title="Microchallenges"
+            icon={<ClipboardList className="h-5 w-5" />}
+            description={microIntro}
+            href="/tools/microchallenges"
+            cta="Open challenges"
+            disabled={!user}
+            onRequireAuth={() => setShowAuth(true)}
+            stat={
+              user
+                ? `${microSummary.completed}/${microSummary.total} challenges completed`
+                : "Log in to view your microchallenges"
+            }
+          >
+            {user && microSummary.current ? (
+              <p className="mt-4 border-l-4 border-brand-secondary pl-4 font-sans text-sm leading-7 text-brand-dark/72">
+                Current: "{microSummary.current}"
+              </p>
+            ) : null}
+          </ToolCard>
+        </div>
+      </section>
+
+      <section className="bg-brand-dark px-6 py-14 text-white md:py-16">
+        <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[0.78fr_1.22fr] md:items-start">
+          <div>
+            <SectionLabel tone="dark">How this works</SectionLabel>
+            <h2 className="text-3xl font-bold leading-tight tracking-[-0.02em] md:text-4xl">
+              Small logs.
+              <br />
+              Better pattern recognition.
+            </h2>
+          </div>
+          <div className="grid gap-5 font-sans text-base leading-8 text-white/72 md:grid-cols-3">
+            <p>Name the moment instead of judging it.</p>
+            <p>Run one small experiment instead of forcing a total reset.</p>
+            <p>Use repetition to make the useful response easier to reach.</p>
+          </div>
+        </div>
+      </section>
+
+      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
+    </main>
+  );
+};
+
+const ToolCard = ({
+  eyebrow,
+  title,
+  icon,
+  description,
+  href,
+  cta,
+  disabled,
+  onRequireAuth,
+  stat,
+  children,
+}: {
+  eyebrow: string;
+  title: string;
+  icon: React.ReactNode;
+  description: string;
+  href: string;
+  cta: string;
+  disabled: boolean;
+  onRequireAuth: () => void;
+  stat: string;
+  children?: React.ReactNode;
+}) => {
+  const content = (
+    <>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
+            {eyebrow}
+          </p>
+          <h2 className="mt-3 text-3xl font-bold leading-tight text-brand-dark">
+            {title}
+          </h2>
+        </div>
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
+          {icon}
+        </span>
+      </div>
+
+      <p className="mt-4 font-sans text-sm leading-7 text-brand-dark/72">
+        {description}
+      </p>
+      <p className="mt-5 font-sans text-xs font-semibold uppercase tracking-[0.14em] text-brand-primary">
+        {stat}
+      </p>
+      {children}
+      <span className="mt-6 inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-accent">
+        {disabled ? <Lock className="h-4 w-4" /> : null}
+        {cta}
+        <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+      </span>
+    </>
+  );
+
+  if (disabled) {
+    return (
+      <button
+        type="button"
+        onClick={onRequireAuth}
+        className="group w-full cursor-pointer rounded-lg border border-brand-dark/10 bg-white p-6 text-left shadow-sm transition hover:border-brand-teal/60 hover:shadow-md md:p-7"
+      >
+        {content}
+      </button>
     );
-    latestSpot = sorted[sorted.length - 1];
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-      <h1 className="text-2xl font-bold text-[#042a2b] mb-4">🛠 Tools Dashboard</h1>
-
-      {/* 1. Streak */}
-      <StreakBar current={streak.current} longest={streak.longest} />
-
-      {/* 2. Grid of summaries */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Caveman Spotting summary */}
-        <div className="p-4 border rounded-lg shadow-sm bg-white">
-          <h2 className="font-semibold text-lg text-[#042a2b] mb-2">
-            Spot Your Inner Caveman
-          </h2>
-
-          {spotCount < 5 ? (
-            <p className="text-sm text-brand-dark mb-4">
-      Your brain runs on ancient wiring. Long before offices, deadlines, and
-      smartphones, our ancestors relied on instincts that kept them alive in
-      small tribes. Those instincts haven’t gone away—they’re still in you
-      today.
-      <br /><br />
-      We call this your Inner Caveman. It’s the part of you that seeks safety,
-      status, Belonging, quick rewards, and certainty—whether or not those
-      instincts actually serve you in modern life.
-      <br /><br />
-      Spotting your caveman is about noticing those moments when your ancient
-      wiring takes the wheel:
-      <br /><br />
-      – When one piece of criticism outweighs ten compliments. <br />
-      – When you check email instead of tackling strategy. <br />
-      – When you hold back an idea in a meeting to avoid standing out.
-      <br /><br />
-      By spotting these moments, you begin to see the patterns. And once you
-      see them, you can start working with them—designing habits, environments,
-      and choices that align with how your brain actually works.
-      <br /><br />
-      This isn’t about fighting your caveman. It’s about recognizing him, and
-      learning how to steer with—not against—your wiring.
-    </p>
-          ) : (
-             <p className="text-sm text-brand-dark mb-4">
-      Spotting your caveman means noticing the moments when ancient instincts
-      show up in modern life—like when one critique stings more than ten
-      compliments or when you hold back in a meeting to play it safe. By naming
-      these patterns, you build awareness and start steering with your wiring
-      instead of against it.
-    </p>
-          )}
-
-          {loading ? (
-            <p className="text-sm text-brand-dark">Loading spots…</p>
-          ) : !user ? (
-            <div className="text-sm text-brand-dark">
-              Please{" "}
-              <button
-                onClick={() => setShowAuth(true)}
-                className="text-brand-accent font-bold text-md hover:underline cursor-pointer"
-              >
-                log in
-              </button>{" "}
-              to see your Caveman Spots.
-            </div>
-          ) : (
-            <>
-              <p className="text-sm text-brand-dark mb-2">
-                You’ve logged <span className="font-bold">{spotCount}</span>{" "}
-                {spotCount === 1 ? "spot" : "spots"} so far.
-              </p>
-              {latestSpot && (
-                <p className="text-sm italic text-brand-dark mb-4">
-                  Latest: “{latestSpot.description}”
-                </p>
-              )}
-
-              <Link
-                href="/tools/spots"
-                className="inline-block border text-brand-dark font-semibold px-6 py-3 rounded-xl shadow hover:bg-brand-teal hover:text-white transition"
-              >
-                View All
-              </Link>
-            </>
-          )}
-        </div>
-
-        {/* Microchallenges summary */}
-        <div className="p-4 border rounded-lg shadow-sm bg-white">
-          <h2 className="font-semibold text-lg text-[#042a2b] mb-2">
-            Microchallenges
-          </h2>
-          {!user ? (
-            <>
-              {/* logged out version */}
-                  <p className="text-sm text-brand-dark mb-4">
-      Microchallenges are tiny, science-backed experiments for your daily life.
-      They’re not about willpower or discipline. They’re about nudges—small,
-      doable actions that work with your ancient wiring instead of against it.
-      <br /><br />
-      Your ancestors didn’t count calories, schedule gym sessions, or manage
-      digital distractions. But they did walk often, pause at sunset, drink
-      water when thirsty, and connect face-to-face. Microchallenges are built
-      from those timeless patterns, translated into modern habits.
-      <br /><br />
-      Each challenge is intentionally small: drink a glass of water before your
-      first coffee, put your phone away 30 minutes before bed, take a 5-minute
-      movement break every hour.
-      <br /><br />
-      This isn’t about adding pressure. It’s about experimenting playfully with
-      your wiring, one small challenge at a time.
-    </p>
-              <div className="text-sm text-brand-dark">
-                Please{" "}
-                <button
-                  onClick={() => setShowAuth(true)}
-                  className="text-brand-accent font-bold text-md hover:underline cursor-pointer"
-                >
-                  log in
-                </button>{" "}
-                to see your Microchallenges.
-              </div>
-            </>
-          ) : (
-            <>
-              {/* logged in version */}
-              {microSummary.completed < 1 ? (
-                <p className="text-sm text-brand-dark mb-4">
-      Microchallenges are tiny, science-backed experiments for your daily life.
-      They’re not about willpower or discipline. They’re about nudges—small,
-      doable actions that work with your ancient wiring instead of against it.
-      <br /><br />
-      Your ancestors didn’t count calories, schedule gym sessions, or manage
-      digital distractions. But they did walk often, pause at sunset, drink
-      water when thirsty, and connect face-to-face. Microchallenges are built
-      from those timeless patterns, translated into modern habits.
-      <br /><br />
-      Each challenge is intentionally small: drink a glass of water before your
-      first coffee, put your phone away 30 minutes before bed, take a 5-minute
-      movement break every hour.
-      <br /><br />
-      This isn’t about adding pressure. It’s about experimenting playfully with
-      your wiring, one small challenge at a time.
-    </p>
-              ) : (
-                  <p className="text-sm text-brand-dark mb-4">
-      Microchallenges are small, science-backed experiments that help you work
-      with your wiring. Think of them as tiny nudges—like a digital sunset, a
-      hydration break, or a movement pause—that build awareness and momentum
-      without relying on willpower.
-    </p>
-              )}
-              <p className="text-sm text-brand-dark mb-2">
-                {microSummary.completed}/{microSummary.total} challenges
-                completed.
-              </p>
-              {microSummary.current && (
-                <p className="text-sm italic text-brand-dark mb-4">
-                  Current: “{microSummary.current}”
-                </p>
-              )}
-              <Link
-                href="/tools/microchallenges"
-                className="inline-block border text-brand-dark font-semibold px-6 py-3 rounded-xl shadow hover:bg-brand-teal hover:text-white transition"
-              >
-                Go to Challenges
-              </Link>
-            </>
-          )}
-        </div>
-      </div>
-
-      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
-    </div>
+    <Link
+      href={href}
+      className="group block cursor-pointer rounded-lg border border-brand-dark/10 bg-white p-6 shadow-sm transition hover:border-brand-teal/60 hover:shadow-md md:p-7"
+    >
+      {content}
+    </Link>
   );
 };
+
+const SectionLabel = ({
+  children,
+  tone = "light",
+}: {
+  children: React.ReactNode;
+  tone?: "light" | "dark";
+}) => (
+  <div
+    className={`mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] ${
+      tone === "dark" ? "text-brand-secondary" : "text-brand-teal"
+    }`}
+  >
+    <span>{children}</span>
+    <span
+      className={`h-px flex-1 ${
+        tone === "dark" ? "bg-white/20" : "bg-brand-dark/15"
+      }`}
+    />
+  </div>
+);
 
 export default ToolsPage;

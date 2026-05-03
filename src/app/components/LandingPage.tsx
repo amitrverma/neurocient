@@ -80,29 +80,29 @@ const shallowFixes = [
 
 const timeline = [
   {
-    era: "200,000 years ago",
+    era: "Early human life",
     title: "Fear meant survival",
-    desc: "Social rejection could mean exile from the group. Anxiety about fitting in was not weakness. It was protection.",
+    desc: "Staying alert to danger kept you alive. Even being pushed out of the group carried real risk.",
   },
   {
-    era: "Paleolithic",
-    title: "Loss aversion meant protection",
-    desc: "Losing food, shelter, or allies could be catastrophic. Feeling losses more strongly than gains kept people vigilant.",
+    era: "Uncertain environments",
+    title: "Loss mattered more than gain",
+    desc: "Losing food, shelter, or allies could be costly. Feeling losses more strongly helped you stay cautious.",
   },
   {
-    era: "Pre-history",
-    title: "Rest could feel risky",
-    desc: "When resources were uncertain, the brain learned to treat alertness and readiness as safety strategies.",
+    era: "Constant vigilance",
+    title: "Alertness meant protection",
+    desc: "When danger was uncertain, noticing small signals early helped you stay alive. The mind learned to scan before it settled.",
   },
   {
-    era: "Scarcity",
+    era: "Scarcity of resources",
     title: "Craving meant opportunity",
-    desc: "Calories were scarce and unpredictable. Wanting sugar and fat when available was smart survival math.",
+    desc: "Food wasn't guaranteed. Wanting high-energy food when it appeared was an advantage.",
   },
   {
     era: "Today",
-    title: "The mismatch",
-    desc: "Same wiring, different world. The threat is an email. The tribe signal is a post. The scarcity cue is everywhere.",
+    title: "Same wiring. Different world.",
+    desc: "The threat is an email. The tribe signal is a notification. The sense of scarcity never quite turns off.",
     mismatch: true,
   },
 ];
@@ -145,42 +145,33 @@ const drives = [
   },
 ];
 
-const awarenessSteps = [
+const awarenessSteps: Array<{ title: string; desc: ReactNode[] }> = [
   {
     title: "Name the pattern",
-    desc: "Call the response what it is. Naming creates distance from the impulse and makes the automatic loop visible.",
+    desc: [
+      "Call the response what it is.",
+      "A pull to avoid. A need for reassurance. A flicker of comparison.",
+      "Naming creates distance. It turns something automatic into something you can see.",
+    ],
   },
   {
     title: "Trace it to the drive",
-    desc: "Ask which old problem the behavior is trying to solve: inclusion, kin care, status, attachment, or safety.",
+    desc: [
+      "Ask what the response is trying to do.",
+      "Is it looking for safety? Connection? Status?",
+      <>
+        The behaviour is not random. It is solving something &mdash; just not always in the right way.
+      </>,
+    ],
   },
   {
     title: "Update the response",
-    desc: "Choose a modern move that respects the need without letting the old alarm run the whole decision.",
-  },
-];
-
-const helpfulTools = [
-  {
-    tag: "Free tool",
-    title: "Spot Your Caveman",
-    desc: "A quick diagnostic to identify which survival pattern is loudest in your life right now.",
-    href: "/diagnostics/spot-your-caveman",
-    cta: "Take the diagnostic",
-  },
-  {
-    tag: "Micro-challenge",
-    title: "The Caveman Audit",
-    desc: "Small observations that train you to notice the drive beneath everyday reactions.",
-    href: "/tools/microchallenges",
-    cta: "Start a challenge",
-  },
-  {
-    tag: "Deep dive",
-    title: "The Inner Caveman Guide",
-    desc: "The full framework: evolutionary psychology, neuroscience, and practical tools in one place.",
-    href: "/inner-caveman",
-    cta: "Read the guide",
+    desc: [
+      "Choose a response that fits the situation you're actually in.",
+      <>
+        Not by suppressing the old pattern, but by recognizing the need beneath it &mdash; and responding with more context.
+      </>,
+    ],
   },
 ];
 
@@ -205,7 +196,7 @@ const LandingPage = () => {
               <br />
               Your world isn&apos;t.
             </h1>
-            <p className="mt-8 max-w-3xl border-l-4 border-brand-secondary pl-5 font-sans text-lg leading-8 text-brand-dark/74 md:text-xl md:leading-9">
+            <p className="mt-8 max-w-3xl border-l-4 border-brand-secondary pl-5 font-sans text-lg leading-8 text-brand-dark md:text-xl md:leading-9">
               Constant distraction. Persistent pressure. Social comparison.
               <br />
               Low energy. Cognitive overload.
@@ -241,7 +232,7 @@ const LandingPage = () => {
         <h2 className="text-[clamp(3rem,4.2vw,4.75rem)] font-bold leading-[0.95] tracking-[-0.03em] text-brand-dark">
           Why do I do that?
         </h2>
-        <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-brand-dark/72">
+        <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-brand-dark">
           You know what needs to be done. You may even want to do it. And yet,
           you don&apos;t. Not always. Not completely. But often enough to notice a
           pattern. That&apos;s the part worth paying attention to.
@@ -265,7 +256,7 @@ const LandingPage = () => {
             </h2>
           </div>
           <div className="border-l-4 border-brand-secondary pl-5">
-            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark/50">
+            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark">
               The usual move
             </p>
             <p className="mt-3 text-3xl font-bold leading-tight text-brand-dark md:text-4xl">
@@ -284,7 +275,7 @@ const LandingPage = () => {
               <p className="text-2xl leading-9 text-brand-dark md:text-3xl md:leading-10">
                 When something isn&rsquo;t working, the response is almost automatic.
               </p>
-              <div className="space-y-5 font-sans text-base leading-8 text-brand-dark/72">
+              <div className="space-y-5 font-sans text-base leading-8 text-brand-dark">
                 <p>
                   Read more. Learn better systems. Build discipline. Stay consistent.
                 </p>
@@ -303,7 +294,7 @@ const LandingPage = () => {
                 Most advice operates at the level of behaviour &mdash; what you do,
                 how you do it, how often you do it.
               </p>
-              <div className="mt-6 grid gap-5 font-sans text-base leading-8 text-brand-dark/72 md:grid-cols-2">
+              <div className="mt-6 grid gap-5 font-sans text-base leading-8 text-brand-dark md:grid-cols-2">
                 <p>
                   It assumes that once you know better, you will do better.
                   <br />
@@ -319,7 +310,7 @@ const LandingPage = () => {
 
             <div className="grid gap-8 rounded-lg border border-brand-dark/10 bg-white p-6 shadow-sm md:grid-cols-[0.74fr_1.26fr] md:p-8 lg:p-10">
               <div>
-                <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark/50">
+                <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark">
                   What it misses
                 </p>
                 <h3 className="mt-4 max-w-sm text-3xl font-bold leading-[1.08] tracking-[-0.015em] text-brand-dark md:text-4xl">
@@ -339,7 +330,7 @@ const LandingPage = () => {
                   It is solving something &mdash; just not the thing you think.
                 </p>
 
-                <p className="max-w-2xl font-sans text-base leading-8 text-brand-dark/72">
+                <p className="max-w-2xl font-sans text-base leading-8 text-brand-dark">
                   Most conventional approaches don&rsquo;t account for this layer.
                   They try to change the action without understanding what the action
                   is doing for you.
@@ -362,7 +353,7 @@ const LandingPage = () => {
               <br />
               It fades.
             </p>
-            <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-brand-dark/72">
+            <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-brand-dark">
               And slowly, the problem starts to feel like you.
             </p>
             <p className="mt-5 border-l-4 border-brand-secondary pl-5 text-2xl leading-9 text-brand-dark">
@@ -375,7 +366,7 @@ const LandingPage = () => {
           </div>
 
           <div>
-            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark/50">
+            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark">
               Where things break
             </p>
             <div className="mt-5 grid gap-4">
@@ -392,7 +383,7 @@ const LandingPage = () => {
                       {fix.name}
                     </h3>
                   </div>
-                  <p className="mt-2 font-sans text-sm leading-6 text-brand-dark/62">
+                  <p className="mt-2 font-sans text-sm leading-6 text-brand-dark">
                     {fix.why}
                   </p>
                 </article>
@@ -403,14 +394,14 @@ const LandingPage = () => {
 
         <div className="mt-14 grid gap-8 border-t border-brand-dark/12 pt-10 md:grid-cols-[0.7fr_1fr] md:items-start">
           <div>
-            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark/50">
+            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark">
               The deeper issue
             </p>
             <h3 className="mt-3 text-3xl font-bold leading-tight text-brand-dark md:text-4xl">
               Most solutions are built for a version of you that is fully rational.
             </h3>
           </div>
-          <div className="space-y-5 font-sans text-base leading-8 text-brand-dark/72">
+          <div className="space-y-5 font-sans text-base leading-8 text-brand-dark">
             <p>
               But your behaviour isn&rsquo;t just driven by logic.
               <br />
@@ -475,32 +466,32 @@ const LandingPage = () => {
             <h2 className="text-3xl font-bold leading-tight text-brand-dark md:text-5xl">
               Your <span className="italic text-brand-accent">Inner Caveman</span> is still in charge.
             </h2>
-            <p className="mt-5 font-sans text-base leading-8 text-brand-dark/72">
+            <p className="mt-5 font-sans text-base leading-8 text-brand-dark">
               Beneath your rational, modern mind is an older system.
               <br />
               Faster. Automatic. Always scanning, always responding.
             </p>
-            <p className="mt-4 font-sans text-base leading-8 text-brand-dark/72">
+            <p className="mt-4 font-sans text-base leading-8 text-brand-dark">
               It doesn&rsquo;t care about your plans for their own sake.
               <br />
               It cares about something more basic &mdash; staying safe, staying
               connected, staying relevant.
             </p>
-            <p className="mt-4 font-sans text-base leading-8 text-brand-dark/72">
+            <p className="mt-4 font-sans text-base leading-8 text-brand-dark">
               And most of the time, it acts before you even notice.
             </p>
-            <p className="mt-4 font-sans text-base leading-8 text-brand-dark/72">
+            <p className="mt-4 font-sans text-base leading-8 text-brand-dark">
               The Inner Caveman is not an enemy.
               <br />
               It is a protector &mdash; working with patterns that once made sense.
             </p>
-            <p className="mt-4 font-sans text-base leading-8 text-brand-dark/72">
+            <p className="mt-4 font-sans text-base leading-8 text-brand-dark">
               The problem is not that it exists.
               <br />
               It&rsquo;s that it&rsquo;s operating in a world very different from the one it
               was built for.
             </p>
-            <p className="mt-4 font-sans text-base leading-8 text-brand-dark/72">
+            <p className="mt-4 font-sans text-base leading-8 text-brand-dark">
               Once you begin to see which pattern is active,
               <br />
               you can work with it instead of against yourself.
@@ -536,7 +527,7 @@ const LandingPage = () => {
                     <p className="mt-1 text-lg italic leading-7 text-brand-dark">
                       {drive.question}
                     </p>
-                    <p className="mt-2 font-sans text-sm leading-6 text-brand-dark/64">
+                    <p className="mt-2 font-sans text-sm leading-6 text-brand-dark">
                       {drive.modern}
                     </p>
                   </div>
@@ -545,6 +536,12 @@ const LandingPage = () => {
             );
           })}
         </div>
+
+        <p className="mx-auto mt-8 max-w-6xl font-sans text-base leading-8 text-brand-dark">
+          These patterns are not random.
+          <br />
+          They come from a system shaped long before the world you live in today.
+        </p>
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
@@ -554,10 +551,18 @@ const LandingPage = () => {
           <br />
           <span className="italic text-brand-accent">Back then.</span>
         </h2>
-        <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-brand-dark/72">
-          Your brain was not built for 2026. It was built for a world of scarce
-          resources, uncertain safety, close kin, and constant social
-          dependency. Many irrational behaviors make sense in that world.
+        <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-brand-dark">
+          This system was shaped in a very different world &mdash;
+          <br />
+          where safety was uncertain, resources were limited, and belonging mattered.
+        </p>
+        <p className="mt-4 max-w-2xl font-sans text-base leading-8 text-brand-dark">
+          In that world, many of the patterns you struggle with today
+          <br />
+          were not problems.
+        </p>
+        <p className="mt-4 max-w-2xl font-sans text-base leading-8 text-brand-dark">
+          They were advantages.
         </p>
         <div className="mt-10 space-y-7 border-l border-brand-teal/55 pl-5 md:ml-16 md:pl-8">
           {timeline.map((item) => (
@@ -567,14 +572,14 @@ const LandingPage = () => {
                   item.mismatch ? "bg-brand-dark" : "bg-brand-dark/45"
                 }`}
               />
-              <p className="font-sans text-xs font-semibold uppercase tracking-[0.14em] text-brand-dark/45">
+              <p className="font-sans text-xs font-semibold uppercase tracking-[0.14em] text-brand-dark">
                 {item.era}
               </p>
               <div>
                 <h3 className="font-sans text-base font-semibold text-brand-dark">
                   {item.title}
                 </h3>
-                <p className="mt-1 font-sans text-sm leading-7 text-brand-dark/62">
+                <p className="mt-1 font-sans text-sm leading-7 text-brand-dark">
                   {item.desc}
                 </p>
               </div>
@@ -583,18 +588,18 @@ const LandingPage = () => {
         </div>
       </section>
 
-      <section className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-14 md:grid-cols-[0.95fr_1.05fr] md:py-20">
+      <section className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
         <div>
-          <SectionLabel>The helpful lens</SectionLabel>
+          <SectionLabel>A useful way to respond</SectionLabel>
           <h2 className="text-3xl font-bold leading-tight text-brand-dark md:text-5xl">
             Awareness is the <span className="italic text-brand-accent">first update.</span>
           </h2>
-          <p className="mt-5 font-sans text-base leading-8 text-brand-dark/72">
+          <p className="mt-5 font-sans text-base leading-8 text-brand-dark">
             You cannot delete the caveman. But you can learn to spot him before
             he hijacks the decision. That gap between stimulus and response is
             where the useful work begins.
           </p>
-          <div className="mt-7 space-y-4">
+          <div className="mt-7 grid gap-4 md:grid-cols-2">
             {awarenessSteps.map((step, index) => (
               <article
                 key={step.title}
@@ -607,88 +612,52 @@ const LandingPage = () => {
                   <h3 className="font-sans text-sm font-semibold text-brand-dark">
                     {step.title}
                   </h3>
-                  <p className="mt-2 font-sans text-sm leading-6 text-brand-dark/64">
-                    {step.desc}
-                  </p>
+                  <div className="mt-2 space-y-3 font-sans text-sm leading-6 text-brand-dark">
+                    {step.desc.map((paragraph, paragraphIndex) => (
+                      <p key={paragraphIndex}>{paragraph}</p>
+                    ))}
+                  </div>
                 </div>
               </article>
             ))}
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          {helpfulTools.map((tool) => (
-            <Link
-              key={tool.title}
-              href={tool.href}
-              className="block rounded-lg border border-brand-dark bg-brand-dark p-6 text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-brand-dark/95 hover:shadow-md"
-            >
-              <span className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-secondary">
-                {tool.tag}
-              </span>
-              <h3 className="mt-3 text-2xl font-normal">{tool.title}</h3>
-              <p className="mt-2 font-sans text-sm leading-7 text-white/65">
-                {tool.desc}
+            <div className="space-y-3 rounded-lg border border-brand-dark/10 bg-white p-5 font-sans text-base leading-8 text-brand-dark">
+              <p>
+                You don&apos;t have to get it right every time. You just have to notice a little earlier.
               </p>
-              <span className="mt-4 inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-secondary">
-                {tool.cta}
-                <ArrowRight className="h-4 w-4" />
-              </span>
-            </Link>
-          ))}
+              <p>And over time, that changes how the system responds.</p>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
-        <SectionLabel>Diagnostic</SectionLabel>
-        <h2 className="text-3xl font-bold leading-tight text-brand-dark md:text-5xl">
-          Which caveman pattern
-          <br />
-          <span className="italic text-brand-accent">runs your life?</span>
-        </h2>
-        <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-brand-dark/72">
-          Take a sample question from the Caveman Diagnostic, then continue to
-          the full scan to identify your dominant survival pattern.
-        </p>
-        <div className="mt-8 overflow-hidden rounded-lg border border-brand-dark/10 shadow-sm">
-          <div className="flex flex-col gap-2 bg-brand-dark px-6 py-5 text-white sm:flex-row sm:items-center sm:justify-between">
-            <h3 className="text-xl font-bold">Spot Your Caveman: Quick Sample</h3>
-            <span className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-secondary">
-              Free diagnostic
-            </span>
-          </div>
-          <div className="bg-white p-6">
-            <p className="font-sans text-base leading-7 text-brand-dark">
-              When you have an important task to do, which is most true for you?
-            </p>
-            <div className="mt-5 grid gap-3 md:grid-cols-2">
-              {[
-                "I wait until I feel ready, which often means I do not start.",
-                "I get distracted by everything else and lose the thread.",
-                "I start but quit when it gets uncomfortable or hard.",
-                "I overthink it until the window closes.",
-              ].map((option) => (
-                <Link
-                  key={option}
-                  href="/diagnostics/caveman-scan"
-                  className="rounded-lg border border-brand-dark/10 bg-white px-4 py-3 font-sans text-sm leading-6 text-brand-dark transition hover:border-brand-primary"
-                >
-                  {option}
-                </Link>
-              ))}
-            </div>
-          </div>
-          <div className="flex flex-col gap-3 bg-white px-6 py-4 font-sans text-sm text-brand-dark/70 sm:flex-row sm:items-center sm:justify-between">
-            <span>2 min. Free. No signup required.</span>
-            <Link
-              href="/diagnostics/caveman-scan"
-              className="inline-flex items-center gap-2 font-semibold text-brand-primary hover:underline"
-            >
-              Take the full diagnostic
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
+      <section className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-14 md:grid-cols-[0.9fr_1fr] md:items-start md:py-16">
+        <div>
+          <SectionLabel>Inner Caveman Scan</SectionLabel>
+          <h2 className="max-w-xl text-3xl font-bold leading-tight text-brand-dark md:text-5xl">
+            The next step is to see this in yourself.
+          </h2>
         </div>
+        <Link
+          href="/diagnostics/caveman-scan"
+          className="block w-full rounded-lg border border-brand-dark bg-brand-dark p-6 text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-brand-dark/95 hover:shadow-md md:justify-self-end md:p-8"
+        >
+          <span className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-secondary">
+            Free tool
+          </span>
+          <h3 className="mt-3 text-2xl font-normal">Inner Caveman Scan</h3>
+          <p className="mt-3 font-sans text-sm leading-7 text-white/65">
+            A quick way to notice how this system shows up in your everyday decisions.
+          </p>
+          <p className="mt-4 font-sans text-sm leading-7 text-white/65">
+            Not a test. Not a label.
+            <br />
+            Just a clearer view of what&apos;s already happening.
+          </p>
+          <span className="mt-5 inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-secondary">
+            Start the scan
+            <ArrowRight className="h-4 w-4" />
+          </span>
+        </Link>
       </section>
 
       <Newsletter
@@ -783,7 +752,7 @@ const SplitStruggleShowcase = ({
             <p className="max-w-md text-3xl leading-tight text-brand-dark lg:text-4xl">
               {struggles[safeActiveStruggle].lead}
             </p>
-            <div className="max-w-3xl space-y-6 font-sans text-base leading-8 text-brand-dark/68">
+            <div className="max-w-3xl space-y-6 font-sans text-base leading-8 text-brand-dark">
               <p>{struggles[safeActiveStruggle].detail}</p>
               <p className="border-l-4 border-brand-secondary pl-5 text-lg leading-8 text-brand-dark">
                 {struggles[safeActiveStruggle].close}
@@ -858,7 +827,7 @@ const MobileStruggleAccordion = ({
             <div>
               <span
                 className={`font-sans text-xs font-semibold uppercase tracking-[0.18em] ${
-                  isActive ? "text-white/55" : "text-brand-dark/35"
+                  isActive ? "text-white/55" : "text-brand-dark"
                 }`}
               >
                 {String(index + 1).padStart(2, "0")}
@@ -887,7 +856,7 @@ const MobileStruggleAccordion = ({
               <p className="mt-3 text-2xl leading-8 text-brand-dark">
                 {item.lead}
               </p>
-              <div className="mt-5 space-y-4 font-sans text-sm leading-7 text-brand-dark/66">
+              <div className="mt-5 space-y-4 font-sans text-sm leading-7 text-brand-dark">
                 <p>{item.detail}</p>
                 <p className="border-l-4 border-brand-secondary pl-4 text-base leading-7 text-brand-dark">
                   {item.close}

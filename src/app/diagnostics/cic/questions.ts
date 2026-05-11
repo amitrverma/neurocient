@@ -49,7 +49,7 @@ export const diagnosticQuestions: DiagnosticQuestion[] = [
   {
     id: "q4",
     title: "Burnout Patterns",
-    question: "Have you noticed people staying “on” all the time - but showing signs of wear beneath the surface? What do you think keeps them pushing through?",
+    question: "Have you noticed people staying \"on\" all the time - but showing signs of wear beneath the surface? What do you think keeps them pushing through?",
     options: {
       A: "Taking a break feels like falling behind.",
       B: "We celebrate endurance more than recovery.",

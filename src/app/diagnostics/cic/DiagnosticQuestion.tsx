@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { diagnosticQuestions } from "./questions";
 import FeedbackOverlay from "./FeedbackOverlay";
 import { useAuth } from "@/app/context/AuthContext";
@@ -17,9 +18,9 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
   const [responses, setResponses] = useState<Record<string, string>>({});
   const [showAuth, setShowAuth] = useState(false);
 
-  const { user } = useAuth(); // ✅ check login
-
+  const { user } = useAuth();
   const question = diagnosticQuestions[currentIndex];
+  const total = diagnosticQuestions.length;
 
   useEffect(() => {
     const existing = responses[question.id];
@@ -31,137 +32,147 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
     setResponses((prev) => ({ ...prev, [question.id]: optionKey }));
   };
 
+  const completeDiagnostic = () => {
+    if (!selectedOption) return;
+
+    const completedResponses = {
+      ...responses,
+      [question.id]: selectedOption,
+    };
+
+    trackEvent("Diagnostic Completed", { responses: completedResponses });
+    onComplete(completedResponses);
+  };
+
   const handleNext = () => {
     if (!selectedOption) return;
 
-    if (currentIndex + 1 < diagnosticQuestions.length) {
+    if (currentIndex + 1 < total) {
       trackEvent("Diagnostic Step Completed", {
         step: currentIndex + 1,
         questionId: question.id,
         answer: selectedOption,
       });
       setCurrentIndex((prev) => prev + 1);
-    } else {
-      // ✅ Protect finish behind login
-      if (!user) {
-        setShowAuth(true);
-        return;
-      }
-      trackEvent("Diagnostic Completed", { responses });
-      onComplete(responses);
+      return;
     }
+
+    if (!user) {
+      setShowAuth(true);
+      return;
+    }
+
+    completeDiagnostic();
   };
 
   const handlePrevious = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex((prev) => prev - 1);
-    }
+    if (currentIndex > 0) setCurrentIndex((prev) => prev - 1);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-[#f8fafc] font-sans">
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        {/* Progress Bar */}
-        <div className="mb-4">
-          <div className="flex justify-between items-center text-sm text-brand-dark mb-1">
+    <main className="min-h-screen bg-white px-6 py-10 font-serif text-brand-dark md:py-14">
+      <section className="mx-auto w-full max-w-6xl">
+        <div className="mb-8">
+          <div className="mb-3 flex items-center justify-between gap-4 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark">
             <span>
-              Step {currentIndex + 1} of {diagnosticQuestions.length}
+              {currentIndex + 1} of {total}
             </span>
-            <span className="font-semibold text-brand-primary">
-              Caveman at Work
-            </span>
+            <span className="text-brand-teal">Caveman in the Cubicle</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+
+          <div className="h-2 w-full overflow-hidden rounded-full bg-brand-dark/10">
             <div
-              className="h-2 rounded-full transition-all duration-500 bg-brand-primary"
-              style={{
-                width: `${((currentIndex + 1) / diagnosticQuestions.length) * 100}%`,
-              }}
+              className="h-full rounded-full bg-brand-primary transition-all duration-500"
+              style={{ width: `${((currentIndex + 1) / total) * 100}%` }}
             />
           </div>
         </div>
 
-        {/* Question */}
-        <h2 className="text-2xl font-bold text-brand-dark mb-2">
+        <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
           {question.title}
-        </h2>
-        <p className="text-lg text-brand-dark mb-6 whitespace-pre-line">
-          {question.question.split("?")[0] + "?"}
-          {"\n"}
-          <span className="block font-semibold text-brand-dark mt-2">
-            {question.question.split("?")[1]?.trim()}
-          </span>
         </p>
+        <h1 className="mt-3 w-full text-2xl font-bold leading-tight tracking-[-0.015em] text-brand-dark md:text-4xl">
+          {question.question}
+        </h1>
 
-        {/* Options + Feedback side by side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* LEFT: Options + Buttons */}
+        <div className="mt-10 grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
           <div>
-            <ul className="space-y-3 mb-6">
-              {Object.entries(question.options).map(([key, value]) => (
-                <li key={key}>
-                  <button
-                    onClick={() => handleSelect(key)}
-                    className={`w-full text-left px-4 py-3 rounded-lg border shadow-sm transition duration-150
-                      ${
-                        selectedOption === key
-                          ? " text-brand-dark border-brand-teal ring-1 ring-brand-teal/70"
-                          : "bg-white text-brand-dark border-brand-dark hover:bg-brand-secondary/20"
-                      }`}
-                  >
-                    <span className="font-semibold">{key})</span> {value}
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <p className="mb-4 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
+              Choose the closest team pattern
+            </p>
 
-            {/* Navigation Buttons */}
-            <div className="flex justify-between mt-6">
-              {currentIndex > 0 && (
-                <button
-                  onClick={handlePrevious}
-                  className="px-4 py-2 border text-brand-dark text-sm rounded hover:bg-brand-teal hover:text-white transition"
-                >
-                  ← Previous
-                </button>
-              )}
+            <div className="space-y-3">
+              {Object.entries(question.options).map(([key, value]) => {
+                const isSelected = selectedOption === key;
+
+                return (
+                  <button
+                    key={key}
+                    onClick={() => handleSelect(key)}
+                    className={`w-full cursor-pointer rounded-lg border px-5 py-4 text-left font-sans text-[0.82rem] leading-6 shadow-sm transition md:text-sm ${
+                      isSelected
+                        ? "border-brand-dark bg-brand-dark text-white"
+                        : "border-brand-dark/10 bg-white text-brand-dark hover:border-brand-teal/60 hover:shadow-md"
+                    }`}
+                  >
+                    {value}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-7 flex items-center justify-between gap-3">
+              <button
+                onClick={handlePrevious}
+                disabled={currentIndex === 0}
+                className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark/25 px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-teal hover:text-brand-teal disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-35"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Previous
+              </button>
+
               <button
                 onClick={handleNext}
                 disabled={!selectedOption}
-                className={`px-4 py-2 text-sm rounded transition
-                  ${
-                    selectedOption
-                      ? "px-4 py-2 border text-brand-dark text-sm rounded hover:bg-brand-teal hover:text-white transition"
-                      : "border text-brand-dark cursor-not-allowed hover:bg-gray"
-                  }`}
+                className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:opacity-90 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-35"
               >
-                {currentIndex + 1 === diagnosticQuestions.length
-                  ? "Finish →"
-                  : "Next →"}
+                {currentIndex + 1 === total ? "Finish" : "Next"}
+                <ArrowRight className="h-4 w-4" />
               </button>
             </div>
           </div>
 
-          {/* RIGHT: Feedback aligned with options */}
-          <div>
-            {selectedOption && (
-              <FeedbackOverlay questionId={question.id} option={selectedOption} />
+          <div className="lg:pt-[2.1rem]">
+            {selectedOption ? (
+              <FeedbackOverlay
+                questionId={question.id}
+                option={selectedOption}
+              />
+            ) : (
+              <div className="rounded-lg border border-brand-dark/10 bg-white p-6 shadow-sm">
+                <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
+                  Behavioral read appears here
+                </p>
+                <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
+                  Pick a response to see the instinct that may be shaping the
+                  workplace pattern.
+                </p>
+              </div>
             )}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ✅ Auth Modal */}
       <AuthModal
         isOpen={showAuth}
         onClose={() => setShowAuth(false)}
         context="view the result"
         onSuccess={() => {
           setShowAuth(false);
-          onComplete(responses); // resume after login
+          completeDiagnostic();
         }}
       />
-    </div>
+    </main>
   );
 };
 

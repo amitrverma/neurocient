@@ -1,11 +1,20 @@
-import fs from "fs";
-import path from "path";
-import matter from "gray-matter";
 import type { Metadata } from "next";
-import Script from "next/script";
 import Image from "next/image";
+import Link from "next/link";
+import Script from "next/script";
+import type { ReactNode } from "react";
+import {
+  ArrowRight,
+  Compass,
+  Heart,
+  Headphones,
+  Repeat2,
+  ShieldCheck,
+  Sparkles,
+  Users,
+} from "lucide-react";
+import Newsletter from "../components/Newsletter";
 
-const insightsDir = path.join(process.cwd(), "src/content/insights");
 const innerCavemanAudioUrl =
   "https://neurocientblob.blob.core.windows.net/audio/inner-caveman.mp3?sp=r&st=2026-01-07T13:14:30Z&se=2029-01-07T21:29:30Z&spr=https&sv=2024-11-04&sr=b&sig=VBMEjoqZ06UnnDktbcRTOwyH%2BTdcq6QyHlpMWejuwc4%3D";
 const orgId = "https://neurocient.com/#/org/neurocient-labs";
@@ -13,7 +22,7 @@ const orgId = "https://neurocient.com/#/org/neurocient-labs";
 export const metadata: Metadata = {
   title: "The Complete Guide to Your Inner Caveman",
   description:
-    "Your Inner Caveman is ancient wiring shaping modern life. Understand its science and train your brain with Neurocient Labs’ behavioral frameworks.",
+    "Your Inner Caveman is ancient wiring shaping modern life. Understand its science and train your brain with Neurocient Labs' behavioral frameworks.",
   keywords: [
     "inner caveman",
     "what is inner caveman",
@@ -33,13 +42,13 @@ export const metadata: Metadata = {
     siteName: "Neurocient Labs",
     title: "The Complete Guide to Your Inner Caveman",
     description:
-      "Your Inner Caveman is ancient wiring shaping modern life. Understand its science and train your brain with Neurocient Labs’ behavioral frameworks.",
+      "Your Inner Caveman is ancient wiring shaping modern life. Understand its science and train your brain with Neurocient Labs' behavioral frameworks.",
     images: [
       {
-        url: "https://neurocient.com/assets/inner-caveman-logo.png",
+        url: "https://neurocient.com/assets/inner-caveman-five-drives.png",
         width: 1200,
         height: 630,
-        alt: "Neurocient Labs",
+        alt: "The Inner Caveman framework",
       },
     ],
   },
@@ -47,10 +56,148 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "The Complete Guide to Your Inner Caveman",
     description:
-      "Your Inner Caveman is ancient wiring shaping modern life. Understand its science and train your brain with Neurocient Labs’ behavioral frameworks.",
-    images: ["https://neurocient.com/assets/inner-caveman-logo.png"],
+      "Your Inner Caveman is ancient wiring shaping modern life. Understand its science and train your brain with Neurocient Labs' behavioral frameworks.",
+    images: ["https://neurocient.com/assets/inner-caveman-five-drives.png"],
   },
 };
+
+const drives = [
+  {
+    name: "Safety & Survival",
+    question: "Is there danger?",
+    oldLogic:
+      "Notice threat early, conserve energy, avoid unnecessary exposure.",
+    modernSignal:
+      "Procrastination, overthinking, anxiety, defensiveness, and waiting to feel ready.",
+    href: "/insights/evolutionary-lag",
+    icon: ShieldCheck,
+  },
+  {
+    name: "Affiliation & Belonging",
+    question: "Am I still included?",
+    oldLogic:
+      "Stay close to the group because exclusion once carried real risk.",
+    modernSignal:
+      "People-pleasing, notification checking, conflict avoidance, and loneliness.",
+    href: "/insights/connections",
+    icon: Users,
+  },
+  {
+    name: "Status & Hierarchy",
+    question: "Where do I stand?",
+    oldLogic:
+      "Track rank because status shaped safety, resources, and influence.",
+    modernSignal:
+      "Comparison, performance anxiety, reputation management, and silence after being dismissed.",
+    href: "/insights/why-we-compare",
+    icon: Compass,
+  },
+  {
+    name: "Kin Care",
+    question: "Are my people okay?",
+    oldLogic:
+      "Protect the people whose survival was tied to yours.",
+    modernSignal:
+      "Caregiving load, guilt, responsibility spirals, and difficulty switching off.",
+    href: "/insights/alloparenting",
+    icon: Heart,
+  },
+  {
+    name: "Mate & Bond Security",
+    question: "Is this bond safe?",
+    oldLogic:
+      "Monitor attachment because close bonds shaped protection, continuity, and belonging.",
+    modernSignal:
+      "Jealousy, replayed arguments, reassurance seeking, and reading tiny shifts in tone.",
+    href: "/insights/replay-arguments",
+    icon: Sparkles,
+  },
+];
+
+const mismatches = [
+  {
+    old: "A rustle in the grass",
+    now: "A Slack ping, email preview, or unread message",
+    pattern: "The body prepares before the mind has context.",
+  },
+  {
+    old: "Visible rank inside a small group",
+    now: "Global comparison feeds and performance metrics",
+    pattern: "Status tracking becomes endless because the tribe never stops refreshing.",
+  },
+  {
+    old: "Scarce calories and uncertain food",
+    now: "Always-available snacks, delivery apps, and stress eating",
+    pattern: "Craving feels urgent because opportunity once had an expiry date.",
+  },
+  {
+    old: "Short bursts of danger with recovery",
+    now: "Low-grade pressure without closure",
+    pattern: "The stress system stays open because nothing clearly ends.",
+  },
+];
+
+const bodySignals = [
+  {
+    signal: "A racing pulse",
+    meaning: "The body is preparing for threat before the mind has finished interpreting the situation.",
+  },
+  {
+    signal: "A craving",
+    meaning: "The old system has detected quick relief, quick energy, or quick reassurance.",
+  },
+  {
+    signal: "A hesitation",
+    meaning: "Some part of the next step feels exposed, costly, unclear, or socially unsafe.",
+  },
+  {
+    signal: "A defensive story",
+    meaning: "The mind may be explaining an alarm that began underneath language.",
+  },
+];
+
+const responseSteps = [
+  {
+    title: "Name the signal",
+    text: "Before fixing the behavior, identify what the caveman is trying to protect: safety, status, belonging, energy, or attachment.",
+  },
+  {
+    title: "Lower the threat",
+    text: "The nervous system responds to evidence, not lectures. Make the next action smaller, clearer, and less socially costly.",
+  },
+  {
+    title: "Design the environment",
+    text: "Do not rely on willpower alone. Change defaults, cues, friction, timing, and social context so the useful action becomes easier.",
+  },
+  {
+    title: "Repeat the update",
+    text: "Every small completed action teaches the ancient system that this modern situation is survivable.",
+  },
+];
+
+const pathways = [
+  {
+    label: "Free diagnostic",
+    title: "Take the Inner Caveman Scan",
+    text: "See which patterns show up in your everyday choices: avoidance, comparison, distraction, conflict, and habits.",
+    href: "/diagnostics/caveman-scan",
+    cta: "Start the scan",
+  },
+  {
+    label: "Program",
+    title: "Practice the Modern Caveman method",
+    text: "Turn this lens into a practical behavior-change system for habits, focus, food, movement, and emotional loops.",
+    href: "/modern-caveman",
+    cta: "Explore the program",
+  },
+  {
+    label: "Essays",
+    title: "Read the pattern library",
+    text: "Short, grounded essays that explain how ancient wiring appears in modern work, relationships, health, and attention.",
+    href: "/insights",
+    cta: "Browse insights",
+  },
+];
 
 export default function InnerCavemanPage() {
   const faqJsonLd = {
@@ -62,23 +209,23 @@ export default function InnerCavemanPage() {
         name: "What is the Inner Caveman?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "It's your ancient survival circuitry—fear, comfort, and social instincts—still running modern life. The Inner Caveman is not a flaw, but a foundation of human behavior.",
+          text: "The Inner Caveman is Neurocient Labs' shorthand for ancient survival patterns that still shape modern behavior: safety, belonging, status, care, attachment, energy conservation, and threat detection.",
         },
       },
       {
         "@type": "Question",
-        name: "Why does the Inner Caveman matter today?",
+        name: "Is the Inner Caveman a literal old brain?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Our brains evolved for small tribes and visible dangers, not for abstract modern stressors. Understanding the Inner Caveman helps us work with our instincts rather than against them.",
+          text: "No. It is a practical metaphor for evolved response patterns, not a claim that the brain is split into simple primitive and modern layers.",
         },
       },
       {
         "@type": "Question",
-        name: "How can I understand my Inner Caveman better?",
+        name: "How do I work with my Inner Caveman?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "By observing emotional reactions, body sensations, and social patterns that arise under stress. Awareness of these ancient circuits is the first step toward integration.",
+          text: "Start by naming the signal, lowering perceived threat, changing the environment, and repeating small actions that teach the nervous system a new expectation.",
         },
       },
     ],
@@ -89,7 +236,7 @@ export default function InnerCavemanPage() {
     "@type": "Article",
     headline: "The Complete Guide to Your Inner Caveman",
     description:
-      "Your Inner Caveman is ancient wiring shaping modern life. Understand its science and train your brain with Neurocient Labs’ behavioral frameworks.",
+      "Your Inner Caveman is ancient wiring shaping modern life. Understand its science and train your brain with Neurocient Labs' behavioral frameworks.",
     author: {
       "@type": "Organization",
       "@id": orgId,
@@ -119,308 +266,399 @@ export default function InnerCavemanPage() {
   };
 
   return (
-    <main className="max-w-3xl mx-auto p-6 text-lg leading-relaxed font-serif text-brand-dark">
-      <h1 className="text-4xl font-sans font-bold text-brand-accent mb-6">
-        The Complete Guide to Your Inner Caveman
-      </h1>
-      <p className="italic text-xl text-brand-dark/80 mb-10">
-        Understanding your ancient brain in a modern world.
-      </p>
-
-      <div className="my-8">
-        <Image
-          src="/assets/inner-caveman-logo.png"
-          alt="Illustration of the Inner Caveman — representing the ancient survival brain navigating modern life"
-          width={1200}
-          height={630}
-          className="rounded-xl shadow-md"
-        />
-      </div>
-
-      {/* Conversation Version */}
-      <section className="my-10 border-y border-gray-300 py-6">
-        <div className="text-base text-brand-dark/90">
-          <div className="mb-2 font-sans font-medium">
-            🎧 Conversation version
+    <main className="bg-white font-serif text-brand-dark">
+      <section className="border-b border-brand-dark/10 px-6 py-14 md:py-20">
+        <div className="mx-auto grid w-full max-w-6xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div>
+            <SectionLabel>Complete guide</SectionLabel>
+            <h1 className="text-[clamp(3rem,6.6vw,6.35rem)] font-bold leading-[0.96] tracking-[-0.035em] text-brand-dark">
+              Meet your
+              <br />
+              <span className="italic text-brand-accent">Inner Caveman.</span>
+            </h1>
+            <p className="mt-7 max-w-2xl border-l-4 border-brand-secondary pl-5 font-sans text-lg leading-8 text-brand-dark md:text-xl md:leading-9">
+              The part of you that reacts before you reason. Not because it is
+              broken. Because it was built for survival in a very different
+              world.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/diagnostics/caveman-scan"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-6 py-3 font-sans text-sm font-semibold text-white transition hover:opacity-90"
+              >
+                Take the scan
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <a
+                href="#audio"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-dark/25 px-6 py-3 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-primary hover:text-brand-primary"
+              >
+                Listen instead
+                <Headphones className="h-4 w-4" />
+              </a>
+            </div>
           </div>
 
-          <p className="mb-3 text-brand-dark/80">
-            A 12-minute audio conversation exploring this idea.
+          <figure className="mx-auto w-full max-w-lg">
+            <div className="overflow-hidden rounded-lg border border-brand-teal/25 bg-white p-2 shadow-sm">
+              <Image
+                src="/assets/inner-caveman-five-drives.png"
+                alt="The Inner Caveman framework showing the five core drives"
+                width={1152}
+                height={1536}
+                priority
+                className="h-auto w-full rounded-md"
+              />
+            </div>
+          </figure>
+        </div>
+      </section>
+
+      <section className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-14 md:grid-cols-[0.78fr_1.22fr] md:items-start md:py-20">
+        <div>
+          <SectionLabel>Definition</SectionLabel>
+          <h2 className="text-[clamp(2.4rem,4.6vw,4.85rem)] font-bold leading-[0.96] tracking-[-0.03em] text-brand-dark">
+            It is not a villain.
+            <br />
+            It is a protector with old data.
+          </h2>
+        </div>
+
+        <div className="space-y-5 font-sans text-base leading-8 text-brand-dark">
+          <p>
+            The Inner Caveman is a shorthand for the evolved patterns still
+            active inside modern behavior. It is not a literal anatomical
+            &quot;old brain,&quot; and it is not an insult. It is a way to name
+            the fast, protective system that scans for danger, belonging,
+            rank, scarcity, and social safety.
           </p>
-
-          <audio
-            controls
-            preload="metadata"
-            playsInline
-            className="w-full mb-3"
-            controlsList="nodownload"
-          >
-            <source
-              src={innerCavemanAudioUrl}
-              type="audio/mpeg"
-            />
-            Your browser does not support the audio element.
-          </audio>
-
-          <p className="italic text-sm text-brand-dark/70">
-            Ideas worth listening to !
+          <p>
+            This system helped humans survive small groups, uncertainty,
+            hunger, exposure, and conflict. Today, it responds to deadlines,
+            unread messages, public criticism, comparison feeds, ambiguity, and
+            emotional distance.
+          </p>
+          <p className="border-l-4 border-brand-secondary pl-5 text-xl font-semibold leading-9 text-brand-dark">
+            The problem is not that you have ancient wiring. The problem is that
+            modern life keeps pressing its ancient buttons.
           </p>
         </div>
       </section>
 
-      <p className="mb-6">
-        We inhabit an age of breathtaking complexity—machines that translate
-        languages, algorithms that predict desire, devices that speak back when
-        spoken to. Yet beneath the glass and glow, the most powerful system
-        running your life is older than civilization itself. The{" "}
-        <strong>Inner Caveman</strong>—your ancient survival brain—still hums
-        beneath every email, argument, and ambition. It is the invisible hand on
-        the steering wheel of modern behavior.
-      </p>
+      <section className="border-y border-brand-dark/10 px-6 py-14 md:py-16">
+        <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[0.78fr_1.22fr] md:items-start">
+          <div>
+            <SectionLabel>The body's language</SectionLabel>
+            <h2 className="text-3xl font-bold leading-tight tracking-[-0.02em] text-brand-dark md:text-5xl">
+              The caveman does not speak in arguments.
+              <br />
+              It speaks in signals.
+            </h2>
+          </div>
 
-      <p className="mb-6">
-        For roughly two hundred thousand years, this neural machinery kept our
-        ancestors alive. It learned to scan for threat, to seek comfort, to win
-        belonging. But the environment that shaped it has vanished. We now live
-        among abstractions—status, reputation, wealth, achievement—while
-        carrying a biology built for immediacy. The result is a constant
-        friction between Stone Age instincts and digital-age demands.
-      </p>
-
-      <h2 className="text-2xl font-sans font-semibold text-brand-secondary mt-12 mb-4">
-        The Ancient Brain Still Running the Show
-      </h2>
-
-      <p className="mb-6">
-        The <strong>Inner Caveman</strong> isn’t a symbol of ignorance or
-        violence; it is a biological reality. Deep within the skull lies an
-        exquisite survival network—the amygdala, limbic system, and prefrontal
-        cortex—each performing ancient duties in a modern theater. The amygdala
-        detects danger before you can name it. The limbic system records
-        emotional memory and rewards you for patterns that once ensured food or
-        friendship. The prefrontal cortex, the youngest region, tries to plan
-        the future while the older circuits guard the past.
-      </p>
-
-      <p className="mb-6">
-        These layers of brain architecture evolved for tribes of a hundred
-        people, not for the eight billion strangers that now share the planet.
-        They understood seasons, predators, and social hierarchies you could see
-        and touch. Today they confront invisible currencies: deadlines,
-        notifications, credit scores, metrics of worth. To your Inner Caveman, a
-        delayed reply can feel like exile, a critical comment like a predator’s
-        shadow.
-      </p>
-
-      <h2 className="text-2xl font-sans font-semibold text-brand-secondary mt-12 mb-4">
-        The Evolutionary Mismatch
-      </h2>
-
-      <p className="mb-6">
-        Scientists call this the <em>evolutionary mismatch</em>—ancient
-        adaptations meeting modern abstractions. The caveman’s body was tuned to
-        short bursts of stress followed by long recovery. Our world offers the
-        opposite: perpetual alertness without closure. What once triggered a
-        sprint now triggers insomnia. A rustle in the grass has become a
-        vibration in your pocket, and the same hormones flood your bloodstream.
-      </p>
-
-      <p className="mb-6">
-        Because your Inner Caveman can’t tell the difference between physical
-        and psychological threat, it overreacts to both. It drives
-        procrastination, perfectionism, and the endless scroll for validation.
-        These are not flaws in character but features of survival logic playing
-        out in the wrong century.
-      </p>
-
-      <h2 className="text-2xl font-sans font-semibold text-brand-secondary mt-12 mb-4">
-        The Body’s Native Language
-      </h2>
-
-      <p className="mb-6">
-        The Inner Caveman does not understand words. Its grammar is sensation. A
-        racing pulse signals danger; a slow breath whispers safety. Warmth from
-        another human means inclusion; silence feels like risk. This is why
-        rational pep talks rarely change behavior. The nervous system demands
-        proof, not argument. Until the body feels safe, the mind keeps producing
-        stories to explain its unease.
-      </p>
-
-      <p className="mb-6">
-        Every sigh, craving, and hesitation is data from this ancient operating
-        system. To work with it, one must first learn to listen in its dialect
-        of heartbeat, tension, and release. Awareness begins when you realize
-        that emotion is not the enemy of reason but the soil from which reason
-        grows.
-      </p>
-
-      <h2 className="text-2xl font-sans font-semibold text-brand-secondary mt-12 mb-4">
-        The Inner Caveman at Work
-      </h2>
-
-      <p className="mb-6">
-        In everyday life, the caveman moves quietly but decisively. The
-        hesitation before sending a message, the surge of defensiveness in
-        conflict, the restless pull toward your phone—all are echoes of
-        ancestral logic. When you overeat after stress, your body remembers
-        famine. When you avoid confrontation, it remembers that social harmony
-        once guaranteed safety. Even the drive for achievement can be traced to
-        a primitive calculus: visibility meant survival.
-      </p>
-
-      <p className="mb-6">
-        Understanding this lineage dissolves shame. You are not weak; you are
-        exquisitely tuned for a world that no longer exists. Recognizing that
-        truth turns frustration into compassion—a necessary step if we hope to
-        evolve consciously rather than react automatically.
-      </p>
-
-      <h2 className="text-2xl font-sans font-semibold text-brand-secondary mt-12 mb-4">
-        Knowing Is Not Enough
-      </h2>
-
-      <p className="mb-6">
-        Modern culture worships intellect, yet the{" "}
-        <strong>Inner Caveman</strong> proves that insight alone rarely changes
-        behavior. Under stress, blood flow shifts away from the prefrontal
-        cortex—the rational seat of decision-making—toward older survival
-        circuits. The mind that solves equations is literally disabled by fear.
-        This is why willpower collapses at midnight in front of a fridge, why
-        clarity in calm moments vanishes under pressure. The ancient brain
-        seizes control the instant it senses threat, real or imagined.
-      </p>
-
-      <p className="mb-6">
-        To bridge this gap between knowing and doing, we must teach the nervous
-        system safety. Every calm exhale, every small act completed despite
-        discomfort, is evidence for the caveman that the world has changed. Over
-        time, repetition rewires expectation. That is how knowledge becomes
-        embodiment.
-      </p>
-
-      <h2 className="text-2xl font-sans font-semibold text-brand-secondary mt-12 mb-4">
-        The Social Animal
-      </h2>
-
-      <p className="mb-6">
-        No instinct shapes us more than the need to belong. For the Inner
-        Caveman, acceptance was life; isolation meant death. Our nervous systems
-        still treat exclusion as a mortal wound. Neuroscience shows that social
-        pain activates the same regions as physical pain. A harsh comment on a
-        screen can ignite the same neural fire as a burn on the skin.
-      </p>
-
-      <p className="mb-6">
-        We chase followers not for vanity but for ancient reassurance. We fear
-        public speaking because ancestral memory equates judgment with expulsion
-        from the tribe. To be human is to live with a social brain in a world
-        too large for it to map.
-      </p>
-
-      <h2 className="text-2xl font-sans font-semibold text-brand-secondary mt-12 mb-4">
-        Integrating the Ancient and the Modern
-      </h2>
-
-      <p className="mb-6">
-        The goal is not to silence the Inner Caveman but to integrate it—to
-        translate its fears into the language of the present. When you feel
-        resistance, instead of declaring war on yourself, ask: what is my
-        nervous system trying to protect? That simple question replaces judgment
-        with curiosity. Curiosity, in turn, lowers threat perception, allowing
-        the rational brain to return online.
-      </p>
-
-      <p className="mb-6">
-        Integration is not a single revelation but a lifelong dialogue between
-        instinct and intention. It begins when you stop treating emotion as
-        interference and start treating it as information. In doing so, you
-        evolve the caveman rather than exiling him.
-      </p>
-
-      <h2 className="text-2xl font-sans font-semibold text-brand-secondary mt-12 mb-4">
-        Beyond Survival
-      </h2>
-
-      <p className="mb-6">
-        For most of human history, survival was enough. Today, existence demands
-        something subtler: meaning, connection, creativity. The same neural
-        machinery that once feared predators now dreams, designs, and debates.
-        The Inner Caveman has become the artist, the scientist, the lover—all
-        using the same pulse that once guarded a campfire.
-      </p>
-
-      <p className="mb-6">
-        To thrive in the modern world is to repurpose those ancient reflexes.
-        Fear becomes focus; craving becomes curiosity; belonging expands from
-        tribe to humanity. Evolution continues not through genes but through
-        awareness.
-      </p>
-
-      <h2 className="text-2xl font-sans font-semibold text-brand-secondary mt-12 mb-4">
-        The Quiet Revolution
-      </h2>
-
-      <p className="mb-6">
-        Every small act of awareness is a step in human evolution. When you
-        breathe instead of react, notice instead of judge, pause instead of
-        post—you teach your Inner Caveman a new world. The change is microscopic
-        yet monumental: the nervous system updates its map of safety. Over time,
-        these moments accumulate into a new baseline of calm intelligence. This
-        is the quiet revolution available to each of us—the movement from reflex
-        to reflection, from survival to presence.
-      </p>
-
-      <h2 className="text-2xl font-sans font-semibold text-brand-secondary mt-12 mb-4">
-        Returning Home
-      </h2>
-
-      <p className="mb-6">
-        The Inner Caveman is not an enemy to overcome but a companion to
-        understand. It has carried humanity through hunger, danger, and
-        isolation. It beats your heart, alerts you to threat, and binds you to
-        others. But it also fears too quickly, hungers too easily, and imagines
-        threat in the space where only uncertainty lives.
-      </p>
-
-      <p className="mb-6">
-        To know this creature within is to reconcile past and present—to live
-        with ancient roots and modern branches. The work of evolution now
-        happens in consciousness, one breath, one pause, one insight at a time.
-      </p>
-
-      <p className="mb-8">
-        So when you feel the old pulse rise—the fear, the craving, the need for
-        approval—pause. Smile, perhaps. That is your oldest self, still trying
-        to keep you safe. Thank it. Then remind it: we made it out of the cave.
-      </p>
-
-      <section className="mt-20 pt-10 border-t border-gray-300">
-        <p className="mb-6">
-          <strong>Neurocient Labs</strong> is a behavioral science studio
-          exploring the gap between how our brains evolved and how we live
-          today. We translate research from neuroscience, psychology, and
-          evolutionary biology into frameworks that make everyday behavior more
-          understandable—and more humane.
-        </p>
-
-        <p className="mb-6">
-          At Neurocient, we don’t believe in willpower revolutions or quick
-          fixes. We believe in awareness, environment design, and
-          micro-evolutions that let the ancient brain and modern life coexist in
-          harmony. Every insight, every framework, is an experiment in aligning
-          instinct with intention.
-        </p>
-
-        <p className="italic text-brand-dark/80">
-          Neurocient Labs — bridging the gap between who we are wired to be and
-          the world we live in today.
-        </p>
-
-        <p className="mt-16 italic text-brand-dark/70">
-          If you moved through this quickly, the conversation version lingers
-          longer than the text.
-        </p>
+          <div>
+            <p className="max-w-3xl font-sans text-base leading-8 text-brand-dark">
+              This is why rational pep talks often fail. The nervous system is
+              not waiting for a better paragraph. It is looking for proof of
+              safety. Until the body feels safe enough, the mind keeps producing
+              stories to explain the alarm.
+            </p>
+            <div className="mt-7 grid gap-4 sm:grid-cols-2">
+              {bodySignals.map((item) => (
+                <article
+                  key={item.signal}
+                  className="rounded-lg border border-brand-dark/12 bg-white p-5 shadow-sm"
+                >
+                  <h3 className="font-sans text-sm font-semibold text-brand-accent">
+                    {item.signal}
+                  </h3>
+                  <p className="mt-2 font-sans text-sm leading-7 text-brand-dark/72">
+                    {item.meaning}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
       </section>
+
+      <section id="audio" className="bg-brand-dark px-6 py-14 text-white md:py-16">
+        <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[0.78fr_1.22fr] md:items-start">
+          <div>
+            <SectionLabel tone="dark">Conversation version</SectionLabel>
+            <h2 className="text-3xl font-bold leading-tight tracking-[-0.02em] md:text-5xl">
+              Prefer to hear the idea unfold?
+            </h2>
+          </div>
+
+          <div className="rounded-lg border border-white/18 bg-white p-6 text-brand-dark shadow-sm md:p-7">
+            <div className="flex items-start gap-4">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brand-teal/45 text-brand-accent">
+                <Headphones className="h-5 w-5" />
+              </span>
+              <div className="w-full">
+                <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
+                  12-minute audio
+                </p>
+                <h3 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
+                  The Complete Guide to Your Inner Caveman
+                </h3>
+                <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
+                  A slower conversation for the core idea: why ancient
+                  protective patterns still shape modern choices.
+                </p>
+                <audio
+                  controls
+                  preload="metadata"
+                  playsInline
+                  className="mt-5 w-full"
+                  controlsList="nodownload"
+                >
+                  <source src={innerCavemanAudioUrl} type="audio/mpeg" />
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-brand-dark/10 px-6 py-14 md:py-16">
+        <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[0.78fr_1.22fr] md:items-start">
+          <div>
+            <SectionLabel>Knowing is not enough</SectionLabel>
+            <h2 className="text-3xl font-bold leading-tight tracking-[-0.02em] text-brand-dark md:text-5xl">
+              Insight explains the pattern.
+              <br />
+              Safety changes it.
+            </h2>
+          </div>
+
+          <div className="space-y-5 font-sans text-base leading-8 text-brand-dark">
+            <p>
+              Modern culture loves the idea that if you understand something,
+              you should be able to change it. But under pressure, the body
+              often moves before the insight can help. Fear narrows attention.
+              Stress pulls energy toward older protective responses. The part of
+              you that can plan, reflect, and choose may simply arrive late.
+            </p>
+            <p>
+              This is why the work cannot be only intellectual. Every calm
+              exhale, every smaller first step, every completed action under
+              mild discomfort becomes evidence. The caveman learns through
+              repeated proof that the modern situation is survivable.
+            </p>
+            <p className="border-l-4 border-brand-secondary pl-5 text-xl font-semibold leading-9 text-brand-dark">
+              Knowledge becomes useful when the nervous system has enough safety
+              to act on it.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
+        <SectionLabel>The five drives</SectionLabel>
+        <div className="grid gap-8 md:grid-cols-[0.7fr_1fr] md:items-start">
+          <h2 className="text-[clamp(2.5rem,4.8vw,5rem)] font-bold leading-[0.96] tracking-[-0.03em] text-brand-dark">
+            What is it
+            <br />
+            trying to protect?
+          </h2>
+          <p className="font-sans text-base leading-8 text-brand-dark">
+            Most reactions make more sense when you ask which ancient drive is
+            active. The same moment can involve several drives, but one usually
+            speaks loudest.
+          </p>
+        </div>
+
+        <div className="mt-10 border-y border-brand-dark/12">
+          {drives.map((drive) => {
+            const Icon = drive.icon;
+            return (
+              <Link
+                key={drive.name}
+                href={drive.href}
+                className="group grid gap-5 border-b border-brand-dark/12 py-6 transition last:border-b-0 md:grid-cols-[0.65fr_1fr_auto] md:items-center"
+              >
+                <div className="flex gap-4">
+                  <span className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
+                      {drive.question}
+                    </p>
+                    <h3 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
+                      {drive.name}
+                    </h3>
+                  </div>
+                </div>
+                <div className="grid gap-3 font-sans text-sm leading-7 text-brand-dark/72 md:grid-cols-2">
+                  <p>
+                    <strong className="text-brand-dark">Old logic:</strong>{" "}
+                    {drive.oldLogic}
+                  </p>
+                  <p>
+                    <strong className="text-brand-dark">Modern signal:</strong>{" "}
+                    {drive.modernSignal}
+                  </p>
+                </div>
+                <ArrowRight className="h-5 w-5 text-brand-accent transition group-hover:translate-x-0.5" />
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="bg-brand-dark px-6 py-16 text-white md:py-20">
+        <div className="mx-auto max-w-6xl">
+          <SectionLabel tone="dark">The mismatch</SectionLabel>
+          <div className="grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
+            <h2 className="text-3xl font-bold leading-tight tracking-[-0.02em] md:text-5xl">
+              Same wiring.
+              <br />
+              Different world.
+            </h2>
+            <div className="grid gap-4">
+              {mismatches.map((item) => (
+                <article
+                  key={item.old}
+                  className="rounded-lg border border-white/16 bg-white p-5 text-brand-dark md:p-6"
+                >
+                  <div className="grid gap-4 md:grid-cols-[0.7fr_0.7fr_1fr]">
+                    <div>
+                      <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
+                        Then
+                      </p>
+                      <p className="mt-2 font-sans text-sm font-semibold leading-6">
+                        {item.old}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
+                        Now
+                      </p>
+                      <p className="mt-2 font-sans text-sm font-semibold leading-6">
+                        {item.now}
+                      </p>
+                    </div>
+                    <p className="font-sans text-sm leading-7 text-brand-dark/72">
+                      {item.pattern}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
+        <SectionLabel>How to work with it</SectionLabel>
+        <div className="grid gap-8 md:grid-cols-[0.78fr_1.22fr] md:items-start">
+          <div>
+            <h2 className="text-[clamp(2.5rem,4.6vw,4.85rem)] font-bold leading-[0.96] tracking-[-0.03em] text-brand-dark">
+              Do not fight the caveman.
+              <br />
+              Update the map.
+            </h2>
+            <p className="mt-6 max-w-xl font-sans text-base leading-8 text-brand-dark">
+              Insight matters, but under pressure the body asks a simpler
+              question: is this safe enough to try?
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            {responseSteps.map((step, index) => (
+              <article
+                key={step.title}
+                className="rounded-lg border border-brand-dark/12 bg-white p-5 shadow-sm"
+              >
+                <span className="font-serif text-3xl font-bold text-brand-primary">
+                  {index + 1}
+                </span>
+                <h3 className="mt-3 font-sans text-sm font-semibold text-brand-dark">
+                  {step.title}
+                </h3>
+                <p className="mt-2 font-sans text-sm leading-7 text-brand-dark/72">
+                  {step.text}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-6xl px-6 py-14 md:py-16">
+        <div className="grid gap-8 md:grid-cols-[0.78fr_1.22fr] md:items-start">
+          <div>
+            <SectionLabel>Where to go next</SectionLabel>
+            <h2 className="text-3xl font-bold leading-tight text-brand-dark md:text-4xl">
+              Make the idea useful.
+            </h2>
+          </div>
+          <div className="grid gap-4">
+            {pathways.map((item) => (
+              <Link
+                key={item.title}
+                href={item.href}
+                className="group grid gap-4 rounded-lg border border-brand-dark/12 bg-white p-5 shadow-sm transition hover:border-brand-teal/60 hover:shadow-md md:grid-cols-[0.62fr_1fr_auto] md:items-center"
+              >
+                <div>
+                  <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
+                    {item.label}
+                  </p>
+                  <h3 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
+                    {item.title}
+                  </h3>
+                </div>
+                <p className="font-sans text-sm leading-7 text-brand-dark/72">
+                  {item.text}
+                </p>
+                <span className="inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-accent">
+                  <span className="hidden xl:inline">{item.cta}</span>
+                  <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-brand-dark/10 px-6 py-14 md:py-16">
+        <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-[0.78fr_1.22fr] md:items-start">
+          <div>
+            <SectionLabel>Core reminder</SectionLabel>
+            <h2 className="text-3xl font-bold leading-tight text-brand-dark md:text-4xl">
+              The goal is not exile.
+              <br />
+              It is translation.
+            </h2>
+          </div>
+          <div className="space-y-5 border-l-4 border-brand-secondary pl-5">
+            <div className="flex gap-4">
+              <Repeat2 className="mt-1 h-6 w-6 shrink-0 text-brand-accent" />
+              <p className="font-sans text-lg leading-9 text-brand-dark">
+                The work is learning to notice a little earlier, reduce threat a
+                little faster, and choose the next useful action before the old
+                pattern becomes the whole story.
+              </p>
+            </div>
+            <p className="font-sans text-base leading-8 text-brand-dark/78">
+              So when the old pulse rises — the fear, the craving, the need for
+              approval — pause. That is your oldest self still trying to keep
+              you safe. Thank it. Then remind it: the world has changed, and you
+              can choose from here.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <Newsletter
+        variant="feature"
+        subtext="Join thousands of readers getting weekly insights on the ancient wiring behind modern struggles and practical ways to work with it. No fluff. No gimmicks. Just science made human."
+        logoSrc="/logo/newsletter.png"
+      />
 
       <Script
         id="inner-caveman-faq-jsonld"
@@ -435,3 +673,24 @@ export default function InnerCavemanPage() {
     </main>
   );
 }
+
+const SectionLabel = ({
+  children,
+  tone = "light",
+}: {
+  children: ReactNode;
+  tone?: "light" | "dark";
+}) => (
+  <div
+    className={`mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] ${
+      tone === "dark" ? "text-brand-secondary" : "text-brand-teal"
+    }`}
+  >
+    <span>{children}</span>
+    <span
+      className={`h-px flex-1 ${
+        tone === "dark" ? "bg-white/20" : "bg-brand-dark/15"
+      }`}
+    />
+  </div>
+);

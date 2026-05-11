@@ -1,34 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  LoaderCircle,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "../../components/AuthModal";
-import { ChevronDown, ChevronUp } from "lucide-react";
 import { useNotification } from "../../components/NotificationProvider";
 import ConfettiCelebration from "../../components/ui/ConfettiCelebration";
 
-
-// 🔹 Assigned challenges (from /challenges/my)
 interface AssignedChallenge {
-  assignment_id: string;  // UserMicrochallenge.id
-  challenge_id: string;   // MicrochallengeDefinition.id
+  assignment_id: string;
+  challenge_id: string;
   status: "active" | "success" | "removed" | "failed";
   started_at: string;
   completed_at?: string | null;
-
   title: string;
   intro: string[];
   instructions: string[];
   why: string;
   tips: string[];
   closing: string;
-
-  progress: number;       // % complete (rounded)
-  loggedToday?: boolean;  // frontend-only flag
+  progress: number;
+  loggedToday?: boolean;
 }
 
-// 🔹 Available challenges (from /challenges/all)
 interface AvailableChallenge {
   id: string;
   title: string;
@@ -48,7 +52,6 @@ const MicrochallengesPage = () => {
   const { user, ready } = useAuth();
   const { notify } = useNotification();
 
-  // 🔹 Fetch my assigned challenges
   useEffect(() => {
     const fetchChallenges = async () => {
       if (!ready) return;
@@ -57,26 +60,26 @@ const MicrochallengesPage = () => {
         setShowAuth(true);
         return;
       }
+
       try {
         const res = await fetch("/api/challenges/my", {
           method: "GET",
           credentials: "include",
         });
         if (!res.ok) throw new Error("Failed to fetch challenges");
-        const data = await res.json();
 
-        // ✅ restore loggedToday from localStorage
+        const data = await res.json();
         const todayKey = new Date().toISOString().slice(0, 10);
         const stored = localStorage.getItem("loggedToday");
 
         setChallenges(
-          data.map((c: AssignedChallenge) => ({
-            ...c,
+          data.map((challenge: AssignedChallenge) => ({
+            ...challenge,
             loggedToday: stored === todayKey,
-          }))
+          })),
         );
       } catch (err) {
-        console.error("❌ Error fetching challenges:", err);
+        console.error("Error fetching challenges:", err);
         notify("Failed to load challenges.", "error");
       } finally {
         setLoading(false);
@@ -86,14 +89,16 @@ const MicrochallengesPage = () => {
     fetchChallenges();
   }, [user, ready, notify]);
 
+  const activeChallenge = challenges.find((c) => c.status === "active");
+  const completedCount = challenges.filter((c) => c.status === "success").length;
+
   const toggleOpen = (assignmentId: string) => {
     setOpenId(openId === assignmentId ? null : assignmentId);
   };
 
-  // 🔹 Log today’s progress
   const handleLog = async (assignment: AssignedChallenge) => {
     try {
-      const res = await fetch(`/api/challenges/log`, {
+      const res = await fetch("/api/challenges/log", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -107,38 +112,35 @@ const MicrochallengesPage = () => {
       }
 
       const data = await res.json();
-
-      // ✅ save today’s date in localStorage
       const todayKey = new Date().toISOString().slice(0, 10);
       localStorage.setItem("loggedToday", todayKey);
 
-        if (data.status === "success") {
-          setShowConfetti(true);
-          setTimeout(() => setShowConfetti(false), 5000); // stop after 5s
-        }
-      // ✅ update state
+      if (data.status === "success") {
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 5000);
+      }
+
       setChallenges((prev) =>
-      prev.map((c) =>
-        c.assignment_id === assignment.assignment_id
-          ? { 
-              ...c, 
-              progress: Math.round(data.progress), 
-              loggedToday: true,
-              status: data.status, // ✅ update status
-              completed_at: data.completed_at || c.completed_at
-            }
-          : c
-      )
-    );
-      notify("✅ Logged successfully!", "success");
+        prev.map((challenge) =>
+          challenge.assignment_id === assignment.assignment_id
+            ? {
+                ...challenge,
+                progress: Math.round(data.progress),
+                loggedToday: true,
+                status: data.status,
+                completed_at: data.completed_at || challenge.completed_at,
+              }
+            : challenge,
+        ),
+      );
+      notify("Logged successfully.", "success");
       setNote("");
     } catch (err) {
-      console.error("❌ Error logging challenge:", err);
+      console.error("Error logging challenge:", err);
       notify("Something went wrong while logging.", "error");
     }
   };
 
-  // 🔹 Fetch available challenges
   const handleToggleCarousel = async () => {
     if (!showNewChallenge) {
       try {
@@ -150,14 +152,13 @@ const MicrochallengesPage = () => {
         const data = await res.json();
         setAvailable(data);
       } catch (err) {
-        console.error("❌ Error fetching all challenges:", err);
+        console.error("Error fetching all challenges:", err);
         notify("Failed to load available challenges.", "error");
       }
     }
     setShowNewChallenge(!showNewChallenge);
   };
 
-  // 🔹 Assign new challenge
   const handleStartChallenge = async (challenge: AvailableChallenge) => {
     try {
       const res = await fetch(`/api/challenges/assign/${challenge.id}`, {
@@ -168,7 +169,10 @@ const MicrochallengesPage = () => {
       if (!res.ok) {
         const errData = await res.json();
         if (errData.detail === "You already have an active challenge") {
-          notify("⚡ You already have an active challenge. Finish or remove it first.", "info");
+          notify(
+            "You already have an active challenge. Finish or remove it first.",
+            "info",
+          );
           return;
         }
         notify(errData.detail || "Failed to start challenge", "error");
@@ -197,14 +201,13 @@ const MicrochallengesPage = () => {
         },
       ]);
 
-      notify("🎉 Challenge started successfully!", "success");
+      notify("Challenge started successfully.", "success");
     } catch (err) {
-      console.error("❌ Error starting challenge:", err);
+      console.error("Error starting challenge:", err);
       notify("Something went wrong while starting the challenge.", "error");
     }
   };
 
-  // 🔹 Remove challenge
   const handleRemove = async (assignmentId: string) => {
     try {
       const res = await fetch(`/api/challenges/remove/${assignmentId}`, {
@@ -214,256 +217,137 @@ const MicrochallengesPage = () => {
       if (!res.ok) throw new Error("Failed to remove challenge");
 
       setChallenges((prev) =>
-        prev.map((c) =>
-          c.assignment_id === assignmentId
-            ? { ...c, status: "removed", completed_at: new Date().toISOString() }
-            : c
-        )
+        prev.map((challenge) =>
+          challenge.assignment_id === assignmentId
+            ? {
+                ...challenge,
+                status: "removed",
+                completed_at: new Date().toISOString(),
+              }
+            : challenge,
+        ),
       );
-      notify("🗑️ Challenge removed successfully.", "success");
+      notify("Challenge removed successfully.", "success");
     } catch (err) {
-      console.error("❌ Error removing challenge:", err);
+      console.error("Error removing challenge:", err);
       notify("Something went wrong while removing the challenge.", "error");
     }
   };
 
-  if (loading) {
-    return <div className="text-center py-10">Loading microchallenges...</div>;
-  }
-
-  const activeChallenge = challenges.find((c) => c.status === "active");
-
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-[#042a2b] mb-6">⚡ Microchallenges</h1>
+    <main className="bg-white font-serif text-brand-dark">
+      <section className="mx-auto grid w-full max-w-6xl gap-10 px-6 pb-6 pt-12 md:grid-cols-[0.78fr_1.22fr] md:items-start md:pb-8 md:pt-16">
+        <div>
+          <SectionLabel>Daily experiment</SectionLabel>
+          <h1 className="text-[clamp(2.6rem,5vw,5.1rem)] font-bold leading-[0.98] tracking-[-0.03em] text-brand-dark">
+            Small actions.
+            <br />
+            <span className="italic text-brand-accent">Repeated enough.</span>
+          </h1>
+          <p className="mt-6 max-w-xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark">
+            Microchallenges are tiny behavior experiments. They lower the
+            threat of change so your nervous system gets evidence through
+            repetition.
+          </p>
+        </div>
 
-      <p className="text-brand-dark mb-6">
-        Track your weekly microchallenges here. Complete them to build
-        consistency and strengthen new habits.
-      </p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Metric label="Active" value={activeChallenge ? "1" : "0"} />
+          <Metric label="Completed" value={String(completedCount)} />
+          <Metric label="Total" value={loading ? "..." : String(challenges.length)} />
+        </div>
+      </section>
 
-      {challenges.length === 0 && (
-        <p className="text-brand-dark">No microchallenges assigned yet.</p>
-      )}
-
-      <div className="space-y-4">
-        {challenges.map((c) => {
-          const isOpen = openId === c.assignment_id;
-          return (
-            <div key={c.assignment_id} className="border rounded-lg overflow-hidden">
-              {/* Accordion header */}
-              <button
-                onClick={() => toggleOpen(c.assignment_id)}
-                className="w-full flex justify-between items-center px-4 py-3 bg-white hover:bg-gray-50 transition"
-              >
-                <span className="text-sm font-medium text-[#042a2b]">
-                  {c.title}
-                </span>
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`text-xs font-semibold px-2 py-1 rounded ${
-                      c.status === "success"
-                        ? "border text-green-700"
-                        : c.status === "active"
-                        ? "border text-blue-700"
-                        : "border text-brand-dark"
-                    }`}
-                  >
-                    {c.status}
-                  </span>
-                  {isOpen ? (
-                    <ChevronUp className="w-4 h-4 text-brand-dark" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-brand-dark" />
-                  )}
-                </div>
-              </button>
-
-              {/* Accordion content */}
-              {isOpen && (
-                <div className="border-t border-[#5eb1bf] p-6 text-[#042a2b] space-y-6">
-                  {c.intro?.map((para, idx) => (
-                    <p key={idx}>{para}</p>
-                  ))}
-
-                  {c.instructions?.length > 0 && (
-                    <div>
-                      <h3 className="font-semibold text-lg mb-2">
-                        The Microchallenge:
-                      </h3>
-                      <ol className="list-decimal list-inside space-y-1">
-                        {c.instructions.map((step, idx) => (
-                          <li key={idx}>{step}</li>
-                        ))}
-                      </ol>
-                    </div>
-                  )}
-
-                  {c.why && (
-                    <div>
-                      <h3 className="font-semibold text-lg mb-2">Why it works:</h3>
-                      <p>{c.why}</p>
-                    </div>
-                  )}
-
-                  {c.tips?.length > 0 && (
-                    <div>
-                      <h3 className="font-semibold text-lg mb-2">Bonus tip:</h3>
-                      <ul className="list-disc list-inside space-y-1">
-                        {c.tips.map((tip, idx) => (
-                          <li key={idx}>{tip}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {c.closing && <p className="pt-2 font-semibold">{c.closing}</p>}
-
-                  <div className="flex flex-col gap-4 mt-4">
-  {/* Progress bar with % */}
-  {typeof c.progress === "number" && (
-    <div className="flex items-center gap-3">
-      <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-        <div
-          className="bg-brand-teal h-3 rounded-full transition-all duration-700 ease-out"
-          style={{ width: `${Math.min(100, Math.round(c.progress))}%` }}
-        />
-      </div>
-      <span className="text-sm font-semibold text-brand-dark min-w-[3ch]">
-        {Math.min(100, Math.round(c.progress))}%
-      </span>
-    </div>
-  )}
-
-  {c.status === "active" && (
-    <div className="flex items-center gap-4">
-      {/* Checkbox for daily log */}
-      <label className="flex items-center gap-2 cursor-pointer select-none">
-        <input
-          type="checkbox"
-          checked={c.loggedToday}
-          onChange={() => handleLog(c)}
-          disabled={c.loggedToday}
-          className="h-5 w-5 accent-brand-teal rounded-md cursor-pointer disabled:opacity-60"
-        />
-        <span
-          className={`font-semibold ${
-            c.loggedToday ? "text-gray-500 line-through" : "text-brand-dark"
-          }`}
-        >
-          {c.loggedToday ? "Yes, done!" : "I Did It Today"}
-        </span>
-      </label>
-
-      {/* Notes */}
-      <textarea
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-        placeholder="Write a quick reflection (optional)..."
-        rows={1}
-        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg shadow-sm 
-                   focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-brand-teal 
-                   resize-none text-sm"
-      />
-    </div>
-  )}
-</div>
-
-
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Start a New Microchallenge */}
-      <div className="mt-10">
-        {activeChallenge ? (
-          <div className="text-center text-sm text-gray-700 space-y-2">
-            <p>
-              ⚡ You’re already working on{" "}
-              <strong>{activeChallenge.title}</strong>.
-            </p>
-            <p>
-              Keep logging daily to complete it, or{" "}
-              <button
-                onClick={() => handleRemove(activeChallenge.assignment_id)}
-                className="text-red-600 underline hover:text-red-800"
-              >
-                remove it
-              </button>{" "}
-              if you want to start a different one.
-            </p>
-          </div>
+      <section className="mx-auto w-full max-w-6xl px-6 pb-14 md:pb-16">
+        {loading ? (
+          <LoadingBlock />
+        ) : !user ? (
+          <SignedOutBlock onLogin={() => setShowAuth(true)} />
+        ) : challenges.length === 0 ? (
+          <EmptyBlock onStart={handleToggleCarousel} />
         ) : (
-          <button
-            onClick={handleToggleCarousel}
-            className="px-6 py-3 border text-brand-dark font-semibold rounded-lg shadow-sm 
-                       hover:bg-brand-primary transition-colors hover:text-white"
-          >
-            {showNewChallenge ? "✕ Close" : "Start a New Microchallenge"}
-          </button>
-        )}
+          <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
+            <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-sm">
+              <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
+                Next action
+              </p>
+              {activeChallenge ? (
+                <>
+                  <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
+                    Keep going with {activeChallenge.title}
+                  </h2>
+                  <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
+                    Log one small repetition today. Consistency teaches the
+                    system faster than intensity.
+                  </p>
+                  <button
+                    onClick={() => toggleOpen(activeChallenge.assignment_id)}
+                    className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:opacity-90"
+                  >
+                    Open active challenge
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
+                    Choose your next experiment.
+                  </h2>
+                  <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
+                    Pick one challenge that feels useful and small enough to
+                    repeat.
+                  </p>
+                </>
+              )}
+              <button
+                onClick={handleToggleCarousel}
+                disabled={Boolean(activeChallenge)}
+                className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark/25 px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-primary hover:text-brand-primary disabled:pointer-events-none disabled:opacity-40"
+              >
+                <Plus className="h-4 w-4" />
+                {showNewChallenge ? "Close choices" : "Start a new challenge"}
+              </button>
+            </div>
 
-        {showNewChallenge && !activeChallenge && (
-          <div className="mt-6">
-            {available.length === 0 ? (
-              <p className=" text-center">No challenges available right now.</p>
-            ) : (
-              <div className="space-y-6">
-                {available.map((c) => {
-                  const alreadyAssigned = challenges.some(
-  (assigned) =>
-    assigned.challenge_id === c.id &&
-    assigned.status !== "removed" // ✅ ignore removed ones
-);
-
-                  return (
-                    <div
-                      key={c.id}
-                      className="border rounded-lg p-6 shadow-sm flex flex-col"
-                    >
-                      <h3 className="text-lg font-semibold text-brand-dark">
-                        {c.title}
-                      </h3>
-
-                      <div className="mt-2 space-y-2 text-md">
-                        {c.intro?.map((line, idx) => (
-                          <p key={idx}>{line}</p>
-                        ))}
-                      </div>
-
-                      <div className="mt-auto self-end">
-                        {alreadyAssigned ? (
-                          <span className="inline-block px-3 py-2 text-xs font-semibold text-gray-600 border rounded">
-                            ✅ Already Assigned
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => handleStartChallenge(c)}
-                            className="px-4 py-2 bg-brand-teal text-white rounded-lg shadow-sm 
-                                       hover:bg-brand-dark transition"
-                          >
-                            Start This Challenge
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+            <div>
+              <div className="mb-5 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
+                <span>Your challenges</span>
+                <span className="h-px flex-1 bg-brand-dark/15" />
               </div>
-            )}
+              <div className="border-y border-brand-dark/12">
+                {challenges.map((challenge) => (
+                  <ChallengeRow
+                    key={challenge.assignment_id}
+                    challenge={challenge}
+                    isOpen={openId === challenge.assignment_id}
+                    note={note}
+                    onNoteChange={setNote}
+                    onToggle={() => toggleOpen(challenge.assignment_id)}
+                    onLog={() => handleLog(challenge)}
+                    onRemove={() => handleRemove(challenge.assignment_id)}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         )}
-      </div>
 
-      <div className="mt-6">
+        {showNewChallenge && !activeChallenge && user && (
+          <AvailableChallenges
+            available={available}
+            challenges={challenges}
+            onStart={handleStartChallenge}
+          />
+        )}
+      </section>
+
+      <div className="mx-auto w-full max-w-6xl px-6 py-8">
         <Link
           href="/tools"
-          className="text-sm font-semibold text-[#042a2b] hover:text-[#5eb1bf] underline"
+          className="inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-dark transition hover:text-brand-primary"
         >
-          ← Back to Tools Dashboard
+          <ArrowLeft className="h-4 w-4" />
+          Back to tools
         </Link>
       </div>
 
@@ -473,8 +357,283 @@ const MicrochallengesPage = () => {
         context="start microchallenges"
       />
       <ConfettiCelebration trigger={showConfetti} />
-    </div>
+    </main>
   );
 };
+
+const ChallengeRow = ({
+  challenge,
+  isOpen,
+  note,
+  onNoteChange,
+  onToggle,
+  onLog,
+  onRemove,
+}: {
+  challenge: AssignedChallenge;
+  isOpen: boolean;
+  note: string;
+  onNoteChange: (value: string) => void;
+  onToggle: () => void;
+  onLog: () => void;
+  onRemove: () => void;
+}) => {
+  const progress = Math.min(100, Math.round(challenge.progress || 0));
+
+  return (
+    <article className="border-b border-brand-dark/12 last:border-b-0">
+      <button
+        onClick={onToggle}
+        className="grid w-full cursor-pointer gap-4 py-5 text-left transition hover:text-brand-primary md:grid-cols-[1fr_auto] md:items-center"
+      >
+        <div>
+          <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
+            {challenge.status}
+          </p>
+          <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
+            {challenge.title}
+          </h2>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="font-sans text-sm font-semibold text-brand-dark">
+            {progress}%
+          </span>
+          {isOpen ? (
+            <ChevronUp className="h-5 w-5 text-brand-accent" />
+          ) : (
+            <ChevronDown className="h-5 w-5 text-brand-accent" />
+          )}
+        </div>
+      </button>
+
+      {isOpen && (
+        <div className="pb-6">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-brand-dark/10">
+            <div
+              className="h-full rounded-full bg-brand-teal transition-all duration-700"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+
+          <div className="mt-5 space-y-4 font-sans text-sm leading-7 text-brand-dark/72">
+            {challenge.intro?.map((paragraph, index) => (
+              <p key={index}>{paragraph}</p>
+            ))}
+          </div>
+
+          {challenge.instructions?.length > 0 && (
+            <Block title="The microchallenge">
+              <ol className="list-decimal space-y-2 pl-5 font-sans text-sm leading-7 text-brand-dark/72">
+                {challenge.instructions.map((step, index) => (
+                  <li key={index}>{step}</li>
+                ))}
+              </ol>
+            </Block>
+          )}
+
+          {challenge.why && (
+            <Block title="Why it works">
+              <p>{challenge.why}</p>
+            </Block>
+          )}
+
+          {challenge.tips?.length > 0 && (
+            <Block title="Bonus tip">
+              <ul className="list-disc space-y-2 pl-5">
+                {challenge.tips.map((tip, index) => (
+                  <li key={index}>{tip}</li>
+                ))}
+              </ul>
+            </Block>
+          )}
+
+          {challenge.status === "active" && (
+            <div className="mt-6 grid gap-3 md:grid-cols-[auto_1fr] md:items-center">
+              <button
+                onClick={onLog}
+                disabled={challenge.loggedToday}
+                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                {challenge.loggedToday ? "Logged today" : "Log today"}
+              </button>
+              <textarea
+                value={note}
+                onChange={(event) => onNoteChange(event.target.value)}
+                placeholder="Quick reflection, optional"
+                rows={1}
+                className="min-h-11 resize-none rounded-lg border border-brand-dark/15 px-4 py-3 font-sans text-sm text-brand-dark outline-none transition focus:border-brand-teal"
+              />
+            </div>
+          )}
+
+          {challenge.status === "active" && (
+            <button
+              onClick={onRemove}
+              className="mt-5 inline-flex cursor-pointer items-center gap-2 font-sans text-sm font-semibold text-brand-accent transition hover:text-brand-primary"
+            >
+              <Trash2 className="h-4 w-4" />
+              Remove challenge
+            </button>
+          )}
+        </div>
+      )}
+    </article>
+  );
+};
+
+const AvailableChallenges = ({
+  available,
+  challenges,
+  onStart,
+}: {
+  available: AvailableChallenge[];
+  challenges: AssignedChallenge[];
+  onStart: (challenge: AvailableChallenge) => void;
+}) => (
+  <section className="mt-10">
+    <SectionLabel>Choose a challenge</SectionLabel>
+    {available.length === 0 ? (
+      <EmptyPanel text="No challenges available right now." />
+    ) : (
+      <div className="grid gap-4 md:grid-cols-2">
+        {available.map((challenge) => {
+          const alreadyAssigned = challenges.some(
+            (assigned) =>
+              assigned.challenge_id === challenge.id &&
+              assigned.status !== "removed",
+          );
+
+          return (
+            <article
+              key={challenge.id}
+              className="rounded-lg border border-brand-dark/12 bg-white p-5 shadow-sm"
+            >
+              <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
+                Microchallenge
+              </p>
+              <h3 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
+                {challenge.title}
+              </h3>
+              <div className="mt-3 space-y-2 font-sans text-sm leading-7 text-brand-dark/72">
+                {challenge.intro?.map((line, index) => (
+                  <p key={index}>{line}</p>
+                ))}
+              </div>
+              {alreadyAssigned ? (
+                <span className="mt-5 inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-dark/55">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Already assigned
+                </span>
+              ) : (
+                <button
+                  onClick={() => onStart(challenge)}
+                  className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:opacity-90"
+                >
+                  Start this challenge
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              )}
+            </article>
+          );
+        })}
+      </div>
+    )}
+  </section>
+);
+
+const Metric = ({ label, value }: { label: string; value: string }) => (
+  <div className="rounded-lg border border-brand-dark/12 bg-white p-5 shadow-sm">
+    <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
+      {label}
+    </p>
+    <p className="mt-3 font-sans text-4xl font-semibold tracking-[-0.03em] text-brand-dark">
+      {value}
+    </p>
+  </div>
+);
+
+const LoadingBlock = () => (
+  <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-sm">
+    <LoaderCircle className="h-6 w-6 animate-spin text-brand-accent" />
+    <p className="mt-3 font-sans text-sm font-semibold text-brand-dark">
+      Loading microchallenges...
+    </p>
+  </div>
+);
+
+const SignedOutBlock = ({ onLogin }: { onLogin: () => void }) => (
+  <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-sm">
+    <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
+      Sign in required
+    </p>
+    <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
+      Log in to view your microchallenges.
+    </h2>
+    <button
+      onClick={onLogin}
+      className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:opacity-90"
+    >
+      Log in
+      <ArrowRight className="h-4 w-4" />
+    </button>
+  </div>
+);
+
+const EmptyBlock = ({ onStart }: { onStart: () => void }) => (
+  <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-sm">
+    <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
+      Empty state
+    </p>
+    <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
+      No microchallenges assigned yet.
+    </h2>
+    <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
+      Start with one small experiment. The point is not intensity; it is
+      repetition.
+    </p>
+    <button
+      onClick={onStart}
+      className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:opacity-90"
+    >
+      Choose a challenge
+      <ArrowRight className="h-4 w-4" />
+    </button>
+  </div>
+);
+
+const EmptyPanel = ({ text }: { text: string }) => (
+  <div className="rounded-lg border border-brand-dark/12 bg-white p-6 font-sans text-sm text-brand-dark/72 shadow-sm">
+    {text}
+  </div>
+);
+
+const Block = ({ title, children }: { title: string; children: ReactNode }) => (
+  <div className="mt-5 border-l-4 border-brand-secondary pl-4 font-sans text-sm leading-7 text-brand-dark/72">
+    <h3 className="mb-2 text-sm font-semibold text-brand-dark">{title}</h3>
+    {children}
+  </div>
+);
+
+const SectionLabel = ({
+  children,
+  tone = "light",
+}: {
+  children: ReactNode;
+  tone?: "light" | "dark";
+}) => (
+  <div
+    className={`mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] ${
+      tone === "dark" ? "text-brand-secondary" : "text-brand-teal"
+    }`}
+  >
+    <span>{children}</span>
+    <span
+      className={`h-px flex-1 ${
+        tone === "dark" ? "bg-white/20" : "bg-brand-dark/15"
+      }`}
+    />
+  </div>
+);
 
 export default MicrochallengesPage;

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { instinctMap } from "./instinctMap";
 
 interface Props {
@@ -19,48 +20,55 @@ const FeedbackOverlay = ({ questionId, option }: Props) => {
   if (!insight) return null;
 
   return (
-    <div
-      className="relative bg-white rounded-2xl shadow-lg p-5 text-base text-brand-dark
-                 transition-all duration-300 transform hover:shadow-xl hover:-translate-y-1 border-t-4 "
-    >
-      {/* Instinct Title */}
-      <p className="font-semibold text-brand-accent mb-1">
-        Instinct: {insight.instinct}
+    <aside className="rounded-lg border border-brand-dark/10 bg-white p-6 shadow-sm">
+      <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
+        Behavioral read
       </p>
 
-      {/* Motive */}
-      {insight.motive && (
-        <p className="text-md font-medium mb-4 text-brand-accent">
-          Caveman Motive: {insight.motive}
+      {insight.instinct ? (
+        <>
+          <h2 className="mt-3 text-2xl font-bold leading-tight text-brand-dark">
+            {insight.instinct}
+          </h2>
+          {insight.motive && (
+            <p className="mt-2 font-sans text-xs font-semibold uppercase tracking-[0.14em] text-brand-teal">
+              {insight.motive}
+            </p>
+          )}
+          <p className="mt-4 font-sans text-sm leading-7 text-brand-dark/72">
+            {insight.feedback}
+          </p>
+
+          <button
+            onClick={() => setShowDetail((value) => !value)}
+            className="mt-5 inline-flex cursor-pointer items-center gap-2 font-sans text-sm font-semibold text-brand-accent transition hover:text-brand-primary"
+          >
+            {showDetail ? "Hide the deeper read" : "Why this happens"}
+            {showDetail ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </button>
+
+          {showDetail && (
+            <div className="mt-5 border-l-4 border-brand-secondary pl-4 font-sans text-sm leading-7 text-brand-dark/72">
+              <p>{insight.explanation}</p>
+              {insight.microShift && (
+                <p className="mt-3">
+                  <strong className="text-brand-dark">Try this:</strong>{" "}
+                  {insight.microShift}
+                </p>
+              )}
+            </div>
+          )}
+        </>
+      ) : (
+        <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
+          {insight.feedback}
         </p>
       )}
-
-      {/* Feedback */}
-      <p className="mb-4">{insight.feedback}</p>
-
-      {/* Expandable Details */}
-      {insight.instinct &&
-        (!showDetail ? (
-          <button
-            onClick={() => setShowDetail(true)}
-            className="text-brand-accent text-sm mb-2 hover:text-brand-accent transition cursor-pointer"
-          >
-            why this happens?
-          </button>
-        ) : (
-          <div className="space-y-3 text-md">
-            <p>{insight.explanation}</p>
-            {insight.microShift && (
-              <p className="text-brand-dark">
-                <strong className="text-brand-primary">
-                  Try this:
-                </strong>{" "}
-                {insight.microShift}
-              </p>
-            )}
-          </div>
-        ))}
-    </div>
+    </aside>
   );
 };
 

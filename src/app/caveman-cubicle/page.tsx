@@ -1,231 +1,334 @@
-"use client";
-
 import Link from "next/link";
-import { useAuth } from "@/app/context/AuthContext";
-import { useState } from "react";
-import AuthModal from "../components/AuthModal";
+import type { ReactNode } from "react";
 import {
-  Users,
+  ArrowRight,
   Brain,
+  BriefcaseBusiness,
   Compass,
-  ChevronRight,
-  Phone,
   Mail,
+  Phone,
+  ShieldCheck,
+  Users,
 } from "lucide-react";
 
-const CavemanInTheCubicle = () => {
-  const { user } = useAuth();
-  const [showAuth, setShowAuth] = useState(false);
+const workplaceSignals = [
+  {
+    title: "People agree in the room, then drift afterward.",
+    label: "Belonging protection",
+    text: "The meeting sounded aligned, but the nervous system still read dissent as risky.",
+  },
+  {
+    title: "Ownership is requested, but permission is still expected.",
+    label: "Hierarchy sensitivity",
+    text: "Teams may wait for signals of safety before acting with real agency.",
+  },
+  {
+    title: "Feedback gets softened until nothing changes.",
+    label: "Status management",
+    text: "When rank feels fragile, truth becomes expensive and clarity gets diluted.",
+  },
+  {
+    title: "Smart people make cautious decisions under pressure.",
+    label: "Threat narrowing",
+    text: "Stress pushes attention toward protection, certainty, and familiar defaults.",
+  },
+];
 
+const programAreas = [
+  {
+    title: "Decision-making pitfalls",
+    label: "Bias under pressure",
+    text: "Why optimism, sunk costs, loss aversion, and urgency distort execution even in capable teams.",
+    icon: Brain,
+  },
+  {
+    title: "Leadership under the lens",
+    label: "Signals leaders send",
+    text: "How tone, timing, status, and ambiguity can trigger silence or initiative without anyone naming it.",
+    icon: Users,
+  },
+  {
+    title: "Behavior design",
+    label: "Systems over slogans",
+    text: "Practical nudges that make ownership, trust, and constructive dissent easier to repeat.",
+    icon: Compass,
+  },
+];
+
+const takeaways = [
+  "A sharper read on why teams hesitate, conform, defer, or disengage.",
+  "Bias-aware reflexes for decisions, feedback, meetings, and execution.",
+  "Practical behavior-design moves that reduce threat and increase initiative.",
+  "A shared language for discussing human dynamics without blame.",
+];
+
+export default function CavemanInTheCubiclePage() {
   return (
-    <main className="flex flex-col px-6 py-20 bg-white font-serif">
-      <div className="max-w-6xl mx-auto space-y-20">
-        {/* ===========================
-            HERO
-        ============================ */}
-        <section className="text-center space-y-6">
-          <h1 className="text-3xl md:text-5xl font-bold text-[#042a2b] leading-tight">
-            Caveman in the Cubicle
-          </h1>
-          <p className="text-lg md:text-xl text-brand-dark/70 max-w-3xl mx-auto leading-relaxed">
-            A leadership reset grounded in how people actually behave —  
-            not how we wish they did.
-          </p>
-        </section>
+    <main className="bg-white font-serif text-brand-dark">
+      <section className="border-b border-brand-dark/10 px-6 py-14 md:py-20">
+        <div className="mx-auto grid w-full max-w-6xl gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:items-center">
+          <div>
+            <SectionLabel>Workplace behavior</SectionLabel>
+            <h1 className="text-[clamp(3rem,6.2vw,6.1rem)] font-bold leading-[0.96] tracking-[-0.035em] text-brand-dark">
+              Caveman in
+              <br />
+              <span className="italic text-brand-accent">the Cubicle.</span>
+            </h1>
+            <p className="mt-7 max-w-2xl border-l-4 border-brand-secondary pl-5 font-sans text-lg leading-8 text-brand-dark md:text-xl md:leading-9">
+              A leadership reset grounded in how people actually behave, not
+              how we wish they behaved under pressure.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/diagnostics/cic"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-6 py-3 font-sans text-sm font-semibold text-white transition hover:opacity-90"
+              >
+                Start CIC diagnostic
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <a
+                href="mailto:hello@neurocient.com"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-dark/25 px-6 py-3 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-primary hover:text-brand-primary"
+              >
+                Discuss a workshop
+                <Mail className="h-4 w-4" />
+              </a>
+            </div>
+          </div>
 
-        {/* ===========================
-            THE PROBLEM
-        ============================ */}
-        <section className="space-y-6">
-          <h2 className="text-2xl md:text-4xl font-bold text-[#042a2b]">
-            The Problem Most Leadership Training Misses
-          </h2>
+          <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-[0_20px_60px_rgba(4,42,43,0.06)] md:p-8">
+            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
+              The hidden problem
+            </p>
+            <h2 className="mt-3 text-3xl font-bold leading-tight text-brand-dark md:text-4xl">
+              You are not leading spreadsheets.
+              <br />
+              You are leading nervous systems.
+            </h2>
+            <div className="mt-6 space-y-4 font-sans text-sm leading-7 text-brand-dark/72">
+              <p>
+                Leaders say the right things: open door, more ownership, more
+                initiative, more candor.
+              </p>
+              <p>
+                But teams still hesitate because hierarchy, belonging, status,
+                and safety are not abstract ideas to the brain. They are ancient
+                survival signals.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-          <p className="text-brand-dark/70 text-lg leading-relaxed">
-            You’ve said all the right things:
-          </p>
-
-          <ul className="list-disc pl-6 space-y-2 text-brand-dark/80 text-base">
-            <li>“I have an open-door policy.”</li>
-            <li>“I want more ownership from my team.”</li>
-            <li>“I’m here to support, not micromanage.”</li>
-          </ul>
-
-          <p className="text-brand-dark/70 text-lg leading-relaxed">
-            And still, teams hesitate. It’s not resistance — it’s wiring.
-            Humans evolved to survive hierarchy, protect belonging,  
-            and avoid standing out. These ancient instincts still run the show.
-          </p>
-        </section>
-
-        {/* ===========================
-            ANCIENT WIRING
-        ============================ */}
-        <section className="space-y-6">
-          <h2 className="text-2xl md:text-4xl font-bold text-[#042a2b]">
-            Modern Leadership, Ancient Wiring
-          </h2>
-
-          <p className="text-brand-dark/70 text-lg">
-            You’re not leading spreadsheets. You’re leading brains built 200,000 years ago.
-          </p>
-
-          <ul className="list-disc pl-6 space-y-3 text-brand-dark/80 text-base">
-            <li>Avoid standing out (conformity bias)</li>
-            <li>Defer to authority (even when invited to challenge)</li>
-            <li>Protect status & belonging (kills risk-taking)</li>
-          </ul>
-
-          <p className="text-brand-dark/70 text-lg leading-relaxed">
-            This isn’t a soft-skill problem.
-            It’s a human-nature problem — strategy alone can’t fix it.
-          </p>
-        </section>
-
-        {/* ===========================
-            THE SHIFT
-        ============================ */}
-        <section className="space-y-6">
-          <h2 className="text-2xl md:text-4xl font-bold text-[#042a2b]">
-            The Shift: From Insight to X-Ray Vision
-          </h2>
-
-          <p className="text-brand-dark/70 text-lg leading-relaxed">
-            Most leadership programs tell you what to do.  
-            This one explains why what you're doing isn't landing — and what actually works.
-          </p>
-
-          <ul className="list-disc pl-6 space-y-3 text-brand-dark/80 text-base">
-            <li>Spot the invisible social signals you’re sending</li>
-            <li>Decode the instinctive loops behind low ownership</li>
-            <li>Shift behaviour using evolutionary psychology — not motivational fluff</li>
-          </ul>
-        </section>
-
-        {/* ===========================
-            PROGRAM OVERVIEW (3 CARD GRID)
-        ============================ */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Decision Making */}
-          <div className="p-6 border rounded-2xl shadow-sm hover:shadow-md transition space-y-4">
-            <Brain className="w-10 h-10 text-[#ed254e]" />
-            <h3 className="text-xl font-semibold text-[#042a2b]">
-              Decision-Making Pitfalls
-            </h3>
-            <p className="text-brand-dark/70 text-sm leading-relaxed">
-              Why smart people make bad calls — and how optimism, sunk costs,  
-              and bias sabotage execution.
+      <section className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
+        <SectionLabel>What leadership training misses</SectionLabel>
+        <div className="grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
+          <div>
+            <h2 className="text-[clamp(2.5rem,4.8vw,5rem)] font-bold leading-[0.96] tracking-[-0.03em] text-brand-dark">
+              The issue is rarely intent.
+              <br />
+              <span className="italic text-brand-accent">It is threat.</span>
+            </h2>
+            <p className="mt-6 max-w-xl font-sans text-base leading-8 text-brand-dark">
+              Most workplace advice assumes people will act on what is logical.
+              Caveman in the Cubicle starts from a different premise: under
+              pressure, people first protect safety, status, and belonging.
             </p>
           </div>
 
-          {/* Team Dynamics */}
-          <div className="p-6 border rounded-2xl shadow-sm hover:shadow-md transition space-y-4">
-            <Users className="w-10 h-10 text-[#5eb1bf]" />
-            <h3 className="text-xl font-semibold text-[#042a2b]">
-              Leadership Under the Lens
-            </h3>
-            <p className="text-brand-dark/70 text-sm leading-relaxed">
-              Why what you say doesn’t always land — and how ancient wiring shapes  
-              your team's behaviour.
-            </p>
+          <div className="border-y border-brand-dark/12">
+            {workplaceSignals.map((signal, index) => (
+              <article
+                key={signal.title}
+                className="grid gap-4 border-b border-brand-dark/12 py-6 last:border-b-0 md:grid-cols-[0.58fr_1fr]"
+              >
+                <div className="flex gap-4">
+                  <span className="mt-1 font-serif text-3xl font-bold text-brand-primary">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div>
+                    <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
+                      {signal.label}
+                    </p>
+                    <h3 className="mt-2 text-xl font-bold leading-tight text-brand-dark">
+                      {signal.title}
+                    </h3>
+                  </div>
+                </div>
+                <p className="font-sans text-sm leading-7 text-brand-dark/72">
+                  {signal.text}
+                </p>
+              </article>
+            ))}
           </div>
+        </div>
+      </section>
 
-          {/* Behaviour Design */}
-          <div className="p-6 border rounded-2xl shadow-sm hover:shadow-md transition space-y-4">
-            <Compass className="w-10 h-10 text-[#a93f55]" />
-            <h3 className="text-xl font-semibold text-[#042a2b]">
-              Designing for Behaviour
-            </h3>
-            <p className="text-brand-dark/70 text-sm leading-relaxed">
-              Build environments that naturally increase ownership, safety,  
-              and initiative.
-            </p>
+      <section className="bg-brand-dark px-6 py-14 text-white md:py-20">
+        <div className="mx-auto max-w-6xl">
+          <SectionLabel tone="dark">The shift</SectionLabel>
+          <div className="grid gap-10 md:grid-cols-[0.78fr_1.22fr] md:items-start">
+            <h2 className="text-3xl font-bold leading-tight tracking-[-0.02em] md:text-5xl">
+              From leadership scripts
+              <br />
+              to behavioral x-ray vision.
+            </h2>
+            <div className="space-y-5 font-sans text-base leading-8 text-white/72">
+              <p>
+                Most programs tell leaders what to do. This lens explains why
+                what they are already doing may not be landing.
+              </p>
+              <p>
+                It helps leaders spot the invisible social signals they send,
+                decode instinctive loops behind low ownership, and design
+                environments where useful behavior is easier to repeat.
+              </p>
+              <p className="border-l-4 border-brand-secondary pl-5 text-xl leading-9 text-white">
+                The work is not motivational fluff. It is behavior design for
+                ancient brains inside modern organizations.
+              </p>
+            </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ===========================
-            DIAGNOSTIC
-        ============================ */}
-        <section className="space-y-6" id="diagnostic">
-          <h2 className="text-2xl md:text-4xl font-bold text-[#042a2b]">
-            Spot Your Inner Caveman (Diagnostic)
+      <section className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
+        <SectionLabel>Program focus</SectionLabel>
+        <div className="grid gap-5 md:grid-cols-3">
+          {programAreas.map((area) => {
+            const Icon = area.icon;
+
+            return (
+              <article
+                key={area.title}
+                className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-sm"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <p className="mt-5 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
+                  {area.label}
+                </p>
+                <h3 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
+                  {area.title}
+                </h3>
+                <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
+                  {area.text}
+                </p>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section
+        id="diagnostic"
+        className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-14 md:grid-cols-[0.78fr_1.22fr] md:items-start md:py-16"
+      >
+        <div>
+          <SectionLabel>CIC Diagnostic</SectionLabel>
+          <h2 className="text-3xl font-bold leading-tight text-brand-dark md:text-5xl">
+            Start with a clearer read of the room.
           </h2>
+        </div>
 
-          <p className="text-brand-dark/70 text-lg">
-            A 5-minute leadership diagnostic revealing:
+        <Link
+          href="/diagnostics/cic"
+          className="group block rounded-lg border border-brand-dark bg-brand-dark p-6 text-white shadow-sm transition hover:opacity-95 md:p-8"
+        >
+          <span className="inline-flex items-center gap-2 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-secondary">
+            <BriefcaseBusiness className="h-4 w-4" />
+            Workplace insight
+          </span>
+          <h3 className="mt-3 text-3xl font-bold leading-tight">
+            Find the instincts shaping execution.
+          </h3>
+          <p className="mt-4 max-w-2xl font-sans text-sm leading-7 text-white/72">
+            A diagnostic for seeing where status patterns, conflict avoidance,
+            hierarchy sensitivity, and alignment breakdowns may be shaping team
+            behavior.
           </p>
+          <span className="mt-6 inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-secondary">
+            Start CIC diagnostic
+            <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+          </span>
+        </Link>
+      </section>
 
-          <ul className="list-disc pl-6 space-y-3 text-brand-dark/80 text-base">
-            <li>Your instinctive traps under pressure</li>
-            <li>How your leadership triggers or calms primal responses</li>
-            <li>Where execution and ownership get stuck</li>
-          </ul>
+      <section className="border-y border-brand-dark/10 px-6 py-14 md:py-16">
+        <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[0.78fr_1.22fr] md:items-start">
+          <div>
+            <SectionLabel>Takeaways</SectionLabel>
+            <h2 className="text-3xl font-bold leading-tight text-brand-dark md:text-4xl">
+              What leaders walk away with.
+            </h2>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {takeaways.map((takeaway) => (
+              <div
+                key={takeaway}
+                className="flex gap-3 rounded-lg border border-brand-dark/12 bg-white p-5 shadow-sm"
+              >
+                <ShieldCheck className="mt-1 h-5 w-5 shrink-0 text-brand-accent" />
+                <p className="font-sans text-sm leading-7 text-brand-dark/72">
+                  {takeaway}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-          <p className="text-brand-dark/70 italic text-lg">
-            Not a personality quiz — a leadership mirror.
+      <section className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-14 md:grid-cols-[0.78fr_1.22fr] md:items-start md:py-16">
+        <div>
+          <SectionLabel>Bring it to your team</SectionLabel>
+          <h2 className="text-3xl font-bold leading-tight text-brand-dark md:text-4xl">
+            Start with a conversation.
+          </h2>
+          <p className="mt-4 max-w-xl font-sans text-sm leading-7 text-brand-dark/72">
+            Use the diagnostic as a starting point, or bring the framework into
+            a leadership workshop.
           </p>
+        </div>
 
-          <Link
-            href="/diagnostics/caveman"
-            className="inline-flex items-center gap-2 mt-4 px-6 py-3 text-lg font-semibold rounded-full border text-brand-dark hover:bg-brand-primary hover:text-white transition"
+        <div className="grid gap-3 sm:grid-cols-2">
+          <a
+            href="mailto:hello@neurocient.com"
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-3 font-sans text-sm font-semibold text-white transition hover:opacity-90"
           >
-            Try the Diagnostic
-            <ChevronRight className="w-5 h-5" />
-          </Link>
-        </section>
-
-        {/* ===========================
-            TAKEAWAYS
-        ============================ */}
-        <section className="space-y-6">
-          <h2 className="text-2xl md:text-4xl font-bold text-[#042a2b]">
-            What Leaders Walk Away With
-          </h2>
-
-          <ul className="list-disc pl-6 space-y-4 text-brand-dark/80 text-base leading-relaxed">
-            <li>X-ray vision for team behaviour</li>
-            <li>Bias-aware reflexes for better decisions</li>
-            <li>Practical nudges that build trust & initiative</li>
-            <li>A personal instinct map for aligned leadership</li>
-          </ul>
-        </section>
-
-        {/* ===========================
-            CONTACT CTA
-        ============================ */}
-        <section className="text-center space-y-6 py-10">
-          <h2 className="text-2xl md:text-4xl font-bold text-[#042a2b]">
-            Bring Caveman in the Cubicle to Your Leadership Team
-          </h2>
-
-          <p className="text-brand-dark/70 text-lg">
-            Start with a conversation. Or begin with the diagnostic.
-          </p>
-
-          <div className="flex flex-col md:flex-row gap-4 justify-center mt-6">
-            <a
-              href="mailto:hello@neurocient.com"
-              className="inline-flex items-center gap-2 px-6 py-3 border rounded-full text-brand-dark font-semibold hover:bg-brand-primary hover:text-white transition"
-            >
-              <Mail className="w-5 h-5" />
-              hello@neurocient.com
-            </a>
-
-            <a
-              href="tel:+918551915656"
-              className="inline-flex items-center gap-2 px-6 py-3 border rounded-full text-brand-dark font-semibold hover:bg-brand-primary hover:text-white transition"
-            >
-              <Phone className="w-5 h-5" />
-              +91-85519 15656
-            </a>
-          </div>
-        </section>
-      </div>
-
-      {/* Auth Modal */}
-      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
+            <Mail className="h-4 w-4" />
+            hello@neurocient.com
+          </a>
+          <a
+            href="tel:+918551915656"
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-dark/25 px-5 py-3 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-primary hover:text-brand-primary"
+          >
+            <Phone className="h-4 w-4" />
+            +91-85519 15656
+          </a>
+        </div>
+      </section>
     </main>
   );
-};
+}
 
-export default CavemanInTheCubicle;
+const SectionLabel = ({
+  children,
+  tone = "light",
+}: {
+  children: ReactNode;
+  tone?: "light" | "dark";
+}) => (
+  <div
+    className={`mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] ${
+      tone === "dark" ? "text-brand-secondary" : "text-brand-teal"
+    }`}
+  >
+    <span>{children}</span>
+    <span
+      className={`h-px flex-1 ${
+        tone === "dark" ? "bg-white/20" : "bg-brand-dark/15"
+      }`}
+    />
+  </div>
+);

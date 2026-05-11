@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { questionsBank } from "./questionsBank";  // ✅ Correct import
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { questionsBank } from "./questionsBank";
 
 import CavemanScanIntro from "./CavemanScanIntro";
 import CavemanScanQuestion from "./CavemanScanQuestion";
@@ -9,30 +10,81 @@ import CavemanScanResult from "./CavemanScanResult";
 import ScanScienceModal from "./ScanScienceModal";
 
 import type { ScanOption, ScanScienceBlock } from "./questionsBank";
-
-type Stage = "intro" | "questions" | "result";
+import {
+  CAVEMAN_SCAN_STORAGE_KEY,
+  isCavemanScanStage,
+  type CavemanScanResponse,
+  type CavemanScanStage,
+  type CavemanScanState,
+} from "./scanStorage";
 
 export default function CavemanScan() {
-  const [stage, setStage] = useState<Stage>("intro");
+  const router = useRouter();
+  const [stage, setStage] = useState<CavemanScanStage>("intro");
   const [current, setCurrent] = useState(0);
+  const [hasRestored, setHasRestored] = useState(false);
 
   const total = questionsBank.length;
 
-  const [responses, setResponses] = useState<
-    { type: "caveman" | "modern"; reflection: string; science: ScanScienceBlock | null }[]
-  >([]);
+  const [responses, setResponses] = useState<CavemanScanResponse[]>([]);
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [scienceToShow, setScienceToShow] = useState<ScanScienceBlock | null>(null);
+  const [scienceToShow, setScienceToShow] =
+    useState<ScanScienceBlock | null>(null);
 
   const question = questionsBank[current];
 
-  /* --------------------------
-        ON SELECT
-  --------------------------- */
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(CAVEMAN_SCAN_STORAGE_KEY);
+      if (!saved) return;
+
+      const parsed = JSON.parse(saved) as {
+        stage?: unknown;
+        current?: unknown;
+        responses?: unknown;
+      };
+
+      if (isCavemanScanStage(parsed.stage)) {
+        if (parsed.stage === "result") {
+          router.replace("/diagnostics/caveman-scan/result");
+          return;
+        }
+
+        setStage(parsed.stage);
+      }
+      if (typeof parsed.current === "number") {
+        setCurrent(Math.min(Math.max(parsed.current, 0), total - 1));
+      }
+      if (Array.isArray(parsed.responses)) {
+        setResponses(parsed.responses as CavemanScanResponse[]);
+      }
+    } catch {
+      window.localStorage.removeItem(CAVEMAN_SCAN_STORAGE_KEY);
+    } finally {
+      setHasRestored(true);
+    }
+  }, [router, total]);
+
+  useEffect(() => {
+    if (!hasRestored) return;
+
+    saveScanState({ stage, current, responses });
+  }, [current, hasRestored, responses, stage]);
+
+  const handleRestart = () => {
+    window.localStorage.removeItem(CAVEMAN_SCAN_STORAGE_KEY);
+    setResponses([]);
+    setCurrent(0);
+    setStage("intro");
+    setModalOpen(false);
+    setScienceToShow(null);
+  };
+
   const handleSelect = (opt: ScanOption) => {
     const copy = [...responses];
     copy[current] = {
+      label: opt.label,
       type: opt.type,
       reflection: opt.reflection,
       science: typeof opt.science === "object" ? opt.science : null,
@@ -40,16 +92,15 @@ export default function CavemanScan() {
     setResponses(copy);
   };
 
-  /* --------------------------
-        NEXT / PREVIOUS
-  --------------------------- */
   const handleNext = () => {
     if (!responses[current]) return;
 
     if (current + 1 < total) {
       setCurrent((c) => c + 1);
     } else {
+      saveScanState({ stage: "result", current, responses });
       setStage("result");
+      router.push("/diagnostics/caveman-scan/result");
     }
   };
 
@@ -58,17 +109,14 @@ export default function CavemanScan() {
     setCurrent((c) => c - 1);
   };
 
-  /* --------------------------
-         RENDER
-  --------------------------- */
+  if (!hasRestored) return null;
+
   return (
     <>
-      {/* INTRO */}
       {stage === "intro" && (
         <CavemanScanIntro onStart={() => setStage("questions")} />
       )}
 
-      {/* QUESTION FLOW */}
       {stage === "questions" && (
         <>
           <CavemanScanQuestion
@@ -76,7 +124,7 @@ export default function CavemanScan() {
             selected={
               responses[current]
                 ? {
-                    label: "selected",  // not used in UI, but required by type
+                    label: responses[current].label,
                     type: responses[current].type,
                     reflection: responses[current].reflection,
                     science: responses[current].science,
@@ -94,7 +142,7 @@ export default function CavemanScan() {
               }
             }}
             progress={current + 1}
-            total={total}   // ✅ Added total for progress bar
+            total={total}
           />
 
           <ScanScienceModal
@@ -105,8 +153,13 @@ export default function CavemanScan() {
         </>
       )}
 
-      {/* SUMMARY */}
-      {stage === "result" && <CavemanScanResult responses={responses} />}
+      {stage === "result" && (
+        <CavemanScanResult responses={responses} onRestart={handleRestart} />
+      )}
     </>
   );
 }
+
+const saveScanState = (state: CavemanScanState) => {
+  window.localStorage.setItem(CAVEMAN_SCAN_STORAGE_KEY, JSON.stringify(state));
+};

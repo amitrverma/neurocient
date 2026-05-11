@@ -3,8 +3,18 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import type React from "react";
 import Link from "next/link";
-import Script from "next/script"; // ✅ JSON-LD injection
-import { Twitter, Linkedin, Mail } from "lucide-react";
+import Script from "next/script";
+import {
+  ArrowRight,
+  Bookmark,
+  BookOpen,
+  Clock,
+  Compass,
+  Linkedin,
+  Mail,
+  Printer,
+  Twitter,
+} from "lucide-react";
 import ScrollProgress from "./ui/ScrollProgress";
 import FurtherReads from "./FurtherReads";
 import type { PathwayId, ArticleRef } from "@/content/pathways";
@@ -32,12 +42,14 @@ interface ArticleLayoutProps {
   title: string;
   date: string;
   excerpt?: string;
-  description?: string;   // ✅ SEO + JSON-LD
-  keywords?: string[];    // ✅ SEO + JSON-LD
-  author?: string;        // ✅ JSON-LD schema
+  description?: string;
+  keywords?: string[];
+  author?: string;
   tags?: string[];
   readingTime?: string;
   slug?: string;
+  typographyVariant?: string;
+  headings?: Array<{ id: string; title: string }>;
   children: ReactNode;
   nextArticle?: { slug: string; title: string; excerpt?: string } | null;
   resources?: ArticleResources;
@@ -57,6 +69,8 @@ const ArticleLayout = ({
   tags = [],
   readingTime,
   slug,
+  typographyVariant,
+  headings = [],
   children,
   nextArticle,
   resources,
@@ -70,7 +84,7 @@ const ArticleLayout = ({
   const orgId = "https://neurocient.com/#/org/neurocient-labs";
   const personId = "https://neurocient.com/#/person/amit-r-verma";
 
-  // ✅ JSON-LD structured data
+  // JSON-LD structured data
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -104,8 +118,9 @@ const ArticleLayout = ({
   const [authContext, setAuthContext] = useState<string | null>(null);
   const [authCallback, setAuthCallback] = useState<(() => void) | null>(null);
   const nextRef = useRef<HTMLDivElement | null>(null);
+  const isPremiumLongform = typographyVariant === "prologue";
 
-  // ✅ Detect if saved
+  // Detect if saved
   useEffect(() => {
     if (!user || !slug) return;
     const checkSaved = async () => {
@@ -125,12 +140,12 @@ const ArticleLayout = ({
     checkSaved();
   }, [slug, user]);
 
-  // ✅ Track article view
+  // Track article view
   useEffect(() => {
     if (slug) trackEvent("Article Viewed", { slug });
   }, [slug]);
 
-  // ✅ Mark as read
+  // Mark as read
   useEffect(() => {
     if (!slug || !ready) return;
     let incremented = false;
@@ -180,7 +195,7 @@ const ArticleLayout = ({
     };
   }, [slug, ready]);
 
-  // ✅ Save / Unsave
+  // Save / Unsave
   const handleSave = async (
     e?: React.MouseEvent<HTMLButtonElement>,
     skipAuthCheck = false,
@@ -251,30 +266,14 @@ const ArticleLayout = ({
         }`}
         title={isSaved ? "Remove from saved" : "Save for later"}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
-          fill={isSaved ? "currentColor" : "none"}
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5v14l7-7 7 7V5a2 2 0 00-2-2H7a2 2 0 00-2 2z" />
-        </svg>
+        <Bookmark size={20} fill={isSaved ? "currentColor" : "none"} />
       </button>
       <button
         onClick={() => window.print()}
         className="text-brand-dark hover:text-brand-primary transition"
         title="Print this article"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 9V2h12v7M6 18h12v4H6v-4zM6 14h12" />
-        </svg>
+        <Printer size={20} />
       </button>
     </div>
   );
@@ -285,80 +284,82 @@ const ArticleLayout = ({
         <ScrollProgress />
       </div>
 
-      <article className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* 👉 Mobile actions */}
+      <article
+        className={`article-shell ${
+          isPremiumLongform ? "article-shell-premium" : ""
+        }`}
+      >
+        {/* Mobile actions */}
         <div className="flex lg:hidden mb-6">{renderActions()}</div>
-        {/* 👉 Desktop actions */}
+        {/* Desktop actions */}
         <div className="hidden lg:flex flex-col gap-4 absolute -left-16 top-20">
           {renderActions("flex-col")}
         </div>
 
         {/* Meta row */}
-        <div className="flex flex-wrap items-center gap-2 mb-4 text-xs uppercase tracking-wide font-semibold">
+        <div className="article-hero-kicker">
+          <span>Neurocient Insight</span>
+          <span className="h-px flex-1 bg-brand-dark/15" />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 mb-5 font-sans text-xs font-semibold uppercase tracking-[0.16em]">
           {tags?.map((tag) => (
             <Link
               key={tag}
               href={`/tags/${slugifyTag(tag)}`}
-              className="px-2 py-1 text-xs bg-gray-100 rounded-md hover:bg-brand-secondary"
+              className="rounded-full border border-brand-dark/15 px-3 py-1 text-brand-dark transition hover:border-brand-teal hover:text-brand-teal"
             >
               {tag}
             </Link>
           ))}
-          {readingTime && <span className="text-brand-dark">{readingTime}</span>}
+          {readingTime && (
+            <span className="inline-flex items-center gap-2 text-brand-dark">
+              <Clock className="h-4 w-4 text-brand-teal" />
+              {readingTime}
+            </span>
+          )}
         </div>
 
         {/* Title / Date / Excerpt */}
-        <h1 className="text-4xl font-bold tracking-tight text-brand-dark mb-2">{title}</h1>
-        <p className="text-sm text-brand-dark mb-6">{date}</p>
-        {excerpt && <p className="text-lg text-brand-dark mb-8 italic">{excerpt}</p>}
+        <h1 className="article-title">{title}</h1>
+        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 font-sans text-sm font-medium text-brand-dark/70">
+          <span>{date}</span>
+          <span>{author}</span>
+        </div>
+        {excerpt && <p className="article-deck">{excerpt}</p>}
         <div className="article-lead-separator" aria-hidden="true" />
 
         {/* Content */}
-        <div className="prose prose-article text-[18px]">{children}</div>
-
-        {/* Newsletter */}
-        <div className="mt-12">
-          <Newsletter
-            subtext="Enjoyed this? Get one fresh insight each week straight to your inbox."
-            logoSrc="/logo/newsletter.png"
-          />
-        </div>
-
-        {/* Pathway nav */}
-        {pathway && (
-          <div className="mt-16 border-t pt-8 text-md text-brand-dark">
-            <p>
-              This article is part of the{" "}
-              <Link
-                href={`/pathways?open=${pathway.id}`}
-                className="text-brand-primary hover:underline"
-              >
-                {pathway.title}
-              </Link>{" "}
-              Pathway.
-            </p>
-            <div className="flex justify-between mt-3">
-              {prevInPath ? (
-                <Link href={`/insights/${prevInPath.slug}`} className="hover:underline">
-                  ← {prevInPath.title}
-                </Link>
-              ) : (
-                <span />
-              )}
-              {nextInPath ? (
-                <Link href={`/insights/${nextInPath.slug}`} className="hover:underline">
-                  {nextInPath.title} →
-                </Link>
-              ) : (
-                <span />
+        <div className="article-reader-grid">
+          <aside className="article-reader-rail">
+            <div className="article-rail-card">
+              <p className="article-rail-label">
+                <BookOpen className="h-4 w-4" />
+                In this essay
+              </p>
+              {headings.length > 0 && (
+                <nav className="mt-4 space-y-3">
+                  {headings.map((heading, index) => (
+                    <a
+                      key={heading.id}
+                      href={`#${heading.id}`}
+                      className="article-toc-link"
+                    >
+                      <span>{String(index + 1).padStart(2, "0")}</span>
+                      {heading.title}
+                    </a>
+                  ))}
+                </nav>
               )}
             </div>
-          </div>
-        )}
+          </aside>
 
-        {/* Random read next */}
+          <div className="article-content-column">{children}</div>
+        </div>
+
+        {/* Read next */}
         {nextArticle && (
-          <div ref={nextRef} className="mt-16 border-t pt-8">
+          <div ref={nextRef} className="article-after-content mt-16 border-t pt-8">
             <p className="text-md text-brand-dark mb-2">You might also like:</p>
             <Link
               href={`/insights/${nextArticle.slug}`}
@@ -372,9 +373,54 @@ const ArticleLayout = ({
           </div>
         )}
 
+        {/* Default article CTAs */}
+        <div className="article-after-content mt-12">
+          <ArticleScanCTA />
+        </div>
+
+        <div className="mt-10">
+          <Newsletter
+            variant="feature"
+            subtext="Join thousands of readers getting weekly insights on the ancient wiring behind modern struggles and practical ways to work with it. No fluff. No gimmicks. Just science made human."
+            logoSrc="/logo/newsletter.png"
+          />
+        </div>
+
+        {/* Pathway nav */}
+        {pathway && (
+          <div className="article-after-content mt-16 border-t pt-8 text-md text-brand-dark">
+            <p>
+              This article is part of the{" "}
+              <Link
+                href={`/pathways?open=${pathway.id}`}
+                className="text-brand-primary hover:underline"
+              >
+                {pathway.title}
+              </Link>{" "}
+              Pathway.
+            </p>
+            <div className="flex justify-between mt-3">
+              {prevInPath ? (
+                <Link href={`/insights/${prevInPath.slug}`} className="hover:underline">
+                  &lt;- {prevInPath.title}
+                </Link>
+              ) : (
+                <span />
+              )}
+              {nextInPath ? (
+                <Link href={`/insights/${nextInPath.slug}`} className="hover:underline">
+                  {nextInPath.title} -&gt;
+                </Link>
+              ) : (
+                <span />
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Mobile further reads */}
         {resources && (
-          <div className="lg:hidden mt-6">
+          <div className="article-after-content lg:hidden mt-6">
             <FurtherReads {...resources} />
           </div>
         )}
@@ -409,7 +455,7 @@ const ArticleLayout = ({
         disableEscape
       />
 
-      {/* ✅ JSON-LD */}
+      {/* JSON-LD */}
       <Script
         id="article-jsonld"
         type="application/ld+json"
@@ -418,5 +464,27 @@ const ArticleLayout = ({
     </div>
   );
 };
+
+const ArticleScanCTA = () => (
+  <section className="article-scan-cta">
+    <div className="article-scan-cta-mark" aria-hidden="true">
+      <Compass className="h-8 w-8" />
+    </div>
+    <div>
+      <p className="article-scan-cta-label">Inner Caveman Scan</p>
+      <h2 className="article-scan-cta-title">
+        Spot the pattern behind your everyday reactions.
+      </h2>
+      <p className="article-scan-cta-copy">
+        A few short scenarios that reveal what sits underneath moments of
+        avoidance, hesitation, distraction, and emotional loops.
+      </p>
+    </div>
+    <Link href="/diagnostics/caveman-scan" className="article-scan-cta-button">
+      Go to Scan
+      <ArrowRight className="h-4 w-4" />
+    </Link>
+  </section>
+);
 
 export default ArticleLayout;

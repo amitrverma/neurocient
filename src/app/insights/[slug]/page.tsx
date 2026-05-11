@@ -4,7 +4,8 @@ import matter from "gray-matter";
 import { notFound } from "next/navigation";
 import { compileMDX } from "next-mdx-remote/rsc";
 import type { Metadata } from "next";
-import Script from "next/script"; // 👈 import Script
+import type { ReactNode } from "react";
+import Script from "next/script";
 import ArticleLayout from "../../components/ArticleLayout";
 import { pathways, type PathwayId, type Pathway, type ArticleRef } from "@/content/pathways";
 import MicrochallengeBox from "../../components/tools/MicrochallengeBox";
@@ -19,6 +20,11 @@ type ConversationFrontmatter = {
   blobName: string;
   duration?: string;
   reflection?: string;
+};
+
+type ArticleHeading = {
+  id: string;
+  title: string;
 };
 
 // Ensure SEO title contains the root term "Inner Caveman"
@@ -46,9 +52,9 @@ export async function generateMetadata(
   return {
     title,
     description,
-    keywords, // ✅ <meta name="keywords">
+    keywords,
     alternates: {
-      canonical: url, // ✅ dynamic canonical tag
+      canonical: url,
     },
     openGraph: {
       type: "article",
@@ -90,6 +96,74 @@ function getReadingTime(text: string) {
   return `${minutes} min read`;
 }
 
+function stripMdx(value: string) {
+  return value
+    .replace(/<[^>]+>/g, "")
+    .replace(/[`*_~#]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function slugifyHeading(value: string) {
+  return stripMdx(value)
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function getArticleHeadings(content: string): ArticleHeading[] {
+  return Array.from(content.matchAll(/^##\s+(.+)$/gm)).map((match) => {
+    const title = stripMdx(match[1]);
+    return {
+      id: slugifyHeading(title),
+      title,
+    };
+  });
+}
+
+function createLongformComponents() {
+  return {
+    h2: ({ children }: { children?: ReactNode }) => {
+      const text = typeof children === "string" ? children : "";
+      const id = slugifyHeading(text);
+
+      return <h2 id={id}>{children}</h2>;
+    },
+    Callout: ({
+      title,
+      children,
+      tone = "teal",
+    }: {
+      title?: string;
+      children: ReactNode;
+      tone?: "teal" | "accent" | "gold";
+    }) => (
+      <aside className={`article-callout article-callout-${tone}`}>
+        {title && <p className="article-callout-title">{title}</p>}
+        <div>{children}</div>
+      </aside>
+    ),
+    PullQuote: ({
+      children,
+      source,
+    }: {
+      children: ReactNode;
+      source?: string;
+    }) => (
+      <figure className="article-pullquote">
+        <blockquote>{children}</blockquote>
+        {source && <figcaption>{source}</figcaption>}
+      </figure>
+    ),
+    KeyTakeaway: ({ children }: { children: ReactNode }) => (
+      <aside className="article-key-takeaway">
+        <div>{children}</div>
+      </aside>
+    ),
+  };
+}
+
 function toIsoDuration(value?: string) {
   if (!value) return null;
   const match = value.trim().match(
@@ -112,8 +186,9 @@ export default async function InsightPage(
 
   const raw = fs.readFileSync(filePath, "utf-8");
   const { content, data } = matter(raw);
-  const typographyVariant = (data.typographyVariant as string | undefined) || "";
+  const typographyVariant = (data.typographyVariant as string | undefined) || "prologue";
   const usesStandardLongformVariant = typographyVariant === "prologue";
+  const headings = getArticleHeadings(content);
 
   const conversation = data.conversation as ConversationFrontmatter | undefined;
   const conversationBlobName = conversation?.blobName;
@@ -128,7 +203,8 @@ export default async function InsightPage(
     source: content,
     options: { parseFrontmatter: false },
     components: {
-      MicrochallengeBox, // ✅ make available inside .mdx
+      MicrochallengeBox,
+      ...createLongformComponents(),
       CavemanSpot,
       ConversationBreak: () =>
         usesStandardLongformVariant && conversationAudioUrl ? (
@@ -201,7 +277,7 @@ export default async function InsightPage(
       }
     : null;
 
-  // ✅ JSON-LD for structured data
+  // JSON-LD for structured data
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -236,6 +312,8 @@ export default async function InsightPage(
         tags={data.tags}
         readingTime={readingTime}
         slug={slug}
+        typographyVariant={typographyVariant}
+        headings={headings}
         nextArticle={randomNext}
         resources={data.resources}
         pathway={pathwayData}
@@ -258,7 +336,7 @@ export default async function InsightPage(
         </>
       </ArticleLayout>
 
-      {/* ✅ JSON-LD structured data */}
+      {/* JSON-LD structured data */}
       <Script
         id="article-jsonld"
         type="application/ld+json"

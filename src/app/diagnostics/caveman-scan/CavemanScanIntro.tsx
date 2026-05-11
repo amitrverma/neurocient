@@ -29,7 +29,7 @@ const CavemanScanIntro = ({ onStart }: Props) => {
             distraction, and emotional loops.
           </p>
 
-          <div className="mt-8 space-y-3 text-xl font-normal leading-tight text-brand-dark md:text-2xl">
+          <div className="mt-8 space-y-2.5 font-sans text-base font-semibold leading-7 text-brand-dark md:text-lg md:leading-8">
             <p>Why do you switch tasks even when you don&apos;t mean to?</p>
             <p>Why do some habits feel easy while others feel hard?</p>
             <p>Why do reactions take over before you can think them through?</p>

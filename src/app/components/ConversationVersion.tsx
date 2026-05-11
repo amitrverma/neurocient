@@ -10,14 +10,14 @@ export default function ConversationVersion({
   reflection,
 }: Props) {
   return (
-    <section className="my-10 border-y border-gray-300 py-6">
-      <div className="text-base text-brand-dark/90">
-        <div className="mb-2 font-sans font-medium">
-          🎧 Prefer listening?
+    <section className="article-audio-module">
+      <div className="text-base text-brand-dark">
+        <div className="mb-2 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
+          Prefer listening?
         </div>
 
-        <p className="mb-3 text-brand-dark/80">
-          Here’s the {duration} audio conversation exploring this idea.
+        <p className="mb-4 font-serif text-2xl leading-tight text-brand-dark">
+          Here&apos;s the {duration} audio conversation exploring this idea.
         </p>
 
         <audio
@@ -25,13 +25,13 @@ export default function ConversationVersion({
           preload="metadata"
           playsInline
           controlsList="nodownload"
-          className="w-full mb-3"
+          className="mb-3 w-full"
         >
           <source src={audioUrl} type="audio/mpeg" />
         </audio>
 
         {reflection && (
-          <p className="italic text-md text-brand-dark/70">
+          <p className="font-sans text-sm italic leading-6 text-brand-dark/70">
             {reflection}
           </p>
         )}

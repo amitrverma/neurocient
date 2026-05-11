@@ -2,93 +2,92 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Instagram, Twitter, Linkedin, Youtube } from "lucide-react";
+import { Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
+
+const navLinks = [
+  { href: "/about", label: "About" },
+  { href: "/inner-caveman", label: "Inner Caveman" },
+  { href: "/diagnostics", label: "Diagnostics" },
+  { href: "/resources", label: "Resources" },
+  { href: "/contact", label: "Contact" },
+];
+
+const socialLinks = [
+  { href: "https://x.com/neurocient", label: "Twitter", icon: Twitter },
+  { href: "https://www.linkedin.com/company/neurocient", label: "LinkedIn", icon: Linkedin },
+  { href: "https://www.youtube.com/@neurocient", label: "YouTube", icon: Youtube },
+  { href: "https://www.instagram.com/neurocient/", label: "Instagram", icon: Instagram },
+];
 
 const Footer = () => {
   return (
-    <footer className="w-full border-t border-brand-dark/40 py-10 mt-12 font-sans text-sm text-brand-dark">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:justify-between md:items-start gap-8">
-        
-        {/* 📌 Left: Logo + Legal */}
-        <div className="flex flex-col gap-2 max-w-sm">
+    <footer className="mt-12 border-t border-brand-dark/12 bg-white px-6 py-10 font-sans text-sm text-brand-dark">
+      <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[1fr_1fr_auto] md:items-start">
+        <div className="max-w-sm">
           <Image
-            src="/logo/neurocient.png" // replace with your footer logo
-            alt="Neurocient Labs — Inner Caveman"
-            width={48}
-            height={48}
-            className="object-contain"
+            src="/logo/neurocient.png"
+            alt="Neurocient Labs"
+            width={70}
+            height={70}
+            className="h-auto object-contain"
           />
-          <p className="text-xs">
+          <p className="mt-4 text-xs leading-6 text-brand-dark/64">
+            Neurocient Labs helps people notice ancient patterns in modern life
+            and design better responses.
+          </p>
+          <p className="mt-4 text-xs text-brand-dark/54">
             © {new Date().getFullYear()} Neurocient Labs. All rights reserved.
           </p>
-          <p className="text-xs">
-            Built with ❤️ and science. See our{" "}
-            <Link href="/privacy" className="underline hover:text-brand-primary">
-              Privacy Policy
+        </div>
+
+        <div>
+          <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
+            Explore
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="font-semibold transition hover:text-brand-primary"
+              >
+                {link.label}
+              </Link>
+            ))}
+            <Link href="/privacy" className="font-semibold transition hover:text-brand-primary">
+              Privacy
             </Link>
-            .
+            <Link href="/terms" className="font-semibold transition hover:text-brand-primary">
+              Terms
+            </Link>
+          </div>
+        </div>
+
+        <div className="md:text-right">
+          <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
+            Stay connected
+          </p>
+          <div className="mt-4 flex gap-3 md:justify-end">
+            {socialLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  aria-label={link.label}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-dark/14 text-brand-dark transition hover:border-brand-primary hover:text-brand-primary"
+                >
+                  <Icon className="h-4 w-4" />
+                </a>
+              );
+            })}
+          </div>
+          <p className="mt-5 text-xs leading-6 text-brand-dark/54">
+            Built for learning, reflection, and behavior design.
           </p>
         </div>
-
-        {/* 📌 Middle: Navigation */}
-        <div className="flex flex-col md:flex-row md:items-center gap-4 text-center md:text-left">
-
-          <Link href="/about" className="hover:text-brand-primary underline underline-offset-4">
-            About
-          </Link>
-          <Link href="/inner-caveman" className="hover:text-brand-primary underline underline-offset-4">
-            Inner Caveman
-          </Link>
-          <Link href="/diagnostics" className="hover:text-brand-primary underline underline-offset-4">
-            Diagnostics
-          </Link>
-          <Link href="/contact" className="hover:text-brand-primary underline underline-offset-4">
-            Contact
-          </Link>
-        </div>
-
-        {/* 📌 Right: Social */}
-<div className="flex flex-col items-center md:items-end gap-3">
-  <p className="font-medium">Stay connected:</p>
-  <div className="flex gap-4 text-brand-dark">
-    <a
-      href="https://x.com/neurocient"
-      aria-label="Twitter"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="hover:text-brand-primary transition"
-    >
-      <Twitter className="w-5 h-5" />
-    </a>
-    <a
-      href="https://www.linkedin.com/company/neurocient"
-      aria-label="LinkedIn"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="hover:text-brand-primary transition"
-    >
-      <Linkedin className="w-5 h-5" />
-    </a>
-    <a
-      href="https://www.youtube.com/@neurocient"
-      aria-label="YouTube"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="hover:text-brand-primary transition"
-    >
-      <Youtube className="w-5 h-5" />
-    </a>
-    <a
-      href="https://www.instagram.com/neurocient/"
-      aria-label="Instagram"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="hover:text-brand-primary transition"
-    >
-      <Instagram className="w-5 h-5" />
-    </a>
-  </div>
-</div>
       </div>
     </footer>
   );

@@ -8,8 +8,8 @@ const withPWA = (config) =>
   isProd
     ? nextPWA({
         dest: "public",
-        swSrc: "src/service-worker.js", // 👈 our custom SW
-        sw: "service-worker.js",        // 👈 output filename in /public
+        swSrc: "src/service-worker.js",
+        sw: "service-worker.js",
         register: true,
         skipWaiting: true,
       })(config)

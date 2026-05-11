@@ -1,199 +1,179 @@
 "use client";
 
-import {
-  Mail,
-  Phone,
-  Send,
-  User,
-  MessageSquare,
-  ChevronRight,
-} from "lucide-react";
+import { Mail, MessageSquare, Phone, Send, User } from "lucide-react";
 import { useState } from "react";
+import type React from "react";
 import toast from "react-hot-toast";
 
 export default function ContactPage() {
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-  e.preventDefault();
-  setSubmitting(true);
+    e.preventDefault();
+    setSubmitting(true);
 
-  const formEl = e.currentTarget;
-  const form = new FormData(formEl);
+    const formEl = e.currentTarget;
+    const form = new FormData(formEl);
+    const payload = {
+      name: form.get("name") as string,
+      email: form.get("email") as string,
+      message: form.get("message") as string,
+    };
 
-  const payload = {
-    name: form.get("name") as string,
-    email: form.get("email") as string,
-    message: form.get("message") as string,
-  };
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-  try {
-    const res = await fetch("/api/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(data?.error ?? "Something went wrong.");
+        return;
+      }
 
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      toast.error(data?.error ?? "Something went wrong.");
-      return; // IMPORTANT
+      toast.success("Message delivered. I will get back to you soon.");
+      formEl.reset();
+    } catch {
+      toast.error("Could not send message. Try again?");
+    } finally {
+      setSubmitting(false);
     }
-
-    toast.success("Message delivered — I’ll get back to you soon!");
-    formEl.reset(); // clear form
-
-  } catch (err) {
-    toast.error("Could not send message. Try again?");
-  } finally {
-    setSubmitting(false);
   }
-}
-
 
   return (
-    <main className="flex flex-col px-6 py-20 font-serif bg-white">
-      <div className="max-w-4xl mx-auto space-y-20">
-        {/* ----------------
-            HERO
-        ---------------- */}
-        <section className="text-center space-y-6">
-          <h1 className="text-3xl md:text-5xl font-bold text-brand-dark leading-tight">
-            Get in Touch
-          </h1>
-
-          <p className="text-lg md:text-xl text-brand-dark/70 max-w-2xl mx-auto leading-relaxed">
-            Whether you’re curious about programs, collaborations, or leadership
-            sessions — I’d love to hear from you.
+    <main className="bg-white font-serif text-brand-dark">
+      <section className="px-6 py-14 md:py-20">
+        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
+          <div>
+            <SectionLabel>Contact</SectionLabel>
+            <h1 className="mt-6 text-[clamp(2.55rem,5vw,5.2rem)] font-bold leading-[0.98] tracking-[-0.03em]">
+              Tell me what
+              <br />
+              <span className="italic text-brand-accent">you are building.</span>
+            </h1>
+          </div>
+          <p className="max-w-2xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark/72 md:text-lg">
+            For programs, leadership sessions, workplace diagnostics,
+            collaborations, or questions about Neurocient Labs.
           </p>
-        </section>
+        </div>
+      </section>
 
-        {/* ----------------
-            CONTACT OPTIONS
-        ---------------- */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Email */}
-          <a
-            href="mailto:hello@neurocient.com"
-            className="border rounded-xl p-6 shadow-sm hover:shadow-md transition flex flex-col gap-3"
+      <section className="px-6 pb-16 md:pb-20">
+        <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.42fr_0.58fr]">
+          <div className="space-y-4">
+            <ContactCard
+              icon={<Mail className="h-5 w-5" />}
+              title="Email"
+              text="hello@neurocient.com"
+              href="mailto:hello@neurocient.com"
+            />
+            <ContactCard
+              icon={<Phone className="h-5 w-5" />}
+              title="Phone / WhatsApp"
+              text="+91-85519 15656"
+              href="tel:+918551915656"
+            />
+          </div>
+
+          <form
+            onSubmit={handleSubmit}
+            className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-[0_20px_60px_rgba(4,42,43,0.06)] md:p-8"
           >
-            <div className="flex items-center gap-3">
-              <Mail className="w-6 h-6 text-brand-primary" />
-              <h3 className="text-xl font-semibold text-brand-dark">Email</h3>
-            </div>
-
-            <p className="text-brand-dark/70">hello@neurocient.com</p>
-            <span className="text-brand-primary text-sm font-semibold flex items-center gap-1 mt-2">
-              Send an email <ChevronRight className="w-4 h-4" />
-            </span>
-          </a>
-
-          {/* Phone */}
-          <a
-            href="tel:+918551915656"
-            className="border rounded-xl p-6 shadow-sm hover:shadow-md transition flex flex-col gap-3"
-          >
-            <div className="flex items-center gap-3">
-              <Phone className="w-6 h-6 text-brand-teal" />
-              <h3 className="text-xl font-semibold text-brand-dark">
-                Phone / WhatsApp
-              </h3>
-            </div>
-
-            <p className="text-brand-dark/70">+91-85519 15656</p>
-            <span className="text-brand-teal text-sm font-semibold flex items-center gap-1 mt-2">
-              Call or message <ChevronRight className="w-4 h-4" />
-            </span>
-          </a>
-        </section>
-
-        {/* ----------------
-            CONTACT FORM
-        ---------------- */}
-        <section className="border rounded-xl shadow-md p-8 bg-white">
-          <h2 className="text-2xl font-bold text-brand-dark mb-6">
-            Send a Message
-          </h2>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-semibold text-brand-dark mb-1">
-                Your Name
-              </label>
-
-              <div className="flex items-center border rounded-lg p-3 gap-3">
-                <User className="w-5 h-5 text-brand-accent" />
+            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
+              Send a message
+            </p>
+            <div className="mt-6 grid gap-5">
+              <Field icon={<User className="h-5 w-5" />}>
                 <input
                   type="text"
                   name="name"
                   required
-                  className="w-full outline-none text-brand-dark"
-                  placeholder="Your Name"
+                  className="w-full bg-transparent font-sans text-sm outline-none"
+                  placeholder="Your name"
                 />
-              </div>
-            </div>
-
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-semibold text-brand-dark mb-1">
-                Email Address
-              </label>
-
-              <div className="flex items-center border rounded-lg p-3 gap-3">
-                <Mail className="w-5 h-5 text-brand-primary" />
+              </Field>
+              <Field icon={<Mail className="h-5 w-5" />}>
                 <input
                   type="email"
                   name="email"
                   required
-                  className="w-full outline-none text-brand-dark"
+                  className="w-full bg-transparent font-sans text-sm outline-none"
                   placeholder="you@domain.com"
                 />
-              </div>
-            </div>
-
-            {/* Message */}
-            <div>
-              <label className="block text-sm font-semibold text-brand-dark mb-1">
-                Message
-              </label>
-
-              <div className="flex items-start border rounded-lg p-3 gap-3">
-                <MessageSquare className="w-5 h-5 text-brand-teal mt-1" />
+              </Field>
+              <Field icon={<MessageSquare className="h-5 w-5" />} alignTop>
                 <textarea
                   name="message"
                   required
-                  rows={5}
-                  className="w-full outline-none resize-none text-brand-dark"
-                  placeholder="Tell me a little about what you're looking for…"
+                  rows={6}
+                  className="w-full resize-none bg-transparent font-sans text-sm outline-none"
+                  placeholder="Tell me a little about what you are looking for."
                 />
-              </div>
+              </Field>
             </div>
-
             <button
               type="submit"
               disabled={submitting}
-              className={`w-full md:w-auto px-6 py-3 rounded-full border text-brand-dark font-semibold flex items-center gap-2 transition
-              ${
-                submitting
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-brand-primary hover:text-white"
-              }`}
+              className="mt-6 inline-flex cursor-pointer items-center gap-2 rounded-full bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:bg-brand-primary disabled:pointer-events-none disabled:opacity-45"
             >
-              {submitting ? "Sending…" : "Send Message"}
-              <Send className="w-5 h-5" />
+              {submitting ? "Sending" : "Send message"}
+              <Send className="h-4 w-4" />
             </button>
           </form>
-        </section>
-
-        {/* ----------------
-            ADDRESS (optional)
-        ---------------- */}
-        <section className="text-center space-y-2 text-sm text-brand-dark/60">
-          Neurocient • Pune, India
-        </section>
-      </div>
+        </div>
+      </section>
     </main>
   );
 }
+
+const SectionLabel = ({ children }: { children: React.ReactNode }) => (
+  <div className="flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">
+    <span>{children}</span>
+    <span className="h-px flex-1 bg-brand-dark/15" />
+  </div>
+);
+
+const ContactCard = ({
+  icon,
+  title,
+  text,
+  href,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  text: string;
+  href: string;
+}) => (
+  <a
+    href={href}
+    className="block rounded-lg border border-brand-dark/12 p-6 transition hover:border-brand-teal/60 hover:shadow-sm"
+  >
+    <span className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
+      {icon}
+    </span>
+    <h2 className="mt-4 text-2xl font-bold leading-tight">{title}</h2>
+    <p className="mt-2 font-sans text-sm leading-7 text-brand-dark/72">{text}</p>
+  </a>
+);
+
+const Field = ({
+  icon,
+  children,
+  alignTop = false,
+}: {
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  alignTop?: boolean;
+}) => (
+  <div
+    className={`flex gap-3 rounded-lg border border-brand-dark/14 px-4 py-3 transition focus-within:border-brand-teal ${
+      alignTop ? "items-start" : "items-center"
+    }`}
+  >
+    <span className={`text-brand-accent ${alignTop ? "mt-0.5" : ""}`}>{icon}</span>
+    {children}
+  </div>
+);

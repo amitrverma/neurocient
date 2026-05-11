@@ -13,8 +13,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/programs", changeFrequency: "monthly", priority: 0.5 },
     { path: "/diagnostics", changeFrequency: "weekly", priority: 0.6 },
     { path: "/tools", changeFrequency: "monthly", priority: 0.5 },
-    { path: "/spot", changeFrequency: "weekly", priority: 0.5 },
-    { path: "/microchallenge", changeFrequency: "weekly", priority: 0.5 },
     { path: "/insights", changeFrequency: "daily", priority: 0.8 },
     { path: "/insights/all", changeFrequency: "daily", priority: 0.7 },
     { path: "/tags/inner-caveman", changeFrequency: "weekly", priority: 0.6 },

@@ -1,11 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import type React from "react";
+import { Bookmark, LayoutDashboard, LogOut, Menu, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "../context/AuthContext";
 import AuthModal from "./AuthModal";
+
+const navLinks = [
+  { href: "/about", label: "About" },
+  { href: "/resources", label: "Resources" },
+  { href: "/programs", label: "Programs" },
+];
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,75 +20,81 @@ const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const { user, logout } = useAuth();
 
+  const closeMobile = () => setIsOpen(false);
+
   return (
-    <nav className="font-sans w-full fixed top-0 left-0 z-50 border-b border-brand-dark/40 backdrop-blur-sm">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          {/* Logo */}
-          <Link href="/" className="text-xl font-bold text-brand-secondary">
+    <nav className="fixed left-0 top-0 z-50 w-full border-b border-brand-dark/12 bg-white/92 font-sans text-brand-dark backdrop-blur-md">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between">
+          <Link href="/" className="inline-flex items-center">
             <Image
               src="/logo/neurocient.png"
-              alt="The Modern Caveman"
-              width={100}
-              height={100}
-              className="object-contain"
+              alt="Neurocient Labs"
+              width={104}
+              height={42}
+              className="h-auto object-contain"
+              priority
             />
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-6 font-medium text-brand-dark">
-            <Link href="/about" className="hover:text-brand-teal">About</Link>
-            <Link href="/resources" className="hover:text-brand-teal">Resources</Link>
-            <Link href="/programs" className="hover:text-brand-teal">Programs</Link>
+          <div className="hidden items-center gap-7 md:flex">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-sm font-semibold transition hover:text-brand-primary"
+              >
+                {link.label}
+              </Link>
+            ))}
 
-            {/* Auth Section */}
             {user ? (
               <div className="relative">
-                {/* Profile Pic Button */}
                 <button
                   onClick={() => setShowDropdown((prev) => !prev)}
-                  className="flex items-center focus:outline-none"
+                  className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-brand-dark/18 transition hover:border-brand-teal"
+                  aria-label="Open account menu"
                 >
                   <Image
                     src={user?.photoURL ? String(user.photoURL) : "/assets/user.png"}
                     alt="Profile"
-                    width={36}
-                    height={36}
-                    className="rounded-full border border-brand-dark"
+                    width={32}
+                    height={32}
+                    className="rounded-full object-cover"
                   />
                 </button>
 
-                {/* Dropdown */}
                 {showDropdown && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border py-2 text-sm">
-                    <Link
+                  <div className="absolute right-0 mt-3 w-52 rounded-lg border border-brand-dark/12 bg-white p-2 text-sm shadow-[0_20px_60px_rgba(4,42,43,0.14)]">
+                    <AccountLink
                       href="/tools"
+                      icon={<LayoutDashboard className="h-4 w-4" />}
                       onClick={() => setShowDropdown(false)}
-                      className="block px-4 py-2 hover:bg-gray-100"
                     >
                       Dashboard
-                    </Link>
-                    <Link
+                    </AccountLink>
+                    <AccountLink
                       href="/saved"
+                      icon={<Bookmark className="h-4 w-4" />}
                       onClick={() => setShowDropdown(false)}
-                      className="block px-4 py-2 hover:bg-gray-100"
                     >
-                      Bookmarks
-                    </Link>
-                    <Link
+                      Saved
+                    </AccountLink>
+                    <AccountLink
                       href="/profile"
+                      icon={<UserRound className="h-4 w-4" />}
                       onClick={() => setShowDropdown(false)}
-                      className="block px-4 py-2 hover:bg-gray-100"
                     >
                       Profile
-                    </Link>
+                    </AccountLink>
                     <button
                       onClick={() => {
-                        logout(true);
                         setShowDropdown(false);
+                        logout(true);
                       }}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                      className="flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-left font-semibold transition hover:bg-brand-dark/5"
                     >
+                      <LogOut className="h-4 w-4" />
                       Sign out
                     </button>
                   </div>
@@ -90,99 +103,99 @@ const Navbar = () => {
             ) : (
               <button
                 onClick={() => setShowAuth(true)}
-                className="text-sm font-semibold px-3 py-1 rounded-lg text-brand-dark border border-brand-dark hover:bg-brand-dark hover:border-white hover:text-white transition"
+                className="cursor-pointer rounded-full border border-brand-dark px-4 py-2 text-sm font-semibold transition hover:bg-brand-dark hover:text-white"
               >
                 Sign in
               </button>
             )}
-
-                        {/* Unlock Full Access for logged-in users */}
-{/*             {user && (
-              <Link
-                href="/membership"
-                className="text-sm font-semibold px-3 py-1 rounded-lg bg-brand-primary text-white border  hover:bg-brand-teal hover:text-white transition"
-              >
-                Unlock Full Access
-              </Link>
-            )} */}
           </div>
 
-          {/* Mobile Hamburger */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-foreground focus:outline-none"
-            >
-              {isOpen ? <X size={28} /> : <Menu size={28} />}
-            </button>
-          </div>
+          <button
+            onClick={() => setIsOpen((prev) => !prev)}
+            className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-brand-dark/18 text-brand-dark md:hidden"
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
       </div>
 
-      {/* Mobile Dropdown */}
       {isOpen && (
-        <div className="md:hidden border-t border-brand-dark/40 backdrop-blur-sm text-brand-dark">
-          <div className="flex flex-col px-6 py-4 space-y-4 font-medium">
-            <Link href="/inner-caveman" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">Inner Caveman</Link>
-            <Link href="/about" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">About</Link>
-            <Link href="/resources" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">Resources</Link>
-            <Link href="/programs" onClick={() => setIsOpen(false)} className="hover:text-brand-primary">Programs</Link>
-
-            {/* Mobile Auth */}
+        <div className="border-t border-brand-dark/12 bg-white md:hidden">
+          <div className="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-4 font-sans text-sm font-semibold">
+            <Link href="/inner-caveman" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
+              Inner Caveman
+            </Link>
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={closeMobile}
+                className="rounded-md px-3 py-3 hover:bg-brand-dark/5"
+              >
+                {link.label}
+              </Link>
+            ))}
             {user ? (
               <>
-                <Link
-                  href="/saved"
-                  onClick={() => setIsOpen(false)}
-                  className="hover:text-brand-primary"
-                >
-                  Bookmarks
+                <Link href="/tools" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
+                  Dashboard
                 </Link>
-                <Link
-                  href="/profile"
-                  onClick={() => setIsOpen(false)}
-                  className="hover:text-brand-primary"
-                >
+                <Link href="/saved" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
+                  Saved
+                </Link>
+                <Link href="/profile" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
                   Profile
                 </Link>
-                <Link
-                  href="#"
+                <button
                   onClick={() => {
+                    closeMobile();
                     logout(true);
-                    setIsOpen(false);
                   }}
-                  className="hover:text-brand-primary"
+                  className="cursor-pointer rounded-md px-3 py-3 text-left hover:bg-brand-dark/5"
                 >
-                  Sign out ({String(user.name || "User")})
-                </Link>
-{/*                 <Link
-                  href="/membership"
-                  onClick={() => setIsOpen(false)}
-                  className="text-sm font-semibold px-3 py-1 rounded-lg border bg-brand-primary text-white hover:bg-brand-teal hover:text-white transition"
-                >
-                  Unlock Full Access
-                </Link>   */}              
+                  Sign out
+                </button>
               </>
             ) : (
-              <Link
-                href={"#"}
+              <button
                 onClick={() => {
+                  closeMobile();
                   setShowAuth(true);
-                  setIsOpen(false);
                 }}
-                className="hover:text-brand-primary rounded-lg border px-3 py-1"
+                className="mt-2 cursor-pointer rounded-full border border-brand-dark px-4 py-2 text-left transition hover:bg-brand-dark hover:text-white"
               >
                 Sign in
-              </Link>
+              </button>
             )}
           </div>
         </div>
       )}
 
-      {/* Auth Modal */}
       <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
     </nav>
   );
 };
+
+const AccountLink = ({
+  href,
+  icon,
+  children,
+  onClick,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  onClick: () => void;
+}) => (
+  <Link
+    href={href}
+    onClick={onClick}
+    className="flex items-center gap-3 rounded-md px-3 py-2 font-semibold transition hover:bg-brand-dark/5"
+  >
+    {icon}
+    {children}
+  </Link>
+);
 
 export default Navbar;

@@ -9,9 +9,10 @@ import { useAuth } from "../context/AuthContext";
 import AuthModal from "./AuthModal";
 
 const navLinks = [
-  { href: "/inner-caveman", label: "Inner Caveman" },
+  { href: "/insights", label: "Insights" },
   { href: "/resources", label: "Resources" },
-  { href: "/programs", label: "Programs" },
+  { href: "/diagnostics", label: "Diagnostics" },
+  { href: "/tools", label: "Tools" },
   { href: "/about", label: "About" },
 ];
 

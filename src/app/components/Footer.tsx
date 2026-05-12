@@ -4,12 +4,43 @@ import Link from "next/link";
 import Image from "next/image";
 import { Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
 
-const navLinks = [
-  { href: "/about", label: "About" },
-  { href: "/inner-caveman", label: "Inner Caveman" },
-  { href: "/diagnostics", label: "Diagnostics" },
-  { href: "/resources", label: "Resources" },
-  { href: "/contact", label: "Contact" },
+const footerGroups = [
+  {
+    title: "Learn",
+    links: [
+      { href: "/insights", label: "Insights" },
+      { href: "/inner-caveman", label: "Inner Caveman" },
+      { href: "/pathways", label: "Pathways" },
+      { href: "/books", label: "Books" },
+    ],
+  },
+  {
+    title: "Practice",
+    links: [
+      { href: "/diagnostics", label: "Diagnostics" },
+      { href: "/tools", label: "Tools" },
+      { href: "/saved", label: "Saved" },
+      { href: "/profile", label: "Profile" },
+    ],
+  },
+  {
+    title: "Programs",
+    links: [
+      { href: "/modern-caveman", label: "The Modern Caveman" },
+      { href: "/caveman-cubicle", label: "Caveman in the Cubicle" },
+      { href: "/programs", label: "All Programs" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { href: "/about", label: "About" },
+      { href: "/contact", label: "Contact" },
+      { href: "/membership", label: "Membership" },
+      { href: "/privacy", label: "Privacy" },
+      { href: "/terms", label: "Terms" },
+    ],
+  },
 ];
 
 const socialLinks = [
@@ -22,7 +53,7 @@ const socialLinks = [
 const Footer = () => {
   return (
     <footer className="mt-12 border-t border-brand-dark/12 bg-white px-6 py-10 font-sans text-sm text-brand-dark">
-      <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[1fr_1fr_auto] md:items-start">
+      <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.85fr_1.55fr_0.6fr] lg:items-start">
         <div className="max-w-sm">
           <Image
             src="/logo/neurocient.png"
@@ -36,38 +67,36 @@ const Footer = () => {
             and design better responses.
           </p>
           <p className="mt-4 text-xs text-brand-dark/54">
-            © {new Date().getFullYear()} Neurocient Labs. All rights reserved.
+            &copy; {new Date().getFullYear()} Neurocient Labs. All rights reserved.
           </p>
         </div>
 
-        <div>
-          <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
-            Explore
-          </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="font-semibold transition hover:text-brand-primary"
-              >
-                {link.label}
-              </Link>
-            ))}
-            <Link href="/privacy" className="font-semibold transition hover:text-brand-primary">
-              Privacy
-            </Link>
-            <Link href="/terms" className="font-semibold transition hover:text-brand-primary">
-              Terms
-            </Link>
-          </div>
+        <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
+          {footerGroups.map((group) => (
+            <div key={group.title}>
+              <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
+                {group.title}
+              </p>
+              <div className="mt-4 grid gap-3">
+                {group.links.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="font-semibold transition hover:text-brand-primary"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
 
-        <div className="md:text-right">
+        <div className="lg:text-right">
           <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
             Stay connected
           </p>
-          <div className="mt-4 flex gap-3 md:justify-end">
+          <div className="mt-4 flex gap-3 lg:justify-end">
             {socialLinks.map((link) => {
               const Icon = link.icon;
               return (

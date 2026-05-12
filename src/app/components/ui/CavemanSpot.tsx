@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PenLine, Plus } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "../AuthModal";
 import { useNotification } from "../NotificationProvider";
@@ -9,12 +10,12 @@ import { getUsage, incrementUsage, usageLimits } from "../../utils/usage";
 import { trackEvent } from "../../utils/analytics";
 
 interface CavemanSpotProps {
-  prompt?: string; // now optional
+  prompt?: string;
   onAdded?: (spot: { date: string; description: string }) => void;
 }
 
 const CavemanSpot = ({
-  prompt = "Notice a caveman instinct? Log it here 👇",
+  prompt = "Notice a caveman instinct? Log it here.",
   onAdded,
 }: CavemanSpotProps) => {
   const [note, setNote] = useState("");
@@ -27,7 +28,7 @@ const CavemanSpot = ({
   const handleSubmit = async () => {
     if (!ready) return;
     if (!user) {
-      setShowAuth(true); // ✅ prompt login only when adding
+      setShowAuth(true);
       return;
     }
 
@@ -44,7 +45,7 @@ const CavemanSpot = ({
     try {
       const res = await fetch("/api/spots/", {
         method: "POST",
-        credentials: "include", // ✅ send cookies for auth
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -55,7 +56,7 @@ const CavemanSpot = ({
 
       if (res.ok) {
         incrementUsage("spots", true);
-        notify("✅ Spot saved!", "success");
+        notify("Spot saved", "success");
         onAdded?.({ date: new Date().toISOString(), description: note });
         setNote("");
         trackEvent("Spot Added");
@@ -64,38 +65,55 @@ const CavemanSpot = ({
         notify(data.detail || "Failed to log spot", "error");
       }
     } catch (err) {
-      console.error("❌ Error saving spot:", err);
+      console.error("Error saving spot:", err);
       notify("Something went wrong", "error");
     }
   };
 
-return (
-  <div className="p-4 rounded-lg bg-brand-secondary/20 shadow-sm mb-4 border border-brand-accent">
-    <div className="flex items-center gap-4">
-    <h3 className="font-semibold text-brand-dark">Spot Your Inner Caveman</h3>
-    <p className="text-md text-brand-dark/80">
-      Notice the moments when your inner caveman shows up in modern life. By
-      naming these patterns, you build awareness and start steering with your
-      wiring instead of against it.
-    </p>
+  return (
+  <aside className="not-prose my-2 rounded-lg border border-brand-accent bg-white px-4 py-3 text-brand-dark">
+    <div className="flex items-center">
+      <h3 className="font-sans text-brand-accent">
+        Caveman Spot
+      </h3>
     </div>
-    <p className="text-md text-brand-dark mb-2">{prompt}</p>
-    <textarea
-      value={note}
-      onChange={(e) => setNote(e.target.value)}
-      placeholder="Add your observation..."
-      rows={2}
-      className="w-full text-sm border border-brand-accent rounded-md p-2 mb-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-    />
-    <button
-      onClick={handleSubmit}
-      data-cta="add-spot"
-      className="text-sm font-semibold px-3 py-2 rounded-md border border-brand-accent text-brand-dark hover:bg-brand-teal hover:text-white transition"
-    >
-      Log It
-    </button>
 
-    {/* Modals */}
+    <p className="mt-3 font-sans text-sm leading-6 text-brand-dark/75">
+      A spot is a short observation. Use it to name where this idea shows up
+      in real life so the pattern becomes easier to recognize next time.
+    </p>
+
+    <p className="mt-3 rounded-md border border-brand-accent/28 bg-brand-accent/[0.03] px-3 py-2 font-serif text-[1.02rem] leading-6 text-brand-dark">
+      {prompt}
+    </p>
+
+    <div className="mt-3 flex items-start gap-2.5">
+      <div className="min-w-0 flex-1">
+        <label className="sr-only" htmlFor="caveman-spot-note">
+          Add your observation
+        </label>
+        <textarea
+          id="caveman-spot-note"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Add your observation..."
+          rows={2}
+          className="block w-full resize-y rounded-md border border-brand-accent/30 bg-white px-3 py-2 font-sans text-sm leading-5 text-brand-dark transition placeholder:text-brand-dark/40 focus:border-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-accent/15"
+        />
+      </div>
+
+        <button
+          type="button"
+          onClick={handleSubmit}
+          data-cta="add-spot"
+          disabled={!ready}
+          className="mt-0.5 inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-brand-accent/40 px-3.5 py-1.5 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-brand-accent transition hover:border-brand-accent hover:bg-brand-accent hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+        >
+        <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+        Log It
+      </button>
+    </div>
+
     <MembershipModal
       isOpen={showMembership}
       onClose={() => setShowMembership(false)}
@@ -107,10 +125,8 @@ return (
       context="start spotting your caveman"
       disableEscape
     />
-  </div>
+  </aside>
 );
-
-
 };
 
 export default CavemanSpot;

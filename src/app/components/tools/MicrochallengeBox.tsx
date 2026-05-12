@@ -1,5 +1,7 @@
 "use client";
+
 import { useEffect, useState } from "react";
+import { ArrowRight, CheckCircle2, FlaskConical } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "../AuthModal";
@@ -9,7 +11,7 @@ import { trackEvent } from "../../utils/analytics";
 import { useNotification } from "../NotificationProvider";
 
 interface MicrochallengeBoxProps {
-  id: string; // UUID from backend
+  id: string;
 }
 
 interface Microchallenge {
@@ -26,10 +28,9 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
   const [showAuth, setShowAuth] = useState(false);
   const [showMembership, setShowMembership] = useState(false);
   const [challenge, setChallenge] = useState<Microchallenge | null>(null);
-  const [assigning, setAssigning] = useState(false); // ⏳ disable button while assigning
-  const [alreadyAssigned, setAlreadyAssigned] = useState(false); // ✅ state for active challenge
+  const [assigning, setAssigning] = useState(false);
+  const [alreadyAssigned, setAlreadyAssigned] = useState(false);
 
-  // 🔄 Fetch challenge data (public)
   useEffect(() => {
     const fetchChallenge = async () => {
       try {
@@ -38,14 +39,13 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
         const data = await res.json();
         setChallenge(data);
       } catch (err) {
-        console.error("❌ Error fetching challenge:", err);
+        console.error("Error fetching challenge:", err);
       }
     };
 
     if (id) fetchChallenge();
   }, [id]);
 
-  // 🚦 Try assigning challenge
   const startChallenge = async () => {
     setAssigning(true);
     incrementUsage("microchallenges", true);
@@ -62,7 +62,7 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
         if (errData.detail === "You already have an active challenge") {
           setAlreadyAssigned(true);
           notify(
-            "⚡ You already have an active challenge. Track it in your dashboard.",
+            "You already have an active challenge. Track it in your dashboard.",
             "info"
           );
           return;
@@ -70,10 +70,10 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
         throw new Error(errData.detail || "Failed to start challenge");
       }
 
-      notify("🎉 Microchallenge started successfully!", "success");
+      notify("Microchallenge started successfully", "success");
       router.push("/tools/microchallenges");
     } catch (err) {
-      console.error("❌ Error starting challenge:", err);
+      console.error("Error starting challenge:", err);
       notify("Something went wrong while starting the challenge.", "error");
     } finally {
       setAssigning(false);
@@ -99,77 +99,85 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
 
   if (!challenge) {
     return (
-      <div className="my-6 p-4 border rounded-lg border-brand-dark shadow-sm">
-        <p className="text-sm text-brand-dark">Loading challenge...</p>
-      </div>
+      <aside className="not-prose my-8 rounded-lg border border-brand-teal/45 bg-white px-3 pt-0.5 pb-3 text-brand-dark md:px-4 md:pt-0.5 md:pb-3">
+        <div className="flex items-center gap-2 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-brand-teal">
+          <span className="h-px w-6 bg-brand-dark/60" />
+          <span>Loading microchallenge</span>
+        </div>
+      </aside>
     );
   }
 
   return (
-  <div className="my-6 p-4 rounded-lg shadow-sm border border-brand-accent bg-brand-teal/10">
-    <div className="flex items-center gap-2 mb-2">
-      <h3 className="text-lg font-semibold text-brand-accent">
-        Ready for Microchallenge?
-      </h3>
-    
+    <aside className="not-prose my-8 rounded-lg border border-brand-teal bg-white px-3 pt-0.5 pb-3 text-brand-dark md:px-4 md:pt-0.5 md:pb-3">
+      <div className="flex items-center gap-2">
+        <h3 className="font-sans text-[0.72rem] font-semibold uppercase leading-none tracking-[0.18em] text-brand-teal">
+          Microchallenge
+        </h3>
+      </div>
 
-    {/* Explainer */}
-    <p className="text-md text-brand-dark mb-3">
-      A Microchallenge is a tiny, science-backed experiment for daily life.
-      They’re not about discipline—they’re small nudges that work with your
-      wiring. Think of them as playful tests of instinct: one small shift at a
-      time, building awareness and momentum.
-    </p>
-</div>
-    <p className="text-md text-brand-dark mb-3">
-      <strong>{challenge.title}</strong>: {challenge.why}
-    </p>
-
-    {alreadyAssigned ? (
-      <p className="text-sm text-gray-600">
-        ⚡ You’ve already started this microchallenge.{" "}
-        <button
-          onClick={() => router.push("/tools/microchallenges")}
-          className="text-brand-teal underline hover:text-brand-dark"
-        >
-          View progress in your dashboard →
-        </button>
+      <p className="mt-1 font-sans text-sm leading-6 text-brand-dark/75">
+        A microchallenge is a small behavior experiment. It helps you test the
+        article&apos;s idea in daily life instead of leaving it as insight alone.
       </p>
-    ) : (
-      <button
-        onClick={handleClick}
-        data-cta="microchallenge-open"
-        disabled={assigning}
-        className={`text-sm font-semibold px-3 py-2 rounded-md border shadow-sm transition
-          ${
-            assigning
-              ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-              : "border-brand-accent text-brand-dark hover:bg-brand-teal hover:text-white"
-          }`}
-      >
-        {assigning ? "Starting..." : "Try this Microchallenge"}
-      </button>
-    )}
 
-    {/* Modals */}
-    <MembershipModal
-      isOpen={showMembership}
-      onClose={() => setShowMembership(false)}
-      disableEscape
-    />
-    <AuthModal
-      isOpen={showAuth}
-      onClose={() => setShowAuth(false)}
-      context="start microchallenges"
-      onSuccess={() => {
-        setShowAuth(false);
-        startChallenge();
-      }}
-      disableEscape
-    />
-  </div>
-);
+      <div className="mt-2.5 rounded-md border border-brand-teal/30 bg-brand-teal/[0.04] px-3 py-2.5">
+        <p className="font-sans text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-brand-teal">
+          Featured challenge
+        </p>
+        <p className="mt-1 font-serif text-[1.02rem] leading-7 text-brand-dark">
+          <strong className="font-bold text-brand-dark">{challenge.title}</strong>
+        </p>
+        <p className="mt-1 font-sans text-sm leading-6 text-brand-dark/72">
+          {challenge.why}
+        </p>
+      </div>
 
+      <div className="mt-2.5 flex items-center justify-between gap-3">
+        <p className="font-sans text-sm leading-6 text-brand-dark/68">
+          Keep it small enough to do today.
+        </p>
+
+        {alreadyAssigned ? (
+          <button
+            type="button"
+            onClick={() => router.push("/tools/microchallenges")}
+            className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-brand-teal/40 px-3.5 py-1.5 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-brand-teal transition hover:border-brand-teal hover:bg-brand-teal hover:text-white"
+          >
+            <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+            View Progress
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleClick}
+            data-cta="microchallenge-open"
+            disabled={assigning || !ready}
+            className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-brand-teal/45 px-3.5 py-1.5 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-brand-teal transition hover:border-brand-teal hover:bg-brand-teal hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {assigning ? "Starting..." : "Try this Microchallenge"}
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+        )}
+      </div>
+
+      <MembershipModal
+        isOpen={showMembership}
+        onClose={() => setShowMembership(false)}
+        disableEscape
+      />
+      <AuthModal
+        isOpen={showAuth}
+        onClose={() => setShowAuth(false)}
+        context="start microchallenges"
+        onSuccess={() => {
+          setShowAuth(false);
+          startChallenge();
+        }}
+        disableEscape
+      />
+    </aside>
+  );
 };
 
 export default MicrochallengeBox;

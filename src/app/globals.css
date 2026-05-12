@@ -231,10 +231,7 @@ body {
 .prose-article.prose-variant-prologue strong {
   color: #a93f55;
   font-weight: 800;
-  text-decoration: underline;
-  text-decoration-color: rgba(169, 63, 85, 0.22);
-  text-decoration-thickness: 2px;
-  text-underline-offset: 2px;
+  text-decoration: none;
 }
 
 .prose-article.prose-variant-prologue .inner-caveman-mark {

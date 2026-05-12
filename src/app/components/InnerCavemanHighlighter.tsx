@@ -22,6 +22,8 @@ function shouldSkipNode(node: Text): boolean {
     return true;
   }
 
+  if (parent.closest("a")) return true;
+
   return false;
 }
 
@@ -37,8 +39,9 @@ function wrapPhrase(node: Text) {
   for (let i = 0; i < parts.length; i += 1) {
     if (parts[i]) fragment.appendChild(document.createTextNode(parts[i]));
     if (i < parts.length - 1) {
-      const mark = document.createElement("span");
+      const mark = document.createElement("a");
       mark.className = "inner-caveman-mark";
+      mark.href = "/inner-caveman";
       mark.textContent = TARGET_PHRASE;
       fragment.appendChild(mark);
     }
@@ -65,4 +68,3 @@ export default function InnerCavemanHighlighter({ targetId }: InnerCavemanHighli
 
   return null;
 }
-

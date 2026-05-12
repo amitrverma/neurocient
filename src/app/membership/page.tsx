@@ -1,9 +1,7 @@
-"use client";
+import { Check, MessageCircle } from "lucide-react";
 
-import { useEffect } from "react";
-import { Check } from "lucide-react";
-
-const membershipPaymentUrl = process.env.NEXT_PUBLIC_RAZORPAY_MEMBERSHIP_URL;
+const whatsappUrl =
+  "https://wa.me/918551915656?text=Hi%20Amit%2C%20I%20am%20interested%20in%20Neurocient%20membership.";
 
 const plans = [
   {
@@ -32,24 +30,6 @@ const plans = [
 ];
 
 export default function MembershipPage() {
-  useEffect(() => {
-    if (!membershipPaymentUrl) return;
-
-    if (!document.getElementById("razorpay-embed-btn-js")) {
-      const script = document.createElement("script");
-      script.src = "https://cdn.razorpay.com/static/embed_btn/bundle.js";
-      script.defer = true;
-      script.id = "razorpay-embed-btn-js";
-      document.body.appendChild(script);
-      return;
-    }
-
-    const rzpWindow = window as Window & {
-      __rzp__?: { init?: () => void };
-    };
-    rzpWindow.__rzp__?.init?.();
-  }, []);
-
   return (
     <main className="bg-brand-dark px-6 py-16 font-serif text-white md:py-24">
       <div className="mx-auto max-w-6xl">
@@ -61,9 +41,8 @@ export default function MembershipPage() {
           Go deeper. Work with your wiring.
         </h1>
         <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-white/70">
-          Free resources get you started. Membership gives you the toolkit:
-          weekly insights, practical exercises, live sessions, and structured
-          programs to help the framework become usable in real life.
+          Free resources get you started. Membership is being opened manually
+          while the subscription checkout is being prepared.
         </p>
         <div className="mt-10 grid gap-4 lg:grid-cols-2">
           {plans.map((plan) => (
@@ -95,16 +74,16 @@ export default function MembershipPage() {
                   </li>
                 ))}
               </ul>
-              {plan.featured && membershipPaymentUrl ? (
-                <div className="mt-7">
-                  <div
-                    className="razorpay-embed-btn"
-                    data-url={membershipPaymentUrl}
-                    data-text="Get started"
-                    data-color="#ffffff"
-                    data-size="large"
-                  />
-                </div>
+              {plan.featured ? (
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand-primary bg-white px-4 py-3 font-sans text-sm font-semibold text-brand-dark transition hover:text-brand-primary"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  Message on WhatsApp
+                </a>
               ) : null}
             </article>
           ))}

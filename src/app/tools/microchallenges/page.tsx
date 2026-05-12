@@ -57,7 +57,6 @@ const MicrochallengesPage = () => {
       if (!ready) return;
       if (!user) {
         setLoading(false);
-        setShowAuth(true);
         return;
       }
 
@@ -568,8 +567,12 @@ const SignedOutBlock = ({ onLogin }: { onLogin: () => void }) => (
       Sign in required
     </p>
     <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
-      Log in to view your microchallenges.
+      Log in to start your microchallenges.
     </h2>
+    <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
+      Microchallenges are small behavior experiments. Sign in to choose one,
+      track progress, and keep your practice history connected to your account.
+    </p>
     <button
       onClick={onLogin}
       className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:opacity-90"

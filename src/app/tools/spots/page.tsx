@@ -46,7 +46,6 @@ const SpotsPage = () => {
       if (!ready) return;
       if (!user) {
         setLoading(false);
-        setShowAuth(true);
         return;
       }
 
@@ -151,8 +150,13 @@ const SpotsPage = () => {
                 Sign in required
               </p>
               <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
-                Log in to view your spots.
+                Log in to start your awareness log.
               </h2>
+              <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
+                Your spots are private entries. Sign in to save them, revisit
+                patterns, and build a record of what your Inner Caveman tends
+                to protect.
+              </p>
               <button
                 onClick={() => setShowAuth(true)}
                 className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:opacity-90"

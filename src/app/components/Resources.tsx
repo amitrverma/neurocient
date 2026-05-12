@@ -7,11 +7,8 @@ import {
   BookOpen,
   ClipboardList,
   Compass,
-  Lock,
   Wrench,
 } from "lucide-react";
-import { useAuth } from "@/app/context/AuthContext";
-import AuthModal from "./AuthModal";
 
 const primaryResources = [
   {
@@ -37,7 +34,6 @@ const primaryResources = [
     href: "/tools",
     cta: "Explore tools",
     icon: Wrench,
-    protected: true,
   },
 ];
 
@@ -60,16 +56,6 @@ const startingPoints = [
 ];
 
 const Resources = () => {
-  const { user } = useAuth();
-  const [showAuth, setShowAuth] = useState(false);
-
-  const handleProtectedClick = (e: React.MouseEvent) => {
-    if (!user) {
-      e.preventDefault();
-      setShowAuth(true);
-    }
-  };
-
   return (
     <main className="bg-white font-serif text-brand-dark">
       <section className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
@@ -91,13 +77,11 @@ const Resources = () => {
           <div className="border-y border-brand-dark/12">
             {primaryResources.map((item) => {
               const Icon = item.icon;
-              const isProtected = item.protected && !user;
 
               return (
                 <Link
                   key={item.title}
-                  href={isProtected ? "#" : item.href}
-                  onClick={item.protected ? handleProtectedClick : undefined}
+                  href={item.href}
                   className="group grid cursor-pointer gap-4 border-b border-brand-dark/12 py-6 transition last:border-b-0 md:grid-cols-[0.62fr_1fr_auto] md:items-center"
                 >
                   <div className="flex gap-4">
@@ -119,7 +103,6 @@ const Resources = () => {
                   </p>
 
                   <span className="inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-accent">
-                    {isProtected ? <Lock className="h-4 w-4" /> : null}
                     <span className="hidden xl:inline">{item.cta}</span>
                     <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                   </span>
@@ -200,8 +183,6 @@ const Resources = () => {
           </span>
         </Link>
       </section>
-
-      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
     </main>
   );
 };

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowRight, ClipboardList, Lock, NotebookPen } from "lucide-react";
+import { ArrowRight, ClipboardList, NotebookPen } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
 import StreakBar from "../components/tools/StreakBar";
 import AuthModal from "../components/AuthModal";
@@ -12,11 +12,34 @@ interface Spot {
   description: string;
 }
 
-const spotIntro =
-  "Notice the moments when ancient wiring takes the wheel: avoidance, comparison, overreaction, status scanning, or the pull toward easy relief.";
-
-const microIntro =
-  "Small, science-backed experiments that help you practice with your wiring instead of relying on willpower.";
+const tools = [
+  {
+    eyebrow: "Awareness log",
+    title: "Spot Your Inner Caveman",
+    icon: NotebookPen,
+    description:
+      "This is a simple awareness log for the moments when old wiring takes over. You might notice avoidance before a difficult task, comparison after seeing someone else's progress, defensiveness in a conversation, craving under stress, or a sudden need for reassurance.",
+    why:
+      "The useful move is to catch the pattern close to the moment it happens. A short note gives the reaction a name, and over time those notes start revealing your common triggers.",
+    unlock:
+      "Use it when you want a private record of your recurring loops: what triggered the response, what it was protecting, and what you might try next time.",
+    href: "/tools/spots",
+    cta: "Explore spots",
+  },
+  {
+    eyebrow: "Daily experiment",
+    title: "Microchallenges",
+    icon: ClipboardList,
+    description:
+      "Microchallenges are small behavior experiments designed for real life. Instead of trying to overhaul a habit, you choose one tiny action that gives your nervous system evidence that a different response is possible.",
+    why:
+      "The challenge is intentionally modest because intensity is usually where old resistance shows up. Repetition matters more than drama: one small action, logged consistently, becomes proof.",
+    unlock:
+      "Use it when you want structure: pick a challenge, log daily progress, remove what is not working, and keep a history of experiments you have completed.",
+    href: "/tools/microchallenges",
+    cta: "Explore challenges",
+  },
+];
 
 const ToolsPage = () => {
   const [spots, setSpots] = useState<Spot[]>([]);
@@ -26,12 +49,6 @@ const ToolsPage = () => {
   const { user } = useAuth();
 
   const streak = { current: 7, longest: 15 };
-  const microSummary = {
-    completed: 3,
-    total: 5,
-    current: "Hydrate Like a Caveman",
-  };
-
   useEffect(() => {
     const fetchSpots = async () => {
       if (!user) {
@@ -86,77 +103,46 @@ const ToolsPage = () => {
             </p>
           </div>
 
-          <div className="space-y-5">
-            <StreakBar current={streak.current} longest={streak.longest} />
-            {!user ? (
-              <div className="rounded-lg border border-brand-dark/10 bg-white p-5 shadow-sm">
-                <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-                  Sign in required
-                </p>
-                <p className="mt-2 font-sans text-sm leading-7 text-brand-dark/72">
-                  Log in to view your saved spots, assigned microchallenges,
-                  and progress.
-                </p>
-                <button
-                  onClick={() => setShowAuth(true)}
-                  className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:opacity-90"
-                >
-                  Log in
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
-            ) : null}
-          </div>
+          {user ? <StreakBar current={streak.current} longest={streak.longest} /> : null}
         </div>
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-6 pb-14 md:pb-20">
         <div className="grid gap-5 lg:grid-cols-2">
-          <ToolCard
-            eyebrow="Awareness log"
-            title="Spot Your Inner Caveman"
-            icon={<NotebookPen className="h-5 w-5" />}
-            description={spotIntro}
-            href="/tools/spots"
-            cta="Open spots"
-            disabled={!user}
-            onRequireAuth={() => setShowAuth(true)}
-            stat={
-              loading
-                ? "Loading spots..."
+          {tools.map((tool) => {
+            const Icon = tool.icon;
+            const stat =
+              tool.href === "/tools/spots"
+                ? loading
+                  ? "Loading spots..."
+                  : user
+                    ? `${spotCount} ${spotCount === 1 ? "spot" : "spots"} logged`
+                    : null
                 : user
-                  ? `${spotCount} ${spotCount === 1 ? "spot" : "spots"} logged`
-                  : "Log in to view your spots"
-            }
-          >
-            {user && latestSpot ? (
-              <p className="mt-4 border-l-4 border-brand-secondary pl-4 font-sans text-sm leading-7 text-brand-dark/72">
-                Latest: "{latestSpot.description}"
-              </p>
-            ) : null}
-          </ToolCard>
+                  ? "Open your challenges to see active and completed work."
+                  : null;
 
-          <ToolCard
-            eyebrow="Daily experiment"
-            title="Microchallenges"
-            icon={<ClipboardList className="h-5 w-5" />}
-            description={microIntro}
-            href="/tools/microchallenges"
-            cta="Open challenges"
-            disabled={!user}
-            onRequireAuth={() => setShowAuth(true)}
-            stat={
-              user
-                ? `${microSummary.completed}/${microSummary.total} challenges completed`
-                : "Log in to view your microchallenges"
-            }
-          >
-            {user && microSummary.current ? (
-              <p className="mt-4 border-l-4 border-brand-secondary pl-4 font-sans text-sm leading-7 text-brand-dark/72">
-                Current: "{microSummary.current}"
-              </p>
-            ) : null}
-          </ToolCard>
+            return (
+              <ToolCard
+                key={tool.href}
+                eyebrow={tool.eyebrow}
+                title={tool.title}
+                icon={<Icon className="h-5 w-5" />}
+                description={tool.description}
+                why={tool.why}
+                unlock={tool.unlock}
+                href={tool.href}
+                cta={tool.cta}
+                stat={stat}
+              >
+                {user && tool.href === "/tools/spots" && latestSpot ? (
+                  <p className="mt-4 border-l-4 border-brand-secondary pl-4 font-sans text-sm leading-7 text-brand-dark/72">
+                    Latest: "{latestSpot.description}"
+                  </p>
+                ) : null}
+              </ToolCard>
+            );
+          })}
         </div>
       </section>
 
@@ -188,10 +174,10 @@ const ToolCard = ({
   title,
   icon,
   description,
+  why,
+  unlock,
   href,
   cta,
-  disabled,
-  onRequireAuth,
   stat,
   children,
 }: {
@@ -199,11 +185,11 @@ const ToolCard = ({
   title: string;
   icon: React.ReactNode;
   description: string;
+  why: string;
+  unlock: string;
   href: string;
   cta: string;
-  disabled: boolean;
-  onRequireAuth: () => void;
-  stat: string;
+  stat: string | null;
   children?: React.ReactNode;
 }) => {
   const content = (
@@ -225,29 +211,26 @@ const ToolCard = ({
       <p className="mt-4 font-sans text-sm leading-7 text-brand-dark/72">
         {description}
       </p>
-      <p className="mt-5 font-sans text-xs font-semibold uppercase tracking-[0.14em] text-brand-primary">
-        {stat}
-      </p>
+      <div className="mt-5 grid gap-4 border-t border-brand-dark/12 pt-5 font-sans text-sm leading-7 text-brand-dark/72">
+        <p>
+          <strong className="text-brand-dark">Why it helps:</strong> {why}
+        </p>
+        <p>
+          <strong className="text-brand-dark">After login:</strong> {unlock}
+        </p>
+      </div>
+      {stat ? (
+        <p className="mt-5 font-sans text-xs font-semibold uppercase tracking-[0.14em] text-brand-primary">
+          {stat}
+        </p>
+      ) : null}
       {children}
       <span className="mt-6 inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-accent">
-        {disabled ? <Lock className="h-4 w-4" /> : null}
         {cta}
         <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
       </span>
     </>
   );
-
-  if (disabled) {
-    return (
-      <button
-        type="button"
-        onClick={onRequireAuth}
-        className="group w-full cursor-pointer rounded-lg border border-brand-dark/10 bg-white p-6 text-left shadow-sm transition hover:border-brand-teal/60 hover:shadow-md md:p-7"
-      >
-        {content}
-      </button>
-    );
-  }
 
   return (
     <Link

@@ -184,11 +184,11 @@ const pathways = [
     cta: "Start the scan",
   },
   {
-    label: "Program",
-    title: "Practice the Modern Caveman method",
-    text: "Turn this lens into a practical behavior-change system for habits, focus, food, movement, and emotional loops.",
-    href: "/modern-caveman",
-    cta: "Explore the program",
+    label: "Tools",
+    title: "Practice with daily tools",
+    text: "Use spots, microchallenges, nudges, and reflections to turn this lens into small repeatable actions.",
+    href: "/tools",
+    cta: "Open tools",
   },
   {
     label: "Essays",
@@ -277,18 +277,10 @@ export default function InnerCavemanPage() {
               <span className="italic text-brand-accent">Inner Caveman.</span>
             </h1>
             <p className="mt-7 max-w-2xl border-l-4 border-brand-secondary pl-5 font-sans text-lg leading-8 text-brand-dark md:text-xl md:leading-9">
-              The part of you that reacts before you reason. Not because it is
-              broken. Because it was built for survival in a very different
-              world.
+              The brain system that reacts before you reason: fast,
+              protective, and shaped for survival in a very different world.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/diagnostics/caveman-scan"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-6 py-3 font-sans text-sm font-semibold text-white transition hover:opacity-90"
-              >
-                Take the scan
-                <ArrowRight className="h-4 w-4" />
-              </Link>
               <a
                 href="#audio"
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-dark/25 px-6 py-3 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-primary hover:text-brand-primary"

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DiagnosticIntro from "./DiagnosticIntro";
 import DiagnosticQuestion from "./DiagnosticQuestion";
+import AuthModal from "@/app/components/AuthModal";
+import { useAuth } from "@/app/context/AuthContext";
 import { trackEvent } from "../../utils/analytics";
 import {
   CIC_DIAGNOSTIC_STORAGE_KEY,
@@ -13,11 +15,15 @@ import {
 
 export default function CICDiagnosticPage() {
   const router = useRouter();
+  const { user, ready } = useAuth();
   const [stage, setStage] = useState<CICDiagnosticStage>("intro");
   const [responses, setResponses] = useState<Record<string, string>>({});
   const [hasRestored, setHasRestored] = useState(false);
+  const [showResultAuth, setShowResultAuth] = useState(false);
 
   useEffect(() => {
+    if (!ready) return;
+
     try {
       const saved = window.localStorage.getItem(CIC_DIAGNOSTIC_STORAGE_KEY);
       if (!saved) return;
@@ -29,7 +35,11 @@ export default function CICDiagnosticPage() {
 
       if (isCICDiagnosticStage(parsed.stage)) {
         if (parsed.stage === "summary") {
-          router.replace("/diagnostics/cic/result");
+          if (user) {
+            router.replace("/diagnostics/cic/result");
+          } else {
+            setShowResultAuth(true);
+          }
           return;
         }
 
@@ -44,7 +54,7 @@ export default function CICDiagnosticPage() {
     } finally {
       setHasRestored(true);
     }
-  }, [router]);
+  }, [ready, router, user]);
 
   const handleStart = () => {
     trackEvent("Diagnostic Started", { type: "cic" });
@@ -59,17 +69,23 @@ export default function CICDiagnosticPage() {
       JSON.stringify({ stage: "summary", responses: answers }),
     );
     trackEvent("Diagnostic Completed", { type: "cic" });
+
+    if (!ready || !user) {
+      setShowResultAuth(true);
+      return;
+    }
+
     router.push("/diagnostics/cic/result");
   };
 
   useEffect(() => {
-    if (!hasRestored || stage === "summary") return;
+    if (!hasRestored || showResultAuth || stage === "summary") return;
 
     window.localStorage.setItem(
       CIC_DIAGNOSTIC_STORAGE_KEY,
       JSON.stringify({ stage, responses }),
     );
-  }, [hasRestored, responses, stage]);
+  }, [hasRestored, responses, showResultAuth, stage]);
 
   if (!hasRestored) return null;
 
@@ -77,6 +93,12 @@ export default function CICDiagnosticPage() {
     <div className="min-h-screen bg-white">
       {stage === "intro" && <DiagnosticIntro onStart={handleStart} />}
       {stage === "questions" && <DiagnosticQuestion onComplete={handleComplete} />}
+      <AuthModal
+        isOpen={showResultAuth}
+        onClose={() => setShowResultAuth(false)}
+        onSuccess={() => router.push("/diagnostics/cic/result")}
+        context="see your CIC result"
+      />
     </div>
   );
 }

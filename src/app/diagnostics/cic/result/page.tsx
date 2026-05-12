@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
 import ResultSummary from "../ResultSummary";
+import AuthModal from "@/app/components/AuthModal";
+import { useAuth } from "@/app/context/AuthContext";
 import {
   CIC_DIAGNOSTIC_STORAGE_KEY,
   type CICDiagnosticState,
@@ -11,6 +13,7 @@ import {
 
 export default function CICDiagnosticResultPage() {
   const router = useRouter();
+  const { user, ready } = useAuth();
   const [diagnosticState, setDiagnosticState] =
     useState<CICDiagnosticState | null>(null);
   const [hasChecked, setHasChecked] = useState(false);
@@ -47,7 +50,21 @@ export default function CICDiagnosticResultPage() {
     router.replace("/diagnostics/cic");
   };
 
-  if (!hasChecked || !diagnosticState) return <ResultLoader />;
+  if (!hasChecked || !diagnosticState || !ready) return <ResultLoader />;
+
+  if (!user) {
+    return (
+      <>
+        <ResultLoader />
+        <AuthModal
+          isOpen
+          onClose={() => {}}
+          context="see your CIC result"
+          disableEscape
+        />
+      </>
+    );
+  }
 
   return (
     <ResultSummary

@@ -9,9 +9,10 @@ import { useAuth } from "../context/AuthContext";
 import AuthModal from "./AuthModal";
 
 const navLinks = [
-  { href: "/about", label: "About" },
+  { href: "/inner-caveman", label: "Inner Caveman" },
   { href: "/resources", label: "Resources" },
   { href: "/programs", label: "Programs" },
+  { href: "/about", label: "About" },
 ];
 
 const Navbar = () => {
@@ -123,9 +124,6 @@ const Navbar = () => {
       {isOpen && (
         <div className="border-t border-brand-dark/12 bg-white md:hidden">
           <div className="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-4 font-sans text-sm font-semibold">
-            <Link href="/inner-caveman" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
-              Inner Caveman
-            </Link>
             {navLinks.map((link) => (
               <Link
                 key={link.href}

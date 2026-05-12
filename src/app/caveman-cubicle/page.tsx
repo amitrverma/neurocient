@@ -79,13 +79,6 @@ export default function CavemanInTheCubiclePage() {
               how we wish they behaved under pressure.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/diagnostics/cic"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-6 py-3 font-sans text-sm font-semibold text-white transition hover:opacity-90"
-              >
-                Start CIC diagnostic
-                <ArrowRight className="h-4 w-4" />
-              </Link>
               <a
                 href="mailto:hello@neurocient.com"
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-dark/25 px-6 py-3 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-primary hover:text-brand-primary"

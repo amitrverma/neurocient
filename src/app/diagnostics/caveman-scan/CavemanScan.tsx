@@ -8,6 +8,8 @@ import CavemanScanIntro from "./CavemanScanIntro";
 import CavemanScanQuestion from "./CavemanScanQuestion";
 import CavemanScanResult from "./CavemanScanResult";
 import ScanScienceModal from "./ScanScienceModal";
+import AuthModal from "@/app/components/AuthModal";
+import { useAuth } from "@/app/context/AuthContext";
 
 import type { ScanOption, ScanScienceBlock } from "./questionsBank";
 import {
@@ -20,9 +22,11 @@ import {
 
 export default function CavemanScan() {
   const router = useRouter();
+  const { user, ready } = useAuth();
   const [stage, setStage] = useState<CavemanScanStage>("intro");
   const [current, setCurrent] = useState(0);
   const [hasRestored, setHasRestored] = useState(false);
+  const [showResultAuth, setShowResultAuth] = useState(false);
 
   const total = questionsBank.length;
 
@@ -35,6 +39,8 @@ export default function CavemanScan() {
   const question = questionsBank[current];
 
   useEffect(() => {
+    if (!ready) return;
+
     try {
       const saved = window.localStorage.getItem(CAVEMAN_SCAN_STORAGE_KEY);
       if (!saved) return;
@@ -47,7 +53,11 @@ export default function CavemanScan() {
 
       if (isCavemanScanStage(parsed.stage)) {
         if (parsed.stage === "result") {
-          router.replace("/diagnostics/caveman-scan/result");
+          if (user) {
+            router.replace("/diagnostics/caveman-scan/result");
+          } else {
+            setShowResultAuth(true);
+          }
           return;
         }
 
@@ -64,13 +74,13 @@ export default function CavemanScan() {
     } finally {
       setHasRestored(true);
     }
-  }, [router, total]);
+  }, [ready, router, total, user]);
 
   useEffect(() => {
-    if (!hasRestored) return;
+    if (!hasRestored || showResultAuth) return;
 
     saveScanState({ stage, current, responses });
-  }, [current, hasRestored, responses, stage]);
+  }, [current, hasRestored, responses, showResultAuth, stage]);
 
   const handleRestart = () => {
     window.localStorage.removeItem(CAVEMAN_SCAN_STORAGE_KEY);
@@ -99,7 +109,11 @@ export default function CavemanScan() {
       setCurrent((c) => c + 1);
     } else {
       saveScanState({ stage: "result", current, responses });
-      setStage("result");
+      if (!ready || !user) {
+        setShowResultAuth(true);
+        return;
+      }
+
       router.push("/diagnostics/caveman-scan/result");
     }
   };
@@ -156,6 +170,13 @@ export default function CavemanScan() {
       {stage === "result" && (
         <CavemanScanResult responses={responses} onRestart={handleRestart} />
       )}
+
+      <AuthModal
+        isOpen={showResultAuth}
+        onClose={() => setShowResultAuth(false)}
+        onSuccess={() => router.push("/diagnostics/caveman-scan/result")}
+        context="see your scan result"
+      />
     </>
   );
 }

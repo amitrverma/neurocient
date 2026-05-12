@@ -7,6 +7,7 @@ import { useState, type ReactNode } from "react";
 import Newsletter from "./Newsletter";
 import {
   ArrowRight,
+  ChevronDown,
   Compass,
   Heart,
   ShieldCheck,
@@ -205,21 +206,16 @@ const LandingPage = () => {
               <br />
               Before anything else, start with the question modern life ignores.
             </p>
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="#struggle"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-7 py-3.5 font-sans text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
-              >
-                Start here
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/programs"
-                className="inline-flex items-center justify-center rounded-full border border-brand-dark/35 bg-white px-7 py-3.5 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-teal hover:text-brand-teal"
-              >
-                See programs
-              </Link>
-            </div>
+            <button
+              type="button"
+              onClick={() =>
+                window.scrollBy({ top: window.innerHeight * 0.85, behavior: "smooth" })
+              }
+              aria-label="Scroll to the next section"
+              className="mt-10 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-brand-dark/20 text-brand-dark/55 transition hover:border-brand-teal hover:text-brand-teal"
+            >
+              <ChevronDown className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </section>
@@ -654,7 +650,7 @@ const LandingPage = () => {
             Just a clearer view of what&apos;s already happening.
           </p>
           <span className="mt-5 inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-secondary">
-            Start the scan
+            Go to the scan
             <ArrowRight className="h-4 w-4" />
           </span>
         </Link>

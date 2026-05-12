@@ -1,5 +1,9 @@
-import Link from "next/link";
+"use client";
+
+import { useEffect } from "react";
 import { Check } from "lucide-react";
+
+const membershipPaymentUrl = process.env.NEXT_PUBLIC_RAZORPAY_MEMBERSHIP_URL;
 
 const plans = [
   {
@@ -12,38 +16,40 @@ const plans = [
       "Weekly newsletter",
       "Sample micro-challenges",
     ],
-    href: "/subscribe",
   },
   {
     name: "Member",
-    price: "$12",
+    price: "$9",
     desc: "Tools, challenges, and deeper guidance for everyday practice.",
     features: [
       "Everything in Explorer",
-      "Full micro-challenge library",
-      "Monthly live sessions",
-      "Private community access",
-      "New content weekly",
+      "Unlimited articles",
+      "Unlimited tools",
+      "Discounts for programs",
     ],
-    href: "/subscribe",
     featured: true,
-  },
-  {
-    name: "Program Access",
-    price: "$29",
-    desc: "Membership plus structured programs for personal and work life.",
-    features: [
-      "Everything in Member",
-      "The Modern Caveman program",
-      "Caveman in the Cubicle",
-      "Program updates",
-      "Onboarding session",
-    ],
-    href: "/programs",
   },
 ];
 
 export default function MembershipPage() {
+  useEffect(() => {
+    if (!membershipPaymentUrl) return;
+
+    if (!document.getElementById("razorpay-embed-btn-js")) {
+      const script = document.createElement("script");
+      script.src = "https://cdn.razorpay.com/static/embed_btn/bundle.js";
+      script.defer = true;
+      script.id = "razorpay-embed-btn-js";
+      document.body.appendChild(script);
+      return;
+    }
+
+    const rzpWindow = window as Window & {
+      __rzp__?: { init?: () => void };
+    };
+    rzpWindow.__rzp__?.init?.();
+  }, []);
+
   return (
     <main className="bg-brand-dark px-6 py-16 font-serif text-white md:py-24">
       <div className="mx-auto max-w-6xl">
@@ -59,7 +65,7 @@ export default function MembershipPage() {
           weekly insights, practical exercises, live sessions, and structured
           programs to help the framework become usable in real life.
         </p>
-        <div className="mt-10 grid gap-4 lg:grid-cols-3">
+        <div className="mt-10 grid gap-4 lg:grid-cols-2">
           {plans.map((plan) => (
             <article
               key={plan.name}
@@ -69,11 +75,6 @@ export default function MembershipPage() {
                   : "border-white/15 bg-white/5"
               }`}
             >
-              {plan.featured && (
-                <span className="mb-4 inline-flex rounded-full border border-brand-primary px-3 py-1 font-sans text-xs font-semibold uppercase tracking-[0.12em] text-white">
-                  Most popular
-                </span>
-              )}
               <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
                 {plan.name}
               </p>
@@ -94,16 +95,17 @@ export default function MembershipPage() {
                   </li>
                 ))}
               </ul>
-              <Link
-                href={plan.href}
-                className={`mt-7 inline-flex w-full items-center justify-center rounded-full border px-4 py-3 font-sans text-sm font-semibold transition ${
-                  plan.featured
-                    ? "border-brand-primary bg-white text-brand-dark hover:text-brand-primary"
-                    : "border-white/25 text-white hover:border-brand-secondary hover:text-brand-secondary"
-                }`}
-              >
-                Get started
-              </Link>
+              {plan.featured && membershipPaymentUrl ? (
+                <div className="mt-7">
+                  <div
+                    className="razorpay-embed-btn"
+                    data-url={membershipPaymentUrl}
+                    data-text="Get started"
+                    data-color="#ffffff"
+                    data-size="large"
+                  />
+                </div>
+              ) : null}
             </article>
           ))}
         </div>

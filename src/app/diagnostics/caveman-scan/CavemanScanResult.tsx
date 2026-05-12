@@ -277,13 +277,13 @@ const CavemanScanResult = ({ responses, onRestart }: Props) => {
         </div>
         {onRestart && (
           <div className="mx-auto mt-8 max-w-6xl border-t border-brand-dark/12 pt-6">
-            <button
-              onClick={onRestart}
+            <Link
+              href="/diagnostics/cic"
               className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark/25 px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-primary hover:text-brand-primary"
             >
-              Retake scan
+              See how your Inner Caveman plays out at work
               <ArrowRight className="h-4 w-4" />
-            </button>
+            </Link>
           </div>
         )}
       </section>

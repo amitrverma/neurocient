@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
 import CavemanScanResult from "../CavemanScanResult";
+import AuthModal from "@/app/components/AuthModal";
+import { useAuth } from "@/app/context/AuthContext";
 import {
   CAVEMAN_SCAN_STORAGE_KEY,
   type CavemanScanState,
@@ -11,6 +13,7 @@ import {
 
 export default function CavemanScanResultPage() {
   const router = useRouter();
+  const { user, ready } = useAuth();
   const [scanState, setScanState] = useState<CavemanScanState | null>(null);
   const [hasChecked, setHasChecked] = useState(false);
 
@@ -42,7 +45,21 @@ export default function CavemanScanResultPage() {
     router.replace("/diagnostics/caveman-scan");
   };
 
-  if (!hasChecked || !scanState) return <ResultLoader />;
+  if (!hasChecked || !scanState || !ready) return <ResultLoader />;
+
+  if (!user) {
+    return (
+      <>
+        <ResultLoader />
+        <AuthModal
+          isOpen
+          onClose={() => {}}
+          context="see your scan result"
+          disableEscape
+        />
+      </>
+    );
+  }
 
   return (
     <CavemanScanResult

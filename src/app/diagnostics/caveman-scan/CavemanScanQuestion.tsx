@@ -78,13 +78,6 @@ const CavemanScanQuestion = ({
                         : "border-brand-dark/10 bg-white text-brand-dark hover:border-brand-teal/60 hover:shadow-md"
                     }`}
                   >
-                    <span
-                      className={`mb-2 block text-xs font-semibold uppercase tracking-[0.14em] ${
-                        isSelected ? "text-brand-secondary" : "text-brand-teal"
-                      }`}
-                    >
-                      Option {index + 1}
-                    </span>
                     {opt.label}
                   </button>
                 );

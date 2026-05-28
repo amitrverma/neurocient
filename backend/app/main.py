@@ -34,6 +34,7 @@ app.add_middleware(
         "https://www.neurocient.com",
         "https://neurocient.com",
         "http://localhost:3000", 
+        "http://localhost:3001",
     ],
     allow_credentials=True,
     allow_methods=["*"],

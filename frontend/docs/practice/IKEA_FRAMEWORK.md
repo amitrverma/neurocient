@@ -133,7 +133,7 @@ Reinforcement should include:
 - spaced repetition
 - short check-ins
 - reminders of the user's discovered pattern
-- visible moments of victory
+- visible moments of victory after real-world action or return
 - evidence of behavioral persistence
 - reframing progress visually
 
@@ -153,7 +153,7 @@ Useful biases and design levers include:
 - **Commitment effect**: ask for tiny, concrete commitments the user can plausibly keep.
 - **Default effect**: make the next useful step the easiest path through the interface.
 - **Zeigarnik effect**: use visible unfinished first steps to gently pull the user back.
-- **Peak-end rule**: end sessions with a moment of recognition, relief, or victory.
+- **Peak-end rule**: end sessions with recognition, relief, or a useful next move; save victory language for real evidence.
 - **Fresh start effect**: create natural re-entry points after forgetting, so return feels normal.
 - **Salience bias**: make the real behavior pattern vivid enough to notice in daily life.
 
@@ -163,12 +163,12 @@ The design goal is not to trick the user into engagement. The goal is to make em
 Practice experiences should generally move through:
 
 1. Recognition: "This is the loop."
-2. Identity: "This is the story it creates about me."
-3. Knowledge: "This is why the loop makes sense."
+2. Knowledge / alternate perspective: "This is why the loop makes sense."
+3. Identity: "This is the story it creates about me, and the identity I can practice instead."
 4. Environment: "This is what supports the loop."
 5. Action: "This is the smallest useful move."
 6. Reinforcement: "This is how the insight comes back."
-7. Moment of victory: "This is what changed, however small."
+7. Post-action evidence: "This is what changed, however small."
 
 This order is a default path, not a rigid procedure. Mature Practice experiences should adapt based on what the user recognizes, what they have already tried, whether it helped, what their environment supports, and how they respond to reinforcement.
 

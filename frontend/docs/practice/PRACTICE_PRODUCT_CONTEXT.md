@@ -68,7 +68,20 @@ The old implementation used:
 
 That approach should not be extended. It was useful as an exploratory prototype, but the next Practice build should start fresh while reusing existing product infrastructure.
 
-The current `/practice` route is a clean shell for the rebuilt experience.
+The current `/practice` route is the first rebuilt surface. It may begin with procrastination, but procrastination is only one Practice loop, not the product architecture.
+
+Do not let the first procrastination implementation become a single-page monolith. Any production version should be modular enough to support many loops over time: procrastination, avoidance, overthinking, impulsive checking, emotional eating, inconsistency, distraction, people-pleasing, or future practices not yet named.
+
+The route can host the first experience, but the architecture should separate:
+
+- loop data
+- screen components
+- flow/routing logic
+- response state
+- reinforcement handoff
+- existing auth/progress/WhatsApp integrations
+
+This keeps Practice from becoming a hardcoded SPA where every new loop requires copying and editing a large page component.
 
 ## Existing Systems To Reuse
 Do not duplicate mechanisms that already exist in the repo.
@@ -116,6 +129,15 @@ For the early product, Practice remains a web app with WhatsApp integration. Wha
 
 When the user opts into reinforcement, Practice should hand off to existing authenticated systems for progress tracking, WhatsApp details, reminders, and persistence.
 
+Initial implementation:
+
+- anonymous users keep a pending Practice draft locally only when they ask for reinforcement
+- login/signup converts that pending draft into an authenticated saved loop
+- logged-in users save the selected loop directly
+- the first saved object uses the existing IKEA worksheet backend through a Practice-facing adapter
+- logged-in users can see the current saved practice details on the Practice surface
+- user-facing screens should not mention worksheets, schemas, or account plumbing
+
 ## Emotional Design Principles
 Practice should make users feel:
 
@@ -156,6 +178,54 @@ Avoid:
 - turning a behavior loop into a generic learning module
 - making progress feel like administrative completion
 
+## Internal Concepts Versus User-Facing Copy
+Many Practice concepts exist to help product, design, and engineering reason clearly. They are not automatically user-facing language.
+
+Internal reference language includes:
+
+- IKEA
+- Identity
+- Knowledge
+- Environment
+- Action
+- Reinforcement
+- behavioral design levers
+- cognitive bias names
+- free insight / gated reinforcement
+- adaptive routing
+- persistence, schema, and infrastructure language
+
+Use these concepts in docs, code structure, data models, and team discussion. Do not expose them to users unless there is a deliberate copy/design decision to teach a concept.
+
+User-facing copy should assume the user is intelligent and can infer obvious things from context. Do not explain what the interface already communicates.
+
+Avoid user-facing phrases like:
+
+- "Begin free session"
+- "IKEA worksheet"
+- "reinforcement loop"
+- "Identity step"
+- "Knowledge screen"
+- "This is gated"
+- "Create an account to save progress"
+- "This is not a type. It is a scene."
+- "The point is..."
+- "A strategy that works deserves respect."
+- "This gives us useful evidence."
+
+Prefer copy that speaks to the lived moment:
+
+- "Start"
+- "Keep this for later"
+- "Help me remember this"
+- "What changed?"
+- "What made this harder?"
+- "What is the next visible move?"
+- "Pick the one that feels closest to a recent day."
+- "Think about the last few times."
+
+Only educate users when education creates real value, reduces uncertainty, or protects consent. For example, explain WhatsApp reminders, account creation, payment, privacy, or why a particular question matters. Do not educate users about internal frameworks just because the framework exists.
+
 ## Conceptual Source
 The originating whiteboard emphasized:
 
@@ -166,7 +236,7 @@ The originating whiteboard emphasized:
 - knowledge/inner awareness precedes behavior change
 - reinforcement and spaced repetition matter because forgetting is real
 - progress should be visually reframed
-- moments of victory should be visible
+- moments of victory should be visible after real behavior, not manufactured inside the first session
 - the opening should ask for actual behavior, not abstract self-labels
 - users should identify what they have already tried and whether it helped
 - the knowing-doing gap is central
@@ -193,10 +263,53 @@ A mature Practice loop should become:
 4. Product reveals environment support/friction.
 5. Product recommends one tiny matched action.
 6. Product reinforces the insight over time.
-7. Product captures a moment of victory.
+7. Product captures post-action evidence when the user has tried, returned, or noticed the loop earlier.
 8. User gradually sees behavioral persistence.
 
-The mature loop should be adaptive rather than procedural. The system should decide whether the next useful intervention is a story reframe, knowledge prompt, environment adjustment, small action, reinforcement prompt, or victory capture.
+The mature loop should be adaptive rather than procedural. The system should decide whether the next useful intervention is a story reframe, knowledge prompt, environment adjustment, small action, reinforcement prompt, or post-action evidence capture.
+
+## Architecture Guardrails
+Practice is a product family of behavior loops, not a single procrastination page.
+
+Architecture should therefore be:
+
+- modular
+- data-driven where useful
+- small-component based
+- easy to read
+- easy to extend with new loops
+- aligned with existing product primitives
+
+Avoid:
+
+- building Practice as one large client component
+- treating procrastination as the only schema
+- creating a standalone SPA inside the route
+- duplicating existing auth, progress, microchallenge, WhatsApp, or IKEA systems
+- adding route-specific logic that cannot be reused by the next loop
+
+Prefer:
+
+- reusable session shell components
+- reusable choice, reflection, evidence, and handoff components
+- loop definitions that hold content and behavioral design intent
+- route containers that compose smaller modules
+- a thin adapter from Practice responses into existing authenticated systems
+
+The first flow can be pragmatic, but before adding the second loop or deeper persistence, split the implementation into reusable pieces.
+
+## Product Design Alignment
+Practice can have a calmer expression than the portal, but it must still feel like part of the current Neurocient product.
+
+Align with:
+
+- existing typography and layout sensibility
+- current auth and modal patterns
+- current user account expectations
+- existing content tone where it is already warm, clear, and non-clinical
+- current membership/progress systems
+
+Do not create a visually disconnected app-within-the-app unless there is a deliberate design-system decision. Practice should feel more focused and emotionally lighter, not like a separate brand or experimental SPA.
 
 ## UX Bar
 When working on Practice, evaluate every screen with these questions:
@@ -220,11 +333,11 @@ Examples:
 - Present bias: make the first useful action feel immediately light.
 - Loss aversion: show less life lost to autopilot without shaming the user.
 - Identity and consistency bias: connect tiny actions to a better self-story.
-- Availability bias: keep recent victories and recognized loops easy to remember.
+- Availability bias: keep real progress evidence and recognized loops easy to remember.
 - Commitment effect: ask for small promises the user can actually keep.
 - Default effect: make the next useful move the easiest available path.
 - Zeigarnik effect: make unfinished first steps visible enough to invite return.
-- Peak-end rule: close sessions with recognition, relief, or a small victory.
+- Peak-end rule: close sessions with recognition, relief, or a useful next move. Save victory language for real evidence.
 - Fresh start effect: make returning after forgetting feel normal.
 - Salience bias: make old loops vivid enough to notice earlier.
 
@@ -239,6 +352,7 @@ Avoid hand-holding when the interaction is visually obvious. For example:
 - prefer clear layout, contrast, and state changes over explanatory copy
 - use words for meaning, not for narrating the interface
 - remove microcopy if the screen still works without it
+- every clickable element should show the hand cursor; disabled controls should clearly stop inviting action
 
 ## Choice Count Guidance
 For emotionally reflective screens, avoid large visible option sets.
@@ -257,9 +371,10 @@ Reason:
 
 For the procrastination advice check-in, this means:
 
-- show four common advice options
+- show four advice options relevant to the selected procrastination moment
 - show "None of these, honestly"
 - keep other advice out of the first-pass screen unless a later "something else" path is added
+- when the opening moment changes, clear answers that belonged to the previous moment
 
 ## Progress Model
 Do not default to streaks as the primary progress model.

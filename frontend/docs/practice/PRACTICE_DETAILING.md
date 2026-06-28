@@ -5,7 +5,7 @@ This document turns the Practice pivot into a working product blueprint.
 
 It is not a final specification. It is the bridge between product direction and later work on design, IA, architecture, challenge content, and code.
 
-Practice should become an adaptive emotional behavior-change system. Procrastination is the first proof case.
+Practice should become an adaptive emotional behavior-change system. Procrastination is the first proof case, not the whole product.
 
 ## Product Thesis
 Practice helps users get more life from life by losing less time, energy, and possibility to autopilot.
@@ -69,26 +69,23 @@ The preferred first-pass journey:
 3. **Effect Check**
    The user says whether those attempts helped, helped briefly, or did not really hold.
 
-4. **Story Turn**
+4. **Another Angle / Knowledge**
    The product reframes procrastination as a loop that may be protecting short-term relief, not proof of laziness.
 
 5. **Identity**
-   The product names the self-story the loop can create and offers a more accurate reframe.
+   The product names the self-story the loop can create and offers an identity the user can practice instead.
 
-6. **Knowledge**
-   The product shows why that specific behavior makes emotional and cognitive sense.
-
-7. **Environment**
+6. **Environment**
    The product identifies friction, cues, defaults, and setup conditions that keep the loop easy.
 
-8. **Matched Action**
+7. **Matched Action**
    The product gives one tiny action that fits the selected pattern and environment.
 
-9. **Victory Capture**
-   The user records a small evidence point, even if the full task is not complete.
-
-10. **Reinforcement Hook**
+8. **Reinforcement Hook**
     The system schedules or suggests a future retrieval prompt.
+
+9. **Post-Action Evidence**
+   Later, after the user has actually tried the action or returned to the loop, the product can capture what changed.
 
 This order can adapt, but action should not become the default opening move.
 
@@ -102,7 +99,7 @@ Practice should eventually have these surfaces:
   A specific behavior path, starting with procrastination.
 
 - **Session**
-  A short, screen-based journey through recognition, insight, environment, action, and victory.
+  A short, screen-based journey through recognition, insight, environment, action, and optional remembering.
 
 - **Progress Evidence**
   A visual history of real behavioral persistence.
@@ -119,6 +116,53 @@ The old `/practice/[slug]`, `/practice/[slug]/result`, and `frontend/src/content
 
 Future architecture should avoid making pages the whole product model. Routes should be containers for a deeper adaptive system connected to existing auth, preferences, WhatsApp, microchallenge, and IKEA worksheet infrastructure.
 
+## Modular Architecture Direction
+Practice should not be implemented as a single-page app hidden inside `/practice`.
+
+The route may be interactive, but the code should remain modular and legible. Before the product grows beyond the first procrastination loop, split the implementation into clear parts:
+
+- `PracticeHome` or route-level entry container
+- `PracticeSessionShell` for the common session frame
+- reusable screen components for recognition, advice audit, effect check, identity, knowledge, environment, action, reinforcement, and post-action check-ins
+- reusable choice/card controls aligned with current product UI
+- loop definitions that hold content, scenes, prompts, actions, and behavioral design levers
+- a small flow controller or reducer that decides the next step
+- adapters that hand off authenticated state to existing IKEA, microchallenge, user preferences, WhatsApp, and progress systems
+
+The component boundary should follow product meaning, not just visual layout. A future loop should be able to reuse most of the session structure while changing the loop definition and selected branch logic.
+
+Procrastination-specific content should live in a procrastination loop definition or similar module. It should not be scattered through route-level UI code.
+
+## Multi-Loop Product Model
+Every Practice decision should assume more loops will follow.
+
+Procrastination is the first loop because it is vivid, common, and well suited to the IKEA journey. It should establish the architecture pattern for later loops, but not hardcode the product around procrastination.
+
+Future loops may include:
+
+- avoidance
+- overthinking
+- impulsive checking
+- distraction
+- inconsistency
+- people-pleasing
+- emotional eating
+- sleep revenge/procrastination
+- conflict avoidance
+
+Shared concepts across loops:
+
+- lived behavior scenes
+- identity story
+- knowledge pattern
+- environment friction
+- matched action
+- post-action evidence
+- reinforcement prompt
+- cognitive bias/design lever
+
+Loop-specific concepts belong in data/configuration first. Shared interaction patterns belong in components. Cross-loop persistence and progress should use existing backend systems where possible.
+
 ## Adaptive Model
 Practice should move from fixed flow to adaptive routing.
 
@@ -132,7 +176,7 @@ The system should decide the next useful step from observed inputs:
 - environment friction
 - action size
 - reinforcement response
-- victory evidence
+- post-action evidence
 - return behavior
 
 Example routing:
@@ -159,7 +203,7 @@ Cognitive biases should be used intentionally and ethically.
 | Commitment effect | Ask for small promises the user can keep today. | Do not ask for public or high-pressure commitment too early. |
 | Default effect | Make the next useful step the easiest path. | Preserve user choice and exit. |
 | Zeigarnik effect | Leave a visible first step that invites return. | Do not create artificial anxiety. |
-| Peak-end rule | End with recognition, relief, or a moment of victory. | Do not manufacture false celebration. |
+| Peak-end rule | End with recognition, relief, or a useful next move. | Do not manufacture false celebration. |
 | Fresh start effect | Give graceful re-entry after forgetting. | Do not imply the user has failed before returning. |
 | Salience bias | Make the old loop vivid enough to notice earlier. | Do not turn vivid copy into accusation. |
 
@@ -167,6 +211,8 @@ Every major interaction should be explainable through a behavior design purpose 
 
 ## Progress Evidence
 Progress should be measured as persistence, not only completion.
+
+Progress evidence should not be manufactured inside the first session. Capture it after the user has tried the matched action, returns through reinforcement, or reports a real-world change.
 
 Good evidence types:
 
@@ -208,7 +254,7 @@ type PracticeLoop = {
   environmentFrictions: EnvironmentFriction[];
   actions: PracticeAction[];
   reinforcementPrompts: ReinforcementPrompt[];
-  victoryMoments: VictoryMoment[];
+  evidencePrompts: EvidencePrompt[];
   behaviorDesignLevers: BehavioralDesignLever[];
 };
 
@@ -220,7 +266,7 @@ type BehaviorScene = {
   linkedPatterns: string[];
 };
 
-type VictoryMoment = {
+type EvidencePrompt = {
   id: string;
   title: string;
   evidence: string;
@@ -260,6 +306,54 @@ Default bias:
 - reuse preferences/WhatsApp fields for reinforcement delivery
 - avoid a second progress engine unless the existing models block the product experience
 
+## Initial Persistence Contract
+The first implementation uses a thin Practice adapter over the existing IKEA worksheet endpoint.
+
+Anonymous flow:
+
+1. The user completes the free recognition, knowledge, identity, environment, and action path.
+2. Nothing is persisted to the backend during the ungated journey.
+3. When the user asks to remember the loop, the current Practice draft is written to browser local storage.
+4. The auth modal opens.
+5. After login or signup succeeds, the pending draft is posted through a Practice-facing API route.
+6. The local draft is cleared only after the authenticated save succeeds.
+
+Authenticated flow:
+
+1. The user completes the same first-session path.
+2. When they ask to remember the loop, the Practice draft is posted immediately.
+3. The UI shows only a simple keeping/kept/error state.
+4. The current saved practice becomes visible on the Practice surface as a return map.
+
+Saved draft contents:
+
+- loop slug
+- selected behavior scene
+- advice tried
+- effect check response
+- identity story and reframe
+- knowledge / alternate perspective
+- environment prompt
+- matched action
+- reinforcement prompt
+
+Backend mapping:
+
+- `struggle`: selected behavior scene
+- `identity`: practiced identity / reframe
+- `knowledge`: selected alternate perspective
+- `environment`: JSON carrying Practice metadata, environment prompt, reminder, advice, and effect
+- `tiny_action`: matched action
+
+This is not the final Practice data model. It is the minimum useful persistence bridge until a dedicated Practice table, richer reinforcement schedule, or WhatsApp bot flow is justified.
+
+Return surface:
+
+- Logged-in users should see their current saved practice on `/practice`.
+- The return view should show the meaningful behavior map: moment, old story, practiced identity, why it made sense, setup, next move, and future prompt.
+- Do not make users go looking for an "IKEA worksheet" unless the framework is intentionally being taught.
+- The saved worksheet helps only as infrastructure: it powers retrieval, tracking, reflection, and future reinforcement. The user-facing object is the current practice.
+
 ## Personalization
 Personalization should begin lightweight and become deeper over time.
 
@@ -271,7 +365,7 @@ Near-term personalization:
 - selected identity story
 - selected environment friction
 - selected action
-- captured victory
+- post-action evidence, when it exists
 
 Later personalization:
 
@@ -311,7 +405,7 @@ The reinforcement algorithm should decide what the user needs to retrieve:
 - Knowledge: when the reason is unclear
 - Environment: when knowing does not become doing
 - Action: when the next move is too large
-- Victory: when a small persistence signal appears
+- Evidence: when a small persistence signal appears after action or return
 
 ## UX Principles For Screens
 Each screen should have one job.
@@ -338,7 +432,7 @@ Avoid:
 - interface instructions for obvious controls
 
 ## Visual Direction
-The visual language should feel quieter than the main Neurocient portal.
+The visual language should feel quieter than the main Neurocient portal, but still aligned with the current product.
 
 Useful qualities:
 
@@ -353,18 +447,21 @@ Useful qualities:
 
 The product should feel premium because it is precise, not because it is decorative.
 
+Practice should not look like a separate experimental app unless that is an explicit design decision. Use the existing product's typography, auth surfaces, spacing discipline, and interaction expectations as the base, then make the Practice surface calmer and more focused.
+
 ## MVP Detailing For Procrastination
-The next meaningful product iteration should focus on the procrastination path.
+The next meaningful product iteration should focus on the procrastination path while preserving the multi-loop architecture.
 
 Recommended MVP target:
 
 1. Rewrite opening behavior scenes to be more concrete and visual.
 2. Keep the advice audit but make it feel like evidence gathering.
 3. Add a clearer knowing-doing transition when advice did not hold.
-4. Make Identity, Knowledge, Environment, and Action feel like story moments rather than framework screens.
-5. Add a small victory capture before the final reinforcement prompt.
-6. Store enough local evidence to show progress on the result page.
-7. Keep all persistence local unless backend persistence is intentionally added.
+4. Make alternate perspective, Identity, Environment, and Action feel like story moments rather than framework screens.
+5. End the first session with the matched action and reinforcement handoff; do not ask for victory before real-world action.
+6. Store enough local evidence to show progress on the result page or next Practice surface.
+7. Keep persistence local only for pre-auth trial state; after auth, hand off to existing systems intentionally.
+8. Refactor any first-pass single-file implementation before adding another loop, backend persistence, or WhatsApp reinforcement.
 
 Do not add many new features before the first emotional journey feels right.
 
@@ -376,7 +473,7 @@ These should be resolved before larger implementation:
 3. What is the first visible progress evidence surface: result page, Practice home, or a small return card?
 4. Should reinforcement be simulated in web first before building a WhatsApp-style path?
 5. How much personalization should be explicit user choice versus inferred from behavior?
-6. What is the first "moment of victory" we want every user to be able to capture?
+6. What is the first post-action evidence prompt we want every user to be able to answer?
 7. Which existing backend model should own the saved Practice loop after auth?
 8. Should the current `IkeaWorksheet` naming be preserved internally or wrapped behind a Practice-facing API?
 
@@ -384,10 +481,10 @@ These should be resolved before larger implementation:
 The recommended next sequence:
 
 1. Define the procrastination first-session script screen by screen.
-2. Define the data model changes needed for behavior scenes and victory moments.
+2. Define the data model changes needed for behavior scenes and post-action evidence.
 3. Design the IA for Practice Home, Session, Result, and Progress Evidence.
 4. Choose whether the first saved loop maps to `IkeaWorksheet`, microchallenge assignment, or a thin new Practice record.
-5. Implement the new `/practice` flow from scratch.
+5. Implement the new `/practice` flow as modular components and loop data, not as one large SPA component.
 6. Wire auth only at the reinforcement handoff.
 7. Run `npm.cmd run build`.
 

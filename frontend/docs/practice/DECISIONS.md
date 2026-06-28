@@ -1,5 +1,178 @@
 # Practice Decisions
 
+## 2026-06-28: First Persistence Uses Local Draft Then Existing IKEA Worksheet
+The first implemented persistence path for Practice should save an anonymous draft locally, then persist it to the existing IKEA worksheet system after authentication.
+
+Reason:
+
+- The first session remains ungated, but reinforcement and progress need a user identity.
+- The repo already has `IkeaWorksheet` and `IkeaTracker`; creating a second Practice persistence engine now would duplicate existing behavior-change infrastructure.
+- A Practice-facing API adapter can hide internal IKEA naming from the UI while still reusing the backend model.
+- Users who are already logged in should not see an auth interruption; their selected loop can be saved directly.
+
+Implication:
+
+- Before login, keep the selected loop draft in browser local storage only after the user asks to remember it.
+- After login/signup, convert that pending draft into an authenticated active worksheet.
+- For authenticated users, save the draft immediately when they choose reinforcement.
+- Store the Practice-specific context inside the worksheet environment JSON until a dedicated Practice table is justified.
+- Do not expose worksheet, schema, account status, or persistence mechanics as user-facing copy.
+- A logged-in user must be able to see the current saved practice details on the Practice surface; persistence without a return view is not product value.
+
+## 2026-06-28: Reinforcement Handoff Must Not Look Like Account Plumbing
+The screen after "help me remember this" should feel like a continuation of the emotional journey, not an admin summary.
+
+Reason:
+
+- Labels such as "Setup", "Connected", "Pattern", and signed-in email expose internal implementation state.
+- A list of saved objects makes the moment feel like configuration, not support.
+- The user has asked to remember an insight; the product should keep attention on the prompt returning at the right moment.
+
+Implication:
+
+- Do not show account status, email, or object-summary cards as the main reinforcement handoff.
+- Keep the reminder prompt visible and concrete.
+- If backend reminder setup is incomplete, avoid pretending a real reminder has been scheduled.
+- User-facing copy should stay close to the lived loop, not the persistence mechanism.
+
+## 2026-06-28: Do Not Manufacture Victory Inside The First Session
+The first Practice session should not ask the user to pick a "victory" card before they have acted in real life.
+
+Reason:
+
+- A victory is evidence from behavior, not a feeling selected inside the same screen flow.
+- After the matched action, the user has only received a next move; the product does not yet know whether anything changed.
+- Asking for a victory too early makes progress feel fake and turns evidence into interface busywork.
+- The better end of the first session is a useful action plus an optional reinforcement handoff.
+
+Implication:
+
+- Current procrastination flow order is: recognition, advice audit, effect check, alternate perspective/knowledge, identity, environment, action, remembering.
+- Do not add card selection for victory/evidence before the user has tried the action.
+- Capture progress evidence later through reinforcement, return check-ins, or post-action logging.
+- "Moment of victory" remains a product concept, but only when tied to real behavior such as caught earlier, returned sooner, changed the setup, made the next move visible, or started small.
+
+## 2026-06-28: Environment Redesign Follows Identity
+After the identity reframe, the next useful movement is relevant environment redesign.
+
+Reason:
+
+- Identity names what the user may be identifying with and what identity they can practice instead.
+- The next screen should help that identity become easier to act from by changing the setup around the user.
+- Environment is where the product moves from self-story into design: cues, friction, defaults, visibility, and first-move support.
+- In this flow, the alternate perspective is the knowledge/discovery moment, so environment should not wait behind another knowledge screen.
+
+Implication:
+
+- Current procrastination flow order is: recognition, advice audit, effect check, alternate perspective/knowledge, identity, environment, action, remembering.
+- Environment copy should feel like redesigning the setup, not receiving generic advice.
+- The older 2026-06-02 decision "Environment Screen Follows Knowledge" is superseded for the rebuilt Practice flow.
+
+## 2026-06-28: Alternate Perspective Is The Knowledge Moment
+The rebuilt procrastination flow should not add a separate "why it happens" screen after the alternate perspective.
+
+Reason:
+
+- The alternate perspective already explains why procrastination makes sense from the Neurocient/evolutionary mismatch angle.
+- A second knowledge screen repeats the same layer and delays environment redesign and action.
+- The experience should feel like an unfolding journey, not a framework checklist.
+
+Implication:
+
+- Treat the "Another angle" screen as the Knowledge/Discovery moment for this flow.
+- Keep deeper why-language inside the scene-specific perspective copy.
+- Move from alternate perspective to identity, then environment redesign, then action.
+- Reintroduce a separate knowledge screen only if a future loop truly needs more explanation to make the setup/action coherent.
+
+## 2026-06-28: Identity Screen Reframes Self-Identification
+The identity screen should show the self-story the loop invites, then offer an identity the user can practice instead.
+
+Reason:
+
+- The product is not only explaining why procrastination happens; it is helping the user stop identifying with the loop.
+- A "more accurate read" can become analysis copy. The screen needs an identity reframe.
+- The user should see the difference between "what I may be calling myself" and "who I can practice being in this moment."
+
+Implication:
+
+- The first card should name the borrowed identity or self-label from the loop.
+- The second card should be a concise identity-to-practice statement.
+- It is acceptable for this screen to use "Identity" as user-facing language because identity is the explicit work of the moment.
+- Avoid turning the second card into explanation; keep it as a usable self-story.
+
+## 2026-06-28: Effect Check Routes To Scene-Specific Alternate Perspective
+After the user says an attempted fix only helped briefly or did not really help, the next screen should deliver an alternate perspective tied to the selected lived moment.
+
+Reason:
+
+- The whiteboard flow calls for alternate perspective / knowledge / discovery after checking what the user tried.
+- A generic "advice is not enough" transition loses the thread created by the selected scene.
+- The user should feel the system is responding to their exact loop before moving into story, why, setup, and next move.
+- For procrastination, this perspective should show the older protective system choosing short-term relief, safety, clarity, control, or threat reduction.
+
+Implication:
+
+- Each behavior scene should carry a short alternate perspective.
+- The post-effect screen should use the selected scene's perspective, not a generic explanation.
+- The perspective should come before deeper story/why/setup/action screens.
+- If the user's attempt worked, the flow can still close respectfully and offer optional remembering.
+- Do not name "Inner Caveman" or other internal branded concepts in this user-facing moment.
+
+## 2026-06-28: Advice Audit Must Follow The Selected Moment
+The "what have you already tried?" screen should be anchored to the behavior scene the user selected.
+
+Reason:
+
+- Different procrastination loops invite different attempted fixes.
+- Showing the same generic advice options after every recognition choice makes the flow feel less adaptive.
+- The selected moment is already shaping the loop map, so the next screen should continue that thread.
+- The audit is more useful when it asks about attempts that plausibly match the lived scene.
+
+Implication:
+
+- Each behavior scene should define or resolve to relevant audit options.
+- Changing the selected scene should clear stale advice/effect answers.
+- Keep the option count low: four relevant attempts plus an honest escape hatch where possible.
+- Shared options can be reused, but the visible set should be selected by the loop/scene.
+
+## 2026-06-28: Internal Framework Language Is Not User-Facing Copy
+Practice should use internal concepts to guide product thinking, not to explain the product to users by default.
+
+Reason:
+
+- The user uses concepts like IKEA, reinforcement, identity, knowledge, environment, cognitive biases, free access, gating, and persistence so the product team can reason clearly.
+- Those words are often too abstract, instructional, or system-facing for the actual experience.
+- Users should not be treated as if they need obvious interface behavior explained.
+- The product should feel intelligent through precise interaction and concrete copy, not through visible framework labels.
+
+Implication:
+
+- Keep IKEA and related framework terms in docs, code structure, data models, and internal discussion.
+- Do not expose internal labels like "Identity", "Knowledge", "Environment", "Action", "Reinforcement", "IKEA", "gated", or "free session" in user-facing copy unless explicitly chosen.
+- Avoid CTA copy that explains the commercial/access model when the user can infer it.
+- Prefer plain, concrete, lived-moment copy such as "Start", "Continue", "Keep this for later", "What changed?", and "Help me remember this".
+- Educate users only where it matters: consent, privacy, payment, WhatsApp reminders, account creation, or genuinely ambiguous product behavior.
+
+## 2026-06-28: Practice Must Be Multi-Loop And Modular
+Practice should be architected as a family of behavior-change loops, not as a procrastination-only single-page app.
+
+Reason:
+
+- Procrastination is only the first pattern/loop/practice, not the full product.
+- Future loops should reuse the same emotional journey, IKEA structure, reinforcement handoff, and progress evidence patterns.
+- A large route-level client component would become hard to understand, hard to maintain, and easy to copy incorrectly.
+- Practice should align with the current Neurocient product design and infrastructure instead of becoming a disconnected app inside the app.
+
+Implication:
+
+- Do not treat `/practice` as a standalone SPA.
+- Do not hardcode the architecture around procrastination.
+- Split Practice into small reusable components, loop definitions, flow logic, and integration adapters before adding more loops or deeper persistence.
+- Keep route files as containers and composition points.
+- Keep procrastination-specific copy and branching in a loop definition or clearly isolated module.
+- Reuse current auth, progress, WhatsApp, microchallenge, preferences, and IKEA systems.
+- Match the existing product design language while making Practice calmer and more focused.
+
 ## 2026-06-28: Use IKEA Instead Of IDEA
 Practice should use **IKEA** as the internal behavior-change framework: Identity, Knowledge, Environment, Action.
 
@@ -70,7 +243,7 @@ Implication:
 - The user should recognize actual behavior before seeing explanations or actions.
 - Insights should be compressed into moments rather than lessons.
 - Progress should be shown as evidence of behavioral persistence: caught earlier, returned sooner, changed the environment, made the next action visible, or interrupted autopilot.
-- Mature Practice architecture should route users adaptively across Identity, Knowledge, Environment, Action, Reinforcement, and Moment of Victory.
+- Mature Practice architecture should route users adaptively across Identity, Knowledge, Environment, Action, Reinforcement, and post-action evidence.
 
 ## 2026-06-28: Cognitive Biases Are A Core Behavior Design Material
 Practice should heavily use cognitive biases to drive useful behavior, with explicit ethical guardrails.
@@ -150,6 +323,8 @@ Implication:
 - The IKEA screen should stay quick and worksheet-like: Identity, Knowledge, Environment, and Action should be shown as an applied map of the selected pattern.
 
 ## 2026-06-02: Environment Screen Follows Knowledge
+Superseded by 2026-06-28: "Environment Redesign Follows Identity."
+
 The flow now adds a selected-pattern environment screen after the brain-mechanics knowledge screen.
 
 Reason:

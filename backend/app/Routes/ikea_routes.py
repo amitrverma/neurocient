@@ -60,10 +60,12 @@ async def get_active_worksheet(
 
     return {
         "id": str(worksheet.id),
+        "struggle": worksheet.struggle,
         "identity": worksheet.identity,
         "tinyAction": worksheet.tiny_action,
         "environment": worksheet.environment,
         "knowledge": worksheet.knowledge,
+        "created_at": worksheet.created_at.isoformat() if worksheet.created_at else None,
     }
 
 # 3. Toggle today's tracker log
@@ -163,6 +165,7 @@ async def get_worksheet_history(
     return [
         {
             "id": str(w.id),
+            "struggle": w.struggle,
             "identity": w.identity,
             "tinyAction": w.tiny_action,
             "created_at": w.created_at.isoformat() if w.created_at else None
@@ -185,6 +188,7 @@ async def get_worksheet_detail(
 
     return {
         "id": str(worksheet.id),
+        "struggle": worksheet.struggle,
         "identity": worksheet.identity,
         "tinyAction": worksheet.tiny_action,
         "knowledge": worksheet.knowledge,

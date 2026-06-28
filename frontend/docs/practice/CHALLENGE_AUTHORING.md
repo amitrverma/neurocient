@@ -17,6 +17,8 @@ Each challenge should express IKEA + Reinforcement + Behavioral Design:
 
 The old schema was an MVP and should not be treated as the target architecture. When building the next Practice system, evolve toward structured behavior-loop data rather than adding isolated fields for one challenge.
 
+Procrastination is only the first Practice loop. Authoring should assume many loops will eventually use the same product spine. Do not bake procrastination-specific assumptions into shared components, route structure, or persistence.
+
 Challenge authoring should start with lived scenes, not concepts. The user should recognize an actual behavior before they are asked to accept an explanation or try an action.
 
 ## Retired MVP Schema
@@ -187,6 +189,24 @@ type BehavioralDesignLever = {
 
 The exact schema should be decided during implementation. The important constraint is that reinforcement and progress after auth should use or extend existing backend infrastructure where practical.
 
+## Reusable Loop Authoring Rules
+When adding or revising Practice content:
+
+- keep loop-specific copy in loop data or clearly isolated content modules
+- keep reusable screens free of procrastination-only assumptions
+- write lived behavior scenes before explanations
+- anchor advice/audit options to the selected lived behavior scene
+- include a scene-specific alternate perspective after the effect check
+- express the Neurocient/evolutionary mismatch angle without naming internal branded concepts such as Inner Caveman
+- define identity as a pair: what the loop gets the user to call themselves, and what identity they can practice instead
+- make the practiced identity sound natural enough for a person to carry; avoid awkward phrases that only make sense as product logic
+- document the intended behavioral design lever where it matters
+- connect each action to Identity, Knowledge, and Environment rather than generic advice
+- define post-action evidence prompts that can work across progress views
+- define reinforcement prompts that retrieve the user's own insight
+
+Do not create a new one-off page for each loop unless the interaction model truly differs. Most loops should reuse the same session shell and screen components.
+
 ## Flow Requirements
 The original procrastination MVP should:
 
@@ -200,11 +220,11 @@ A future fully developed IKEA challenge should generally:
 
 1. Begin with recognition, not advice.
 2. Surface identity story or self-label.
-3. Help the user discover why the behavior makes sense.
+3. Help the user reframe the self-story created by the loop.
 4. Ask what in the environment supports the old loop.
 5. Recommend one concrete action.
 6. Create a reinforcement hook.
-7. Capture a moment of victory.
+7. Capture evidence later, after the user has tried the action or returned through reinforcement.
 
 Future adaptive challenges should not assume every user needs the same next step. Depending on the user's responses, the system may return to Identity, Knowledge, Environment, Action, or Reinforcement.
 
@@ -283,10 +303,12 @@ Example routing logic:
 - If the user reports confusion about why they avoided the task, return to Knowledge.
 - If the user reports they knew what to do but did not start, return to Environment.
 - If the user reports the setup was ready but action still felt too large, return to a smaller Action.
-- If the user reports a small win, capture a Moment of Victory.
+- If the user reports a small win after trying the action, capture a Moment of Victory.
 
 ## Moments Of Victory
 Challenges should define visible evidence of progress.
+
+Do not ask users to select a victory before they have acted. Victory belongs in post-action check-ins, reinforcement returns, or progress logging where it can reflect real behavior.
 
 Good victory moments include:
 

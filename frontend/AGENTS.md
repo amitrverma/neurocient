@@ -14,6 +14,12 @@ Applies to:
 - `src/app/insights/[slug]/page.tsx`
 - `src/app/globals.css`
 
+Practice-specific work under `src/app/practice/**` and `src/content/challenges/**` follows a separate product context. Read these before editing Practice:
+- `docs/practice/IKEA_FRAMEWORK.md`
+- `docs/practice/PRACTICE_PRODUCT_CONTEXT.md`
+- `docs/practice/CHALLENGE_AUTHORING.md`
+- `docs/practice/DECISIONS.md`
+
 Do not apply article-specific styling globally unless explicitly requested. Site-wide utilities may be added only when they support repeated page patterns and match the landing page system.
 
 ## Non-Negotiables
@@ -23,10 +29,29 @@ Do not apply article-specific styling globally unless explicitly requested. Site
 - Keep changes scoped to the target article when experimenting.
 - Do not overwrite existing user edits. Inspect dirty files before changing them.
 - Fix visible mojibake when touching nearby copy, but avoid broad copy rewrites unless requested.
+- Do not force the Practice product to match the portal design system. Practice is allowed to use a calmer, more minimal visual language when it serves the behavior-change experience.
+
+## Practice Product Exception
+`src/app/practice/**` is an app-like behavior-change surface, not a normal portal page and not a Tools subsection.
+
+The Practice product is based on IKEA + Reinforcement:
+- Identity
+- Knowledge
+- Environment
+- Action
+- Reinforcement
+
+For Practice work:
+- action should generally come after identity, knowledge, and environment
+- flows should feel emotionally lightweight and non-judgmental
+- challenge content should remain structured and reusable
+- reinforcement should retrieve insight over time, not merely notify
+- update `docs/practice/DECISIONS.md` when product direction changes
 
 ## Brand Background Colors
 - Use only two brand background colors for page and section backgrounds: white/background (`--background: #ffffff`, exposed as `--color-background`) and `brand-dark` (`--color-brand-dark: #042a2b`), as defined in `src/app/globals.css`.
 - Do not introduce additional background color treatments unless the user explicitly requests them.
+- This brand background rule does not apply to `src/app/practice/**`, which may use a distinct calm visual system.
 
 ## Landing Page Design System
 Use the current landing page as the default direction for non-article page upgrades:

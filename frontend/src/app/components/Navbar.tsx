@@ -10,6 +10,7 @@ import AuthModal from "./AuthModal";
 
 const navLinks = [
   { href: "/insights", label: "Insights" },
+  { href: "/practice", label: "Practice" },
   { href: "/resources", label: "Resources" },
   { href: "/diagnostics", label: "Diagnostics" },
   { href: "/tools", label: "Tools" },

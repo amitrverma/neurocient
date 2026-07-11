@@ -110,7 +110,10 @@ export const fetchCurrentPractice = async (): Promise<SavedPractice | null> => {
     credentials: "include",
   });
 
-  if (res.status === 404) return null;
+  // A stale or still-hydrating client auth state can briefly request this
+  // before the backend session cookie is available. For this optional read,
+  // signed out and "no saved practice" are the same UI state.
+  if (res.status === 401 || res.status === 404) return null;
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {

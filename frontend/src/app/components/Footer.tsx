@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
+import { Instagram, Linkedin, Twitter, X, Youtube } from "lucide-react";
+import Newsletter from "./Newsletter";
 
 const footerGroups = [
   {
@@ -51,7 +53,10 @@ const socialLinks = [
 ];
 
 const Footer = () => {
+  const [newsletterOpen, setNewsletterOpen] = useState(false);
+
   return (
+    <>
     <footer className="mt-12 border-t border-brand-dark/12 bg-white px-6 py-10 font-sans text-sm text-brand-dark">
       <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.85fr_1.55fr_0.6fr] lg:items-start">
         <div className="max-w-sm">
@@ -96,6 +101,13 @@ const Footer = () => {
           <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
             Stay connected
           </p>
+          <button
+            type="button"
+            onClick={() => setNewsletterOpen(true)}
+            className="mt-4 cursor-pointer font-semibold underline decoration-brand-dark/25 underline-offset-4 transition hover:text-brand-primary"
+          >
+            Newsletter
+          </button>
           <div className="mt-4 flex gap-3 lg:justify-end">
             {socialLinks.map((link) => {
               const Icon = link.icon;
@@ -119,6 +131,41 @@ const Footer = () => {
         </div>
       </div>
     </footer>
+
+    {newsletterOpen && (
+      <div
+        className="fixed inset-0 z-[80] flex items-center justify-center bg-brand-dark/70 p-4 backdrop-blur-sm"
+        role="presentation"
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setNewsletterOpen(false);
+        }}
+      >
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="newsletter-dialog-title"
+          className="relative max-h-[92vh] w-full max-w-6xl overflow-y-auto rounded-lg bg-brand-dark shadow-[0_30px_100px_rgba(0,0,0,0.3)]"
+        >
+          <button
+            type="button"
+            onClick={() => setNewsletterOpen(false)}
+            aria-label="Close newsletter signup"
+            className="absolute right-4 top-4 z-10 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/25 bg-brand-dark text-white transition hover:border-brand-secondary hover:text-brand-secondary"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <span id="newsletter-dialog-title" className="sr-only">
+            Weekly Insights newsletter signup
+          </span>
+          <Newsletter
+            variant="feature"
+            subtext="Join thousands of readers getting weekly insights on the ancient wiring behind modern struggles and practical ways to work with it. No fluff. No gimmicks. Just science made human."
+            logoSrc="/logo/newsletter.png"
+          />
+        </div>
+      </div>
+    )}
+    </>
   );
 };
 

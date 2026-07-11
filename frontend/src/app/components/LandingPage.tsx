@@ -7,7 +7,7 @@ import CavemanScanSection from "./landing/CavemanScanSection";
 
 export default function LandingPage() {
   return (
-    <main className="flex flex-col overflow-hidden bg-white font-serif text-brand-dark selection:bg-brand-secondary/60">
+    <main className="landing-page flex flex-col overflow-hidden bg-white font-serif text-brand-dark selection:bg-brand-secondary/60">
       <HeroSection />
       <StrugglesSection />
       <ModernFixesSection />

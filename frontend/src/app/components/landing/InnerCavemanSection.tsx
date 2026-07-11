@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Compass, Heart, ShieldCheck, Sparkles, Users } from "lucide-react";
-import { SectionLabel } from "./LandingShared";
+import { SectionDecorations, SectionLabel } from "./LandingShared";
 
 const drives = [
   {
@@ -42,11 +42,12 @@ const drives = [
 ];
 export default function InnerCavemanSection() {
   return (
-      <section className="bg-white px-6 py-20 md:py-28">
-        <div className="mx-auto grid w-full max-w-6xl gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+      <section className="relative overflow-hidden bg-white px-6 py-20 md:py-28">
+        <SectionDecorations />
+        <div className="relative z-10 mx-auto grid w-full max-w-6xl gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <div>
             <SectionLabel>Neurocient Labs introduces…</SectionLabel>
-            <h2 className="text-[clamp(3.25rem,5.5vw,6rem)] font-bold leading-[0.96] tracking-[-0.04em] text-brand-dark">
+            <h2 className="text-[clamp(3rem,5.2vw,5.5rem)] font-bold leading-[0.95] tracking-[-0.04em] text-brand-dark">
               Meet Your <span className="italic text-brand-accent">Inner Caveman</span>
             </h2>
             <p className="mt-8 font-sans text-lg leading-9 text-brand-dark/75">
@@ -73,54 +74,62 @@ export default function InnerCavemanSection() {
           <CavemanImage />
         </div>
 
-        <div className="mx-auto mt-16 grid max-w-6xl content-start gap-px overflow-hidden rounded-lg border border-brand-dark/12 bg-brand-dark/12 sm:grid-cols-2 lg:grid-cols-3">
-          {drives.map((drive) => {
+        <div className="relative z-10 mx-auto mt-16 max-w-6xl border-y border-brand-dark/15">
+          <div aria-hidden="true" className="absolute bottom-0 left-[1.15rem] top-0 w-px bg-brand-teal/25 md:left-[1.65rem]" />
+          {drives.map((drive, index) => {
             const Icon = drive.icon;
 
             return (
               <Link
                 key={drive.name}
                 href={drive.href}
-                className="group bg-white px-6 py-6 transition duration-300 hover:-translate-y-0.5 hover:bg-brand-dark hover:text-white"
+                className="group relative grid gap-4 border-b border-brand-dark/12 bg-white py-6 last:border-b-0 md:grid-cols-[3.5rem_1fr_1fr] md:items-center md:gap-8 md:py-7"
               >
-                <div className="flex items-start gap-3">
-                  <Icon className="mt-1 h-5 w-5 shrink-0 text-brand-accent transition group-hover:text-brand-secondary" />
-                  <div>
-                    <h3 className="font-sans text-sm font-semibold text-brand-dark transition group-hover:text-white">
+                <div className="absolute left-0 top-6 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-brand-teal/40 bg-white font-sans text-[0.65rem] font-bold text-brand-teal transition group-hover:border-brand-primary group-hover:text-brand-primary md:static md:h-12 md:w-12">
+                  {String(index + 1).padStart(2, "0")}
+                </div>
+                <div className="pl-14 md:pl-0">
+                  <div className="flex items-center gap-3">
+                    <Icon className="h-5 w-5 shrink-0 text-brand-accent" />
+                    <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.12em] text-brand-dark/65">
                       {drive.name}
                     </h3>
-                    <p className="mt-2 text-xl italic leading-7 text-brand-dark transition group-hover:text-brand-secondary">
-                      {drive.question}
-                    </p>
-                    <p className="mt-3 font-sans text-sm leading-6 text-brand-dark/70 transition group-hover:text-white/65">
-                      {drive.modern}
-                    </p>
                   </div>
+                  <p className="mt-2 font-serif text-2xl font-bold italic leading-8 text-brand-dark transition group-hover:text-brand-accent md:text-3xl">
+                    {drive.question}
+                  </p>
                 </div>
+                <p className="ml-14 border-l-2 border-brand-secondary/50 pl-4 font-sans text-sm leading-6 text-brand-dark/70 md:ml-0 md:text-base md:leading-7">
+                  {drive.modern}
+                </p>
               </Link>
             );
           })}
         </div>
 
-        <div className="mx-auto mt-14 grid max-w-6xl gap-6 border-t border-brand-dark/15 pt-10 font-sans text-base leading-8 text-brand-dark/75 md:grid-cols-2">
-          <p className="font-serif text-2xl leading-9 text-brand-dark">
+        <div className="relative z-10 mx-auto mt-14 grid max-w-6xl gap-8 pt-10 font-sans text-base leading-8 text-brand-dark/75 md:grid-cols-2 md:gap-12">
+          <p className="border-l-4 border-brand-secondary pl-5 font-serif text-2xl font-bold leading-9 text-brand-dark md:text-3xl md:leading-10">
             None of these drives are good or bad. They helped humans survive for
             thousands of years.
           </p>
-          <p>
+          <p className="border-t-2 border-brand-primary/35 pt-5 md:text-lg md:leading-9">
             The challenge is that they are still responding to a modern world
             they were never designed for.
           </p>
-          <p>
-            You cannot delete your Inner Caveman. But you can learn to recognise
-            when it is active, understand what it is trying to protect, and work
-            with it
-          </p>
-          <p className="font-semibold text-brand-dark">
-            You want MORE from your ONE life. This is where it starts. By finally
+          <div className="py-8 md:col-span-2 md:py-10">
+            <p className="font-serif text-2xl leading-9 text-brand-dark md:max-w-5xl md:text-3xl md:leading-10">
+              You cannot delete your Inner Caveman. But you can learn to
+            </p>
+            <div className="mt-6 grid gap-3 font-sans font-semibold text-brand-dark sm:grid-cols-3">
+              <span className="border-l-2 border-brand-teal pl-4">recognise when it is active,</span>
+              <span className="border-l-2 border-brand-secondary pl-4">understand what it is trying to protect,</span>
+              <span className="border-l-2 border-brand-primary pl-4">and work with it.</span>
+            </div>
+          </div>
+          <p className="bg-brand-dark px-6 py-7 font-serif text-2xl font-bold leading-9 text-white md:col-span-2 md:max-w-5xl md:px-9 md:py-9 md:text-3xl md:leading-10">
+            You want MORE from your life. This is where it starts. By finally
             understanding what&apos;s underneath.
           </p>
-          <p className="border-l-4 border-brand-secondary pl-5 font-serif text-3xl font-bold leading-tight text-brand-dark md:col-span-2 md:text-5xl">The first step is seeing it in yourself.</p>
         </div>
       </section>
   );

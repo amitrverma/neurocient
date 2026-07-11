@@ -1,11 +1,12 @@
-import { SectionLabel, Stat } from "./LandingShared";
+import { SectionDecorations, SectionLabel } from "./LandingShared";
 
 export default function PerspectiveSection() {
   return (
-      <section className="border-b border-brand-dark/10 bg-white text-brand-dark">
-        <div className="mx-auto max-w-6xl px-6 py-20 md:py-28">
+      <section className="relative overflow-hidden bg-white text-brand-dark">
+        <SectionDecorations flip />
+        <div className="relative z-10 mx-auto max-w-6xl px-6 py-20 md:py-28">
           <SectionLabel>A Different Perspective on Getting More Life from Life</SectionLabel>
-          <h2 className="max-w-5xl text-[clamp(3.25rem,6vw,6.5rem)] font-bold leading-[0.94] tracking-[-0.045em]">
+          <h2 className="max-w-5xl text-[clamp(3rem,5.2vw,5.5rem)] font-bold leading-[0.95] tracking-[-0.04em]">
             It is not your <span className="italic text-brand-accent">personal failing.</span>
           </h2>
 
@@ -15,20 +16,37 @@ export default function PerspectiveSection() {
             live in today.
           </p>
 
-          <div className="mt-12 max-w-4xl space-y-6 font-sans text-base leading-8 text-brand-dark/80 md:ml-auto md:text-lg md:leading-9">
-            <p>
-              The world around us has changed dramatically. Technology has
-              changed. The way we work has changed. The way we communicate has
-              changed.
+          <div className="mt-14 max-w-5xl md:ml-auto">
+            <p className="font-serif text-2xl font-bold leading-9 md:text-4xl md:leading-tight">
+              The world around us has changed dramatically.
             </p>
-            <p>But our inner system has not changed at the same pace.</p>
-            <p>
-              For most of human history, our ancestors lived in caves, in small
-              groups where survival depended on avoiding danger, finding food,
-              and staying connected to the tribe.
+            <div className="mt-7 grid gap-px bg-brand-dark/12 font-sans sm:grid-cols-3">
+              {[
+                ["01", "Technology has changed."],
+                ["02", "The way we work has changed."],
+                ["03", "The way we communicate has changed."],
+              ].map(([number, text]) => (
+                <div key={number} className="bg-white px-5 py-5">
+                  <span className="text-[0.65rem] font-bold tracking-[0.18em] text-brand-teal">{number}</span>
+                  <p className="mt-2 font-sans text-base font-semibold leading-7 text-brand-dark md:text-lg md:leading-8">{text}</p>
+                </div>
+              ))}
+            </div>
+
+            <p className="my-10 border-l-4 border-brand-primary py-2 pl-6 font-serif text-2xl font-bold italic leading-9 text-brand-accent md:ml-16 md:text-4xl md:leading-tight">
+              But our inner system has not changed at the same pace.
             </p>
-            <p>Those conditions shaped the patterns that still influence us today.</p>
-            <p>
+
+            <div className="grid gap-6 border-y border-brand-dark/15 py-8 font-sans text-base leading-8 text-brand-dark/80 md:grid-cols-[1.2fr_.8fr] md:gap-12 md:py-10 md:text-lg md:leading-9">
+              <p>
+                For most of human history, our ancestors lived in caves, in small
+                groups where survival depended on avoiding danger, finding food,
+                and staying connected to the tribe.
+              </p>
+              <p className="font-serif text-2xl font-bold leading-9 text-brand-dark">Those conditions shaped the patterns that still influence us today.</p>
+            </div>
+
+            <p className="mt-10 border-l-4 border-brand-secondary pl-6 font-sans text-base leading-8 text-brand-dark/80 md:max-w-4xl md:text-lg md:leading-9">
               Today, comparing, scrolling, worrying, delaying action, and
               overthinking can start to feel like they say something about who
               you are. So you push harder. You try to become more disciplined.
@@ -36,9 +54,11 @@ export default function PerspectiveSection() {
             </p>
           </div>
 
-          <div className="mt-16 max-w-4xl space-y-6 border-t border-brand-dark/20 pt-12 font-sans text-base leading-8 text-brand-dark/80 md:text-lg md:leading-9">
-            <p>But what if that&apos;s not the real problem?</p>
-            <p>What if it was never about willpower in the first place?</p>
+          <div className="mt-16 max-w-5xl space-y-6 border-t border-brand-dark/20 pt-12 font-sans text-base leading-8 text-brand-dark/80 md:text-lg md:leading-9">
+            <div className="space-y-3 font-serif text-[clamp(2.35rem,5vw,5rem)] font-bold leading-[1.02] tracking-[-0.035em] text-brand-dark">
+              <p>But what if that&apos;s not the real problem<span className="text-brand-primary">?</span></p>
+              <p className="italic text-brand-accent">What if it was never about willpower in the first place?</p>
+            </div>
             <p>
               These struggles are not signs that something is wrong with you.
               They are old responses that were useful in a very different
@@ -63,7 +83,7 @@ export default function PerspectiveSection() {
               even notice.
             </p>
             <p className="my-14 border-y border-brand-dark/15 py-12 font-serif text-[clamp(3rem,6vw,6.25rem)] font-bold leading-[1.02] tracking-[-0.04em] text-brand-dark">
-              Your brain is around{" "}
+              Your brain is{" "}
               <span className="italic text-brand-accent">200,000 years old.</span>
               <br />
               The world you are living in is not.
@@ -84,13 +104,6 @@ export default function PerspectiveSection() {
           </div>
         </div>
 
-        <div className="bg-brand-dark px-6 py-10 text-white md:py-12">
-          <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
-            <Stat number="5" label="Core survival drives still shaping modern behavior." />
-            <Stat number="2x" label="How much stronger losses can feel compared with equivalent gains." />
-            <Stat number="95%" label="Of decisions driven by unconscious, automatic processes." />
-          </div>
-        </div>
       </section>
   );
 }

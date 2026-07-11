@@ -23,6 +23,8 @@ Practice-specific work under `src/app/practice/**` and `src/content/challenges/*
 Do not apply article-specific styling globally unless explicitly requested. Site-wide utilities may be added only when they support repeated page patterns and match the landing page system.
 
 ## Non-Negotiables
+- Treat all product and marketing surfaces as mobile-first by default. Begin with mobile hierarchy, content density, touch targets, wrapping, and progressive disclosure; then enhance for larger screens. Desktop is an important supported surface, not the default design canvas.
+- Expect text-heavy experiences. Preserve intellectual and emotional substance while making it accessible through layout rhythm, typographic roles, concise groups, visual models, progressive disclosure, and varied presentation. Do not default to deleting copy merely to make a page feel lighter.
 - Preserve article content meaning. If user says "do not modify content", do not rewrite claims or arguments.
 - Prefer structure/presentation changes over wording changes.
 - Save MDX files as UTF-8. Avoid cp1252 encoding artifacts, replacement characters, and mojibake.
@@ -147,6 +149,7 @@ Preferred rich format for dense educational articles:
 - Legacy `prologue-reading-list` / `prologue-reading-table` remain supported.
 
 ## QA Checklist Before Finalizing
+- Verify mobile first at a narrow viewport before evaluating desktop enhancements.
 - Article renders without encoding artifacts or mojibake.
 - No unintended global style regressions.
 - Audio placement matches request.

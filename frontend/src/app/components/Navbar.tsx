@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type React from "react";
 import { Bookmark, LayoutDashboard, LogOut, Menu, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import AuthModal from "./AuthModal";
 
@@ -21,12 +22,40 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showHomeNav, setShowHomeNav] = useState(false);
+  const pathname = usePathname();
   const { user, logout } = useAuth();
+
+  useEffect(() => {
+    if (pathname !== "/") {
+      setShowHomeNav(true);
+      return;
+    }
+
+    setShowHomeNav(false);
+    const scanSection = document.getElementById("caveman-scan-section");
+    if (!scanSection) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowHomeNav(entry.isIntersecting),
+      { threshold: 0.08 },
+    );
+
+    observer.observe(scanSection);
+    return () => observer.disconnect();
+  }, [pathname]);
 
   const closeMobile = () => setIsOpen(false);
 
   return (
-    <nav className="fixed left-0 top-0 z-50 w-full border-b border-brand-dark/12 bg-white/92 font-sans text-brand-dark backdrop-blur-md">
+    <nav
+      aria-hidden={pathname === "/" && !showHomeNav}
+      className={`fixed left-0 top-0 z-50 w-full border-b border-brand-dark/12 bg-white/92 font-sans text-brand-dark backdrop-blur-md transition duration-500 motion-reduce:transition-none ${
+        pathname === "/" && !showHomeNav
+          ? "pointer-events-none -translate-y-full opacity-0"
+          : "translate-y-0 opacity-100"
+      }`}
+    >
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="inline-flex items-center">

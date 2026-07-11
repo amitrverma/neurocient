@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SectionLabel } from "./LandingShared";
+import { SectionDecorations, SectionLabel } from "./LandingShared";
 
 const struggles = [
   {
@@ -24,7 +24,7 @@ const struggles = [
   },
   {
     title: "Worries That Never Leave",
-    eyebrow: "",
+    eyebrow: "The mind keeps rehearsing",
     lead: "You replay conversations and anticipate problems before they happen.",
     detail:
       "You are thinking/overthinking all the time. Pre-playing and re-playing social interactions in your head. And more often than not the things you imagine might go wrong never happen.",
@@ -33,7 +33,7 @@ const struggles = [
   },
   {
     title: "The Guilt That Doesn't Go Away",
-    eyebrow: "",
+    eyebrow: "Another plan abandoned",
     lead: "You've hit a point where you're scared for yourself.",
     detail:
       "You've tried every self-help method under the sun — gym, healthy food, multivitamins, motivational quotes all over your room, goal planning, screen filters — but nothing sticks. You make detailed plans,",
@@ -41,7 +41,7 @@ const struggles = [
       "print them, write them on your walls, and yet you waste whole days doing nothing meaningful. You keep procrastinating.  Just watching random videos or scrolling aimlessly.",
   },
   {
-    title: "Keep Measuring Yourself Against Others",
+    title: "Measuring Yourself Against Others",
     eyebrow: "Status scanning",
     lead: "You're doing your thing, and then something shifts.",
     detail:
@@ -73,22 +73,42 @@ export default function StrugglesSection() {
   return (
       <section
         id="struggle"
-        className="mx-auto w-full max-w-6xl scroll-mt-24 px-6 py-20 md:py-28"
+        className="relative mx-auto w-full max-w-6xl scroll-mt-24 overflow-hidden px-6 pb-20 pt-12 md:pb-28 md:pt-16"
       >
+        <SectionDecorations flip />
+        <div className="relative z-10">
         <SectionLabel>The modern challenge</SectionLabel>
-        <h2 className="text-[clamp(3.5rem,6vw,6.5rem)] font-bold leading-[0.92] tracking-[-0.045em] text-brand-dark">
-          Why do I do that?
-        </h2>
-        <p className="mt-7 max-w-3xl font-sans text-lg leading-8 text-brand-dark/75 md:text-xl md:leading-9">
-          You know what needs to be done. You may even want to do it. And yet,
-          you don&apos;t. Not always. Not completely. But often enough to notice a
-          pattern. That&apos;s the part worth paying attention to.
-        </p>
-        <div className="mt-14">
+        <div className="grid gap-6 md:grid-cols-[1.1fr_.9fr] md:items-end md:gap-12">
+          <h2 className="text-[clamp(3rem,5.2vw,5.5rem)] font-bold leading-[0.94] tracking-[-0.045em] text-brand-dark">
+            Why do I do that<span className="text-brand-primary">?</span>
+          </h2>
+          <div className="max-w-2xl border-l-2 border-brand-teal/35 pl-5 font-sans text-base leading-7 text-brand-dark md:text-lg md:leading-8">
+            <p>You know what needs to be done. You may even want to do it.</p>
+            <ul className="my-4 space-y-2">
+              <li className="flex gap-3">
+                <span aria-hidden="true" className="mt-[0.7em] h-1.5 w-1.5 shrink-0 rounded-full bg-brand-primary" />
+                <span>And yet, you don&apos;t.</span>
+              </li>
+              <li className="flex gap-3">
+                <span aria-hidden="true" className="mt-[0.7em] h-1.5 w-1.5 shrink-0 rounded-full bg-brand-secondary" />
+                <span>Not always. Not completely.</span>
+              </li>
+              <li className="flex gap-3">
+                <span aria-hidden="true" className="mt-[0.7em] h-1.5 w-1.5 shrink-0 rounded-full bg-brand-teal" />
+                <span>But often enough to notice a pattern.</span>
+              </li>
+            </ul>
+            <p className="font-serif text-xl font-bold leading-7 text-brand-dark md:text-2xl md:leading-8">
+              That&apos;s the part worth paying attention to.
+            </p>
+          </div>
+        </div>
+        <div className="mt-9 md:mt-11">
           <SplitStruggleShowcase
             activeStruggle={activeStruggle}
             onSelect={setActiveStruggle}
           />
+        </div>
         </div>
       </section>
   );
@@ -108,8 +128,8 @@ const SplitStruggleShowcase = ({
 
   return (
     <>
-      <div className="hidden min-h-[34rem] overflow-hidden rounded-lg border border-brand-dark/12 bg-white shadow-[0_28px_80px_rgba(4,42,43,0.09)] md:grid md:grid-cols-[1fr_5.5rem] md:items-stretch">
-        <article className="flex flex-col justify-between px-8 py-9 lg:px-12 lg:py-11">
+      <div className="hidden min-h-[28rem] overflow-hidden rounded-lg border border-brand-dark/12 bg-white shadow-[0_28px_80px_rgba(4,42,43,0.09)] md:grid md:grid-cols-[1fr_5.5rem] md:items-stretch">
+        <article className="flex flex-col px-8 py-9 lg:px-12 lg:py-11">
           <div className="flex items-start justify-between gap-8 border-b border-brand-dark/10 pb-7">
             <div>
               {struggles[safeActiveStruggle].eyebrow && (

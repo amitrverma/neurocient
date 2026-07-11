@@ -1,38 +1,40 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { SectionLabel } from "./LandingShared";
+import { ArrowRight, Check } from "lucide-react";
+import { SectionDecorations, SectionLabel } from "./LandingShared";
 
 export default function CavemanScanSection() {
   return (
-      <section className="bg-brand-dark px-6 py-20 text-white md:py-28">
-        <div className="mx-auto grid w-full max-w-6xl gap-12 md:grid-cols-[0.85fr_1.15fr] md:items-start">
-        <div>
+      <section id="caveman-scan-section" className="relative overflow-hidden bg-brand-dark px-6 py-20 text-white md:py-28">
+        <SectionDecorations tone="dark" flip />
+        <div className="relative z-10 mx-auto w-full max-w-6xl">
           <SectionLabel tone="dark">Inner Caveman Scan</SectionLabel>
-          <h2 className="max-w-xl text-[clamp(3rem,5vw,5.5rem)] font-bold leading-[0.96] tracking-[-0.04em] text-white">
-            The next step is to see this in yourself.
-          </h2>
-        </div>
-        <Link
-          href="/diagnostics/caveman-scan"
-          className="group block w-full rounded-lg border border-white/20 bg-white/[0.05] p-7 text-white transition duration-300 hover:-translate-y-1 hover:border-brand-secondary/60 hover:bg-white/[0.08] md:justify-self-end md:p-10"
-        >
-          <span className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-secondary">
-            Free tool
-          </span>
-          <h3 className="mt-4 text-3xl font-bold">Inner Caveman Scan</h3>
-          <p className="mt-3 font-sans text-sm leading-7 text-white/65">
-            A quick way to notice how this system shows up in your everyday decisions.
-          </p>
-          <p className="mt-4 font-sans text-sm leading-7 text-white/65">
-            Not a test. Not a label.
-            <br />
-            Just a clearer view of what&apos;s already happening.
-          </p>
-          <span className="mt-7 inline-flex items-center gap-2 rounded-full bg-brand-secondary px-5 py-3 font-sans text-sm font-semibold text-brand-dark transition group-hover:gap-3">
-            Go to the scan
-            <ArrowRight className="h-4 w-4" />
-          </span>
-        </Link>
+          <div className="grid gap-12 md:grid-cols-[1.05fr_.95fr] md:items-start md:gap-16">
+            <h2 className="max-w-3xl text-[clamp(3rem,5.2vw,5.5rem)] font-bold leading-[0.95] tracking-[-0.04em] text-white">
+              See where your Inner Caveman <span className="italic text-brand-secondary">goes first.</span>
+            </h2>
+
+            <div className="border-l-4 border-brand-primary pl-6 md:mt-3 md:pl-8">
+              <h3 className="text-3xl font-bold md:text-4xl">Inner Caveman Scan</h3>
+              <p className="mt-4 max-w-xl font-sans text-base leading-7 text-white/70 md:text-lg md:leading-8">
+                A quick way to notice how this system shows up in your everyday decisions.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-14 grid gap-8 border-t border-white/15 pt-9 md:grid-cols-[1fr_auto] md:items-end md:gap-12">
+            <div className="grid gap-3 font-sans text-sm text-white/75 sm:grid-cols-3 md:text-base">
+              <p className="flex items-center gap-3"><Check className="h-4 w-4 shrink-0 text-brand-secondary" />Not a test.</p>
+              <p className="flex items-center gap-3"><Check className="h-4 w-4 shrink-0 text-brand-secondary" />Not a label.</p>
+              <p className="flex items-center gap-3"><Check className="h-4 w-4 shrink-0 text-brand-secondary" />Just a clearer view of what&apos;s already happening.</p>
+            </div>
+            <Link
+              href="/diagnostics/caveman-scan"
+              className="group inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-brand-secondary px-7 font-sans text-sm font-bold text-brand-dark outline-none transition hover:bg-white focus-visible:ring-4 focus-visible:ring-brand-teal/60 sm:w-auto"
+            >
+              Go to the scan
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
         </div>
       </section>
   );

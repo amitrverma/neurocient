@@ -763,3 +763,18 @@ Implication:
 - Remove labels like "Tap" when the row is already clearly interactive.
 - Avoid "click here", "select one", and similar helper copy unless the interaction is genuinely ambiguous.
 - Use copy for emotional meaning and concrete recognition, not interface narration.
+## 2026-07-11: Neurocient Is Mobile-First
+Neurocient should be designed and implemented for mobile as the default experience, while continuing to support desktop well.
+
+Reason:
+
+- The expected primary usage context is mobile.
+- Mobile constraints force clearer hierarchy, lower cognitive load, more deliberate progressive disclosure, and appropriately sized interactions.
+- Starting from desktop and compressing afterward tends to preserve desktop density and weakens the intended calm, lightweight experience.
+
+Implication:
+
+- Begin new flows, pages, and components with the narrow-screen experience.
+- Make content order, interaction states, touch targets, line wrapping, and one-idea-per-viewport behavior work on mobile before adding desktop enhancements.
+- Treat desktop layouts as a deliberate expansion of the mobile product, not as the source layout.
+- Verify both surfaces, but resolve design tradeoffs in favor of the mobile experience unless a task explicitly targets desktop.

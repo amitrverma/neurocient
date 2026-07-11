@@ -99,7 +99,7 @@ export default function RootLayout({
           <AuthProvider>
             <PostHogProvider>
               <Navbar />
-              <main className="pt-20 font-serif">{children}</main>
+              <main className="pt-20 font-serif has-[.landing-page]:pt-0">{children}</main>
               <Footer />
             </PostHogProvider>
           </AuthProvider>

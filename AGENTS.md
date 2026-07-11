@@ -37,6 +37,8 @@ It is a guided behavior-change experience built around:
 Short form: **IKEA + Reinforcement**.
 
 ## Non-Negotiables
+- Neurocient is a mobile-first product. Design and implement the mobile experience as the default, then expand deliberately for desktop. Desktop support remains required, but it must not drive the initial information hierarchy, interaction model, or layout decisions.
+- Neurocient is intentionally text-rich. Do not treat removing substance as the default accessibility solution. Use exceptional hierarchy, pacing, typography, grouping, progressive disclosure, interaction, and visual storytelling to make dense ideas easy to enter and understand.
 - Do not reduce Practice to a list of tips.
 - Do not start Practice flows with action unless the user explicitly asks for that; action comes after Identity, Knowledge, and Environment.
 - Do not make each challenge a one-off page if it can be expressed through shared challenge data and reusable flow components.

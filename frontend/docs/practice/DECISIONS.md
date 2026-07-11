@@ -1,5 +1,114 @@
 # Practice Decisions
 
+## 2026-07-11: Account-Linked Portraits Must Be Retrievable
+
+A completed Scan linked during authentication must be available again from the user's account, independent of the original browser's local storage.
+
+Reason:
+
+- Persistence without a return path is not user value.
+- Creating an account to "keep your portrait" establishes a clear expectation that it can be revisited.
+- Local storage supports resume but cannot be the source of truth for an account-owned result.
+
+Implication:
+
+- `/diagnostics/caveman-scan` loads the authenticated user's latest completed portrait when there is no current local Scan.
+- The backend exposes the latest completed account-linked Scan with full evidence and portrait data.
+- Future account/history surfaces can build on the same records without changing the persistence contract.
+
+## 2026-07-11: Watchtowers Stay Internal Unless Deliberately Taught
+
+The Watchtower and landscape metaphors are internal product, scoring, and design language. They should not appear in the public Scan by default.
+
+Reason:
+
+- A user entering the Scan has not been taught what a Watchtower or landscape means.
+- Exposing internal metaphors makes the user decode the product instead of recognizing themselves.
+- The public experience is clearer when it describes what the Inner Caveman notices first, what it is trying to protect, where it becomes alert, and where Rational Mind stays grounded.
+
+Implication:
+
+- Keep Watchtower identifiers and mappings in code and internal documentation.
+- Use the established five core-drive names only where naming the concern adds clarity.
+- Do not mention supporting Watchtowers, landscapes, standing guard, or towers in public copy unless a future experience deliberately introduces and earns the metaphor.
+- Review public Scan copy specifically for implementation-language leakage during every iteration.
+
+## 2026-07-11: First Watchtower Scan Ships As An End-To-End Vertical Slice
+
+The versioned Watchtower foundation now powers the public `/diagnostics/caveman-scan` experience from intro through the account-linked living portrait.
+
+Reason:
+
+- The complete interaction is necessary to validate more than isolated types and scoring functions.
+- Scenario recognition, progressive pacing, the anonymous value boundary, account motivation, and report usefulness need to be experienced together.
+- A working vertical slice gives future wording and visual iterations a stable evidence and persistence base.
+
+Implication:
+
+- Complete all 12 moments before asking for an account.
+- Give anonymous users a meaningful first portrait observation rather than withholding the promised result.
+- Ask for a free account to keep and deepen the portrait, then link the anonymous session to that user.
+- Randomize response presentation without changing option identities or mappings.
+- Keep the full report deterministic in this version and route toward Inner Caveman 101 and Practice.
+- Treat the current copy and presentation as a testable first iteration, not final calibrated language.
+
+## 2026-07-11: Build The Scan Foundation Before Reworking Presentation
+
+The first implementation step for the new Inner Caveman Scan is the versioned domain, evidence, and persistence foundation. Wording and visible presentation will be reviewed in a later iteration.
+
+Reason:
+
+- Scenario options must retain stable links to the five Watchtowers and Rational Mind before a trustworthy portrait can be generated.
+- Historical evidence must remain reproducible when scenario copy, mappings, scoring, or report language changes.
+- Anonymous users should be able to complete the Scan while the same session can later be linked to an account for the living portrait.
+
+Implication:
+
+- Keep the existing public Scan UI active until the Watchtower presentation is intentionally designed.
+- Establish versioned scenarios, deterministic 12-scenario selection, response snapshots, evidence scoring, portrait inputs, anonymous sessions, and account linking first.
+- Treat current scenario wording as version-one source material, not final calibrated copy.
+- Do not prematurely implement the preview gate, full report prose, progressive reflections, or Watchtower visual landscape in this foundation pass.
+
+## 2026-07-11: Build The Scan Around Watchtowers, Not Drive Scores
+
+While building the Inner Caveman Scan, the five core drives should be modeled internally as Watchtowers: places the Inner Caveman goes to keep watch when an ordinary moment acquires survival-relevant meaning.
+
+Reason:
+
+- "Drive" can imply a stable trait, a quantity a person possesses, or a force that determines behavior.
+- The Scan is intended to observe what the mind notices and protects first, not assign personality traits.
+- Watchtowers provide a coherent narrative and visual language for scenarios, progressive reflections, and the final portrait.
+- The metaphor supports contextual portraits: the Caveman may watch the Horizon in uncertainty, the Campfire in group moments, the High Ground during evaluation, the Home Path in close bonds, and the Care Circle around responsibility for others.
+
+Implication:
+
+- Use the working Watchtowers Horizon/Safety, Campfire/Belonging, High Ground/Status, Home Path/Bond, and Care Circle/Kin.
+- Preserve each scientific core-drive construct as metadata attached to its Watchtower.
+- Model Rational Mind separately; it is not a sixth Watchtower or a superior command tower.
+- Persist response evidence against stable identifiers and versioned mappings, not only a winning category or final score.
+- Generate reports as a contextual landscape showing where the Caveman keeps watch and where Rational Mind can stay with the evidence.
+- Avoid trait language, dominant-drive labels, rationality percentages, cartoon treatment, and gamified tower visuals.
+- See `frontend/docs/NEUROCIENT_PRODUCT_SYSTEM.md` for the canonical cross-product explanation.
+
+## 2026-07-11: Practice Belongs To One Neurocient Recognition-To-Change System
+
+The Inner Caveman Scan, Inner Caveman 101, Spot Your Inner Caveman, Practice, microchallenges, and reinforcement should be designed as one connected product journey under the promise "Get more life from life."
+
+Reason:
+
+- Neurocient is moving beyond a knowledge base into applied, real-life behavior change.
+- The Scan creates personal recognition; Inner Caveman 101 supplies the shared mental model; Practice applies that understanding to a recurring behavior loop.
+- The existing spots, microchallenges, nudges, WhatsApp, reflections, and IKEA infrastructure can support awareness, experiments, retrieval, and evidence without creating parallel systems.
+- The procrastination Practice is the first proof case for turning a broad Caveman insight into work on one place where time, attention, energy, or agency is being lost.
+
+Implication:
+
+- Treat the Scan as the mirror, Inner Caveman 101 as orientation, and Practice as guided application.
+- Preserve Rational Mind in the Scan as a necessary contrast to the five protective drives; it is not a sixth drive or a claim that the Caveman should be defeated.
+- Connect existing capabilities through a recognition → understanding → spotting → practice → small experiment → reinforcement → evidence journey.
+- Do not present tools as an unrelated catalogue when they are supporting stages of the same product loop.
+- Use `frontend/docs/NEUROCIENT_PRODUCT_SYSTEM.md` as the cross-product reference for this direction.
+
 ## 2026-06-28: First Persistence Uses Local Draft Then Existing IKEA Worksheet
 The first implemented persistence path for Practice should save an anonymous draft locally, then persist it to the existing IKEA worksheet system after authentication.
 

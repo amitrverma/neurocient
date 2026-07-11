@@ -1,5 +1,5 @@
-import CavemanScan from "./CavemanScan";
+import WatchtowerScan from "./v2/WatchtowerScan";
 
 export default function CavemanScanPage() {
-  return <CavemanScan />;
+  return <WatchtowerScan />;
 }

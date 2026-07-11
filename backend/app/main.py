@@ -12,7 +12,8 @@ from app.Routes import (
     challenge_routes,
     spot_routes,
     nudge_routes,
-    preferences_route
+    preferences_route,
+    caveman_scan_routes
 )
 from app.database import Base, engine
 from app.utils.scheduler import start_scheduler 
@@ -61,3 +62,4 @@ app.include_router(challenge_routes.router, prefix="/challenges", tags=["microch
 app.include_router(spot_routes.router, prefix="/api", tags=["spots"])
 app.include_router(nudge_routes.router, prefix="/api", tags=["nudges"])
 app.include_router(preferences_route.router, prefix="/user", tags=["preferences"])
+app.include_router(caveman_scan_routes.router, prefix="/api", tags=["caveman-scan"])

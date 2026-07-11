@@ -204,3 +204,31 @@ class SavedArticle(Base):
     __table_args__ = (
         UniqueConstraint("user_id", "article_id", name="uq_user_article"),
     )
+
+
+class CavemanScanSession(Base):
+    """Versioned evidence captured by the Inner Caveman Scan.
+
+    Content remains defined in the application scenario library. The session
+    stores immutable snapshots so historical portraits remain reproducible
+    after scenario copy or mappings evolve.
+    """
+
+    __tablename__ = "caveman_scan_sessions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    access_token = Column(UUID(as_uuid=True), unique=True, index=True, nullable=False, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    scan_version = Column(String, nullable=False)
+    scoring_version = Column(String, nullable=False)
+    report_version = Column(String, nullable=False)
+    status = Column(String, nullable=False, default="started")
+    scenario_ids = Column(JSON, nullable=False, default=list)
+    responses = Column(JSON, nullable=False, default=list)
+    evidence = Column(JSON, nullable=True)
+    portrait = Column(JSON, nullable=True)
+    started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    completed_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    user = relationship("User", backref="caveman_scan_sessions")

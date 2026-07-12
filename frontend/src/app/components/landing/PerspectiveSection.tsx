@@ -1,9 +1,8 @@
-import { SectionDecorations, SectionLabel } from "./LandingShared";
+import { SectionLabel } from "./LandingShared";
 
 export default function PerspectiveSection() {
   return (
       <section className="relative overflow-hidden bg-white text-brand-dark">
-        <SectionDecorations flip />
         <div className="relative z-10 mx-auto max-w-6xl px-6 py-20 md:py-28">
           <SectionLabel>A Different Perspective on Getting More Life from Life</SectionLabel>
           <h2 className="max-w-5xl text-[clamp(3rem,5.2vw,5.5rem)] font-bold leading-[0.95] tracking-[-0.04em]">
@@ -22,13 +21,12 @@ export default function PerspectiveSection() {
             </p>
             <div className="mt-7 grid gap-px bg-brand-dark/12 font-sans sm:grid-cols-3">
               {[
-                ["01", "Technology has changed."],
-                ["02", "The way we work has changed."],
-                ["03", "The way we communicate has changed."],
-              ].map(([number, text]) => (
-                <div key={number} className="bg-white px-5 py-5">
-                  <span className="text-[0.65rem] font-bold tracking-[0.18em] text-brand-teal">{number}</span>
-                  <p className="mt-2 font-sans text-base font-semibold leading-7 text-brand-dark md:text-lg md:leading-8">{text}</p>
+                "Technology has changed.",
+                "The way we work has changed.",
+                "The way we communicate has changed.",
+              ].map((text) => (
+                <div key={text} className="bg-white px-5 py-5">
+                  <p className="font-sans text-base font-semibold leading-7 text-brand-dark md:text-lg md:leading-8">{text}</p>
                 </div>
               ))}
             </div>

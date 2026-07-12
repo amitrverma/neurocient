@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Compass, Heart, ShieldCheck, Sparkles, Users } from "lucide-react";
-import { SectionDecorations, SectionLabel } from "./LandingShared";
+import { ArrowRight, Compass, Heart, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { SectionLabel } from "./LandingShared";
 
 const drives = [
   {
@@ -43,7 +43,6 @@ const drives = [
 export default function InnerCavemanSection() {
   return (
       <section className="relative overflow-hidden bg-white px-6 py-20 md:py-28">
-        <SectionDecorations />
         <div className="relative z-10 mx-auto grid w-full max-w-6xl gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <div>
             <SectionLabel>Neurocient Labs introduces…</SectionLabel>
@@ -75,20 +74,16 @@ export default function InnerCavemanSection() {
         </div>
 
         <div className="relative z-10 mx-auto mt-16 max-w-6xl border-y border-brand-dark/15">
-          <div aria-hidden="true" className="absolute bottom-0 left-[1.15rem] top-0 w-px bg-brand-teal/25 md:left-[1.65rem]" />
-          {drives.map((drive, index) => {
+          {drives.map((drive) => {
             const Icon = drive.icon;
 
             return (
               <Link
                 key={drive.name}
                 href={drive.href}
-                className="group relative grid gap-4 border-b border-brand-dark/12 bg-white py-6 last:border-b-0 md:grid-cols-[3.5rem_1fr_1fr] md:items-center md:gap-8 md:py-7"
+                className="group relative grid gap-4 border-b border-brand-dark/12 bg-white py-7 last:border-b-0 md:grid-cols-[1fr_1fr_auto] md:items-center md:gap-8"
               >
-                <div className="absolute left-0 top-6 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-brand-teal/40 bg-white font-sans text-[0.65rem] font-bold text-brand-teal transition group-hover:border-brand-primary group-hover:text-brand-primary md:static md:h-12 md:w-12">
-                  {String(index + 1).padStart(2, "0")}
-                </div>
-                <div className="pl-14 md:pl-0">
+                <div>
                   <div className="flex items-center gap-3">
                     <Icon className="h-5 w-5 shrink-0 text-brand-accent" />
                     <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.12em] text-brand-dark/65">
@@ -99,9 +94,10 @@ export default function InnerCavemanSection() {
                     {drive.question}
                   </p>
                 </div>
-                <p className="ml-14 border-l-2 border-brand-secondary/50 pl-4 font-sans text-sm leading-6 text-brand-dark/70 md:ml-0 md:text-base md:leading-7">
+                <p className="border-l-2 border-brand-secondary/50 pl-4 font-sans text-sm leading-6 text-brand-dark/70 md:text-base md:leading-7">
                   {drive.modern}
                 </p>
+                <ArrowRight className="h-5 w-5 text-brand-teal transition-transform group-hover:translate-x-1 group-hover:text-brand-primary" aria-hidden="true" />
               </Link>
             );
           })}

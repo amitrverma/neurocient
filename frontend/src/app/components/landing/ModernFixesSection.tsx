@@ -1,9 +1,8 @@
-import { SectionDecorations, SectionLabel } from "./LandingShared";
+import { SectionLabel } from "./LandingShared";
 
 export default function ModernFixesSection() {
   return (
       <section className="relative overflow-hidden bg-brand-dark px-6 py-20 text-white md:py-28">
-        <SectionDecorations tone="dark" />
         <div className="relative z-10 mx-auto max-w-6xl">
           <SectionLabel tone="dark">Why modern fixes fall short</SectionLabel>
           <h2 className="max-w-5xl text-[clamp(2.8rem,5vw,5.5rem)] font-bold leading-[0.98] tracking-[-0.035em] text-white">
@@ -38,21 +37,21 @@ export default function ModernFixesSection() {
             </div>
 
             <div className="grid gap-8 py-6 md:grid-cols-3 md:gap-10">
-              <div className="relative border-t-2 border-brand-teal/60 pt-12 before:absolute before:right-0 before:top-2 before:font-serif before:text-5xl before:font-bold before:text-white/10 before:content-['01']">
+              <div className="border-t-2 border-brand-teal/60 pt-7">
                 <h3 className="font-serif text-2xl font-bold text-white">Productivity systems:</h3>
                 <p>
                   Help organize what to do, but it doesn&apos;t explain why the work
                   feels difficult to do in the first place.
                 </p>
               </div>
-              <div className="relative border-t-2 border-brand-secondary/60 pt-12 md:mt-8 before:absolute before:right-0 before:top-2 before:font-serif before:text-5xl before:font-bold before:text-white/10 before:content-['02']">
+              <div className="border-t-2 border-brand-secondary/60 pt-7">
                 <h3 className="font-serif text-2xl font-bold text-white">Motivation hacks:</h3>
                 <p>
                   Create short bursts of energy. When the initial excitement
                   wears off older patterns take over again.
                 </p>
               </div>
-              <div className="relative border-t-2 border-brand-primary/60 pt-12 md:mt-16 before:absolute before:right-0 before:top-2 before:font-serif before:text-5xl before:font-bold before:text-white/10 before:content-['03']">
+              <div className="border-t-2 border-brand-primary/60 pt-7">
                 <h3 className="font-serif text-2xl font-bold text-white">Self-discipline advice:</h3>
                 <p>
                   Pushes you to do more.  When the willpower runs out you are back
@@ -68,13 +67,12 @@ export default function ModernFixesSection() {
               </p>
               <div className="mt-7 grid gap-px bg-white/15 font-sans sm:grid-cols-3">
                 {[
-                  ["01", "What you do"],
-                  ["02", "how you do it"],
-                  ["03", "how often you do it."],
-                ].map(([number, text]) => (
-                  <div key={number} className="bg-brand-dark px-5 py-5">
-                    <span className="text-[0.65rem] font-bold tracking-[0.18em] text-brand-secondary">{number}</span>
-                    <p className="mt-2 text-base font-semibold text-white md:text-lg">{text}</p>
+                  "What you do",
+                  "how you do it",
+                  "how often you do it.",
+                ].map((text) => (
+                  <div key={text} className="bg-brand-dark px-5 py-5">
+                    <p className="text-base font-semibold text-white md:text-lg">{text}</p>
                   </div>
                 ))}
               </div>

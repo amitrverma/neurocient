@@ -1,7 +1,4 @@
-"use client";
-
-import { useState } from "react";
-import { SectionDecorations, SectionLabel } from "./LandingShared";
+import { SectionLabel } from "./LandingShared";
 
 const struggles = [
   {
@@ -69,13 +66,11 @@ const struggles = [
   },
 ];
 export default function StrugglesSection() {
-  const [activeStruggle, setActiveStruggle] = useState(0);
   return (
       <section
         id="struggle"
         className="relative mx-auto w-full max-w-6xl scroll-mt-24 overflow-hidden px-6 pb-20 pt-12 md:pb-28 md:pt-16"
       >
-        <SectionDecorations flip />
         <div className="relative z-10">
         <SectionLabel>The modern challenge</SectionLabel>
         <div className="grid gap-6 md:grid-cols-[1.1fr_.9fr] md:items-end md:gap-12">
@@ -104,170 +99,40 @@ export default function StrugglesSection() {
           </div>
         </div>
         <div className="mt-9 md:mt-11">
-          <SplitStruggleShowcase
-            activeStruggle={activeStruggle}
-            onSelect={setActiveStruggle}
-          />
+          <StruggleSequence />
         </div>
         </div>
       </section>
   );
 }
 
-const SplitStruggleShowcase = ({
-  activeStruggle,
-  onSelect,
-}: {
-  activeStruggle: number;
-  onSelect: (index: number) => void;
-}) => {
-  const safeActiveStruggle = Math.min(
-    Math.max(activeStruggle, 0),
-    struggles.length - 1,
-  );
-
-  return (
-    <>
-      <div className="hidden min-h-[28rem] overflow-hidden rounded-lg border border-brand-dark/12 bg-white shadow-[0_28px_80px_rgba(4,42,43,0.09)] md:grid md:grid-cols-[1fr_5.5rem] md:items-stretch">
-        <article className="flex flex-col px-8 py-9 lg:px-12 lg:py-11">
-          <div className="flex items-start justify-between gap-8 border-b border-brand-dark/10 pb-7">
-            <div>
-              {struggles[safeActiveStruggle].eyebrow && (
-                <p className="font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary">
-                  {struggles[safeActiveStruggle].eyebrow}
-                </p>
-              )}
-              <h3 className={`${struggles[safeActiveStruggle].eyebrow ? "mt-3" : ""} text-3xl font-bold leading-[1.02] tracking-[-0.03em] text-brand-dark lg:text-5xl`}>
-                {struggles[safeActiveStruggle].title}
-              </h3>
-            </div>
-            <span className="font-serif text-6xl font-bold leading-none text-brand-primary/15">
-              {String(safeActiveStruggle + 1).padStart(2, "0")}
-            </span>
-          </div>
-
-          <div className="mt-10 grid gap-10 lg:grid-cols-[0.7fr_1fr] lg:items-start">
-            <p className="max-w-md text-3xl font-medium leading-[1.12] text-brand-dark lg:text-4xl">
-              {struggles[safeActiveStruggle].lead}
-            </p>
-            <div className="max-w-3xl space-y-7 font-sans text-base leading-8 text-brand-dark/75">
-              <p>{struggles[safeActiveStruggle].detail}</p>
-              <p className="border-l-4 border-brand-secondary pl-5 font-serif text-xl leading-8 text-brand-dark">
-                {struggles[safeActiveStruggle].close}
-              </p>
-            </div>
-          </div>
-        </article>
-
-        <div className="grid h-full auto-rows-fr border-l border-brand-dark bg-brand-dark">
-          {struggles.map((item, index) => {
-            const isActive = index === safeActiveStruggle;
-
-            return (
-              <button
-                key={item.title}
-                type="button"
-                aria-expanded={isActive}
-                onClick={() => onSelect(index)}
-                aria-label={`Show ${item.title}`}
-                className={`flex h-full w-full items-center justify-center border-b border-white/15 px-3 py-5 text-center transition duration-300 last:border-b-0 ${
-                  isActive
-                    ? "bg-brand-secondary"
-                    : "text-white/45 hover:bg-white/[0.06] hover:text-white"
-                }`}
-              >
-                <span
-                  className={`font-serif text-3xl font-bold leading-none ${
-                    isActive ? "text-brand-dark" : "text-white/45"
-                  }`}
-                >
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-              </button>
-            );
-          })}
+const StruggleSequence = () => (
+  <div className="border-y border-brand-dark/15">
+    {struggles.map((item) => (
+      <article
+        key={item.title}
+        className="relative border-b border-brand-dark/12 py-9 last:border-b-0 md:grid md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.25fr)] md:gap-10 md:py-12 lg:gap-16"
+      >
+        <div>
+          <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-brand-primary">
+            {item.eyebrow}
+          </p>
+          <h3 className="mt-2 text-2xl font-bold leading-tight tracking-[-0.025em] text-brand-dark md:text-3xl">
+            {item.title}
+          </h3>
+          <p className="mt-5 text-xl font-medium leading-7 text-brand-dark md:text-2xl md:leading-8">
+            {item.lead}
+          </p>
         </div>
-      </div>
 
-      <MobileStruggleAccordion
-        activeStruggle={safeActiveStruggle}
-        onSelect={onSelect}
-      />
-    </>
-  );
-};
-
-const MobileStruggleAccordion = ({
-  activeStruggle,
-  onSelect,
-}: {
-  activeStruggle: number;
-  onSelect: (index: number) => void;
-}) => (
-  <div className="space-y-2 md:hidden">
-    {struggles.map((item, index) => {
-      const isActive = index === activeStruggle;
-
-      return (
-        <article
-          key={item.title}
-          className={`overflow-hidden rounded-lg border border-brand-dark/12 ${
-            isActive ? "shadow-[0_16px_45px_rgba(4,42,43,0.08)]" : ""
-          }`}
-        >
-          <button
-            type="button"
-            aria-expanded={isActive}
-            onClick={() => onSelect(index)}
-            className={`flex w-full items-center justify-between gap-4 px-5 py-5 text-left transition ${
-              isActive ? "bg-brand-dark text-white" : "bg-white text-brand-dark hover:bg-brand-dark/[0.03]"
-            }`}
-          >
-            <div>
-              <span
-                className={`font-sans text-xs font-semibold uppercase tracking-[0.18em] ${
-                  isActive ? "text-white/55" : "text-brand-dark"
-                }`}
-              >
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <h3
-                className={`mt-2 font-sans text-base font-semibold ${
-                  isActive ? "text-white" : "text-brand-dark"
-                }`}
-              >
-                {item.title}
-              </h3>
-            </div>
-            <span
-              className={`font-serif text-4xl font-bold leading-none ${
-                isActive ? "text-white/18" : "text-brand-primary/18"
-              }`}
-            >
-              {index + 1}
-            </span>
-          </button>
-          {isActive && (
-            <div className="bg-white px-5 pb-6 pt-5">
-              {item.eyebrow && (
-                <p className="font-sans text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-brand-primary">
-                  {item.eyebrow}
-                </p>
-              )}
-              <p className="mt-3 text-2xl leading-8 text-brand-dark">
-                {item.lead}
-              </p>
-              <div className="mt-5 space-y-4 font-sans text-sm leading-7 text-brand-dark">
-                <p>{item.detail}</p>
-                <p className="border-l-4 border-brand-secondary pl-4 text-base leading-7 text-brand-dark">
-                  {item.close}
-                </p>
-              </div>
-            </div>
-          )}
-        </article>
-      );
-    })}
+        <div className="mt-6 space-y-5 font-sans text-sm leading-7 text-brand-dark/75 md:mt-0 md:text-base md:leading-8">
+          <p>{item.detail}</p>
+          <p className="border-l-4 border-brand-secondary pl-4 font-serif text-lg leading-7 text-brand-dark md:pl-5 md:text-xl md:leading-8">
+            {item.close}
+          </p>
+        </div>
+      </article>
+    ))}
   </div>
 );
 

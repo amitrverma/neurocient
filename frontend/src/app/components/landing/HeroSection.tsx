@@ -50,7 +50,7 @@ export default function HeroSection() {
                 />
               </span>{" "}from
               </span>{" "}
-              <span className="block md:inline">your{" "}
+              <span className="block md:inline">your ONE{" "}
               <span className="relative inline-block italic text-brand-teal">
                 life.
                 <svg
@@ -120,14 +120,19 @@ export default function HeroSection() {
               Moments like these have a way of <strong>revealing</strong> patterns
               you can no longer ignore.
             </p>
-            <div className="mt-8 min-h-52 border-l-4 border-t border-brand-secondary px-6 py-8 font-serif text-xl leading-9 text-brand-dark md:col-span-4 md:col-start-1 md:min-h-64 md:px-8 md:py-10 md:text-3xl md:leading-[1.45]">
-              <p className="text-brand-accent">So you tried.</p>
-              <p className="mt-3">The routines.</p>
-              <p>The fresh starts.</p>
-              <p className="mt-5">You knew exactly what to do.</p>
-              <p className="mt-3 font-bold">And still, the same patterns kept showing up.</p>
+            <div className="mt-8 border-l-4 border-brand-secondary pl-6 md:col-span-5 md:pl-10">
+              <div className="border-t border-brand-secondary py-8 font-serif text-xl leading-9 text-brand-dark md:max-w-4xl md:py-10 md:text-3xl md:leading-[1.45]">
+                <p className="text-brand-accent">So you tried.</p>
+                <p className="mt-3">The routines.</p>
+                <p>The fresh starts.</p>
+                <p className="mt-5">You knew exactly what to do.</p>
+                <p className="mt-3 font-bold">And still, the same patterns kept showing up.</p>
+              </div>
+              <p className="border-t border-brand-dark/12 pt-7 font-sans text-xs font-bold uppercase tracking-[0.18em] text-brand-teal md:pt-9">
+                They showed up as
+              </p>
+              <PatternRevealList />
             </div>
-            <PatternRevealList />
             <p className="mt-8 bg-brand-dark px-6 py-8 font-serif text-2xl font-bold leading-tight text-white md:col-span-6 md:max-w-5xl md:px-10 md:py-10 md:text-4xl">
               These patterns are not who you are. And then the question you ask
               yourself…

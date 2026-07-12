@@ -62,6 +62,9 @@ Use the current landing page as the default direction for non-article page upgra
 - Headlines: prefer specific, editorial lines over generic page titles. Use italic accent spans sparingly for meaningful pivots.
 - Section labels: use the landing-page pattern of small uppercase sans text, wider tracking, and a thin rule.
 - Copy rhythm: favor short paragraphs, line breaks for emphasis, and strong narrative progression over dense blocks.
+- Narrative continuity: when adjacent copy blocks form one emotional or persuasive thought, keep them on a shared visual spine. Avoid staggered or widely offset layouts that make the reader rediscover the continuation or mistake it for unrelated content.
+- Core copy visibility: do not hide essential narrative, recognition, or persuasive copy behind tabs, accordions, carousels, or other click-through controls. Assume many users will not take an extra action to reveal it. Progressive disclosure is appropriate for optional depth and supporting detail, not for the main argument or a sequence every reader should encounter.
+- Wayfinding: do not add numbers merely as decoration. Use numbering only when order, rank, quantity, or step progression is meaningful; otherwise rely on headings, spacing, rules, and typographic hierarchy.
 - Cards: keep cards compact, purposeful, and no more than `rounded-lg` unless an existing component requires otherwise.
 - Buttons: prefer rounded full CTAs for primary page actions; pair text with lucide icons when helpful.
 - Color: use brand tokens (`brand-dark`, `brand-primary`, `brand-secondary`, `brand-accent`, `brand-teal`) rather than ad hoc hex values.
@@ -77,6 +80,7 @@ When upgrading the rest of the website after the landing page refresh:
 5. Unify repeated motifs into small shared helpers only after at least two pages need the same pattern.
 6. Keep interactive tool pages denser and more utilitarian than marketing pages, but still align typography, colors, spacing, and buttons.
 7. Verify mobile text wrapping, card density, nav spacing, and contrast against both white and brand-dark sections.
+8. Verify that the complete core narrative can be followed without clicking, and that visual offsets do not interrupt copy that should read continuously.
 
 ## Page Priority Notes
 - `about`: convert from plain article block to origin/mission narrative using the landing-page editorial rhythm.

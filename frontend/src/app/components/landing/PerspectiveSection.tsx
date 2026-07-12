@@ -15,7 +15,7 @@ export default function PerspectiveSection() {
             live in today.
           </p>
 
-          <div className="mt-14 max-w-5xl md:ml-auto">
+          <div className="mt-14 max-w-5xl">
             <p className="font-serif text-2xl font-bold leading-9 md:text-4xl md:leading-tight">
               The world around us has changed dramatically.
             </p>
@@ -31,7 +31,7 @@ export default function PerspectiveSection() {
               ))}
             </div>
 
-            <p className="my-10 border-l-4 border-brand-primary py-2 pl-6 font-serif text-2xl font-bold italic leading-9 text-brand-accent md:ml-16 md:text-4xl md:leading-tight">
+            <p className="my-10 border-l-4 border-brand-primary py-2 pl-6 font-serif text-2xl font-bold italic leading-9 text-brand-accent md:text-4xl md:leading-tight">
               But our inner system has not changed at the same pace.
             </p>
 

@@ -73,14 +73,11 @@ export default function HeroSection() {
             </h1>
 
             <div className="mt-10 max-w-4xl border-l-4 border-brand-secondary py-1 pl-5">
-              <p className="font-sans text-[0.65rem] font-bold uppercase tracking-[0.2em] text-brand-teal">
-                We, at Neurocient, help you
-              </p>
-              <p className="mt-2 font-sans text-lg font-semibold leading-8 text-brand-dark md:text-2xl md:leading-9">
-                Understand what&apos;s been{" "}
+              <p className="font-sans text-lg font-semibold leading-8 text-brand-dark md:text-2xl md:leading-9">
+                We help you understand what&apos;s been{" "}
                 <span className="box-decoration-clone bg-brand-secondary/55 px-1.5 py-0.5 text-brand-accent">
                   standing in your way
-                </span>
+                </span>.
               </p>
               <p className="mt-1 font-serif text-2xl font-bold italic leading-8 text-brand-dark md:text-3xl md:leading-10">
                 <span className="text-brand-primary">&amp;</span> work with it in real life !!
@@ -116,11 +113,11 @@ export default function HeroSection() {
               Maybe it was realizing you&apos;d started getting triggered by the
               smallest things, like you were under pressure all day, every day.
             </p>
-            <p className="my-8 border-y border-brand-dark/12 py-8 font-serif text-2xl leading-9 text-brand-dark md:col-span-6 md:ml-auto md:max-w-4xl md:py-10 md:text-4xl md:leading-tight">
+            <p className="my-8 border-y border-brand-dark/12 py-8 font-serif text-2xl leading-9 text-brand-dark md:col-span-5 md:max-w-5xl md:py-10 md:text-4xl md:leading-tight">
               Moments like these have a way of <strong>revealing</strong> patterns
               you can no longer ignore.
             </p>
-            <div className="mt-8 border-l-4 border-brand-secondary pl-6 md:col-span-5 md:pl-10">
+            <div className="mt-8 md:col-span-5">
               <div className="border-t border-brand-secondary py-8 font-serif text-xl leading-9 text-brand-dark md:max-w-4xl md:py-10 md:text-3xl md:leading-[1.45]">
                 <p className="text-brand-accent">So you tried.</p>
                 <p className="mt-3">The routines.</p>
@@ -134,7 +131,7 @@ export default function HeroSection() {
               <PatternRevealList />
             </div>
             <p className="mt-8 bg-brand-dark px-6 py-8 font-serif text-2xl font-bold leading-tight text-white md:col-span-6 md:max-w-5xl md:px-10 md:py-10 md:text-4xl">
-              These patterns are not who you are. And then the question you ask
+              These patterns are not who you are. But then the question you ask
               yourself…
             </p>
           </div>

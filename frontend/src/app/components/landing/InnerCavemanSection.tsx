@@ -26,8 +26,8 @@ const drives = [
     icon: Compass,
   },
   {
-    name: "Mate Acquisition & Retention",
-    question: "Is this bond secure?",
+    name: "Mate & Bond Security",
+    question: "Is this bond safe?",
     modern: "Attachment, ambiguity, jealousy, replaying arguments.",
     href: "/insights/replay-arguments",
     icon: Sparkles,

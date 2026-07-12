@@ -2,26 +2,39 @@ import { SectionLabel } from "./LandingShared";
 
 const struggles = [
   {
-    title: "Escaping Into the Scroll",
-    eyebrow: "One more check",
-    lead: "The work is right there.",
+    title: "Waiting to Feel Ready",
+    lead: "You have been putting off a lot of stuff because you don't feel ready.",
     detail:
-      "You tell yourself you'll start in a minute: just one check, one tab, one video. Something small, something harmless. And then another. Time passes without resistance. It doesn't feel like a choice. It feels like something you slipped into. When you look up, the task is still there.",
+      "Starting that project, reaching out to old friends, starting exercising, trying new things.",
     close:
-      "Only now, it feels heavier than before.",
+      "Always telling yourself you’ll do it when you are more prepared, more confident, more together. Waiting for some magical moment of confidence or clarity that never showed up",
+  },
+  {
+    title: "Escaping Into the Scroll",
+    lead: "You often catch yourself wasting hours scrolling on your phone, watching other people's lives.",
+    detail:
+      "The whole time, You know but you ignore a \"signal\" to do something better with your time.",
+    close:
+      "You want to improve, but the worry feels overwhelming, which makes you run back to your phone to distract yourself.",
+  },
+  {
+    title: "Measuring Yourself Against Others",
+    lead: "Comparison has been automatic in your life, almost like background noise you never questioned.",
+    detail:
+      "As a younger self it might show up in small ways, what other people wore, how confident they seemed, how easily things appeared to come to them. As an adult it shifted into career, progress, and timing, watching others hit milestones and wondering what you are doing wrong.",
+    close:
+      "What’s strange is that on paper your life is fine, stable even, but the habit of comparing never really cared about facts",
   },
   {
     title: "Pressure That Never Switches Off",
-    eyebrow: "Always in the background",
-    lead: "There's always something in the background.",
+    lead: "There's always something unfinished, unresolved, or waiting for your attention.",
     detail:
-      "Something unfinished. Something pending. Something you should get to next. Even in the quieter moments, it doesn't fully leave. It stays: subtle, but present. You move from one thing to another, carrying it along.",
+      "Even when you're resting, your mind keeps making lists, or jumping ahead to the next thing.",
     close:
-      "Not urgent enough to act on. Not distant enough to ignore.",
+      "You keep scrolling to escape your stressful reality.",
   },
   {
     title: "Worries That Never Leave",
-    eyebrow: "The mind keeps rehearsing",
     lead: "You replay conversations and anticipate problems before they happen.",
     detail:
       "You are thinking/overthinking all the time. Pre-playing and re-playing social interactions in your head. And more often than not the things you imagine might go wrong never happen.",
@@ -30,39 +43,19 @@ const struggles = [
   },
   {
     title: "The Guilt That Doesn't Go Away",
-    eyebrow: "Another plan abandoned",
     lead: "You've hit a point where you're scared for yourself.",
     detail:
       "You've tried every self-help method under the sun — gym, healthy food, multivitamins, motivational quotes all over your room, goal planning, screen filters — but nothing sticks. You make detailed plans,",
     close:
-      "print them, write them on your walls, and yet you waste whole days doing nothing meaningful. You keep procrastinating.  Just watching random videos or scrolling aimlessly.",
-  },
-  {
-    title: "Measuring Yourself Against Others",
-    eyebrow: "Status scanning",
-    lead: "You're doing your thing, and then something shifts.",
-    detail:
-      "Someone else is ahead. Moving faster. Doing it better. At least, it looks that way. You weren't thinking about it a moment ago. Now you are. Your pace feels slower. Your progress feels smaller. What you have doesn't land the same anymore. Nothing has changed.",
-    close:
-      "But it feels like you've fallen behind.",
+      "print them, write them on your walls, and yet you waste whole days doing nothing meaningful. You keep procrastinating. Just watching random videos or scrolling aimlessly.",
   },
   {
     title: "Rest That Doesn't Restore",
-    eyebrow: "Recovery that doesn't land",
     lead: "You sleep. You take breaks. You step away when you can.",
     detail:
-      "But it doesn't quite land. The day starts a little lower than it should. Simple things take more effort. By the time you get to what matters, there isn't much left.",
+      "But you wake up tired, struggle to recharge, and feel like your energy runs out before you get to what matters most. You've tried to learn restful hobbies (meditation, yoga, journaling) but with those things you are still pushing yourself to rest harder.",
     close:
-      "It's not that you're doing nothing. It just never feels like you've recovered.",
-  },
-  {
-    title: "Waiting to Feel Ready",
-    eyebrow: "The moving start line",
-    lead: "You know what needs to be done.",
-    detail:
-      "It isn't unclear. You've thought about it enough times already. But you wait. For the right mood. The right clarity. The sense that now is the moment to begin. The start keeps moving.",
-    close:
-      "And with it, everything that depends on it.",
+      "You burnout easily and it effects your day to day life",
   },
 ];
 export default function StrugglesSection() {
@@ -90,16 +83,19 @@ export default function StrugglesSection() {
               </li>
               <li className="flex gap-3">
                 <span aria-hidden="true" className="mt-[0.7em] h-1.5 w-1.5 shrink-0 rounded-full bg-brand-teal" />
-                <span>But often enough to notice a pattern.</span>
+                <span>But often enough to wonder what&apos;s really going on.</span>
               </li>
             </ul>
             <p className="font-serif text-xl font-bold leading-7 text-brand-dark md:text-2xl md:leading-8">
-              That&apos;s the part worth paying attention to.
+              It shows up in different ways for different people. Here are seven you might recognize.
             </p>
           </div>
         </div>
         <div className="mt-9 md:mt-11">
           <StruggleSequence />
+          <p className="mt-10 max-w-4xl border-l-4 border-brand-secondary pl-5 font-serif text-2xl leading-9 text-brand-dark md:text-3xl md:leading-10">
+            These patterns may look different from person to person, but the response is usually the same.
+          </p>
         </div>
         </div>
       </section>
@@ -114,10 +110,7 @@ const StruggleSequence = () => (
         className="relative border-b border-brand-dark/12 py-9 last:border-b-0 md:grid md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.25fr)] md:gap-10 md:py-12 lg:gap-16"
       >
         <div>
-          <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-brand-primary">
-            {item.eyebrow}
-          </p>
-          <h3 className="mt-2 text-2xl font-bold leading-tight tracking-[-0.025em] text-brand-dark md:text-3xl">
+          <h3 className="text-2xl font-bold leading-tight tracking-[-0.025em] text-brand-dark md:text-3xl">
             {item.title}
           </h3>
           <p className="mt-5 text-xl font-medium leading-7 text-brand-dark md:text-2xl md:leading-8">

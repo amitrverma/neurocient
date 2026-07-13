@@ -1,5 +1,12 @@
 # Practice Decisions
 
+## 2026-07-13: The landing page should alternate intensity without fragmenting the story
+
+- Use background shifts and geometry to establish section boundaries while keeping one continuous narrative.
+- Reserve large dark fields for the two strongest contrasts: why surface fixes fail and the final invitation to see the pattern personally.
+- Keep final conversion moments on one clear reading path, with benefits immediately preceding the action.
+- Avoid fixed mobile card heights when content can determine the natural rhythm.
+
 ## 2026-07-13: Long perspective shifts should unfold as editorial narratives
 
 - Preserve a single reading path while giving each conceptual turn a distinct visual treatment.

@@ -21,7 +21,7 @@ export default function InnerCavemanSection() {
       <div className="relative z-10 mx-auto w-full max-w-6xl">
         <div className="mx-auto max-w-5xl">
           <SectionLabel>Neurocient Labs introduces&hellip;</SectionLabel>
-          <h2 className="text-[clamp(3.25rem,8vw,6.75rem)] font-bold leading-[0.88] tracking-[-0.055em] text-brand-dark">
+          <h2 className="text-balance text-[clamp(3.25rem,8vw,6.75rem)] font-bold leading-[0.88] tracking-[-0.055em] text-brand-dark">
             Meet Your <span className="italic text-brand-accent">Inner Caveman</span>
           </h2>
           <p className="mt-10 max-w-5xl border-y border-brand-dark/15 py-7 font-serif text-[1.75rem] font-bold leading-[1.35] tracking-[-0.02em] text-brand-dark md:py-9 md:text-[2.65rem] md:leading-[1.2]">

@@ -34,6 +34,8 @@ export const SectionDecorations = ({
 }) => {
   const line = tone === "dark" ? "border-white/10" : "border-brand-teal/15";
   const dots = tone === "dark" ? "rgba(255,255,255,0.18)" : "rgba(4,42,43,0.16)";
+  const quietLine = tone === "dark" ? "bg-white/10" : "bg-brand-dark/10";
+  const quietBorder = tone === "dark" ? "border-white/10" : "border-brand-dark/10";
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
@@ -50,6 +52,14 @@ export const SectionDecorations = ({
       <div className={`absolute bottom-[12%] ${flip ? "right-[6%]" : "left-[6%]"} h-12 w-12 rounded-full border border-brand-primary/15`}>
         <span className="absolute left-1/2 top-1/2 h-px w-6 -translate-x-1/2 bg-brand-primary/20" />
         <span className="absolute left-1/2 top-1/2 h-6 w-px -translate-y-1/2 bg-brand-primary/20" />
+      </div>
+      <div className={`absolute top-[42%] ${flip ? "left-[3%]" : "right-[3%]"} hidden items-center gap-3 md:flex`}>
+        <span className={`h-px w-20 ${quietLine}`} />
+        <span className={`h-3 w-3 rotate-45 border ${quietBorder}`} />
+      </div>
+      <div className={`absolute top-[61%] ${flip ? "right-0 border-l" : "left-0 border-r"} h-28 w-7 border-y ${quietBorder}`} />
+      <div className={`absolute top-[72%] ${flip ? "left-[8%]" : "right-[8%]"} hidden h-16 w-16 rounded-full border ${quietBorder} md:block`}>
+        <span className={`absolute left-1/2 top-1/2 h-px w-24 -translate-x-1/2 -rotate-12 ${quietLine}`} />
       </div>
     </div>
   );

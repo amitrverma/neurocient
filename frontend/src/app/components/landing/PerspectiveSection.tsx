@@ -7,7 +7,7 @@ export default function PerspectiveSection() {
         <div className="pointer-events-none absolute left-1/2 top-[28rem] h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-brand-secondary/10 blur-3xl" aria-hidden="true" />
         <div className="relative z-10 mx-auto max-w-6xl px-6 py-20 md:py-28">
           <SectionLabel>A Different Perspective on Getting More Life from Life</SectionLabel>
-          <h2 className="max-w-5xl text-[clamp(3.25rem,7vw,7rem)] font-bold leading-[0.89] tracking-[-0.055em]">
+          <h2 className="max-w-5xl text-balance text-[clamp(3.25rem,7vw,7rem)] font-bold leading-[0.89] tracking-[-0.055em]">
             It is not your <span className="italic text-brand-accent">personal failing.</span>
           </h2>
 
@@ -56,9 +56,9 @@ export default function PerspectiveSection() {
           </div>
 
           <div className="mt-20 max-w-5xl space-y-7 border-t border-brand-dark/20 pt-14 font-sans text-base leading-8 text-brand-dark/80 md:mt-28 md:pt-20 md:text-lg md:leading-9">
-            <div className="space-y-4 font-serif text-[clamp(2.7rem,6vw,6rem)] font-bold leading-[0.98] tracking-[-0.045em] text-brand-dark">
-              <p>But what if that&apos;s not the real problem<span className="text-brand-primary">?</span></p>
-              <p className="italic text-brand-accent">What if it was never about willpower in the first place?</p>
+            <div className="font-serif font-bold text-brand-dark">
+              <p className="max-w-5xl text-balance text-[clamp(2.9rem,6vw,6rem)] leading-[0.98] tracking-[-0.045em]">But what if that&apos;s not the real problem<span className="text-brand-primary">?</span></p>
+              <p className="mt-8 max-w-4xl border-l-4 border-brand-secondary py-1 pl-6 text-[clamp(2rem,3.8vw,3.75rem)] italic leading-[1.08] tracking-[-0.025em] text-brand-accent md:mt-10 md:pl-8">What if it was never about willpower in the first place?</p>
             </div>
             <p className="max-w-4xl pt-5">
               These struggles are not signs that something is wrong with you.

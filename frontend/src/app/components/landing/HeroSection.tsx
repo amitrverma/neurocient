@@ -35,7 +35,7 @@ export default function HeroSection() {
         </div>
         <div className="relative mx-auto max-w-6xl text-brand-dark">
           <div className="relative flex min-h-svh flex-col justify-center pb-20 pt-10 md:pb-24 md:pt-14">
-            <h1 className="max-w-5xl text-[clamp(2.8rem,14vw,3.35rem)] font-bold leading-[0.92] tracking-[-0.055em] md:text-[clamp(3.35rem,8vw,7.8rem)]">
+            <h1 className="max-w-5xl text-balance text-[clamp(2.8rem,14vw,3.35rem)] font-bold leading-[0.92] tracking-[-0.055em] md:text-[clamp(3.35rem,8vw,7.8rem)]">
               <span className="block md:inline">You want</span>{" "}
               <span className="block whitespace-nowrap md:inline md:whitespace-normal">
               <span className="relative inline-block h-[0.92em] w-[2.55em] translate-y-[0.12em] align-baseline md:mx-[0.03em] md:w-[2.75em]">
@@ -94,7 +94,7 @@ export default function HeroSection() {
           </div>
 
           <div id="hero-story" className="grid scroll-mt-6 max-w-6xl gap-5 border-t border-brand-dark/12 pb-0 pt-20 md:grid-cols-6 md:pt-28">
-            <p className="font-serif text-[clamp(2rem,4vw,3.8rem)] font-bold leading-[1.08] tracking-[-0.035em] text-brand-dark md:col-span-6 md:max-w-6xl">
+            <p className="font-serif text-balance text-[clamp(2rem,4vw,3.8rem)] font-bold leading-[1.08] tracking-[-0.035em] text-brand-dark md:col-span-6 md:max-w-6xl">
               Some life experiences make you realize,{" "}
               <strong className="inline-block whitespace-nowrap bg-brand-secondary/55 px-2 py-0.5 text-[0.82em] italic text-brand-accent sm:text-[1em]">clearly and uncomfortably,</strong> that the life you&apos;re
               living <span className="text-brand-primary">&amp;</span> <span>the life you want</span> are not the same.

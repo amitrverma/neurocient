@@ -1,11 +1,12 @@
-import { SectionLabel } from "./LandingShared";
+import { SectionDecorations, SectionLabel } from "./LandingShared";
 
 export default function ModernFixesSection() {
   return (
       <section className="relative overflow-hidden bg-brand-dark px-6 py-20 text-white md:py-28">
+        <SectionDecorations tone="dark" />
         <div className="relative z-10 mx-auto max-w-6xl">
           <SectionLabel tone="dark">Why modern fixes fall short</SectionLabel>
-          <h2 className="max-w-5xl text-[clamp(2.8rem,5vw,5.5rem)] font-bold leading-[0.98] tracking-[-0.035em] text-white">
+          <h2 className="max-w-5xl text-balance text-[clamp(2.8rem,5vw,5.5rem)] font-bold leading-[0.98] tracking-[-0.035em] text-white">
             To live a life which is more fulfilling, you have tried all the
             <span className="italic text-brand-secondary"> modern fixes.</span>
           </h2>

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { SectionLabel } from "./LandingShared";
+import { SectionDecorations, SectionLabel } from "./LandingShared";
 
 const struggles = [
   {
@@ -72,11 +72,9 @@ const patternImages = [
 
 export default function StrugglesSection() {
   return (
-      <section
-        id="struggle"
-        className="relative mx-auto w-full max-w-6xl scroll-mt-24 overflow-hidden px-6 pb-20 pt-10 md:pb-28 md:pt-14"
-      >
-        <div className="relative z-10">
+      <section id="struggle" className="relative scroll-mt-24 overflow-hidden bg-[#f7f5f0]">
+        <SectionDecorations flip />
+        <div className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-20 pt-16 md:pb-28 md:pt-24">
         <SectionLabel>The modern challenge</SectionLabel>
         <div className="flex flex-col gap-7 md:gap-10">
           <h2 className="max-w-5xl text-[clamp(3rem,7vw,6.5rem)] font-bold leading-[0.9] tracking-[-0.05em] text-brand-dark">
@@ -117,9 +115,9 @@ const StruggleSequence = () => (
       {struggles.map((item, index) => (
         <article
           key={item.title}
-          className="relative grid min-h-[32rem] w-full overflow-hidden rounded-md border border-[#ded8cc] bg-[#fffefa] shadow-[0_18px_45px_rgba(4,42,43,0.08)] md:min-h-[29rem] md:grid-cols-[0.76fr_1.24fr]"
+          className="relative grid w-full overflow-hidden rounded-md border border-[#ded8cc] bg-[#fffefa] shadow-[0_18px_45px_rgba(4,42,43,0.08)] md:min-h-[26rem] md:grid-cols-[0.76fr_1.24fr]"
         >
-          <div className="relative flex min-h-56 items-center justify-center overflow-hidden border-b border-[#ded8cc] px-8 pb-4 pt-10 md:min-h-full md:border-b-0 md:border-r md:p-8">
+          <div className="relative flex min-h-52 items-center justify-center overflow-hidden border-b border-[#ded8cc] px-8 pb-4 pt-9 md:min-h-full md:border-b-0 md:border-r md:p-8">
             <Image
               src={patternImages[index]}
               alt=""

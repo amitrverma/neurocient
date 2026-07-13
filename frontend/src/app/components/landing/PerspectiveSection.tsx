@@ -35,13 +35,13 @@ export default function PerspectiveSection() {
               But our inner system has not changed at the same pace.
             </p>
 
-            <div className="grid gap-6 border-y border-brand-dark/15 py-8 font-sans text-base leading-8 text-brand-dark/80 md:grid-cols-[1.2fr_.8fr] md:gap-12 md:py-10 md:text-lg md:leading-9">
-              <p>
+            <div className="flex flex-col gap-6 border-y border-brand-dark/15 py-8 font-sans text-base leading-8 text-brand-dark/80 md:gap-8 md:py-10 md:text-lg md:leading-9">
+              <p className="max-w-4xl">
                 For most of human history, our ancestors lived in caves, in small
                 groups where survival depended on avoiding danger, finding food,
                 and staying connected to the tribe.
               </p>
-              <p className="font-serif text-2xl font-bold leading-9 text-brand-dark">Those conditions shaped the patterns that still influence us today.</p>
+              <p className="max-w-3xl font-serif text-2xl font-bold leading-9 text-brand-dark">Those conditions shaped the patterns that still influence us today.</p>
             </div>
 
             <p className="mt-10 border-l-4 border-brand-secondary pl-6 font-sans text-base leading-8 text-brand-dark/80 md:max-w-4xl md:text-lg md:leading-9">

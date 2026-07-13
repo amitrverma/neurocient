@@ -23,7 +23,7 @@ export default function ModernFixesSection() {
           </div>
 
           <div className="mt-12 space-y-6 font-sans text-base leading-8 text-white/72">
-            <div className="grid gap-8 border-y border-white/15 py-10 md:grid-cols-[1.1fr_.9fr] md:items-end md:gap-14">
+            <div className="flex flex-col gap-9 border-t border-white/15 py-10 md:gap-12">
               <div className="font-serif text-2xl leading-9 text-white md:text-4xl md:leading-tight">
                 <p>And for a while, it does help.</p>
                 <ul className="my-6 space-y-3 font-sans text-base font-semibold leading-7 text-white/72 md:text-lg md:leading-8">
@@ -33,7 +33,7 @@ export default function ModernFixesSection() {
                 </ul>
                 <p className="italic text-white">But it doesn&rsquo;t last.</p>
               </div>
-              <p className="border-l-4 border-brand-primary pl-5 font-serif text-2xl font-bold italic leading-9 text-brand-secondary md:text-3xl md:leading-10">Because the tools are working on the surface.</p>
+              <p className="max-w-3xl border-l-4 border-brand-primary pl-5 font-serif text-2xl font-bold italic leading-9 text-brand-secondary md:text-3xl md:leading-10">Because the tools are working on the surface.</p>
             </div>
 
             <div className="grid gap-8 py-6 md:grid-cols-3 md:gap-10">
@@ -77,7 +77,7 @@ export default function ModernFixesSection() {
                 ))}
               </div>
               <p className="mt-7 border-l-4 border-brand-primary pl-5 font-sans text-lg font-semibold leading-8 text-white/75 md:text-xl md:leading-9">
-                It assumes that once you know better, you will do better. But that is not how it plays out.
+                It assumes that once you <strong className="box-decoration-clone bg-brand-secondary px-1.5 py-0.5 text-brand-dark">know better, you will do better</strong>. But that is not how it plays out.
               </p>
             </div>
             <p className="max-w-3xl">

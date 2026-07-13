@@ -74,31 +74,28 @@ export default function StrugglesSection() {
   return (
       <section
         id="struggle"
-        className="relative mx-auto w-full max-w-6xl scroll-mt-24 overflow-hidden px-6 pb-20 pt-12 md:pb-28 md:pt-16"
+        className="relative mx-auto w-full max-w-6xl scroll-mt-24 overflow-hidden px-6 pb-20 pt-10 md:pb-28 md:pt-14"
       >
         <div className="relative z-10">
         <SectionLabel>The modern challenge</SectionLabel>
-        <div className="grid gap-6 md:grid-cols-[1.1fr_.9fr] md:items-end md:gap-12">
-          <h2 className="text-[clamp(3rem,5.2vw,5.5rem)] font-bold leading-[0.94] tracking-[-0.045em] text-brand-dark">
+        <div className="flex flex-col gap-7 md:gap-10">
+          <h2 className="max-w-5xl text-[clamp(3rem,7vw,6.5rem)] font-bold leading-[0.9] tracking-[-0.05em] text-brand-dark">
             Why do I do that<span className="text-brand-primary">?</span>
           </h2>
-          <div className="max-w-2xl border-l-2 border-brand-teal/35 pl-5 font-sans text-base leading-7 text-brand-dark md:text-lg md:leading-8">
-            <p>You know what needs to be done. You may even want to do it.</p>
-            <ul className="my-4 space-y-2">
-              <li className="flex gap-3">
-                <span aria-hidden="true" className="mt-[0.7em] h-1.5 w-1.5 shrink-0 rounded-full bg-brand-primary" />
-                <span>And yet, you don&apos;t.</span>
+          <div className="max-w-5xl border-y border-brand-dark/15 py-7 font-sans text-base leading-7 text-brand-dark md:py-9 md:text-lg md:leading-8">
+            <p className="max-w-3xl">You know what needs to be done. You may even want to do it.</p>
+            <ul className="mt-6 grid gap-5 sm:grid-cols-3 md:mt-8 md:gap-8">
+              <li className="border-t-2 border-brand-primary pt-3">
+                And yet, you don&apos;t.
               </li>
-              <li className="flex gap-3">
-                <span aria-hidden="true" className="mt-[0.7em] h-1.5 w-1.5 shrink-0 rounded-full bg-brand-secondary" />
-                <span>Not always. Not completely.</span>
+              <li className="border-t-2 border-brand-secondary pt-3">
+                Not always. Not completely.
               </li>
-              <li className="flex gap-3">
-                <span aria-hidden="true" className="mt-[0.7em] h-1.5 w-1.5 shrink-0 rounded-full bg-brand-teal" />
-                <span>But often enough to wonder what&apos;s really going on.</span>
+              <li className="border-t-2 border-brand-teal pt-3">
+                But often enough to wonder what&apos;s really going on.
               </li>
             </ul>
-            <p className="font-serif text-xl font-bold leading-7 text-brand-dark md:text-2xl md:leading-8">
+            <p className="mt-8 max-w-4xl font-serif text-2xl font-bold leading-8 text-brand-dark md:mt-10 md:text-3xl md:leading-10">
               It shows up in different ways for different people. Here are seven you might recognize.
             </p>
           </div>

@@ -93,7 +93,7 @@ export default function HeroSection() {
             </a>
           </div>
 
-          <div id="hero-story" className="grid scroll-mt-6 max-w-6xl gap-5 border-t border-brand-dark/12 py-20 md:grid-cols-6 md:py-28">
+          <div id="hero-story" className="grid scroll-mt-6 max-w-6xl gap-5 border-t border-brand-dark/12 pb-0 pt-20 md:grid-cols-6 md:pt-28">
             <p className="font-serif text-[clamp(2rem,4vw,3.8rem)] font-bold leading-[1.08] tracking-[-0.035em] text-brand-dark md:col-span-6 md:max-w-6xl">
               Some life experiences make you realize,{" "}
               <strong className="inline-block whitespace-nowrap bg-brand-secondary/55 px-2 py-0.5 text-[0.82em] italic text-brand-accent sm:text-[1em]">clearly and uncomfortably,</strong> that the life you&apos;re
@@ -130,7 +130,7 @@ export default function HeroSection() {
               </p>
               <PatternRevealList />
             </div>
-            <p className="mt-8 bg-brand-dark px-6 py-8 font-serif text-2xl font-bold leading-tight text-white md:col-span-6 md:max-w-5xl md:px-10 md:py-10 md:text-4xl">
+            <p className="relative mt-8 overflow-hidden bg-brand-dark px-6 py-8 font-serif text-2xl font-bold leading-tight text-white after:absolute after:inset-x-0 after:bottom-0 after:h-1 after:bg-brand-secondary md:col-span-6 md:px-10 md:py-10 md:text-4xl">
               These patterns are not who you are. But then the question you ask
               yourself…
             </p>

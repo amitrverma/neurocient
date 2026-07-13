@@ -1,5 +1,11 @@
 # Practice Decisions
 
+## 2026-07-13: The Inner Caveman introduction should read as one visual narrative
+
+- Keep the existing explanatory copy intact while using hierarchy, grouping, and pacing to connect the introduction, framework image, five drives, and closing reframe.
+- Present the five drives as a coherent protective system rather than a generic list of content links.
+- Preserve a single vertical narrative at every breakpoint, with the framework image as a centered feature moment rather than a two-column split.
+
 ## 2026-07-13: Text-Rich Sequences Use Controlled Presentational Variation
 
 Long text-rich sequences should vary the user's mode of comprehension while retaining one coherent visual grammar.

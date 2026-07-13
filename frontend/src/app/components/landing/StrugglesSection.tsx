@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { SectionLabel } from "./LandingShared";
 
 const struggles = [
@@ -58,6 +59,17 @@ const struggles = [
       "You burnout easily and it effects your day to day life",
   },
 ];
+
+const patternImages = [
+  "/images/landing/patterns/waiting-ready.png",
+  "/images/landing/patterns/endless-scroll.png",
+  "/images/landing/patterns/comparison.png",
+  "/images/landing/patterns/pressure.png",
+  "/images/landing/patterns/worries.png",
+  "/images/landing/patterns/guilt.png",
+  "/images/landing/patterns/unrested.png",
+];
+
 export default function StrugglesSection() {
   return (
       <section
@@ -103,29 +115,45 @@ export default function StrugglesSection() {
 }
 
 const StruggleSequence = () => (
-  <div className="border-y border-brand-dark/15">
-    {struggles.map((item) => (
-      <article
-        key={item.title}
-        className="relative border-b border-brand-dark/12 py-9 last:border-b-0 md:grid md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.25fr)] md:gap-10 md:py-12 lg:gap-16"
-      >
-        <div>
-          <h3 className="text-2xl font-bold leading-tight tracking-[-0.025em] text-brand-dark md:text-3xl">
-            {item.title}
-          </h3>
-          <p className="mt-5 text-xl font-medium leading-7 text-brand-dark md:text-2xl md:leading-8">
-            {item.lead}
-          </p>
-        </div>
+  <div className="relative mt-5">
+    <div className="space-y-8 md:space-y-10">
+      {struggles.map((item, index) => (
+        <article
+          key={item.title}
+          className="relative grid min-h-[32rem] w-full overflow-hidden rounded-md border border-[#ded8cc] bg-[#fffefa] shadow-[0_18px_45px_rgba(4,42,43,0.08)] md:min-h-[29rem] md:grid-cols-[0.76fr_1.24fr]"
+        >
+          <div className="relative flex min-h-56 items-center justify-center overflow-hidden border-b border-[#ded8cc] px-8 pb-4 pt-10 md:min-h-full md:border-b-0 md:border-r md:p-8">
+            <Image
+              src={patternImages[index]}
+              alt=""
+              width={560}
+              height={560}
+              sizes="(max-width: 767px) 72vw, 30vw"
+              className="h-auto w-full max-w-56 mix-blend-multiply md:max-w-64"
+            />
+          </div>
 
-        <div className="mt-6 space-y-5 font-sans text-sm leading-7 text-brand-dark/75 md:mt-0 md:text-base md:leading-8">
-          <p>{item.detail}</p>
-          <p className="border-l-4 border-brand-secondary pl-4 font-serif text-lg leading-7 text-brand-dark md:pl-5 md:text-xl md:leading-8">
-            {item.close}
-          </p>
-        </div>
-      </article>
-    ))}
+          <div className="relative flex flex-col justify-center px-6 py-8 sm:px-10 md:px-12 md:py-10 lg:px-16">
+            <span className="flex items-center gap-3 font-sans text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[#b96e19]">
+              <span className="h-px w-4 bg-[#b96e19]" />
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <h3 className="mt-5 max-w-[18ch] text-[clamp(2rem,3.7vw,3.4rem)] font-bold leading-[1.02] tracking-[-0.035em] text-brand-dark text-balance">
+              {item.title}
+            </h3>
+            <p className="mt-6 max-w-[31ch] font-serif text-xl font-bold leading-[1.38] text-brand-dark sm:text-2xl md:text-[1.65rem]">
+              {item.lead}
+            </p>
+            <div className="mt-6 max-w-[39rem] font-sans text-sm leading-7 text-brand-dark/70 md:text-[0.95rem] md:leading-8">
+              <p>{item.detail}</p>
+              <p className="mt-6 border-l-2 border-[#c47a20] pl-5 font-serif text-lg italic leading-7 text-brand-dark md:text-xl md:leading-8">
+                {item.close}
+              </p>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
   </div>
 );
 

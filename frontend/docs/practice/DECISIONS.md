@@ -1,5 +1,22 @@
 # Practice Decisions
 
+## 2026-07-13: Text-Rich Sequences Use Controlled Presentational Variation
+
+Long text-rich sequences should vary the user's mode of comprehension while retaining one coherent visual grammar.
+
+Reason:
+
+- Repeating the same heading, lead, detail, and callout composition makes semantically different ideas feel monotonous.
+- Purely decorative variation can add extraneous cognitive load without improving comprehension or recall.
+- Distinct visual signals, pacing, hierarchy, and composition can make dense material easier to enter without removing substance.
+
+Implication:
+
+- Use mobile-first progressive pacing and clear chunk boundaries for long landing and product sequences.
+- Give major ideas a meaningful visual memory cue when appropriate, rather than styling every paragraph independently.
+- Keep typography, color, spacing, and illustration grammar consistent while varying reading motion and composition.
+- Do not treat copy reduction as the default solution to cognitive load.
+
 ## 2026-07-11: Account-Linked Portraits Must Be Retrievable
 
 A completed Scan linked during authentication must be available again from the user's account, independent of the original browser's local storage.

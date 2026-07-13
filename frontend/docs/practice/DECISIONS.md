@@ -1,5 +1,11 @@
 # Practice Decisions
 
+## 2026-07-13: Long perspective shifts should unfold as editorial narratives
+
+- Preserve a single reading path while giving each conceptual turn a distinct visual treatment.
+- Use contrast, typography, borders, and restrained geometry to pace text-rich explanation without reducing its substance.
+- Reserve the strongest visual block for the central mismatch users should remember.
+
 ## 2026-07-13: The Inner Caveman introduction should read as one visual narrative
 
 - Keep the existing explanatory copy intact while using hierarchy, grouping, and pacing to connect the introduction, framework image, five drives, and closing reframe.

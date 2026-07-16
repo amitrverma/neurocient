@@ -6,7 +6,7 @@ const struggles = [
     title: "Waiting to Feel Ready",
     lead: "You have been putting off a lot of stuff because you don't feel ready.",
     detail:
-      "Starting that project, reaching out to old friends, starting exercising, trying new things.",
+      "Starting that project, reaching out to old friends, starting exercising , trying new things.",
     close:
       "Always telling yourself you’ll do it when you are more prepared, more confident, more together. Waiting for some magical moment of confidence or clarity that never showed up",
   },
@@ -78,7 +78,7 @@ export default function StrugglesSection() {
         <SectionLabel>The modern challenge</SectionLabel>
         <div className="flex flex-col gap-7 md:gap-10">
           <h2 className="max-w-5xl text-[clamp(3rem,7vw,6.5rem)] font-bold leading-[0.9] tracking-[-0.05em] text-brand-dark">
-            Why do I do that<span className="text-brand-primary">?</span>
+            “Why do I do that<span className="text-brand-primary">?</span>”
           </h2>
           <div className="max-w-5xl border-y border-brand-dark/15 py-7 font-sans text-base leading-7 text-brand-dark md:py-9 md:text-lg md:leading-8">
             <p className="max-w-3xl">You know what needs to be done. You may even want to do it.</p>
@@ -94,14 +94,24 @@ export default function StrugglesSection() {
               </li>
             </ul>
             <p className="mt-8 max-w-4xl font-serif text-2xl font-bold leading-8 text-brand-dark md:mt-10 md:text-3xl md:leading-10">
-              It shows up in different ways for different people. Here are seven you might recognize.
+              Over time, it becomes frustrating. You stop asking why you can&apos;t seem to make things stick, and start wondering if something is wrong with you.
+              <br /><br />
+              You tell yourself next week will be different. After this project. After the holidays. Once work settles down. Once life feels less busy. But somehow, that version of your life never arrives.
+              <br /><br />
+              Instead, the same struggles keep showing up in different parts of your life. Some are obvious. Others become so familiar that they start to feel like part of who you are.
+              <br /><br />
+              Here are a few patterns you might recognize
             </p>
           </div>
         </div>
         <div className="mt-9 md:mt-11">
           <StruggleSequence />
           <p className="mt-10 max-w-4xl border-l-4 border-brand-secondary pl-5 font-serif text-2xl leading-9 text-brand-dark md:text-3xl md:leading-10">
-            These patterns may look different from person to person, but the response is usually the same.
+            These patterns may look different from person to person.
+            <br /><br />
+            But if you&apos;ve recognized yourself in even one of them, you&apos;ve probably already searched for answers and followed more advice than you can remember.
+            <br /><br />
+            And to live a life which is more fulfilling...
           </p>
         </div>
         </div>

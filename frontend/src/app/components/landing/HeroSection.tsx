@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
-import PatternRevealList from "./PatternRevealList";
 
 export default function HeroSection() {
   return (
@@ -96,43 +95,31 @@ export default function HeroSection() {
           <div id="hero-story" className="grid scroll-mt-6 max-w-6xl gap-5 border-t border-brand-dark/12 pb-0 pt-20 md:grid-cols-6 md:pt-28">
             <p className="font-serif text-balance text-[clamp(2rem,4vw,3.8rem)] font-bold leading-[1.08] tracking-[-0.035em] text-brand-dark md:col-span-6 md:max-w-6xl">
               Some life experiences make you realize,{" "}
-              <strong className="inline-block whitespace-nowrap bg-brand-secondary/55 px-2 py-0.5 text-[0.82em] italic text-brand-accent sm:text-[1em]">clearly and uncomfortably,</strong> that the life you&apos;re
-              living <span className="text-brand-primary">&amp;</span> <span>the life you want</span> are not the same.
+              <strong className="inline-block whitespace-nowrap bg-brand-secondary/55 px-2 py-0.5 text-[0.82em] italic text-brand-accent sm:text-[1em]">clearly and uncomfortably,</strong> that the life you&apos;re living and the life you want are not the same.
             </p>
             <p className="relative border-l-2 border-t-2 border-brand-teal/55 py-6 pl-6 pr-2 font-serif text-xl leading-8 text-brand-dark before:absolute before:-top-5 before:right-2 before:font-serif before:text-6xl before:font-bold before:leading-none before:text-brand-teal/15 before:content-['01'] md:col-span-2 md:border-l-0 md:px-2 md:pt-12 md:text-2xl md:leading-9">
-              Maybe it was watching someone close struggle with health and
-              realizing you don&apos;t want to keep postponing the life you want to
-              live.
+              Maybe it was watching someone close <strong>struggle with their health</strong> and realizing you don&apos;t want to keep taking your own for granted.
             </p>
             <p className="relative border-l-2 border-t-2 border-brand-secondary/70 py-6 pl-6 pr-2 font-serif text-xl leading-8 text-brand-dark before:absolute before:-top-5 before:right-2 before:font-serif before:text-6xl before:font-bold before:leading-none before:text-brand-secondary/35 before:content-['02'] md:col-span-2 md:mt-10 md:border-l-0 md:px-2 md:pt-12 md:text-2xl md:leading-9">
-              Maybe it was realizing that your close relationships had drifted
-              into the bare minimum, where staying in touch had replaced feeling
-              connected.
+              Maybe it was realizing that your <strong>close relationships had drifted</strong> into the bare minimum, and you don&apos;t want to settle for surface-level relationships just to avoid conflict or judgment.
             </p>
             <p className="relative border-l-2 border-t-2 border-brand-primary/40 py-6 pl-6 pr-2 font-serif text-xl leading-8 text-brand-dark before:absolute before:-top-5 before:right-2 before:font-serif before:text-6xl before:font-bold before:leading-none before:text-brand-primary/12 before:content-['03'] md:col-span-2 md:mt-20 md:border-l-0 md:px-2 md:pt-12 md:text-2xl md:leading-9">
-              Maybe it was realizing you&apos;d started getting triggered by the
-              smallest things, like you were under pressure all day, every day.
+              Maybe it was realizing you&apos;d started getting <strong>triggered by the smallest things</strong>, like you were under pressure all day, every day, and you don&apos;t want your body and mind to keep paying the price.
             </p>
-            <p className="my-8 border-y border-brand-dark/12 py-8 font-serif text-2xl leading-9 text-brand-dark md:col-span-5 md:max-w-5xl md:py-10 md:text-4xl md:leading-tight">
-              Moments like these have a way of <strong>revealing</strong> patterns
-              you can no longer ignore.
-            </p>
+            <div className="my-8 border-y border-brand-dark/12 py-8 font-serif text-2xl leading-9 text-brand-dark md:col-span-5 md:max-w-5xl md:py-10 md:text-4xl md:leading-tight">
+              <p>Or maybe it was something else entirely.</p>
+              <p className="mt-6">
+                Whatever the moment was, it left you with a feeling you couldn&apos;t ignore anymore. You wanted to live with more intention and fewer regrets.
+              </p>
+            </div>
             <div className="mt-8 md:col-span-5">
               <div className="border-t border-brand-secondary py-8 font-serif text-xl leading-9 text-brand-dark md:max-w-4xl md:py-10 md:text-3xl md:leading-[1.45]">
-                <p className="text-brand-accent">So you tried.</p>
-                <p className="mt-3">The routines.</p>
-                <p>The fresh starts.</p>
-                <p className="mt-5">You knew exactly what to do.</p>
-                <p className="mt-3 font-bold">And still, the same patterns kept showing up.</p>
+                <p>So you tried. Morning routines. Meditation. Journaling. Self-help books. Listening to podcasts. Productivity hacks. Self-help apps.</p>
+                <p className="mt-5">You knew what to do. Yet a few weeks later, you found yourself back where you started.</p>
               </div>
-              <p className="border-t border-brand-dark/12 pt-7 font-sans text-xs font-bold uppercase tracking-[0.18em] text-brand-teal md:pt-9">
-                They showed up as
-              </p>
-              <PatternRevealList />
             </div>
             <p className="relative mt-8 overflow-hidden bg-brand-dark px-6 py-8 font-serif text-2xl font-bold leading-tight text-white after:absolute after:inset-x-0 after:bottom-0 after:h-1 after:bg-brand-secondary md:col-span-6 md:px-10 md:py-10 md:text-4xl">
-              These patterns are not who you are. But then the question you ask
-              yourself…
+              And you keep asking yourself…
             </p>
           </div>
         </div>

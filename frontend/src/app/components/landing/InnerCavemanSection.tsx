@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Compass, Heart, ShieldCheck, Sparkles, Users } from "lucide-react";
-import { SectionDecorations, SectionLabel } from "./LandingShared";
+import { SectionDecorations, SectionHeading, SectionLabel } from "./LandingShared";
 
 const drives = [
   { name: "Affiliation & Belonging", question: "Am I included?", modern: "Notifications, social media, loneliness, team silence.", href: "/insights/connections", icon: Users },
@@ -21,9 +21,9 @@ export default function InnerCavemanSection() {
       <div className="relative z-10 mx-auto w-full max-w-6xl">
         <div className="mx-auto max-w-5xl">
           <SectionLabel>Neurocient Labs introduces...</SectionLabel>
-          <h2 className="text-balance text-[clamp(3.25rem,8vw,6.75rem)] font-bold leading-[0.88] tracking-[-0.055em] text-brand-dark">
+          <SectionHeading>
             Meet Your <span className="italic text-brand-accent">Inner Caveman</span>
-          </h2>
+          </SectionHeading>
           <p className="mt-10 max-w-5xl border-y border-brand-dark/15 py-7 font-serif text-[1.75rem] font-bold leading-[1.35] tracking-[-0.02em] text-brand-dark md:py-9 md:text-[2.65rem] md:leading-[1.2]">
             The brain system that <span className="italic text-brand-accent">reacts before you reason:</span>{" "}
             <span className="relative inline bg-[linear-gradient(transparent_68%,rgba(244,201,93,0.48)_68%)]">fast, protective,</span>
@@ -82,33 +82,43 @@ export default function InnerCavemanSection() {
       </div>
 
       <div className="relative z-10 mx-auto mt-16 max-w-6xl border-t border-brand-dark/15 pt-14 font-sans text-base leading-8 text-brand-dark/75 md:pt-20">
-        <p className="max-w-4xl font-serif text-3xl font-bold leading-10 tracking-[-0.02em] text-brand-dark md:text-4xl md:leading-[1.15]">
+        <p className="max-w-4xl font-serif text-2xl font-bold leading-9 tracking-[-0.02em] text-brand-dark md:text-3xl md:leading-10">
           Every person has all five drives. What differs is which one becomes active most often, and how it shapes the way you think, feel, and respond.
         </p>
         <p className="mt-8 max-w-3xl border-l-2 border-brand-primary/40 pl-5 md:text-lg md:leading-9">
           Grounded in decades of research across evolutionary psychology and behavioural science.
         </p>
         <div className="py-10 md:py-14">
-          <div className="mt-7 grid gap-px overflow-hidden rounded-xl border border-brand-dark/15 bg-brand-dark/15 font-sans font-semibold text-brand-dark sm:grid-cols-3">
-            <span className="bg-white/80 p-5">5 — Core survival drives still shaping how you behave today. (Evolutionary Psychology / Kenrick et al.)</span>
-            <span className="bg-white/80 p-5">2x — Losses feel twice as powerful as equivalent gains. (Kahneman &amp; Tversky, Prospect Theory, 1979)</span>
-            <span className="bg-white/80 p-5">95% — Of decisions driven by unconscious processes. (Dr. Gerald Zaltman, Harvard University)</span>
+          <div className="mt-7 grid gap-px overflow-hidden rounded-xl border border-brand-dark/15 bg-brand-dark/15 font-sans font-semibold text-brand-dark lg:grid-cols-3">
+            <span className="flex flex-col bg-white/80 p-5">
+              <strong className="font-serif text-4xl leading-none text-brand-primary">5</strong>
+              <span className="mt-4"> — Core survival drives still shaping how you behave today. (Evolutionary Psychology / Kenrick et al.)</span>
+            </span>
+            <span className="flex flex-col bg-white/80 p-5">
+              <strong className="font-serif text-4xl leading-none text-brand-primary">2x</strong>
+              <span className="mt-4"> — Losses feel twice as powerful as equivalent gains. (Kahneman &amp; Tversky, Prospect Theory, 1979)</span>
+            </span>
+            <span className="flex flex-col bg-white/80 p-5">
+              <strong className="font-serif text-4xl leading-none text-brand-primary">95%</strong>
+              <span className="mt-4"> — Of decisions driven by unconscious processes. (Dr. Gerald Zaltman, Harvard University)</span>
+            </span>
           </div>
-          <p className="mt-7">(check the source)</p>
+          <p className="mt-7 inline-block bg-brand-secondary/55 px-2 py-0.5 font-semibold text-brand-accent">(check the source)</p>
         </div>
         <p className="max-w-4xl font-serif text-2xl leading-9 text-brand-dark md:text-3xl md:leading-10">
           You can&apos;t delete your Inner Caveman.
         </p>
-        <p className="mt-7 max-w-4xl">
-          But you can learn to recognise when it&apos;s active, understand what it&apos;s trying to protect, and respond with more awareness instead of reacting automatically.
-        </p>
-        <p className="mt-7 max-w-4xl">
-          You wanted MORE from your ONE life. That doesn&apos;t begin by trying harder.
-        </p>
-        <p className="mt-7 max-w-4xl">
-          It begins by understanding what&apos;s been shaping you all along.
-        </p>
-        <p className="relative max-w-5xl overflow-hidden rounded-2xl bg-brand-dark px-7 py-9 font-serif text-3xl font-bold leading-10 tracking-[-0.02em] text-white shadow-[0_24px_70px_-35px_rgba(4,42,43,0.75)] before:absolute before:-right-12 before:-top-20 before:h-52 before:w-52 before:rounded-full before:border before:border-white/10 md:px-12 md:py-12 md:text-4xl md:leading-[1.15]">
+        <p className="mt-7 max-w-4xl">But you can learn to</p>
+        <div className="mt-6 grid gap-px overflow-hidden rounded-xl border border-brand-dark/15 bg-brand-dark/15 font-sans font-semibold text-brand-dark sm:grid-cols-3">
+          <span className="bg-white/80 p-5">recognise when it&apos;s active,</span>
+          <span className="bg-white/80 p-5">understand what it&apos;s trying to protect,</span>
+          <span className="bg-white/80 p-5">and respond with more awareness instead of reacting automatically.</span>
+        </div>
+        <div className="mt-12 max-w-4xl space-y-6 border-t border-brand-dark/15 pt-9">
+          <p className="font-serif text-2xl font-bold leading-9 text-brand-dark md:text-3xl md:leading-10">You wanted MORE from your ONE life. That doesn&apos;t begin by trying harder.</p>
+          <p>It begins by understanding what&apos;s been shaping you all along.</p>
+        </div>
+        <p className="relative mt-10 max-w-5xl overflow-hidden rounded-2xl bg-brand-dark px-7 py-9 font-serif text-3xl font-bold leading-10 tracking-[-0.02em] text-white shadow-[0_24px_70px_-35px_rgba(4,42,43,0.75)] before:absolute before:-right-12 before:-top-20 before:h-52 before:w-52 before:rounded-full before:border before:border-white/10 md:px-12 md:py-12 md:text-4xl md:leading-[1.15]">
           So we created a simple scan to help you get started.
         </p>
       </div>

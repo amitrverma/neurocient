@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { SectionDecorations, SectionLabel } from "./LandingShared";
+import { SectionDecorations, SectionHeading, SectionLabel } from "./LandingShared";
 
 const struggles = [
   {
@@ -77,9 +77,9 @@ export default function StrugglesSection() {
         <div className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-20 pt-16 md:pb-28 md:pt-24">
         <SectionLabel>The modern challenge</SectionLabel>
         <div className="flex flex-col gap-7 md:gap-10">
-          <h2 className="max-w-5xl text-[clamp(3rem,7vw,6.5rem)] font-bold leading-[0.9] tracking-[-0.05em] text-brand-dark">
+          <SectionHeading>
             “Why do I do that<span className="text-brand-primary">?</span>”
-          </h2>
+          </SectionHeading>
           <div className="max-w-5xl border-y border-brand-dark/15 py-7 font-sans text-base leading-7 text-brand-dark md:py-9 md:text-lg md:leading-8">
             <p className="max-w-3xl">You know what needs to be done. You may even want to do it.</p>
             <ul className="mt-6 grid gap-5 sm:grid-cols-3 md:mt-8 md:gap-8">
@@ -93,26 +93,21 @@ export default function StrugglesSection() {
                 But often enough to wonder what&apos;s really going on.
               </li>
             </ul>
-            <p className="mt-8 max-w-4xl font-serif text-2xl font-bold leading-8 text-brand-dark md:mt-10 md:text-3xl md:leading-10">
-              Over time, it becomes frustrating. You stop asking why you can&apos;t seem to make things stick, and start wondering if something is wrong with you.
-              <br /><br />
-              You tell yourself next week will be different. After this project. After the holidays. Once work settles down. Once life feels less busy. But somehow, that version of your life never arrives.
-              <br /><br />
-              Instead, the same struggles keep showing up in different parts of your life. Some are obvious. Others become so familiar that they start to feel like part of who you are.
-              <br /><br />
-              Here are a few patterns you might recognize
-            </p>
+            <div className="mt-8 grid max-w-5xl gap-6 md:mt-10 md:grid-cols-3 md:gap-8">
+              <p className="border-t-2 border-brand-primary pt-5">Over time, it becomes frustrating. You stop asking why you can&apos;t seem to make things stick, and start wondering if something is wrong with you.</p>
+              <p className="border-t-2 border-brand-secondary pt-5">You tell yourself next week will be different. After this project. After the holidays. Once work settles down. Once life feels less busy. But somehow, that version of your life never arrives.</p>
+              <p className="border-t-2 border-brand-teal pt-5">Instead, the same struggles keep showing up in different parts of your life. Some are obvious. Others become so familiar that they start to feel like part of who you are.</p>
+              <p className="border-t border-brand-dark/15 pt-7 font-serif text-2xl font-bold leading-8 text-brand-dark md:col-span-3 md:text-3xl md:leading-10">Here are a few patterns you might recognize</p>
+            </div>
           </div>
         </div>
         <div className="mt-9 md:mt-11">
           <StruggleSequence />
-          <p className="mt-10 max-w-4xl border-l-4 border-brand-secondary pl-5 font-serif text-2xl leading-9 text-brand-dark md:text-3xl md:leading-10">
-            These patterns may look different from person to person.
-            <br /><br />
-            But if you&apos;ve recognized yourself in even one of them, you&apos;ve probably already searched for answers and followed more advice than you can remember.
-            <br /><br />
-            And to live a life which is more fulfilling...
-          </p>
+          <div className="mt-10 max-w-4xl space-y-6 border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark md:text-lg md:leading-9">
+            <p>These patterns may look different from person to person.</p>
+            <p>But if you&apos;ve recognized yourself in even one of them, you&apos;ve probably already searched for answers and followed more advice than you can remember.</p>
+            <p className="font-serif text-2xl font-bold leading-9 md:text-3xl md:leading-10">And to live a life which is more fulfilling...</p>
+          </div>
         </div>
         </div>
       </section>

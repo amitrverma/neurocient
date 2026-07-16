@@ -1,4 +1,4 @@
-import { SectionDecorations, SectionLabel } from "./LandingShared";
+import { SectionDecorations, SectionHeading, SectionLabel } from "./LandingShared";
 
 export default function ModernFixesSection() {
   return (
@@ -6,10 +6,10 @@ export default function ModernFixesSection() {
         <SectionDecorations tone="dark" />
         <div className="relative z-10 mx-auto max-w-6xl">
           <SectionLabel tone="dark">Why modern fixes fall short</SectionLabel>
-          <h2 className="max-w-5xl text-balance text-[clamp(2.8rem,5vw,5.5rem)] font-bold leading-[0.98] tracking-[-0.035em] text-white">
+          <SectionHeading tone="dark">
             You have tried all the
             <span className="italic text-brand-secondary"> modern fixes.</span>
-          </h2>
+          </SectionHeading>
           <div className="mt-10 max-w-5xl border-l-4 border-brand-secondary pl-5 md:pl-7">
             <p className="font-sans text-lg font-semibold leading-8 text-white/72 md:text-2xl md:leading-9">
               When something isn&rsquo;t working, the response is almost automatic.
@@ -63,32 +63,26 @@ export default function ModernFixesSection() {
             <p>None of these approaches are wrong.</p>
             <p className="pt-4 font-serif text-3xl text-white md:text-4xl">So…why does none of it stick?</p>
             <div className="max-w-5xl border-y border-white/15 py-8 text-white md:py-10">
-              <p className="font-serif text-2xl font-bold leading-9 md:text-4xl md:leading-tight">
-                Because…this approach
+              <p className="max-w-4xl font-serif text-2xl leading-9 md:text-3xl md:leading-10">
+                Because…this approach <strong className="box-decoration-clone bg-brand-secondary px-1.5 py-0.5 text-brand-dark">assumes that once you know better, you will do better.</strong>
               </p>
-              <div className="mt-7 grid gap-px bg-white/15 font-sans sm:grid-cols-3">
-                {[
-                  "assumes that once",
-                  "you know better,",
-                  "you will do better.",
-                ].map((text) => (
-                  <div key={text} className="bg-brand-dark px-5 py-5">
-                    <p className="text-base font-semibold text-white md:text-lg">{text}</p>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-7 border-l-4 border-brand-primary pl-5 font-sans text-lg font-semibold leading-8 text-white/75 md:text-xl md:leading-9">
-                <strong className="box-decoration-clone bg-brand-secondary px-1.5 py-0.5 text-brand-dark">But that is not how it plays out.</strong>
+              <p className="mt-8 border-l-4 border-brand-primary pl-5 font-sans text-lg font-bold leading-8 text-white md:text-xl md:leading-9">
+                But that is not how it plays out.
               </p>
             </div>
             <p className="max-w-3xl">
               You can understand exactly what needs to be done, and still feel a
               quiet resistance pulling you away from it.
             </p>
-            <p className="max-w-3xl">
-              So the cycle repeats. You apply the fix. It works briefly. It fades.
-              And slowly, the problem starts to feel like you.
-            </p>
+            <div className="max-w-5xl border-y border-white/15 py-8 md:py-10">
+              <p className="font-serif text-2xl font-bold leading-9 text-white md:text-3xl md:leading-10">So the cycle repeats.</p>
+              <div className="mt-7 grid gap-px overflow-hidden border border-white/15 bg-white/15 sm:grid-cols-2 lg:grid-cols-4">
+                <p className="bg-brand-dark p-5 font-semibold text-white">You apply the fix.</p>
+                <p className="bg-brand-dark p-5 font-semibold text-white">It works briefly.</p>
+                <p className="bg-brand-dark p-5 font-semibold text-white">It fades.</p>
+                <p className="bg-brand-dark p-5 font-semibold text-white">And slowly, the problem starts to feel like you.</p>
+              </div>
+            </div>
             <p className="max-w-4xl border-l-4 border-brand-secondary pl-5 font-serif text-2xl leading-9 text-white">
               If this sounds familiar, take a deep breath. You&rsquo;re not alone. And more importantly…
             </p>

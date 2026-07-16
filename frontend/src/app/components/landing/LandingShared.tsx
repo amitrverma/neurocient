@@ -25,6 +25,24 @@ export const Divider = () => (
   <div className="mx-auto h-px w-[calc(100%-3rem)] max-w-6xl bg-brand-dark/15" />
 );
 
+export const SectionHeading = ({
+  children,
+  tone = "light",
+  className = "",
+}: {
+  children: ReactNode;
+  tone?: "light" | "dark";
+  className?: string;
+}) => (
+  <h2
+    className={`max-w-5xl text-balance text-[clamp(3rem,7vw,6.5rem)] font-bold leading-[0.92] tracking-[-0.05em] ${
+      tone === "dark" ? "text-white" : "text-brand-dark"
+    } ${className}`}
+  >
+    {children}
+  </h2>
+);
+
 export const SectionDecorations = ({
   tone = "light",
   flip = false,

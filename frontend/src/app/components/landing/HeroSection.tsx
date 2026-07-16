@@ -106,16 +106,16 @@ export default function HeroSection() {
             <p className="relative border-l-2 border-t-2 border-brand-primary/40 py-6 pl-6 pr-2 font-serif text-xl leading-8 text-brand-dark before:absolute before:-top-5 before:right-2 before:font-serif before:text-6xl before:font-bold before:leading-none before:text-brand-primary/12 before:content-['03'] md:col-span-2 md:mt-20 md:border-l-0 md:px-2 md:pt-12 md:text-2xl md:leading-9">
               Maybe it was realizing you&apos;d started getting <strong>triggered by the smallest things</strong>, like you were under pressure all day, every day, and you don&apos;t want your body and mind to keep paying the price.
             </p>
-            <div className="my-8 border-y border-brand-dark/12 py-8 font-serif text-2xl leading-9 text-brand-dark md:col-span-5 md:max-w-5xl md:py-10 md:text-4xl md:leading-tight">
-              <p>Or maybe it was something else entirely.</p>
-              <p className="mt-6">
+            <div className="my-8 border-y border-brand-dark/12 py-8 text-brand-dark md:col-span-5 md:max-w-5xl md:py-10">
+              <p className="font-serif text-2xl font-bold leading-9 md:text-3xl md:leading-10">Or maybe it was something else entirely.</p>
+              <p className="mt-6 max-w-4xl font-sans text-base leading-8 md:text-lg md:leading-9">
                 Whatever the moment was, it left you with a feeling you couldn&apos;t ignore anymore. You wanted to live with more intention and fewer regrets.
               </p>
             </div>
             <div className="mt-8 md:col-span-5">
-              <div className="border-t border-brand-secondary py-8 font-serif text-xl leading-9 text-brand-dark md:max-w-4xl md:py-10 md:text-3xl md:leading-[1.45]">
+              <div className="max-w-4xl space-y-5 border-t border-brand-secondary py-8 font-sans text-base leading-8 text-brand-dark md:py-10 md:text-lg md:leading-9">
                 <p>So you tried. Morning routines. Meditation. Journaling. Self-help books. Listening to podcasts. Productivity hacks. Self-help apps.</p>
-                <p className="mt-5">You knew what to do. Yet a few weeks later, you found yourself back where you started.</p>
+                <p className="font-serif text-2xl font-bold leading-9 md:text-3xl md:leading-10">You knew what to do. Yet a few weeks later, you found yourself back where you started.</p>
               </div>
             </div>
             <p className="relative mt-8 overflow-hidden bg-brand-dark px-6 py-8 font-serif text-2xl font-bold leading-tight text-white after:absolute after:inset-x-0 after:bottom-0 after:h-1 after:bg-brand-secondary md:col-span-6 md:px-10 md:py-10 md:text-4xl">

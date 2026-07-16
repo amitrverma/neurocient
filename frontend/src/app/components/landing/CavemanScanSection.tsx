@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
-import { SectionDecorations } from "./LandingShared";
+import { SectionDecorations, SectionHeading } from "./LandingShared";
 
 export default function CavemanScanSection() {
   return (
@@ -8,12 +8,12 @@ export default function CavemanScanSection() {
         <SectionDecorations tone="dark" flip />
         <div className="relative z-10 mx-auto w-full max-w-6xl">
           <div className="max-w-5xl">
-            <h2 className="max-w-4xl text-balance text-[clamp(3.25rem,7vw,7rem)] font-bold leading-[0.9] tracking-[-0.05em] text-white">
+            <SectionHeading tone="dark" className="max-w-4xl">
               The Inner Caveman Scan
-            </h2>
+            </SectionHeading>
 
             <div className="mt-10 max-w-4xl border-y border-white/15 py-8 md:mt-12 md:py-10">
-              <h3 className="font-serif text-3xl font-bold md:text-5xl">It&rsquo;s a quick way to notice which of these survival drives shows up most often in your everyday decisions.</h3>
+              <h3 className="max-w-3xl font-serif text-2xl font-bold leading-9 md:text-3xl md:leading-10">It&rsquo;s a quick way to notice which of these survival drives shows up most often in your everyday decisions.</h3>
               <p className="mt-5 max-w-3xl font-sans text-base leading-8 text-white/70 md:text-lg md:leading-9">
                 <strong>It won&apos;t judge you or label you.</strong> It simply gives you a clearer picture of the patterns that may be shaping your thoughts, emotions, and behaviour.
               </p>

@@ -7,6 +7,8 @@
   --foreground: #042a2b;
   --font-quattrocento: 'Quattrocento', serif;
   --font-montserrat: 'Montserrat', sans-serif;
+  --font-landing-serif: 'Playfair Display', serif;
+  --font-landing-sans: 'Inter', sans-serif;
   --font-geist-mono: monospace;
 }
 
@@ -43,6 +45,59 @@ html, body {
 
 body {
   @apply antialiased;
+}
+
+/* Landing-page editorial experiment: expressive real italics and a softer UI voice. */
+.landing-page {
+  --font-serif: var(--font-landing-serif);
+  --font-sans: var(--font-landing-sans);
+  font-family: var(--font-landing-serif);
+}
+
+.landing-page .font-serif {
+  font-family: var(--font-landing-serif);
+}
+
+.landing-page .font-sans {
+  font-family: var(--font-landing-sans);
+}
+
+@keyframes landing-cycle-draw {
+  0% { opacity: 0.18; stroke-dashoffset: 1; }
+  8% { opacity: 1; }
+  30%, 82% { opacity: 1; stroke-dashoffset: 0; }
+  100% { opacity: 0.18; stroke-dashoffset: 0; }
+}
+
+@keyframes landing-cycle-label {
+  0%, 100% { opacity: 0.5; }
+  8%, 34% { opacity: 1; }
+  46% { opacity: 0.65; }
+}
+
+.landing-cycle-arc {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: landing-cycle-draw 6s ease-in-out infinite;
+}
+
+.landing-cycle-label {
+  animation: landing-cycle-label 6s ease-in-out infinite;
+}
+
+.landing-cycle-arc-2,
+.landing-cycle-label-2 { animation-delay: 2s; }
+
+.landing-cycle-arc-3,
+.landing-cycle-label-3 { animation-delay: 4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-cycle-arc,
+  .landing-cycle-label {
+    animation: none;
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
 }
 
 button:not(:disabled),

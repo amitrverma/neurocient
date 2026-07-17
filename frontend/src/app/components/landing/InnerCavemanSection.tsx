@@ -13,13 +13,12 @@ const drives = [
 
 export default function InnerCavemanSection() {
   return (
-    <section className="relative overflow-hidden bg-white px-5 py-20 sm:px-6 md:py-28">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-brand-dark/15" />
+    <section className="relative overflow-hidden bg-white px-5 pb-20 pt-12 sm:px-6 md:pb-28 md:pt-16">
       <SectionDecorations flip />
 
       <div className="relative z-10 mx-auto w-full max-w-6xl">
-        <div className="mx-auto max-w-5xl">
-          <SectionLabel>Neurocient Labs introduces...</SectionLabel>
+        <div className="max-w-5xl">
+          <SectionLabel>The survival system within</SectionLabel>
           <SectionHeading>
             Meet Your <span className="italic text-brand-accent">Inner Caveman</span>
           </SectionHeading>
@@ -80,46 +79,61 @@ export default function InnerCavemanSection() {
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto mt-16 max-w-6xl border-t border-brand-dark/15 pt-14 font-sans text-base leading-8 text-brand-dark/75 md:pt-20">
+      <div className="relative z-10 mx-auto mt-8 max-w-6xl font-sans text-base leading-8 text-brand-dark/75 md:mt-10">
         <p className="max-w-4xl font-serif text-2xl font-bold leading-9 tracking-[-0.02em] text-brand-dark md:text-3xl md:leading-10">
           Every person has all five drives. What differs is which one becomes active most often, and how it shapes the way you think, feel, and respond.
         </p>
-        <p className="mt-8 max-w-3xl md:text-lg md:leading-9">
+        <p className="mt-6 max-w-5xl md:whitespace-nowrap md:text-lg md:leading-9">
           Grounded in decades of research across evolutionary psychology and behavioural science.
         </p>
-        <div className="py-10 md:py-14">
-          <div className="mt-7 grid gap-px overflow-hidden border-y border-brand-dark/15 bg-brand-dark/15 font-sans font-semibold text-brand-dark lg:grid-cols-3">
-            <span className="flex flex-col bg-white/80 p-5">
-              <strong className="font-serif text-4xl leading-none text-brand-primary">5</strong>
-              <span className="mt-4"> — Core survival drives still shaping how you behave today. (Evolutionary Psychology / Kenrick et al.)</span>
-            </span>
-            <span className="flex flex-col bg-white/80 p-5">
-              <strong className="font-serif text-4xl leading-none text-brand-primary">2x</strong>
-              <span className="mt-4"> — Losses feel twice as powerful as equivalent gains. (Kahneman &amp; Tversky, Prospect Theory, 1979)</span>
-            </span>
-            <span className="flex flex-col bg-white/80 p-5">
-              <strong className="font-serif text-4xl leading-none text-brand-primary">95%</strong>
-              <span className="mt-4"> — Of decisions driven by unconscious processes. (Dr. Gerald Zaltman, Harvard University)</span>
-            </span>
+        <div className="pb-6 pt-4 md:pb-8 md:pt-5">
+          <div className="mt-4 grid gap-px overflow-hidden border-y border-brand-dark/15 bg-brand-dark/15 font-sans font-semibold text-brand-dark lg:grid-cols-3">
+            <div className="flex flex-col bg-white/80 p-5">
+              <span>Neurocient&apos;s five-drive model, informed by the fundamental-motives framework. (<a href="https://doi.org/10.1177/1745691610369469" target="_blank" rel="noreferrer" className="font-bold text-brand-teal underline underline-offset-4 transition-colors hover:text-brand-accent">Kenrick et al., 2010 ↗</a>)</span>
+              <strong className="mt-auto self-end pt-6 font-serif text-6xl leading-none text-brand-primary">5</strong>
+            </div>
+            <div className="flex flex-col bg-white/80 p-5">
+              <span>Losses can weigh about twice as much as equivalent gains. (<a href="https://doi.org/10.1007/BF00122574" target="_blank" rel="noreferrer" className="font-bold text-brand-teal underline underline-offset-4 transition-colors hover:text-brand-accent">Tversky &amp; Kahneman, 1992 ↗</a>)</span>
+              <strong className="mt-auto self-end pt-6 font-serif text-6xl leading-none text-brand-primary">2x</strong>
+            </div>
+            <div className="flex flex-col bg-white/80 p-5">
+              <span>Zaltman&apos;s estimate of cognition occurring outside conscious awareness, discussed in consumer decision-making. (<a href="https://www.library.hbs.edu/working-knowledge/the-subconscious-mind-of-the-consumer-and-how-to-reach-it" target="_blank" rel="noreferrer" className="font-bold text-brand-teal underline underline-offset-4 transition-colors hover:text-brand-accent">Harvard Business School, 2003 ↗</a>)</span>
+              <strong className="mt-auto self-end pt-6 font-serif text-6xl leading-none text-brand-primary">95%</strong>
+            </div>
           </div>
-          <p className="mt-7 inline-block bg-brand-secondary/55 px-2 py-0.5 font-semibold text-brand-accent">(check the source)</p>
         </div>
         <p className="max-w-4xl font-serif text-2xl leading-9 text-brand-dark md:text-3xl md:leading-10">
           You can&apos;t delete your Inner Caveman.
         </p>
-        <p className="mt-7 max-w-4xl">But you can learn to</p>
-        <div className="mt-6 grid gap-px overflow-hidden border-y border-brand-dark/15 bg-brand-dark/15 font-sans font-semibold text-brand-dark sm:grid-cols-3">
-          <span className="bg-white/80 p-5">recognise when it&apos;s active,</span>
-          <span className="bg-white/80 p-5">understand what it&apos;s trying to protect,</span>
-          <span className="bg-white/80 p-5">and respond with more awareness instead of reacting automatically.</span>
-        </div>
+        <p className="mt-4 max-w-4xl font-serif text-2xl font-bold italic text-brand-accent md:text-3xl">But you can learn to</p>
+        <ol className="relative mt-7 max-w-5xl space-y-5 pl-12 before:absolute before:bottom-6 before:left-[0.9rem] before:top-6 before:w-px before:bg-brand-dark/15 md:mt-9 md:space-y-6 md:pl-16">
+          <li className="relative">
+            <span className="absolute -left-12 top-1 grid h-8 w-8 place-items-center rounded-full bg-brand-primary font-sans text-xs font-bold text-white md:-left-16">01</span>
+            <p className="font-serif text-2xl leading-9 text-brand-dark md:text-3xl md:leading-10"><strong className="text-brand-primary">recognise</strong> when it&apos;s active,</p>
+          </li>
+          <li className="relative">
+            <span className="absolute -left-12 top-1 grid h-8 w-8 place-items-center rounded-full bg-brand-secondary font-sans text-xs font-bold text-brand-dark md:-left-16">02</span>
+            <p className="font-serif text-2xl leading-9 text-brand-dark md:text-3xl md:leading-10"><strong className="text-brand-accent">understand</strong> what it&apos;s trying to protect,</p>
+          </li>
+          <li className="relative">
+            <span className="absolute -left-12 top-1 grid h-8 w-8 place-items-center rounded-full bg-brand-teal font-sans text-xs font-bold text-brand-dark md:-left-16">03</span>
+            <p className="font-serif text-2xl leading-9 text-brand-dark md:text-3xl md:leading-10">and <strong className="text-brand-teal">respond</strong> with more awareness instead of reacting automatically.</p>
+          </li>
+        </ol>
         <div className="mt-12 max-w-4xl space-y-6 pt-9">
           <p className="font-serif text-2xl font-bold leading-9 text-brand-dark md:text-3xl md:leading-10">You wanted MORE from your ONE life. That doesn&apos;t begin by trying harder.</p>
           <p>It begins by understanding what&apos;s been shaping you all along.</p>
         </div>
-        <p className="relative mt-10 max-w-5xl overflow-hidden bg-brand-dark px-7 py-9 font-serif text-3xl font-bold leading-10 tracking-[-0.02em] text-white after:absolute after:inset-x-0 after:bottom-0 after:h-1 after:bg-brand-secondary md:px-12 md:py-12 md:text-4xl md:leading-[1.15]">
-          So we created a simple scan to help you get started.
-        </p>
+        <div className="mt-10 flex max-w-5xl items-center justify-between gap-6 py-7 md:mt-12 md:py-9">
+          <p className="font-serif text-3xl font-bold leading-10 tracking-[-0.02em] text-brand-dark md:text-4xl md:leading-[1.15]">
+            So we created a{" "}
+            <span className="box-decoration-clone bg-brand-secondary/55 px-1.5 py-0.5 text-brand-accent">simple scan</span>{" "}
+            to help you get started.
+          </p>
+          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-brand-teal/40 text-brand-teal md:h-16 md:w-16" aria-hidden="true">
+            <ArrowRight className="h-6 w-6" />
+          </span>
+        </div>
       </div>
     </section>
   );

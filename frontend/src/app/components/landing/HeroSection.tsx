@@ -89,20 +89,27 @@ export default function HeroSection() {
             <p className="relative border-l-2 border-t-2 border-brand-primary/40 py-6 pl-6 pr-2 font-serif text-xl leading-8 text-brand-dark before:absolute before:-top-5 before:right-2 before:font-serif before:text-6xl before:font-bold before:leading-none before:text-brand-primary/12 before:content-['03'] md:col-span-2 md:mt-20 md:border-l-0 md:px-2 md:pt-12 md:text-2xl md:leading-9">
               Maybe it was realizing you&apos;d started getting <strong>triggered by the smallest things</strong>, like you were under pressure all day, every day, and you don&apos;t want your body and mind to keep paying the price.
             </p>
-            <div className="my-8 py-8 text-brand-dark md:col-span-5 md:max-w-5xl md:py-10">
-              <p className="font-serif text-2xl font-bold leading-9 md:text-3xl md:leading-10">Or maybe it was something else entirely.</p>
-              <p className="mt-6 max-w-4xl font-sans text-base leading-8 md:text-lg md:leading-9">
-                Whatever the moment was, it left you with a feeling you couldn&apos;t ignore anymore. You wanted to live with more intention and fewer regrets.
-              </p>
-            </div>
-            <div className="mt-8 md:col-span-5">
-              <div className="max-w-4xl space-y-5 py-8 font-sans text-base leading-8 text-brand-dark md:py-10 md:text-lg md:leading-9">
-                <p>So you tried. Morning routines. Meditation. Journaling. Self-help books. Listening to podcasts. Productivity hacks. Self-help apps.</p>
-                <p className="font-serif text-2xl font-bold leading-9 md:text-3xl md:leading-10">You knew what to do. Yet a few weeks later, you found yourself back where you started.</p>
+            <div className="mt-2 text-brand-dark md:col-span-6 md:mt-2">
+              <div className="flex items-center gap-4 font-sans text-[0.65rem] font-bold tracking-[0.18em] text-brand-primary" aria-hidden="true">
+                <span>04</span>
+                <span className="h-px flex-1 bg-brand-primary/75" />
+              </div>
+              <div className="pb-4 pt-10 md:pb-5 md:pt-12">
+                <p className="font-serif text-3xl font-bold leading-tight md:text-4xl">Or maybe it was something else entirely.</p>
+                <p className="mt-7 max-w-5xl font-sans text-base leading-8 md:text-lg md:leading-9">
+                  Whatever the moment was, it left you with a feeling you couldn&apos;t ignore anymore. You wanted to live with more intention and fewer regrets.
+                </p>
+                <p className="mt-9 font-serif text-xl font-bold italic md:mt-10 md:text-2xl">So you tried.</p>
+                <p className="mt-4 max-w-5xl font-sans text-base leading-8 text-brand-dark/45 line-through decoration-brand-dark/30 md:text-lg md:leading-9">
+                  Morning routines. Meditation. Journaling. Self-help books. Listening to podcasts. Productivity hacks. Self-help apps.
+                </p>
+                <p className="mt-10 max-w-5xl border-l-4 border-brand-secondary py-0.5 pl-5 font-sans text-lg font-bold leading-7 md:mt-12 md:text-xl md:leading-8">
+                  You knew what to do. Yet a few weeks later, you found yourself back where you started.
+                </p>
               </div>
             </div>
-            <p className="relative mt-8 overflow-hidden bg-brand-dark px-6 py-8 font-serif text-2xl font-bold leading-tight text-white after:absolute after:inset-x-0 after:bottom-0 after:h-1 after:bg-brand-secondary md:col-span-6 md:px-10 md:py-10 md:text-4xl">
-              And you keep asking yourself…
+            <p className="mt-0 py-6 font-serif text-3xl italic leading-tight text-brand-dark md:col-span-6 md:py-7 md:text-4xl">
+              And you keep asking yourself&hellip;
             </p>
           </div>
         </div>

@@ -10,7 +10,7 @@ export default function ModernFixesSection() {
             You have tried all the
             <span className="italic text-brand-secondary"> modern fixes.</span>
           </SectionHeading>
-          <div className="mt-10 max-w-5xl border-l-4 border-brand-secondary pl-5 md:pl-7">
+          <div className="mt-12 max-w-4xl border-l-4 border-brand-secondary pl-5 md:pl-7">
             <p className="font-sans text-lg font-semibold leading-8 text-white/72 md:text-2xl md:leading-9">
               When something isn&rsquo;t working, the response is almost automatic.
             </p>
@@ -23,8 +23,8 @@ export default function ModernFixesSection() {
             </div>
           </div>
 
-          <div className="mt-12 space-y-6 font-sans text-base leading-8 text-white/72">
-            <div className="flex flex-col gap-9 border-t border-white/15 py-10 md:gap-12">
+          <div className="mt-16 space-y-8 font-sans text-base leading-8 text-white/72">
+            <div className="flex flex-col gap-9 py-10 md:gap-12">
               <div className="font-serif text-2xl leading-9 text-white md:text-4xl md:leading-tight">
                 <p>And for a while, it does help.</p>
                 <ul className="my-6 space-y-3 font-sans text-base font-semibold leading-7 text-white/72 md:text-lg md:leading-8">
@@ -36,7 +36,7 @@ export default function ModernFixesSection() {
               </div>
             </div>
 
-            <div className="grid gap-8 py-6 md:grid-cols-3 md:gap-10">
+            <div className="grid gap-10 py-10 md:grid-cols-3 md:gap-10 md:py-14">
               <div className="border-t-2 border-brand-teal/60 pt-7">
                 <h3 className="font-serif text-2xl font-bold text-white">Productivity systems</h3>
                 <p>
@@ -62,7 +62,7 @@ export default function ModernFixesSection() {
 
             <p>None of these approaches are wrong.</p>
             <p className="pt-4 font-serif text-3xl text-white md:text-4xl">So…why does none of it stick?</p>
-            <div className="max-w-5xl border-y border-white/15 py-8 text-white md:py-10">
+            <div className="my-10 max-w-5xl py-8 text-white md:my-14 md:py-10">
               <p className="max-w-4xl font-serif text-2xl leading-9 md:text-3xl md:leading-10">
                 Because…this approach <strong className="box-decoration-clone bg-brand-secondary px-1.5 py-0.5 text-brand-dark">assumes that once you know better, you will do better.</strong>
               </p>
@@ -74,16 +74,16 @@ export default function ModernFixesSection() {
               You can understand exactly what needs to be done, and still feel a
               quiet resistance pulling you away from it.
             </p>
-            <div className="max-w-5xl border-y border-white/15 py-8 md:py-10">
+            <div className="max-w-5xl py-8 md:py-10">
               <p className="font-serif text-2xl font-bold leading-9 text-white md:text-3xl md:leading-10">So the cycle repeats.</p>
-              <div className="mt-7 grid gap-px overflow-hidden border border-white/15 bg-white/15 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="mt-7 grid gap-px overflow-hidden border-y border-white/15 bg-white/15 sm:grid-cols-2 lg:grid-cols-4">
                 <p className="bg-brand-dark p-5 font-semibold text-white">You apply the fix.</p>
                 <p className="bg-brand-dark p-5 font-semibold text-white">It works briefly.</p>
                 <p className="bg-brand-dark p-5 font-semibold text-white">It fades.</p>
                 <p className="bg-brand-dark p-5 font-semibold text-white">And slowly, the problem starts to feel like you.</p>
               </div>
             </div>
-            <p className="max-w-4xl border-l-4 border-brand-secondary pl-5 font-serif text-2xl leading-9 text-white">
+            <p className="max-w-4xl font-serif text-2xl leading-9 text-white">
               If this sounds familiar, take a deep breath. You&rsquo;re not alone. And more importantly…
             </p>
           </div>

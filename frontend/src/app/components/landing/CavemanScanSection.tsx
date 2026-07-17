@@ -12,7 +12,7 @@ export default function CavemanScanSection() {
               The Inner Caveman Scan
             </SectionHeading>
 
-            <div className="mt-10 max-w-4xl border-y border-white/15 py-8 md:mt-12 md:py-10">
+            <div className="mt-10 max-w-4xl py-8 md:mt-12 md:py-10">
               <h3 className="max-w-3xl font-serif text-2xl font-bold leading-9 md:text-3xl md:leading-10">It&rsquo;s a quick way to notice which of these survival drives shows up most often in your everyday decisions.</h3>
               <p className="mt-5 max-w-3xl font-sans text-base leading-8 text-white/70 md:text-lg md:leading-9">
                 <strong>It won&apos;t judge you or label you.</strong> It simply gives you a clearer picture of the patterns that may be shaping your thoughts, emotions, and behaviour.

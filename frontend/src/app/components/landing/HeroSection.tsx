@@ -5,31 +5,14 @@ export default function HeroSection() {
   return (
       <section className="relative bg-white px-6 md:px-10">
         <div className="pointer-events-none absolute left-0 right-0 top-0 h-svh overflow-hidden" aria-hidden="true">
-          <div className="absolute -right-12 top-[7%] h-64 w-64 rounded-full border border-brand-teal/20 bg-[radial-gradient(circle_at_35%_40%,rgba(94,177,191,0.07),transparent_68%)] md:-right-24 md:top-16 md:h-[30rem] md:w-[30rem]" />
-          <div className="absolute -bottom-24 -left-24 h-60 w-60 rounded-full border border-brand-accent/10 md:-bottom-32 md:-left-36 md:h-96 md:w-96" />
-          <div className="absolute left-[5%] top-[11%] h-10 w-10 rotate-12 border border-brand-secondary/35 md:left-[8%] md:top-[16%] md:h-16 md:w-16" />
-          <div className="absolute left-[9%] top-[12%] h-px w-24 -rotate-6 bg-gradient-to-r from-brand-secondary/40 to-transparent md:left-[11%] md:top-[16%] md:w-44" />
-          <div className="absolute bottom-[6%] left-[7%] h-20 w-28 opacity-25 md:bottom-[9%] md:left-[6%] md:h-28 md:w-40 md:opacity-35 [background-image:radial-gradient(rgba(4,42,43,0.2)_1px,transparent_1px)] [background-size:14px_14px]" />
-          <div className="absolute left-[3%] top-[42%] hidden items-center gap-3 md:flex">
-            <span className="font-sans text-[0.58rem] font-semibold tracking-[0.18em] text-brand-teal/45">01</span>
-            <span className="h-20 w-px bg-gradient-to-b from-brand-teal/30 to-transparent" />
+          <div className="absolute right-0 top-[18%] hidden w-[26vw] max-w-sm items-center md:flex">
+            <span className="h-px flex-1 bg-brand-dark/12" />
+            <span className="h-3 w-3 rounded-full bg-brand-primary" />
+            <span className="h-px w-14 bg-brand-dark/12" />
           </div>
-          <div className="absolute left-[48%] top-[8%] h-9 w-9 rounded-full border border-brand-primary/15 md:left-[52%] md:top-[10%] md:h-12 md:w-12">
-            <span className="absolute -right-3 top-1/2 h-px w-5 bg-brand-primary/20" />
-            <span className="absolute left-1/2 -top-2 h-4 w-px bg-brand-primary/15" />
-          </div>
-          <div className="absolute right-0 top-[56%] h-24 w-5 border-y border-l border-brand-teal/15 md:top-[52%] md:h-36 md:w-8" />
-          <div className="absolute bottom-[24%] left-[13%] flex -rotate-12 flex-col gap-2 md:bottom-[18%] md:left-[21%]">
-            <span className="h-px w-10 bg-gradient-to-r from-transparent via-brand-accent/20 to-transparent md:w-16" />
-            <span className="h-px w-6 translate-x-3 bg-gradient-to-r from-brand-accent/20 to-transparent md:w-10" />
-          </div>
-          <div className="absolute bottom-[5%] right-[6%] h-14 w-14 rounded-full border border-brand-secondary/20 md:bottom-[7%] md:right-[4%] md:h-20 md:w-20">
-            <span className="absolute left-1/2 top-1/2 h-px w-8 -translate-x-1/2 bg-brand-secondary/25" />
-            <span className="absolute left-1/2 top-1/2 h-8 w-px -translate-y-1/2 bg-brand-secondary/25" />
-          </div>
-          <div className="absolute bottom-[15%] right-[12%] hidden items-center gap-2 md:flex">
-            <span className="h-1.5 w-1.5 rounded-full bg-brand-primary/35" />
-            <span className="h-px w-20 bg-gradient-to-r from-brand-primary/25 to-transparent" />
+          <div className="absolute bottom-[11%] left-0 hidden w-[18vw] max-w-56 items-center md:flex">
+            <span className="h-px flex-1 bg-brand-dark/12" />
+            <span className="h-2 w-2 rounded-full bg-brand-secondary" />
           </div>
         </div>
         <div className="relative mx-auto max-w-6xl text-brand-dark">
@@ -79,7 +62,7 @@ export default function HeroSection() {
                 </span>.
               </p>
               <p className="mt-1 font-serif text-2xl font-bold italic leading-8 text-brand-dark md:text-3xl md:leading-10">
-                <span className="text-brand-primary">&amp;</span> work with it in real life !!
+                <span className="text-brand-primary">&amp;</span> work with it in real life.
               </p>
             </div>
 
@@ -106,14 +89,14 @@ export default function HeroSection() {
             <p className="relative border-l-2 border-t-2 border-brand-primary/40 py-6 pl-6 pr-2 font-serif text-xl leading-8 text-brand-dark before:absolute before:-top-5 before:right-2 before:font-serif before:text-6xl before:font-bold before:leading-none before:text-brand-primary/12 before:content-['03'] md:col-span-2 md:mt-20 md:border-l-0 md:px-2 md:pt-12 md:text-2xl md:leading-9">
               Maybe it was realizing you&apos;d started getting <strong>triggered by the smallest things</strong>, like you were under pressure all day, every day, and you don&apos;t want your body and mind to keep paying the price.
             </p>
-            <div className="my-8 border-y border-brand-dark/12 py-8 text-brand-dark md:col-span-5 md:max-w-5xl md:py-10">
+            <div className="my-8 py-8 text-brand-dark md:col-span-5 md:max-w-5xl md:py-10">
               <p className="font-serif text-2xl font-bold leading-9 md:text-3xl md:leading-10">Or maybe it was something else entirely.</p>
               <p className="mt-6 max-w-4xl font-sans text-base leading-8 md:text-lg md:leading-9">
                 Whatever the moment was, it left you with a feeling you couldn&apos;t ignore anymore. You wanted to live with more intention and fewer regrets.
               </p>
             </div>
             <div className="mt-8 md:col-span-5">
-              <div className="max-w-4xl space-y-5 border-t border-brand-secondary py-8 font-sans text-base leading-8 text-brand-dark md:py-10 md:text-lg md:leading-9">
+              <div className="max-w-4xl space-y-5 py-8 font-sans text-base leading-8 text-brand-dark md:py-10 md:text-lg md:leading-9">
                 <p>So you tried. Morning routines. Meditation. Journaling. Self-help books. Listening to podcasts. Productivity hacks. Self-help apps.</p>
                 <p className="font-serif text-2xl font-bold leading-9 md:text-3xl md:leading-10">You knew what to do. Yet a few weeks later, you found yourself back where you started.</p>
               </div>

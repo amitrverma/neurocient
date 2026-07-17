@@ -5,14 +5,13 @@ export default function PerspectiveSection() {
   return (
       <section className="relative overflow-hidden bg-white text-brand-dark">
         <SectionDecorations />
-        <div className="pointer-events-none absolute left-1/2 top-[28rem] h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-brand-secondary/10 blur-3xl" aria-hidden="true" />
         <div className="relative z-10 mx-auto max-w-6xl px-6 py-20 md:py-28">
           <SectionLabel>A Different Perspective on Getting More Life from Life</SectionLabel>
           <SectionHeading>
             It is not your <span className="italic text-brand-accent">personal failing.</span>
           </SectionHeading>
 
-          <p className="mt-12 max-w-5xl border-y border-brand-dark/15 py-8 font-serif text-2xl font-bold leading-9 text-brand-dark md:py-10 md:text-4xl md:leading-tight">
+          <p className="mt-12 max-w-5xl py-8 font-serif text-2xl font-bold leading-9 text-brand-dark md:py-10 md:text-4xl md:leading-tight">
             You think you are flawed. But you are human.
           </p>
 
@@ -20,7 +19,7 @@ export default function PerspectiveSection() {
             <p className="max-w-4xl font-serif text-2xl font-bold leading-9 tracking-[-0.02em] md:text-3xl md:leading-10">
               The gap between knowing and doing isn&apos;t simply about willpower, discipline, or motivation.
             </p>
-            <div className="mt-9 flex flex-col justify-between gap-5 border-y border-brand-dark/15 py-7 md:flex-row md:items-end md:py-9">
+            <div className="mt-9 flex flex-col justify-between gap-5 py-7 md:flex-row md:items-end md:py-9">
               <p className="max-w-md font-sans text-lg font-semibold leading-8 text-brand-dark md:text-xl md:leading-9">To understand why, we need to go back around</p>
               <p className="font-serif text-[clamp(3rem,7vw,6rem)] font-bold italic leading-none tracking-[-0.05em] text-brand-primary">200,000 years</p>
             </div>
@@ -29,14 +28,14 @@ export default function PerspectiveSection() {
               For most of human history, our ancestors lived in caves, in small groups where survival depended on avoiding danger, finding food, and staying connected to the tribe.
             </p>
 
-            <div className="relative flex flex-col gap-7 overflow-hidden bg-[#f3eee6] px-6 py-9 font-sans text-base leading-8 text-brand-dark/80 before:absolute before:right-0 before:top-0 before:h-28 before:w-28 before:rounded-bl-full before:border-b before:border-l before:border-brand-dark/10 md:px-10 md:py-12 md:text-lg md:leading-9">
+            <div className="relative flex flex-col gap-7 overflow-hidden px-0 py-9 font-sans text-base leading-8 text-brand-dark/80 md:py-12 md:text-lg md:leading-9">
               <p className="max-w-4xl">
                 In that world, every decision carried consequences. Mistaking a predator for the wind could cost you your life. Being excluded from the tribe could leave you without protection. Missing the chance to eat when food was available meant there was no guarantee of another meal tomorrow.
               </p>
-              <p className="max-w-4xl border-t border-brand-dark/15 pt-7">Over thousands of generations, the human brain adapted to those conditions. It became remarkably good at spotting danger, remembering negative experiences, seeking safety, and repeating behaviours that increased the chances of survival. The more often those responses helped people survive, the more automatic they became.</p>
+              <p className="max-w-4xl">Over thousands of generations, the human brain adapted to those conditions. It became remarkably good at spotting danger, remembering negative experiences, seeking safety, and repeating behaviours that increased the chances of survival. The more often those responses helped people survive, the more automatic they became.</p>
             </div>
 
-            <p className="mt-12 max-w-4xl border-l-4 border-brand-secondary pl-6 font-sans text-base leading-8 text-brand-dark/80 md:text-lg md:leading-9">
+            <p className="mt-12 max-w-4xl font-sans text-base leading-8 text-brand-dark/80 md:text-lg md:leading-9">
               The brain wasn&apos;t trying to make humans happy. It was trying to keep them alive.
             </p>
           </div>
@@ -75,7 +74,7 @@ export default function PerspectiveSection() {
               The challenge is that your brain is still using these survival responses in today&apos;s modern world that no longer demands them in the same way.
             </p>
             <p className="relative my-16 overflow-hidden bg-brand-dark px-6 py-12 font-serif text-[clamp(3rem,6vw,6.25rem)] font-bold leading-[1.02] tracking-[-0.04em] text-white after:absolute after:inset-x-0 after:bottom-0 after:h-1 after:bg-brand-secondary md:px-10 md:py-16">
-              So…to cut the long story short
+              So…long story short
             </p>
             <p className="max-w-4xl font-serif text-2xl font-bold leading-9 text-brand-dark md:text-3xl md:leading-10">
               Your brain is around 200,000 years old. The world you are living in is not.
@@ -83,10 +82,10 @@ export default function PerspectiveSection() {
             <p className="max-w-4xl text-brand-dark/80">
               That is where Neurocient Labs comes in with a different approach.
             </p>
-            <p className="max-w-4xl border-l-4 border-brand-secondary py-1 pl-6 font-bold text-brand-dark">
+            <p className="max-w-4xl font-bold text-brand-dark">
               Rooted in evolutionary psychology, Neurocient Labs helps you understand — why you do what you do, why modern approaches often fall short, and what needs to change at the source. Then it helps you apply those insights in everyday life, so change actually lasts.
             </p>
-            <div className="mt-12 space-y-5 border-t border-brand-dark/15 pt-9 text-brand-dark">
+            <div className="mt-12 space-y-5 pt-9 text-brand-dark">
               <p>To make lasting change, the first step is awareness.</p>
               <p>Not just of your behaviours, but of what is driving them.</p>
               <p className="pt-2 font-serif text-2xl font-bold leading-9 md:text-4xl md:leading-tight">Let&apos;s take that first step...</p>

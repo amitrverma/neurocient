@@ -1,4 +1,5 @@
 import { ArrowRight, Brain, ShieldAlert, Users } from "lucide-react";
+import { AnimatedApproach } from "./AnimatedApproach";
 import { SectionDecorations, SectionHeading } from "./LandingShared";
 
 export default function PerspectiveSection() {
@@ -133,17 +134,19 @@ export default function PerspectiveSection() {
             <p className="mt-7 font-serif text-2xl italic leading-9 text-brand-dark/65 md:mt-8 md:text-3xl md:leading-10">
               So…long story short
             </p>
-            <p className="relative mt-5 overflow-hidden bg-brand-dark px-6 py-9 font-serif text-[clamp(2.5rem,5vw,5rem)] font-bold leading-[1.08] tracking-[-0.035em] text-white after:absolute after:inset-x-0 after:bottom-0 after:h-1 after:bg-brand-secondary md:mt-6 md:px-10 md:py-12">
-              Your brain is around{" "}
-              <span className="text-brand-secondary">200,000 years old.</span>{" "}
-              <span className="mt-2 block">The world you are living in is <em className="text-brand-primary">not.</em></span>
+            <p className="mt-5 max-w-5xl text-balance font-serif text-[clamp(2.35rem,7vw,4.5rem)] font-bold italic leading-[1.08] tracking-[-0.035em] text-brand-dark md:mt-6">
+              <span className="block">Your brain is around 200,000 years old.</span>
+              <span className="mt-1 block">
+                The world you are living in is{" "}
+                <em className="relative whitespace-nowrap text-brand-accent after:absolute after:inset-x-0 after:-bottom-1 after:h-1 after:bg-brand-secondary">
+                  not.
+                </em>
+              </span>
             </p>
             <p className="max-w-4xl text-brand-dark/80">
               That is where Neurocient Labs comes in with a different approach.
             </p>
-            <p className="max-w-4xl font-bold text-brand-dark">
-              Rooted in evolutionary psychology, Neurocient Labs helps you understand — why you do what you do, why modern approaches often fall short, and what needs to change at the source. Then it helps you apply those insights in everyday life, so change actually lasts.
-            </p>
+            <AnimatedApproach />
             <div className="mt-8 space-y-4 pt-4 text-brand-dark">
               <p>To make lasting change, the first step is awareness.</p>
               <p>Not just of your behaviours, but of what is driving them.</p>

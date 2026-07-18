@@ -1,19 +1,18 @@
 import Image from "next/image";
-import Link from "next/link";
 import { ArrowRight, Compass, Heart, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { SectionDecorations, SectionHeading, SectionLabel } from "./LandingShared";
 
 const drives = [
-  { name: "Affiliation & Belonging", question: "Am I included?", modern: "Notifications, social media, loneliness, team silence.", href: "/insights/connections", icon: Users },
-  { name: "Kin Care", question: "Are my people okay?", modern: "Caregiving, provision, responsibility, emotional load.", href: "/insights/alloparenting", icon: Heart },
-  { name: "Status & Hierarchy", question: "Where do I stand?", modern: "Performance reviews, comparison, reputation, visibility.", href: "/insights/why-we-compare", icon: Compass },
-  { name: "Mate & Bond Security", question: "Is this bond safe?", modern: "Attachment, ambiguity, jealousy, replaying arguments.", href: "/insights/replay-arguments", icon: Sparkles },
-  { name: "Safety & Survival", question: "Am I safe enough?", modern: "Deadlines, uncertainty, anxiety, avoidance, overreactions.", href: "/insights/anticipatory-anxiety", icon: ShieldCheck },
+  { name: "Affiliation & Belonging", question: "Am I included?", modern: "Notifications, social media, loneliness, team silence.", icon: Users },
+  { name: "Kin Care", question: "Are my people okay?", modern: "Caregiving, provision, responsibility, emotional load.", icon: Heart },
+  { name: "Status & Hierarchy", question: "Where do I stand?", modern: "Performance reviews, comparison, reputation, visibility.", icon: Compass },
+  { name: "Mate & Bond Security", question: "Is this bond safe?", modern: "Attachment, ambiguity, jealousy, replaying arguments.", icon: Sparkles },
+  { name: "Safety & Survival", question: "Am I safe enough?", modern: "Deadlines, uncertainty, anxiety, avoidance, overreactions.", icon: ShieldCheck },
 ];
 
 export default function InnerCavemanSection() {
   return (
-    <section className="relative overflow-hidden bg-white px-5 pb-20 pt-12 sm:px-6 md:pb-28 md:pt-16">
+    <section className="relative overflow-hidden bg-white px-6 pb-12 pt-12 md:pb-16 md:pt-16">
       <SectionDecorations flip />
 
       <div className="relative z-10 mx-auto w-full max-w-6xl">
@@ -56,24 +55,22 @@ export default function InnerCavemanSection() {
           {drives.map((drive, index) => {
             const Icon = drive.icon;
             return (
-              <Link
+              <article
                 key={drive.name}
-                href={drive.href}
-                className="group relative flex min-h-64 flex-col border-b border-brand-dark/10 p-6 transition-colors hover:bg-white last:border-b-0 md:border-r md:[&:nth-child(2)]:border-r-0 lg:border-b-0 lg:[&:nth-child(2)]:border-r lg:last:border-r-0"
+                className="relative flex min-h-64 flex-col border-b border-brand-dark/10 p-6 last:border-b-0 md:border-r md:[&:nth-child(2)]:border-r-0 lg:border-b-0 lg:[&:nth-child(2)]:border-r lg:last:border-r-0"
               >
                 <div className="flex items-start justify-between gap-4">
-                  <span className="grid h-11 w-11 place-items-center rounded-full border border-brand-accent/25 bg-white text-brand-accent transition-transform group-hover:-translate-y-0.5">
+                  <span className="grid h-11 w-11 place-items-center rounded-full border border-brand-accent/25 bg-white text-brand-accent">
                     <Icon className="h-5 w-5" />
                   </span>
                   <span className="font-sans text-xs font-semibold tracking-[0.16em] text-brand-dark/30">0{index + 1}</span>
                 </div>
                 <div className="mt-8">
                   <h3 className="font-sans text-xs font-semibold uppercase leading-5 tracking-[0.12em] text-brand-dark/60">{drive.name}</h3>
-                  <p className="mt-3 font-serif text-2xl font-bold italic leading-8 text-brand-dark transition-colors group-hover:text-brand-accent">{drive.question}</p>
+                  <p className="mt-3 font-serif text-2xl font-bold italic leading-8 text-brand-dark">{drive.question}</p>
                 </div>
                 <p className="mt-auto pt-7 pr-6 font-sans text-sm leading-6 text-brand-dark/65">{drive.modern}</p>
-                <ArrowRight className="absolute bottom-6 right-6 h-4 w-4 text-brand-teal opacity-40 transition-all group-hover:translate-x-1 group-hover:opacity-100" aria-hidden="true" />
-              </Link>
+              </article>
             );
           })}
         </div>
@@ -81,7 +78,7 @@ export default function InnerCavemanSection() {
 
       <div className="relative z-10 mx-auto mt-8 max-w-6xl font-sans text-base leading-8 text-brand-dark/75 md:mt-10">
         <p className="max-w-4xl font-serif text-2xl font-bold leading-9 tracking-[-0.02em] text-brand-dark md:text-3xl md:leading-10">
-          Every person has all five drives. What differs is which one becomes active most often, and how it shapes the way you think, feel, and respond.
+          Every person has all five drives. What differs is which one becomes active most often, and how it shapes the way you think, feel, and <em className="font-bold italic text-brand-primary">respond</em>.
         </p>
         <p className="mt-6 max-w-5xl md:whitespace-nowrap md:text-lg md:leading-9">
           Grounded in decades of research across evolutionary psychology and behavioural science.
@@ -90,15 +87,15 @@ export default function InnerCavemanSection() {
           <div className="mt-4 grid gap-px overflow-hidden border-y border-brand-dark/15 bg-brand-dark/15 font-sans font-semibold text-brand-dark lg:grid-cols-3">
             <div className="flex flex-col bg-white/80 p-5">
               <span>Neurocient&apos;s five-drive model, informed by the fundamental-motives framework. (<a href="https://doi.org/10.1177/1745691610369469" target="_blank" rel="noreferrer" className="font-bold text-brand-teal underline underline-offset-4 transition-colors hover:text-brand-accent">Kenrick et al., 2010 ↗</a>)</span>
-              <strong className="mt-auto self-end pt-6 font-serif text-6xl leading-none text-brand-primary">5</strong>
+              <strong className="mt-auto self-end pt-6 font-serif text-6xl leading-none text-brand-secondary">5</strong>
             </div>
             <div className="flex flex-col bg-white/80 p-5">
               <span>Losses can weigh about twice as much as equivalent gains. (<a href="https://doi.org/10.1007/BF00122574" target="_blank" rel="noreferrer" className="font-bold text-brand-teal underline underline-offset-4 transition-colors hover:text-brand-accent">Tversky &amp; Kahneman, 1992 ↗</a>)</span>
-              <strong className="mt-auto self-end pt-6 font-serif text-6xl leading-none text-brand-primary">2x</strong>
+              <strong className="mt-auto self-end pt-6 font-serif text-6xl leading-none text-brand-secondary">2x</strong>
             </div>
             <div className="flex flex-col bg-white/80 p-5">
               <span>Zaltman&apos;s estimate of cognition occurring outside conscious awareness, discussed in consumer decision-making. (<a href="https://www.library.hbs.edu/working-knowledge/the-subconscious-mind-of-the-consumer-and-how-to-reach-it" target="_blank" rel="noreferrer" className="font-bold text-brand-teal underline underline-offset-4 transition-colors hover:text-brand-accent">Harvard Business School, 2003 ↗</a>)</span>
-              <strong className="mt-auto self-end pt-6 font-serif text-6xl leading-none text-brand-primary">95%</strong>
+              <strong className="mt-auto self-end pt-6 font-serif text-6xl leading-none text-brand-secondary">95%</strong>
             </div>
           </div>
         </div>
@@ -120,11 +117,18 @@ export default function InnerCavemanSection() {
             <p className="font-serif text-2xl leading-9 text-brand-dark md:text-3xl md:leading-10">and <strong className="text-brand-teal">respond</strong> with more awareness instead of reacting automatically.</p>
           </li>
         </ol>
-        <div className="mt-12 max-w-4xl space-y-6 pt-9">
-          <p className="font-serif text-2xl font-bold leading-9 text-brand-dark md:text-3xl md:leading-10">You wanted MORE from your ONE life. That doesn&apos;t begin by trying harder.</p>
-          <p>It begins by understanding what&apos;s been shaping you all along.</p>
-        </div>
-        <div className="mt-10 flex max-w-5xl items-center justify-between gap-6 py-7 md:mt-12 md:py-9">
+        <blockquote className="mt-14 max-w-5xl border-y border-brand-dark/15 py-10 md:mt-16 md:py-14">
+          <p className="max-w-4xl text-balance font-serif text-[clamp(2.15rem,5vw,4.25rem)] font-bold leading-[1.08] tracking-[-0.035em] text-brand-dark">
+            You wanted MORE from your ONE life.
+          </p>
+          <p className="mt-6 max-w-4xl font-serif text-2xl leading-9 text-brand-dark md:mt-7 md:text-3xl md:leading-10">
+            That doesn&apos;t begin by trying harder.
+          </p>
+          <p className="mt-5 max-w-3xl font-serif text-2xl italic leading-9 text-brand-accent md:mt-6 md:text-3xl md:leading-10">
+            It begins by understanding what&apos;s been shaping you all along.
+          </p>
+        </blockquote>
+        <div className="mt-6 flex max-w-5xl items-center justify-between gap-6 py-5 md:mt-7 md:py-6">
           <p className="font-serif text-3xl font-bold leading-10 tracking-[-0.02em] text-brand-dark md:text-4xl md:leading-[1.15]">
             So we created a{" "}
             <span className="box-decoration-clone bg-brand-secondary/55 px-1.5 py-0.5 text-brand-accent">simple scan</span>{" "}

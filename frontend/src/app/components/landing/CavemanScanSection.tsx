@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
-import { SectionDecorations, SectionHeading } from "./LandingShared";
+import { SectionDecorations, SectionHeading, SectionLabel } from "./LandingShared";
 
 export default function CavemanScanSection() {
   return (
@@ -8,6 +8,7 @@ export default function CavemanScanSection() {
         <SectionDecorations tone="dark" flip />
         <div className="relative z-10 mx-auto w-full max-w-6xl">
           <div className="max-w-5xl">
+            <SectionLabel tone="dark">Your starting point</SectionLabel>
             <SectionHeading tone="dark" className="max-w-4xl">
               The Inner Caveman Scan
             </SectionHeading>

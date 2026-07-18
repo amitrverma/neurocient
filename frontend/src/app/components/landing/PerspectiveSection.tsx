@@ -1,12 +1,112 @@
-import { ArrowRight, Brain, ShieldAlert, Users } from "lucide-react";
+"use client";
+
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowRight, Brain, ShieldAlert, Users, type LucideIcon } from "lucide-react";
 import { AnimatedApproach } from "./AnimatedApproach";
-import { SectionDecorations, SectionHeading } from "./LandingShared";
+import { SectionDecorations, SectionHeading, SectionLabel } from "./LandingShared";
+
+const SurvivalResponseCard = ({
+  then,
+  now,
+  label,
+  icon: Icon,
+  iconColor,
+  contrastBg,
+  className = "",
+}: {
+  then: string;
+  now: string;
+  label: string;
+  icon: LucideIcon;
+  iconColor: string;
+  contrastBg: string;
+  className?: string;
+}) => {
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <article className={`relative overflow-hidden rounded-lg border border-brand-dark/15 bg-white shadow-[0_14px_35px_-28px_rgba(4,42,43,0.45)] ${className}`}>
+      <div className="flex items-center gap-3 border-b border-brand-dark/10 px-6 py-3.5 font-sans text-xs font-bold uppercase tracking-[0.14em] text-brand-dark/65 md:px-8">
+        <Icon className={`h-4 w-4 ${iconColor}`} aria-hidden="true" />
+        <span>{label}</span>
+      </div>
+      <div className="md:hidden">
+        <motion.p
+          className="p-6"
+          initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.6 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {then}
+        </motion.p>
+        <motion.p
+          className={`border-t border-dashed border-brand-dark/15 p-6 ${contrastBg}`}
+          initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.5 }}
+          transition={{ delay: 0.45, duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {now}
+        </motion.p>
+      </div>
+
+      <motion.div
+        className="relative hidden min-h-64 md:block"
+        initial={reduceMotion ? "revealed" : "initial"}
+        whileInView="revealed"
+        viewport={{ once: true, amount: 0.65 }}
+      >
+        <motion.div
+          className="absolute inset-y-0 left-0 z-10 flex items-center border-r border-dashed border-brand-dark/15 bg-white p-8"
+          variants={{
+            initial: { width: "100%" },
+            revealed: { width: "39%", transition: { delay: 0.65, duration: 1.05, ease: [0.22, 1, 0.36, 1] } },
+          }}
+        >
+          <motion.p
+            variants={{
+              initial: { fontSize: "2rem", lineHeight: "1.35" },
+              revealed: {
+                fontSize: "1.125rem",
+                lineHeight: "2.25rem",
+                transition: { delay: 0.65, duration: 1.05, ease: [0.22, 1, 0.36, 1] },
+              },
+            }}
+          >
+            {then}
+          </motion.p>
+        </motion.div>
+        <motion.span
+          className="absolute left-[39%] top-1/2 z-20 grid h-9 w-9 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-brand-dark/15 bg-white text-brand-dark/55 shadow-sm"
+          aria-hidden="true"
+          variants={{
+            initial: { opacity: 0, scale: 0.75 },
+            revealed: { opacity: 1, scale: 1, transition: { delay: 1.25, duration: 0.5, ease: "easeOut" } },
+          }}
+        >
+          <ArrowRight className="h-4 w-4" />
+        </motion.span>
+        <motion.p
+          className={`ml-[39%] flex min-h-64 items-center p-8 pl-10 ${contrastBg}`}
+          variants={{
+            initial: { opacity: 0, x: 28 },
+            revealed: { opacity: 1, x: 0, transition: { delay: 1.35, duration: 0.85, ease: [0.22, 1, 0.36, 1] } },
+          }}
+        >
+          {now}
+        </motion.p>
+      </motion.div>
+    </article>
+  );
+};
 
 export default function PerspectiveSection() {
   return (
       <section className="relative overflow-hidden bg-white text-brand-dark">
         <SectionDecorations />
         <div className="relative z-10 mx-auto max-w-6xl px-6 pb-12 pt-12 md:pb-16 md:pt-16">
+          <SectionLabel>The deeper explanation</SectionLabel>
           <SectionHeading>
             It is not your <span className="italic text-brand-accent">personal failing.</span>
           </SectionHeading>
@@ -27,24 +127,24 @@ export default function PerspectiveSection() {
               <span>200,000 years</span>
             </p>
 
-            <p className="my-8 max-w-4xl border-l-4 border-brand-primary py-2 pl-6 font-serif text-2xl font-bold leading-9 text-brand-accent md:my-10 md:text-3xl md:leading-10">
+            <p className="my-5 max-w-4xl py-1 font-serif text-2xl font-bold leading-9 text-brand-accent md:my-6 md:text-3xl md:leading-10">
               For most of modern human history; our ancestors lived in caves, in small groups where survival depended on avoiding danger, finding food, and staying connected to the tribe.
             </p>
 
-            <div className="pb-2 pt-6 text-brand-dark md:pb-3 md:pt-8">
+            <div className="pb-2 pt-2 text-brand-dark md:pb-3 md:pt-3">
               <p className="max-w-4xl font-serif text-2xl font-bold leading-9 md:text-3xl md:leading-10">
                 In that world, every decision carried consequences.
               </p>
               <div className="mt-7 grid gap-6 font-sans text-lg leading-8 text-brand-dark/80 md:grid-cols-3 md:gap-8 md:text-2xl md:leading-[1.45]">
-                <p className="border-l-2 border-brand-primary pl-5">Mistaking a predator for the wind could cost you your life.</p>
-                <p className="border-l-2 border-brand-secondary pl-5">Being excluded from the tribe could leave you without protection.</p>
-                <p className="border-l-2 border-brand-teal pl-5">Missing the chance to eat when food was available meant there was no guarantee of another meal tomorrow.</p>
+                <p className="border-r-2 border-brand-primary pr-5">Mistaking a predator for the wind could cost you your life.</p>
+                <p className="border-r-2 border-brand-secondary pr-5">Being excluded from the tribe could leave you without protection.</p>
+                <p className="border-r-2 border-brand-teal pr-5">Missing the chance to eat when food was available meant there was no guarantee of another meal tomorrow.</p>
               </div>
 
               <div className="mt-9 max-w-5xl font-sans text-lg leading-8 text-brand-dark/80 md:mt-11 md:text-2xl md:leading-[1.45]">
                 <p>Over thousands of generations, the human brain adapted to those conditions.</p>
                 <p className="mt-5">
-                  It became remarkably good at <strong className="text-brand-dark">spotting danger</strong>, remembering negative experiences, <strong className="text-brand-dark">seeking safety</strong>, and repeating behaviours that increased the chances of survival.
+                  It became remarkably good at <strong className="text-brand-dark">spotting danger</strong>, remembering negative experiences, <strong className="text-brand-dark">seeking safety</strong>, and repeating behaviours that increased the <strong className="text-brand-dark">chances of survival</strong>.
                 </p>
                 <p className="mt-5 font-serif text-2xl font-bold leading-9 text-brand-dark md:text-3xl md:leading-10">
                   The more often those responses helped people survive, the more automatic they became.
@@ -54,7 +154,7 @@ export default function PerspectiveSection() {
 
             <p className="mt-4 max-w-5xl font-serif text-2xl leading-9 text-brand-dark md:mt-5 md:text-3xl md:leading-10">
               The brain wasn&apos;t trying to make humans happy. It was trying to keep them{" "}
-              <strong className="box-decoration-clone bg-brand-secondary/55 px-1.5 py-0.5">alive.</strong>
+              <em className="box-decoration-clone bg-brand-secondary/55 px-1.5 py-0.5 font-bold italic text-brand-primary">alive.</em>
             </p>
           </div>
 
@@ -80,50 +180,35 @@ export default function PerspectiveSection() {
             <p className="max-w-5xl pt-2 text-xl leading-[1.5] text-brand-dark md:text-2xl md:leading-[1.45]">
               So the brain often responds to modern situations using survival responses shaped for a caveman world.
             </p>
-            <div className="relative my-8 max-w-5xl pl-7 md:my-10 md:pl-14">
-              <div className="pointer-events-none absolute bottom-10 left-2 top-10 border-l-2 border-dashed border-brand-dark/20 md:left-5" aria-hidden="true" />
+            <div className="my-8 max-w-5xl md:my-10">
+              <SurvivalResponseCard
+                label="Avoidance"
+                icon={ShieldAlert}
+                iconColor="text-brand-primary"
+                contrastBg="bg-brand-primary/[0.06]"
+                then="If a situation felt risky, avoiding it could increase your chances of survival."
+                now="Today, that same response can show up as putting off difficult conversations, delaying important decisions, or procrastinating on work that feels emotionally uncomfortable."
+              />
 
-              <article className="relative grid rounded-lg border border-brand-dark/15 bg-white shadow-[0_14px_35px_-28px_rgba(4,42,43,0.45)] md:grid-cols-[0.78fr_1.22fr]">
-                <span className="absolute -left-[1.65rem] top-12 h-4 w-4 rounded-full border-4 border-white bg-brand-primary md:-left-[2.7rem]" aria-hidden="true" />
-                <div className="p-6 md:p-8">
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="font-serif text-4xl text-brand-dark/25">01</span>
-                    <ShieldAlert className="h-6 w-6 text-brand-primary" aria-hidden="true" />
-                  </div>
-                  <p className="mt-5">If a situation felt risky, avoiding it could increase your chances of survival.</p>
-                </div>
-                <div className="relative border-t border-dashed border-brand-dark/15 p-6 md:border-l md:border-t-0 md:p-8">
-                  <p>Today, that same response can show up as putting off difficult conversations, delaying important decisions, or procrastinating on work that feels emotionally uncomfortable.</p>
-                </div>
-              </article>
+              <SurvivalResponseCard
+                className="mt-5"
+                label="Belonging & comparison"
+                icon={Users}
+                iconColor="text-brand-accent"
+                contrastBg="bg-brand-secondary/15"
+                then="If your place in the tribe determined whether you belonged, paying attention to where you stood made sense."
+                now="Today, that same response can show up as comparing yourself to others, worrying about how you're perceived, or constantly wondering if you're falling behind."
+              />
 
-              <article className="relative mt-5 grid rounded-lg border border-brand-dark/15 bg-white shadow-[0_14px_35px_-28px_rgba(4,42,43,0.45)] md:grid-cols-[0.78fr_1.22fr]">
-                <span className="absolute -left-[1.65rem] top-12 h-4 w-4 rounded-full border-4 border-white bg-brand-secondary md:-left-[2.7rem]" aria-hidden="true" />
-                <div className="p-6 md:p-8">
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="font-serif text-4xl text-brand-dark/25">02</span>
-                    <Users className="h-6 w-6 text-brand-accent" aria-hidden="true" />
-                  </div>
-                  <p className="mt-5">If your place in the tribe determined whether you belonged, paying attention to where you stood made sense.</p>
-                </div>
-                <div className="relative border-t border-dashed border-brand-dark/15 p-6 md:border-l md:border-t-0 md:p-8">
-                  <p>Today, that same response can show up as comparing yourself to others, worrying about how you&apos;re perceived, or constantly wondering if you&apos;re falling behind.</p>
-                </div>
-              </article>
-
-              <article className="relative mt-5 grid rounded-lg border border-brand-dark/15 bg-white shadow-[0_14px_35px_-28px_rgba(4,42,43,0.45)] md:grid-cols-[0.78fr_1.22fr]">
-                <span className="absolute -left-[1.65rem] top-12 h-4 w-4 rounded-full border-4 border-white bg-brand-teal md:-left-[2.7rem]" aria-hidden="true" />
-                <div className="p-6 md:p-8">
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="font-serif text-4xl text-brand-dark/25">03</span>
-                    <Brain className="h-6 w-6 text-brand-teal" aria-hidden="true" />
-                  </div>
-                  <p className="mt-5">If anticipating danger helped you prepare for what could go wrong, your brain learned to stay alert.</p>
-                </div>
-                <div className="relative border-t border-dashed border-brand-dark/15 p-6 md:border-l md:border-t-0 md:p-8">
-                  <p>Today, that same response can show up as overthinking, worrying, replaying conversations, and imagining problems long before they happen.</p>
-                </div>
-              </article>
+              <SurvivalResponseCard
+                className="mt-5"
+                label="Vigilance"
+                icon={Brain}
+                iconColor="text-brand-teal"
+                contrastBg="bg-brand-teal/10"
+                then="If anticipating danger helped you prepare for what could go wrong, your brain learned to stay alert."
+                now="Today, that same response can show up as overthinking, worrying, replaying conversations, and imagining problems long before they happen."
+              />
             </div>
             <p className="max-w-4xl">
               These responses made sense back then.

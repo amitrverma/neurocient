@@ -3,7 +3,7 @@ import { ChevronDown } from "lucide-react";
 
 export default function HeroSection() {
   return (
-      <section className="relative bg-white px-6 md:px-10">
+      <section className="relative bg-white px-6">
         <div className="pointer-events-none absolute left-0 right-0 top-0 h-svh overflow-hidden" aria-hidden="true">
           <div className="absolute right-0 top-[18%] hidden w-[26vw] max-w-sm items-center md:flex">
             <span className="h-px flex-1 bg-brand-dark/12" />
@@ -103,9 +103,13 @@ export default function HeroSection() {
                 <p className="mt-4 max-w-5xl font-sans text-base leading-8 text-brand-dark/45 line-through decoration-brand-dark/30 md:text-lg md:leading-9">
                   Morning routines. Meditation. Journaling. Self-help books. Listening to podcasts. Productivity hacks. Self-help apps.
                 </p>
-                <p className="mt-10 max-w-5xl border-l-4 border-brand-secondary py-0.5 pl-5 font-sans text-lg font-bold leading-7 md:mt-12 md:text-xl md:leading-8">
-                  You knew what to do. Yet a few weeks later, you found yourself back where you started.
-                </p>
+                <div className="mt-10 max-w-5xl border-l-4 border-brand-secondary py-1 pl-5 md:mt-12 md:pl-6">
+                  <p className="font-sans text-lg font-semibold leading-7 md:text-xl md:leading-8">You knew what to do.</p>
+                  <p className="my-5 font-serif text-4xl font-bold italic leading-none text-brand-accent md:my-6 md:text-5xl">And still&mdash;</p>
+                  <p className="max-w-4xl font-sans text-lg font-semibold leading-7 md:text-xl md:leading-8">
+                    a few weeks later, you found yourself back where you started.
+                  </p>
+                </div>
               </div>
             </div>
             <p className="mt-0 py-6 font-serif text-3xl italic leading-tight text-brand-dark md:col-span-6 md:py-7 md:text-4xl">

@@ -814,3 +814,18 @@ Implication:
 - Make content order, interaction states, touch targets, line wrapping, and one-idea-per-viewport behavior work on mobile before adding desktop enhancements.
 - Treat desktop layouts as a deliberate expansion of the mobile product, not as the source layout.
 - Verify both surfaces, but resolve design tradeoffs in favor of the mobile experience unless a task explicitly targets desktop.
+
+# 2026-07-18: Landing Emphasis Has Distinct Narrative Jobs
+
+The landing page uses two additional emphasis patterns selectively: isolated phrases for the knowing-doing gap and editorial pull quotes for transitions into a useful next step.
+
+Reason:
+
+- Each treatment supports a different stage of the story instead of adding decoration for its own sake.
+- Isolated phrases create a recognition pause, while pull quotes compress the product belief into a retrievable thought.
+
+Implication:
+
+- Use these treatments sparingly and mobile-first.
+- Do not repeat both treatments in every section.
+- Preserve the sequence of recognition, understanding, and then action.

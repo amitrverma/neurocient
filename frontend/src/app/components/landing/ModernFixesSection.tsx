@@ -1,10 +1,11 @@
-import { SectionDecorations, SectionHeading } from "./LandingShared";
+import { SectionDecorations, SectionHeading, SectionLabel } from "./LandingShared";
 
 export default function ModernFixesSection() {
   return (
       <section className="relative overflow-hidden bg-brand-dark px-6 pb-12 pt-14 text-white md:pb-16 md:pt-18">
         <SectionDecorations tone="dark" />
         <div className="relative z-10 mx-auto max-w-6xl">
+          <SectionLabel tone="dark">The usual response</SectionLabel>
           <SectionHeading tone="dark">
             You have tried all the
             <span className="italic text-brand-secondary"> modern fixes.</span>

@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { ArrowRight, BriefcaseBusiness, ClipboardList, ScanLine } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, ScanLine } from "lucide-react";
 import type { ReactNode } from "react";
 
 const diagnostics = [
   {
     title: "Inner Caveman Scan",
     label: "Personal insight",
-    duration: "A few short scenarios",
-    text: "See how your Inner Caveman shows up in everyday decisions: procrastination, hesitation, distraction, and emotional loops.",
+    duration: "12 lived moments",
+    text: "Recognise the protective movements beneath waiting, scrolling, comparison, pressure, worry, guilt, and unrest.",
     href: "/diagnostics/caveman-scan",
     cta: "Start the scan",
     icon: ScanLine,
@@ -17,7 +17,7 @@ const diagnostics = [
     title: "CIC Diagnostic",
     label: "Workplace insight",
     duration: "10 minutes",
-    text: "Uncover the instincts shaping workplace dynamics, from status patterns and conflict avoidance to alignment breakdowns and decision loops.",
+    text: "Uncover the instincts shaping workplace dynamics, from status reactions and conflict avoidance to alignment breakdowns and decision loops.",
     href: "/diagnostics/cic",
     cta: "Start CIC diagnostic",
     icon: BriefcaseBusiness,
@@ -33,7 +33,7 @@ export default function DiagnosticsPage() {
         <div className="grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
           <div>
             <h1 className="text-[clamp(2.6rem,5vw,5.35rem)] font-bold leading-[0.98] tracking-[-0.03em] text-brand-dark">
-              See the pattern
+              See what reacts first
               <br />
               <span className="italic text-brand-accent">while it is happening.</span>
             </h1>
@@ -115,41 +115,12 @@ export default function DiagnosticsPage() {
             </p>
             <p>
               Use it as awareness. Diagnostics are a starting point for
-              noticing patterns earlier, not a fixed identity.
+              recognising automatic reactions earlier, not a fixed identity.
             </p>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-14 md:grid-cols-[0.78fr_1.22fr] md:items-start md:py-16">
-        <div>
-          <SectionLabel>Another view</SectionLabel>
-          <h2 className="text-3xl font-bold leading-tight text-brand-dark md:text-4xl">
-            Prefer the older quick test?
-          </h2>
-        </div>
-
-        <Link
-          href="/diagnostics/spot-your-caveman"
-          className="group block cursor-pointer rounded-lg border border-brand-dark/10 bg-white p-6 shadow-sm transition hover:border-brand-teal/60 hover:shadow-md md:p-7"
-        >
-          <span className="inline-flex items-center gap-2 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-            <ClipboardList className="h-4 w-4" />
-            Quick diagnostic
-          </span>
-          <h3 className="mt-3 text-2xl font-bold leading-tight text-brand-dark">
-            Spot Your Caveman
-          </h3>
-          <p className="mt-3 max-w-2xl font-sans text-sm leading-7 text-brand-dark/72">
-            A shorter entry point for noticing instinctive patterns before
-            moving into the deeper scan.
-          </p>
-          <span className="mt-5 inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-accent">
-            Open quick test
-            <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-          </span>
-        </Link>
-      </section>
     </main>
   );
 }

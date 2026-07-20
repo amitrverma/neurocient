@@ -16,11 +16,12 @@ import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "../../components/AuthModal";
 import { useNotification } from "../../components/NotificationProvider";
 import ConfettiCelebration from "../../components/ui/ConfettiCelebration";
+import type { ProtectiveMove } from "@/app/diagnostics/caveman-scan/scanEvidence";
 
 interface AssignedChallenge {
   assignment_id: string;
   challenge_id: string;
-  status: "active" | "success" | "removed" | "failed";
+  status: "active" | "success" | "completed" | "removed" | "failed";
   started_at: string;
   completed_at?: string | null;
   title: string;
@@ -39,6 +40,36 @@ interface AvailableChallenge {
   intro: string[];
 }
 
+const patternKeywords: Record<ProtectiveMove, string[]> = {
+  seek_relief: ["attention", "distraction", "phone", "scroll", "urge", "start"],
+  restore_control: ["plan", "perfect", "uncertain", "next step", "begin", "start"],
+  social_monitoring: ["compare", "social", "reassurance", "attention", "judgment"],
+  create_distance: ["connect", "conversation", "message", "reach out", "relationship"],
+  override_signal: ["rest", "energy", "body", "exercise", "pause"],
+  discharge_pressure: ["pressure", "stress", "pause", "reaction", "breath"],
+  self_verdict: ["self", "restart", "return", "imperfect", "kind"],
+  flexible_response: ["notice", "pause", "choice", "moment"],
+};
+
+const rankChallenges = (
+  challenges: AvailableChallenge[],
+  pattern: ProtectiveMove | null,
+) => {
+  if (!pattern || !patternKeywords[pattern]) return challenges;
+  const keywords = patternKeywords[pattern];
+  return challenges
+    .map((challenge, index) => {
+      const content = `${challenge.title} ${(challenge.intro ?? []).join(" ")}`.toLowerCase();
+      const score = keywords.reduce(
+        (total, keyword) => total + (content.includes(keyword) ? 1 : 0),
+        0,
+      );
+      return { challenge, index, score };
+    })
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .map(({ challenge }) => challenge);
+};
+
 const MicrochallengesPage = () => {
   const [challenges, setChallenges] = useState<AssignedChallenge[]>([]);
   const [available, setAvailable] = useState<AvailableChallenge[]>([]);
@@ -48,9 +79,18 @@ const MicrochallengesPage = () => {
   const [loading, setLoading] = useState(true);
   const [showNewChallenge, setShowNewChallenge] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [guidedEntry, setGuidedEntry] = useState(false);
+  const [guidedPattern, setGuidedPattern] = useState<ProtectiveMove | null>(null);
 
   const { user, ready } = useAuth();
   const { notify } = useNotification();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setGuidedEntry(params.get("from") === "spot");
+    const pattern = params.get("move") as ProtectiveMove | null;
+    setGuidedPattern(pattern);
+  }, []);
 
   useEffect(() => {
     const fetchChallenges = async () => {
@@ -88,8 +128,27 @@ const MicrochallengesPage = () => {
     fetchChallenges();
   }, [user, ready, notify]);
 
+  useEffect(() => {
+    if (!guidedEntry || !ready || !user) return;
+    void fetch("/api/challenges/all", {
+      method: "GET",
+      credentials: "include",
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error();
+        return response.json() as Promise<AvailableChallenge[]>;
+      })
+      .then((data) => {
+        setAvailable(rankChallenges(data, guidedPattern));
+        setShowNewChallenge(true);
+      })
+      .catch(() => notify("Failed to load available experiments.", "error"));
+  }, [guidedEntry, guidedPattern, notify, ready, user]);
+
   const activeChallenge = challenges.find((c) => c.status === "active");
-  const completedCount = challenges.filter((c) => c.status === "success").length;
+  const completedCount = challenges.filter(
+    (c) => c.status === "success" || c.status === "completed",
+  ).length;
 
   const toggleOpen = (assignmentId: string) => {
     setOpenId(openId === assignmentId ? null : assignmentId);
@@ -184,7 +243,7 @@ const MicrochallengesPage = () => {
       setChallenges((prev) => [
         ...prev,
         {
-          assignment_id: newAssignment.id,
+          assignment_id: newAssignment.assignment_id ?? newAssignment.id,
           challenge_id: challenge.id,
           status: newAssignment.status,
           started_at: newAssignment.started_at,
@@ -200,7 +259,7 @@ const MicrochallengesPage = () => {
         },
       ]);
 
-      notify("Challenge started successfully.", "success");
+      notify(guidedEntry ? "Experiment started." : "Challenge started successfully.", "success");
     } catch (err) {
       console.error("Error starting challenge:", err);
       notify("Something went wrong while starting the challenge.", "error");
@@ -244,17 +303,19 @@ const MicrochallengesPage = () => {
             <span className="italic text-brand-accent">Repeated enough.</span>
           </h1>
           <p className="mt-6 max-w-xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark">
-            Microchallenges are tiny behavior experiments. They lower the
-            threat of change so your nervous system gets evidence through
-            repetition.
+            {guidedEntry
+              ? "You have caught your Caveman in real life. Now choose one tiny experiment—not to fix yourself, but to discover what else is possible."
+              : "Microchallenges are tiny behavior experiments. They lower the threat of change so your nervous system gets evidence through repetition."}
           </p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Metric label="Active" value={activeChallenge ? "1" : "0"} />
-          <Metric label="Completed" value={String(completedCount)} />
-          <Metric label="Total" value={loading ? "..." : String(challenges.length)} />
-        </div>
+        {!guidedEntry && (
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Metric label="Active" value={activeChallenge ? "1" : "0"} />
+            <Metric label="Completed" value={String(completedCount)} />
+            <Metric label="Total" value={loading ? "..." : String(challenges.length)} />
+          </div>
+        )}
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-6 pb-14 md:pb-16">
@@ -262,8 +323,18 @@ const MicrochallengesPage = () => {
           <LoadingBlock />
         ) : !user ? (
           <SignedOutBlock onLogin={() => setShowAuth(true)} />
-        ) : challenges.length === 0 ? (
+        ) : challenges.length === 0 && !guidedEntry ? (
           <EmptyBlock onStart={handleToggleCarousel} />
+        ) : challenges.length === 0 ? (
+          <div className="max-w-2xl border-l-4 border-brand-secondary pl-5">
+            <h2 className="text-2xl font-bold leading-tight text-brand-dark">
+              Choose the experiment that feels closest to the moments you spotted.
+            </h2>
+            <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/70">
+              Keep it small. This is not a new routine or a test of discipline;
+              it is one way to learn what changes when you interrupt the usual move.
+            </p>
+          </div>
         ) : (
           <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
             <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-sm">
@@ -333,20 +404,21 @@ const MicrochallengesPage = () => {
 
         {showNewChallenge && !activeChallenge && user && (
           <AvailableChallenges
-            available={available}
+            available={guidedEntry ? available.slice(0, 3) : available}
             challenges={challenges}
             onStart={handleStartChallenge}
+            guided={guidedEntry}
           />
         )}
       </section>
 
       <div className="mx-auto w-full max-w-6xl px-6 py-8">
         <Link
-          href="/tools"
+          href={guidedEntry ? "/my-caveman" : "/tools"}
           className="inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-dark transition hover:text-brand-primary"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to tools
+          {guidedEntry ? "Back to my portrait" : "Back to tools"}
         </Link>
       </div>
 
@@ -466,6 +538,24 @@ const ChallengeRow = ({
             </div>
           )}
 
+          {(challenge.status === "success" || challenge.status === "completed") &&
+            challenge.title.toLowerCase().includes("procrast") && (
+            <div className="mt-6 border-l-4 border-brand-secondary pl-4">
+              <p className="font-sans text-sm leading-7 text-brand-dark/72">
+                You have repeated the experiment enough to have real-life
+                evidence. Practice can now help you work with the fuller loop
+                behind it—without turning this into another habit to perform.
+              </p>
+              <Link
+                href="/practice"
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white"
+              >
+                Continue into Practice
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          )}
+
           {challenge.status === "active" && (
             <button
               onClick={onRemove}
@@ -485,13 +575,15 @@ const AvailableChallenges = ({
   available,
   challenges,
   onStart,
+  guided = false,
 }: {
   available: AvailableChallenge[];
   challenges: AssignedChallenge[];
   onStart: (challenge: AvailableChallenge) => void;
+  guided?: boolean;
 }) => (
   <section className="mt-10">
-    <SectionLabel>Choose a challenge</SectionLabel>
+    <SectionLabel>{guided ? "One small experiment" : "Choose a challenge"}</SectionLabel>
     {available.length === 0 ? (
       <EmptyPanel text="No challenges available right now." />
     ) : (
@@ -509,7 +601,7 @@ const AvailableChallenges = ({
               className="rounded-lg border border-brand-dark/12 bg-white p-5 shadow-sm"
             >
               <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
-                Microchallenge
+                {guided ? "Small experiment" : "Microchallenge"}
               </p>
               <h3 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
                 {challenge.title}
@@ -529,7 +621,7 @@ const AvailableChallenges = ({
                   onClick={() => onStart(challenge)}
                   className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:opacity-90"
                 >
-                  Start this challenge
+                  {guided ? "Try this experiment" : "Start this challenge"}
                   <ArrowRight className="h-4 w-4" />
                 </button>
               )}

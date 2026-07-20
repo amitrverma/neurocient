@@ -17,7 +17,7 @@ const CavemanScanFeedback = ({ reflection, science, onShowScience }: Props) => {
       </p>
 
       <div
-        className="mt-4 space-y-3 border-l-4 border-brand-secondary pl-5 font-sans text-sm leading-7 text-brand-dark md:text-[0.95rem] md:leading-8 [&_p]:my-3 [&_strong]:text-brand-accent"
+        className="mt-4 space-y-3 border-l-4 border-brand-secondary pl-5 font-sans text-sm leading-7 text-brand-dark md:text-[0.95rem] md:leading-8 [&_blockquote]:my-5 [&_blockquote]:font-serif [&_blockquote]:text-lg [&_blockquote]:font-bold [&_blockquote]:leading-8 [&_blockquote]:text-brand-accent [&_p]:my-3 [&_strong]:text-brand-accent"
         dangerouslySetInnerHTML={{ __html: reflection }}
       />
 

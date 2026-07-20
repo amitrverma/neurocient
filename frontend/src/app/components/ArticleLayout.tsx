@@ -473,11 +473,11 @@ const ArticleScanCTA = () => (
     <div>
       <p className="article-scan-cta-label">Inner Caveman Scan</p>
       <h2 className="article-scan-cta-title">
-        Spot the pattern behind your everyday reactions.
+        Meet the Inner Caveman behind your everyday reactions.
       </h2>
       <p className="article-scan-cta-copy">
-        A few short scenarios that reveal what sits underneath moments of
-        avoidance, hesitation, distraction, and emotional loops.
+        Twelve lived moments that connect everyday reactions with the
+        protective logic that may sit underneath them.
       </p>
     </div>
     <Link href="/diagnostics/caveman-scan" className="article-scan-cta-button">

@@ -1,5 +1,28 @@
 # Practice Decisions
 
+## 2026-07-18: The Scan Begins With Lived Recognition
+
+The Inner Caveman Scan should help users recognise recurring behaviour in concrete everyday scenes and begin appreciating how the Inner Caveman may be shaping it.
+
+Reason:
+
+- The landing page establishes familiar struggles and introduces the Inner Caveman as protective.
+- The Scan must prove the lens by helping users recognise the Inner Caveman inside a moment they have lived.
+- Users often already know that they compare, scroll, delay, worry, or keep planning. Neurocient adds value by contrasting the conventional interpretation with the protective Inner Caveman reading.
+- Watchtowers are useful internal evidence, but starting from drive coverage produces forced scenes and unnatural choices.
+
+Implication:
+
+- Source the 12 Scan scenarios only from behaviour established on the landing page.
+- Write concrete second-person stories with a time, place, object, person, or physical action.
+- Ask for the next honest movement in the scene rather than an abstract inner-voice classification.
+- Use four choices by default and add a fifth only when it protects honesty.
+- Avoid conspicuously virtuous Rational Mind answers.
+- Follow each response with a concise conventional-take versus Inner-Caveman contrast; keep deeper science optional.
+- Write the scene truthfully first and assign Watchtower evidence second.
+- Never force all five Watchtowers into one scenario.
+- Use `frontend/docs/scan/SCAN_AUTHORING.md` as the canonical authoring and review guide.
+
 ## 2026-07-13: The landing page should alternate intensity without fragmenting the story
 
 - Use background shifts and geometry to establish section boundaries while keeping one continuous narrative.
@@ -829,3 +852,38 @@ Implication:
 - Use these treatments sparingly and mobile-first.
 - Do not repeat both treatments in every section.
 - Preserve the sequence of recognition, understanding, and then action.
+## 2026-07-19: Scan results are based on recurring protective moves, not a Caveman score
+
+- Each Scan option records its lived response, protective move, possible concern, evidence strength, optional Watchtower, likely cost, and mirror language.
+- The result may surface a protective move only after it recurs across meaningfully different scenarios.
+- A grounded response is evidence of flexibility in that moment, not evidence that the Caveman is absent.
+- The current landing-page-led scenario set is not balanced across all five Watchtowers, so it must not produce ranked Watchtower scores or infer quiet Watchtowers from missing evidence.
+- Pressure discharge remains distinct from relief, control, and pushing through because collapsing it would misdescribe the accumulated-pressure scenario.
+
+## 2026-07-20: The Scan result has an open primary portrait and a gated deeper portrait
+
+- Completion always reveals the primary result without requiring authentication.
+- The open result includes selected evidence, the recurring movement, the protective interpretation, and a cue to notice in real life.
+- Authentication happens only when the reader chooses to open the deeper portrait.
+- The deeper portrait may include a supported secondary movement, later costs, flexibility evidence, and relevant continuation.
+- The open result must be meaningful on its own and must never be reduced to a teaser for account creation.
+- The Scan, open result, and deeper portrait use three deliberate routes: `/diagnostics/caveman-scan`, `/diagnostics/caveman-scan/result`, and `/my-caveman` respectively. Neither result is expanded inline beneath the Scan.
+
+## 2026-07-20: Post-portrait progression begins with lived spotting
+
+- The deeper portrait asks for one real-world Spot rather than another reading, test, or immediate behavior fix.
+- `/my-caveman/spot` carries the primary portrait cue into a short lived-evidence capture using the existing Spots API.
+- The first Spot reinforces noticing. A microchallenge is offered only after the same primary movement has been recorded more than once.
+- Microchallenge completion may hand into Practice only when the Caveman movement has a relevant authored Practice. The current direct Practice handoff is restricted to procrastination rather than force-fitting every Scan result into the first proof loop.
+- Progress is recognition, repeated spotting, a small experiment, and then deeper Practice—not feature discovery or raw streak completion.
+
+## 2026-07-20: The end-to-end Caveman journey preserves one narrative and one next move
+
+- Landing copy remains the source of truth and must not be rewritten as part of Scan work. The Scan and everything after it help the person realise, meet, and gradually recognise their Inner Caveman; “patterns” is not the user-facing product frame.
+- The active Scan does not advertise optional science until verified science notes actually exist.
+- The open result ends with one primary transition into the deeper portrait; generic reading links do not compete with that handoff.
+- Spots return to `/my-caveman` as visible lived evidence so the portrait does not remain a static scan report.
+- The portrait advances its next action from first Spot, to repeated Spot, to a small experiment.
+- Guided microchallenge arrivals suppress dashboard metrics, reduce visible catalogue choice, and use experiment language.
+- Machine-readable Spot metadata and internal pattern identifiers remain implementation details and must not appear in the user's awareness log or journey copy.
+- Legacy quick-test promotion is removed; `/diagnostics/spot-your-caveman` redirects to the canonical Scan.

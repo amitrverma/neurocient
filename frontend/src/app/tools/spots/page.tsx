@@ -81,7 +81,7 @@ const SpotsPage = () => {
         <div>
           <SectionLabel>Awareness log</SectionLabel>
           <h1 className="text-[clamp(2.6rem,5vw,5.1rem)] font-bold leading-[0.98] tracking-[-0.03em] text-brand-dark">
-            Spot the pattern
+            Spot your Caveman
             <br />
             <span className="italic text-brand-accent">while it is active.</span>
           </h1>
@@ -154,8 +154,8 @@ const SpotsPage = () => {
               </h2>
               <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
                 Your spots are private entries. Sign in to save them, revisit
-                patterns, and build a record of what your Inner Caveman tends
-                to protect.
+                these moments, and build a record of what your Inner Caveman
+                tends to protect.
               </p>
               <button
                 onClick={() => setShowAuth(true)}
@@ -210,7 +210,7 @@ const SpotsPage = () => {
           <div>
             <SectionLabel tone="dark">Related insights</SectionLabel>
             <h2 className="text-3xl font-bold leading-tight md:text-4xl">
-              Read the patterns behind the moments.
+              Understand the Caveman behind the moments.
             </h2>
           </div>
           <div className="grid gap-3">

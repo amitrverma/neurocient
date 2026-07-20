@@ -20,7 +20,7 @@ const tools = [
     description:
       "This is a simple awareness log for the moments when old wiring takes over. You might notice avoidance before a difficult task, comparison after seeing someone else's progress, defensiveness in a conversation, craving under stress, or a sudden need for reassurance.",
     why:
-      "The useful move is to catch the pattern close to the moment it happens. A short note gives the reaction a name, and over time those notes start revealing your common triggers.",
+      "The useful move is to notice your Inner Caveman close to the moment it appears. A short note makes the reaction easier to recognise, and over time those notes reveal what tends to wake it up.",
     unlock:
       "Use it when you want a private record of your recurring loops: what triggered the response, what it was protecting, and what you might try next time.",
     href: "/tools/spots",
@@ -98,8 +98,8 @@ const ToolsPage = () => {
               <span className="italic text-brand-accent">new response.</span>
             </h1>
             <p className="mt-6 max-w-xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark">
-              A working space for spotting patterns, running micro-experiments,
-              and building awareness through repetition.
+              A working space for meeting your Inner Caveman in real moments,
+              trying micro-experiments, and building awareness through repetition.
             </p>
           </div>
 
@@ -153,7 +153,7 @@ const ToolsPage = () => {
             <h2 className="text-3xl font-bold leading-tight tracking-[-0.02em] md:text-4xl">
               Small logs.
               <br />
-              Better pattern recognition.
+              A Caveman you can recognise.
             </h2>
           </div>
           <div className="grid gap-5 font-sans text-base leading-8 text-white/72 md:grid-cols-3">

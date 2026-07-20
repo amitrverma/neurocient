@@ -35,7 +35,7 @@ export const pathways: Record<PathwayId, Pathway> = {
     ],
     books: ["The Story of the Human Body – Daniel Lieberman"],
     research: ["Lieberman et al. (2013) – Evolutionary mismatch and modern health"],
-    tools: [{ title: "Spot Your Caveman Quiz", href: "/diagnostics/caveman-scan" }],
+    tools: [{ title: "Inner Caveman Scan", href: "/diagnostics/caveman-scan" }],
   },
 
   social: {
@@ -58,7 +58,7 @@ export const pathways: Record<PathwayId, Pathway> = {
       "Turkle (2011) – Alone Together",
       "Primack et al. (2019) – Digital Media Use and Perceived Social Isolation",
     ],
-    tools: [{ title: "Spot Your Caveman Quiz", href: "/diagnostics/caveman-scan" }],
+    tools: [{ title: "Inner Caveman Scan", href: "/diagnostics/caveman-scan" }],
   },
 
   workplace: {

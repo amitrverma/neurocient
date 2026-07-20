@@ -1,350 +1,438 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowRight,
-  Brain,
-  BookOpen,
-  Compass,
-  ShieldAlert,
-  Wrench,
-} from "lucide-react";
-import type { ReactNode } from "react";
-
-interface ScanResponse {
-  type: "caveman" | "modern";
-  reflection: string;
-}
+import { ArrowRight, Eye } from "lucide-react";
+import { questionsBank } from "./questionsBank";
+import { buildScanPortrait, type ScanPortraitPattern } from "./scanPortrait";
+import type { CavemanScanResponse } from "./scanStorage";
 
 interface Props {
-  responses: ScanResponse[];
+  responses: CavemanScanResponse[];
+  onUnlock: () => void;
   onRestart?: () => void;
 }
 
-const signalMap = [
-  {
-    trigger: "Ambiguous work",
-    instinct: "Energy protection",
-    oldLogic: "If the task is unclear or effortful, move toward something safer.",
-    modernRead: "You may dress avoidance up as productivity when the real issue is uncertainty.",
-    microShift: "Shrink the first step until it feels almost too small to resist.",
-    href: "/insights/evolutionary-lag",
-  },
-  {
-    trigger: "Someone else's win",
-    instinct: "Status tracking",
-    oldLogic: "Rank used to shape safety, access, and influence.",
-    modernRead: "Comparison may feel like information, but it can quietly steal momentum.",
-    microShift: "Name what the comparison is protecting before deciding what it means.",
-    href: "/insights/why-we-compare",
-  },
-  {
-    trigger: "Group chat pull",
-    instinct: "Social vigilance",
-    oldLogic: "Tribe chatter could carry signals you could not afford to miss.",
-    modernRead: "A notification can feel urgent even when nothing important is happening.",
-    microShift: "Give connection a container: check later, deliberately, instead of reactively.",
-    href: "/insights/doomscrolling",
-  },
-  {
-    trigger: "Reading reactions",
-    instinct: "Belonging scan",
-    oldLogic: "Being out of sync with the group once carried real social risk.",
-    modernRead: "You may monitor other people so closely that your own experience disappears.",
-    microShift: "Ask: is there evidence of disconnection, or only a body-level alarm?",
-    href: "/insights/connections",
-  },
-  {
-    trigger: "Public exposure",
-    instinct: "Spotlight protection",
-    oldLogic: "Being watched meant status judgment, vulnerability, and possible exclusion.",
-    modernRead: "The fear may be old exposure circuitry, not a true measure of readiness.",
-    microShift: "Move with the alarm present. Do not wait to feel fully safe.",
-    href: "/insights/spotlight-bias",
-  },
-  {
-    trigger: "High-reward food",
-    instinct: "Scarcity capture",
-    oldLogic: "If dense calories appeared, taking them was good survival math.",
-    modernRead: "The craving may be opportunity detection, not actual need.",
-    microShift: "Add a pause before the reward. Make the first choice delay, not denial.",
-    href: "/insights/stress-comfort-food",
-  },
-  {
-    trigger: "Being ignored",
-    instinct: "Status defense",
-    oldLogic: "Dismissal in the group could signal falling rank or social danger.",
-    modernRead: "Pulling back may protect dignity in the moment while costing influence later.",
-    microShift: "Re-enter through a lower-threat channel: a follow-up note, question, or one-on-one.",
-    href: "/insights/silent-team",
-  },
-  {
-    trigger: "End-of-day effort",
-    instinct: "Fuel conservation",
-    oldLogic: "Spend energy only when the return is immediate or survival-relevant.",
-    modernRead: "Rest can be real, but your brain may also overprotect the fuel tank.",
-    microShift: "Trade intensity for continuity: two minutes, one set, or a walk counts.",
-    href: "/insights/struggle-to-exercise",
-  },
-  {
-    trigger: "Broken streak",
-    instinct: "Abort reflex",
-    oldLogic: "If a strategy failed in the wild, switching fast could save energy.",
-    modernRead: "One missed day can feel like evidence that the whole identity has failed.",
-    microShift: "Use a restart rule: never miss twice, and never negotiate the restart.",
-    href: "/insights/willpower",
-  },
-];
-
-const profileCopy = {
-  high: {
-    label: "Instinct-led right now",
-    headline: "Your ancient system is doing a lot of the steering.",
-    body:
-      "This does not mean you are irrational. It means your brain is trying to protect energy, belonging, status, or certainty before your modern goals get a vote.",
-  },
-  mixed: {
-    label: "Split signal",
-    headline: "You are already catching the caveman in some moments.",
-    body:
-      "Your pattern is not fixed. Some scenarios show old survival logic taking over; others show a modern override already coming online.",
-  },
-  low: {
-    label: "Modern override active",
-    headline: "You are often able to notice the signal without obeying it.",
-    body:
-      "The caveman still speaks first. Your answers suggest you are increasingly able to pause, interpret the alarm, and choose a better response.",
-  },
-};
-
-const getProfile = (cavemanPercent: number) => {
-  if (cavemanPercent >= 67) return profileCopy.high;
-  if (cavemanPercent >= 34) return profileCopy.mixed;
-  return profileCopy.low;
-};
-
-const CavemanScanResult = ({ responses, onRestart }: Props) => {
-  const total = responses.length || 1;
-  const cavemanCount = responses.filter((r) => r.type === "caveman").length;
-  const cavemanPercent = Math.round((cavemanCount / total) * 100);
-  const modernPercent = 100 - cavemanPercent;
-  const profile = getProfile(cavemanPercent);
-
-  const cavemanSignals = responses
-    .map((response, index) => ({ response, signal: signalMap[index] }))
-    .filter(({ response, signal }) => response.type === "caveman" && signal);
-
-  const modernSignals = responses
-    .map((response, index) => ({ response, signal: signalMap[index] }))
-    .filter(({ response, signal }) => response.type === "modern" && signal);
-
-  const primarySignals =
-    cavemanSignals.length > 0 ? cavemanSignals.slice(0, 3) : modernSignals.slice(0, 3);
+const CavemanScanResult = ({ responses, onUnlock, onRestart }: Props) => {
+  // Responses saved before the evidence model was introduced are hydrated from
+  // the current option label so an already-completed scan can still be read.
+  const evidence = responses.flatMap((response, index) => {
+    const hydrated =
+      response.evidence ??
+      questionsBank[index]?.options.find((option) => option.label === response.label)?.evidence;
+    return hydrated ? [hydrated] : [];
+  });
+  const portrait = buildScanPortrait(evidence);
 
   return (
-    <main className="bg-white font-serif text-brand-dark">
-      <section className="px-6 py-12 md:py-16">
-        <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
-          <div>
-            <div className="mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">
-              <span>Your scan</span>
-              <span className="h-px flex-1 bg-brand-dark/15" />
-            </div>
-
-            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-              {profile.label}
-            </p>
-            <h1 className="mt-3 text-[clamp(2.45rem,5vw,5rem)] font-bold leading-[0.98] tracking-[-0.03em] text-brand-dark">
-              Your Caveman
-              <br />
-              <span className="italic text-brand-accent">Snapshot</span>
-            </h1>
-            <p className="mt-6 max-w-xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark md:text-lg">
-              {profile.headline}
-            </p>
-          </div>
-
-          <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-[0_20px_60px_rgba(4,42,43,0.06)] md:p-8">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <ScoreTile label="Caveman pull" value={cavemanPercent} icon={<ShieldAlert className="h-5 w-5" />} />
-              <ScoreTile label="Modern override" value={modernPercent} icon={<Brain className="h-5 w-5" />} />
-            </div>
-
-            <div className="mt-7">
-              <div className="mb-3 flex items-center justify-between font-sans text-xs font-semibold uppercase tracking-[0.14em] text-brand-dark/60">
-                <span>Instinct</span>
-                <span>Choice</span>
-              </div>
-              <div className="h-3 w-full overflow-hidden rounded-full bg-brand-dark/10">
-                <div
-                  className="h-full rounded-full bg-brand-accent transition-all duration-500"
-                  style={{ width: `${cavemanPercent}%` }}
-                />
-              </div>
-            </div>
-
-            <p className="mt-6 font-sans text-sm leading-7 text-brand-dark/72">
-              {profile.body} This is not a scorecard. It is a map of where old
-              survival logic may be entering modern decisions.
-            </p>
-          </div>
+    <main className="min-h-screen bg-[#f8f6f0] font-serif text-brand-dark">
+      <section className="px-6 pb-14 pt-10 md:pb-20 md:pt-16">
+        <div className="mx-auto max-w-4xl">
+          <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-primary">
+            How your Inner Caveman showed up
+          </p>
+          <h1 className="mt-5 max-w-3xl text-[clamp(2.45rem,7vw,5.4rem)] font-bold leading-[0.98] tracking-[-0.035em]">
+            {portrait.headline}
+          </h1>
+          <p className="mt-7 max-w-2xl font-sans text-base leading-8 text-brand-dark/70 md:text-lg md:leading-9">
+            {portrait.introduction}
+          </p>
         </div>
       </section>
 
-      <section className="bg-brand-dark px-6 py-12 text-white md:py-14">
-        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
-          <div>
-            <div className="mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-secondary">
-              <span>What showed up</span>
-              <span className="h-px flex-1 bg-white/20" />
-            </div>
-            <h2 className="text-3xl font-bold leading-tight tracking-[-0.02em] md:text-4xl">
-              The useful part is not the percentage.
-              <br />
-              It is the pattern.
-            </h2>
-          </div>
-
-          <div className="grid gap-4">
-            {primarySignals.map(({ signal }, index) => (
-              <article
-                key={signal.trigger}
-                className="rounded-lg border border-white/16 bg-white p-5 text-brand-dark shadow-sm md:p-6"
+      <section className="bg-brand-dark px-6 py-14 text-white md:py-20">
+        <div className="mx-auto max-w-4xl">
+          <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+            You recognised yourself here
+          </p>
+          <div className="mt-7 divide-y divide-white/16 border-y border-white/16">
+            {portrait.primary.evidence.map((item) => (
+              <blockquote
+                key={item.optionId}
+                className="py-6 text-xl font-bold leading-[1.4] tracking-[-0.012em] text-white/95 md:py-8 md:text-2xl"
               >
-                <div className="flex flex-wrap items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.14em]">
-                  <span className="text-brand-primary">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <span className="text-brand-teal">{signal.trigger}</span>
-                </div>
-                <h3 className="mt-3 text-2xl font-bold leading-tight text-brand-dark">
-                  {signal.instinct}
-                </h3>
-                <div className="mt-4 grid gap-4 font-sans text-sm leading-7 text-brand-dark/72 md:grid-cols-2">
-                  <p>
-                    <strong className="text-brand-dark">Old logic:</strong>{" "}
-                    {signal.oldLogic}
-                  </p>
-                  <p>
-                    <strong className="text-brand-dark">Modern read:</strong>{" "}
-                    {signal.modernRead}
-                  </p>
-                </div>
-                <div className="mt-5 flex flex-col gap-4 border-t border-brand-dark/12 pt-4 md:flex-row md:items-center md:justify-between">
-                  <p className="font-sans text-sm font-semibold leading-6 text-brand-dark">
-                    Try this: {signal.microShift}
-                  </p>
-                  <Link
-                    href={signal.href}
-                    className="inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-accent"
-                  >
-                    Read more
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </div>
-              </article>
+                “{item.mirror}”
+              </blockquote>
+            ))}
+          </div>
+          <p className="mt-7 max-w-2xl font-sans text-sm leading-7 text-white/68 md:text-base md:leading-8">
+            These are different situations. But your Inner Caveman made a
+            similar protective move underneath them.
+          </p>
+        </div>
+      </section>
+
+      <section className="px-6 py-14 md:py-20">
+        <div className="mx-auto max-w-4xl">
+          <PatternExplanation pattern={portrait.primary} />
+        </div>
+      </section>
+
+      <section className="border-y border-brand-dark/10 bg-white px-6 py-14 md:py-20">
+        <div className="mx-auto max-w-4xl">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
+            <Eye className="h-5 w-5" aria-hidden="true" />
+          </div>
+          <p className="mt-6 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-primary">
+            Your moment to notice
+          </p>
+          <p className="mt-4 max-w-3xl text-2xl font-bold leading-[1.35] tracking-[-0.015em] md:text-3xl">
+            {portrait.primary.cue}
+          </p>
+          <p className="mt-6 max-w-2xl font-sans text-base leading-8 text-brand-dark/68">
+            Do not fix it yet. For now, see whether you can catch this movement
+            a little earlier when it appears in real life.
+          </p>
+        </div>
+      </section>
+
+      <LockedPortrait onUnlock={onUnlock} />
+      {onRestart && (
+        <div className="bg-brand-dark px-6 pb-12">
+          <div className="mx-auto max-w-4xl border-t border-white/16 pt-6">
+            <button
+              type="button"
+              onClick={onRestart}
+              className="font-sans text-sm text-white/60 underline decoration-white/30 underline-offset-4 transition hover:text-white"
+            >
+              Retake the scan
+            </button>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+};
+
+const PatternExplanation = ({ pattern }: { pattern: ScanPortraitPattern }) => (
+  <div>
+    <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-primary">
+      {pattern.eyebrow}
+    </p>
+    <h2 className="mt-4 max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.025em] md:text-5xl">
+      {pattern.headline}
+    </h2>
+    <div className="mt-7 grid gap-7 md:grid-cols-2 md:gap-12">
+      <div>
+        <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
+          What connects the moments
+        </p>
+        <p className="mt-3 font-sans text-base leading-8 text-brand-dark/72">
+          {pattern.explanation}
+        </p>
+      </div>
+      <div>
+        <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
+          The Inner Caveman angle
+        </p>
+        <p className="mt-3 font-sans text-base leading-8 text-brand-dark/72">
+          {pattern.protection}
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+export const CavemanScanDetailedResult = ({
+  responses,
+  spots = [],
+  onRetake,
+}: {
+  responses: CavemanScanResponse[];
+  spots?: Array<{ id: string; date: string; description: string; pattern?: string | null }>;
+  onRetake: () => void;
+}) => {
+  const evidence = responses.flatMap((response, index) => {
+    const hydrated =
+      response.evidence ??
+      questionsBank[index]?.options.find((option) => option.label === response.label)?.evidence;
+    return hydrated ? [hydrated] : [];
+  });
+  const portrait = buildScanPortrait(evidence);
+  const matchingSpots = spots.filter(
+    (spot) => spot.pattern === portrait.primary.move,
+  );
+  const nextStep =
+    matchingSpots.length >= 2
+      ? {
+          title: "Try one small experiment with the Caveman move you have caught.",
+          body: "You have seen this movement in more than one real moment. Now you can test one small interruption—not to fix yourself, but to discover what else is possible.",
+          href: `/tools/microchallenges?from=spot&move=${portrait.primary.move}`,
+          cta: "Choose one small experiment",
+        }
+      : {
+          title:
+            matchingSpots.length === 1
+              ? "Catch this movement one more time."
+              : "Catch this movement once in real life.",
+          body:
+            matchingSpots.length === 1
+              ? "One real moment has joined what you know about your Caveman. Catching it again will tell you more than rushing straight into another solution."
+              : "Do not try to change it yet. Notice the moment it begins, what you find yourself doing next, and what the move offers right then.",
+          href: "/my-caveman/spot",
+          cta: matchingSpots.length === 1 ? "Spot it again" : "Spot my Caveman",
+        };
+
+  return (
+    <main className="min-h-screen bg-[#f8f6f0] font-serif text-brand-dark">
+      <section className="px-6 pb-14 pt-10 md:pb-20 md:pt-16">
+        <div className="mx-auto max-w-4xl">
+          <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-primary">
+            Your deeper portrait
+          </p>
+          <h1 className="mt-5 max-w-3xl text-[clamp(2.5rem,7vw,5.4rem)] font-bold leading-[0.98] tracking-[-0.035em]">
+            A fuller picture of your Inner Caveman.
+          </h1>
+          <p className="mt-7 max-w-2xl font-sans text-base leading-8 text-brand-dark/70 md:text-lg md:leading-9">
+            This brings together the protective moves that repeated across
+            your scan. It is not a diagnosis or a fixed type. It is a closer
+            look at what your Inner Caveman may be doing in these moments.
+          </p>
+        </div>
+      </section>
+
+      <section className="border-y border-brand-dark/10 bg-white px-6 py-14 md:py-20">
+        <div className="mx-auto max-w-4xl">
+          <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-teal">
+            Your primary movement
+          </p>
+          <PatternExplanation pattern={portrait.primary} />
+          <div className="mt-9 divide-y divide-brand-dark/10 border-y border-brand-dark/10">
+            {portrait.primary.evidence.map((item) => (
+              <p key={item.optionId} className="py-5 font-sans text-sm leading-7 text-brand-dark/72 md:text-base">
+                {item.mirror}
+              </p>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="px-6 py-12 md:py-14">
-        <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
-          <ResultAction
-            icon={<Compass className="h-5 w-5" />}
-            label="Go deeper"
-            title="Read the full Inner Caveman guide"
-            text="Understand the five drives behind safety, status, belonging, scarcity, and control."
-            href="/inner-caveman"
-            cta="Open guide"
-          />
-          <ResultAction
-            icon={<Wrench className="h-5 w-5" />}
-            label="Tools"
-            title="Use this insight in daily life"
-            text="Turn the snapshot into small actions with spots, microchallenges, nudges, and reflection tools."
-            href="/tools"
-            cta="Open tools"
-          />
-          <ResultAction
-            icon={<BookOpen className="h-5 w-5" />}
-            label="Insights"
-            title="Read the patterns behind your result"
-            text="Explore essays on comparison, procrastination, stress, cravings, attention, and belonging."
-            href="/insights"
-            cta="Browse insights"
-          />
-        </div>
-        {onRestart && (
-          <div className="mx-auto mt-8 max-w-6xl border-t border-brand-dark/12 pt-6">
-            <Link
-              href="/diagnostics/cic"
-              className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark/25 px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-primary hover:text-brand-primary"
-            >
-              See how your Inner Caveman plays out at work
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+      <DeepPortrait portrait={portrait} />
+
+      {matchingSpots.length > 0 && (
+        <section className="border-y border-brand-dark/10 bg-white px-6 py-14 md:py-20">
+          <div className="mx-auto max-w-4xl">
+            <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-primary">
+              Evidence from real life
+            </p>
+            <h2 className="mt-4 max-w-3xl text-3xl font-bold leading-[1.12] tracking-[-0.025em] md:text-4xl">
+              You have caught this movement {matchingSpots.length === 1 ? "once" : `${matchingSpots.length} times`} outside the scan.
+            </h2>
+            <div className="mt-8 divide-y divide-brand-dark/10 border-y border-brand-dark/10">
+              {matchingSpots.slice(0, 2).map((spot) => (
+                <article key={spot.id} className="grid gap-3 py-5 md:grid-cols-[8rem_1fr]">
+                  <time className="font-sans text-xs font-semibold uppercase tracking-[0.14em] text-brand-teal">
+                    {new Date(spot.date).toLocaleDateString("en-IN", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </time>
+                  <p className="whitespace-pre-line font-sans text-sm leading-7 text-brand-dark/72">
+                    {spot.description}
+                  </p>
+                </article>
+              ))}
+            </div>
           </div>
-        )}
+        </section>
+      )}
+
+      <section className="bg-brand-primary px-6 py-14 text-white md:py-20">
+        <div className="mx-auto max-w-4xl">
+          <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+            Your next step
+          </p>
+          <h2 className="mt-4 max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.025em] md:text-5xl">
+            {nextStep.title}
+          </h2>
+          <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-white/75">
+            {nextStep.body}
+          </p>
+          <Link
+            href={nextStep.href}
+            className="mt-8 inline-flex items-center gap-2 rounded-full bg-brand-secondary px-6 py-3 font-sans text-sm font-semibold text-brand-dark transition hover:bg-white"
+          >
+            {nextStep.cta}
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+          <p className="mt-6 font-sans text-sm text-white/62">
+            Want to understand it first?{" "}
+            <Link
+              href={portrait.continuation.href}
+              className="font-semibold text-white underline decoration-white/35 underline-offset-4"
+            >
+              {portrait.continuation.cta}
+            </Link>
+          </p>
+          <div className="mt-10 border-t border-white/18 pt-6">
+            <button
+              type="button"
+              onClick={onRetake}
+              className="font-sans text-sm text-white/65 underline decoration-white/30 underline-offset-4 transition hover:text-white"
+            >
+              Retake the scan
+            </button>
+          </div>
+        </div>
       </section>
     </main>
   );
 };
 
-const ScoreTile = ({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: number;
-  icon: ReactNode;
-}) => (
-  <div className="rounded-lg border border-brand-dark/12 p-4">
-    <div className="flex items-center justify-between gap-4 font-sans text-xs font-semibold uppercase tracking-[0.14em] text-brand-teal">
-      <span>{label}</span>
-      <span className="text-brand-accent">{icon}</span>
+const LockedPortrait = ({ onUnlock }: { onUnlock: () => void }) => (
+  <section className="bg-brand-dark px-6 py-14 text-white md:py-20">
+    <div className="mx-auto max-w-4xl">
+      <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+        Your deeper portrait
+      </p>
+      <h2 className="mt-4 max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.025em] md:text-5xl">
+        There is more to how your Inner Caveman moves through your life.
+      </h2>
+      <p className="mt-6 max-w-2xl font-sans text-base leading-8 text-white/72">
+        You already have your primary result. Create an account or sign in to
+        open the rest of your portrait and return to it later.
+      </p>
+      <div className="mt-8 grid gap-3 font-sans text-sm leading-7 text-white/78 sm:grid-cols-2">
+        <p className="border-l-2 border-brand-secondary pl-4">Any secondary movement supported by your answers</p>
+        <p className="border-l-2 border-brand-secondary pl-4">Where its protection may be costing you</p>
+        <p className="border-l-2 border-brand-secondary pl-4">Moments where you already show flexibility</p>
+        <p className="border-l-2 border-brand-secondary pl-4">How the immediate protection connects to its later cost</p>
+      </div>
+      <button
+        type="button"
+        onClick={onUnlock}
+        className="mt-9 inline-flex items-center gap-2 rounded-full bg-brand-secondary px-6 py-3 font-sans text-sm font-semibold text-brand-dark transition hover:bg-white"
+      >
+        Open my deeper portrait
+        <ArrowRight className="h-4 w-4" aria-hidden="true" />
+      </button>
     </div>
-    <p className="mt-3 font-sans text-4xl font-semibold tracking-[-0.03em] text-brand-dark">
-      {value}%
-    </p>
-  </div>
+  </section>
 );
 
-const ResultAction = ({
-  icon,
-  label,
-  title,
-  text,
-  href,
-  cta,
-}: {
-  icon: ReactNode;
-  label: string;
-  title: string;
-  text: string;
-  href: string;
-  cta: string;
-}) => (
-  <Link
-    href={href}
-    className="group rounded-lg border border-brand-dark/12 bg-white p-6 shadow-sm transition hover:border-brand-teal/60 hover:shadow-md"
-  >
-    <span className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
-      {icon}
-    </span>
-    <p className="mt-5 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-      {label}
-    </p>
-    <h3 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
-      {title}
-    </h3>
-    <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">{text}</p>
-    <span className="mt-5 inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-accent">
-      {cta}
-      <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-    </span>
-  </Link>
-);
+const costCopy = {
+  momentum: "Momentum — meaningful beginnings are repeatedly moved into a later moment.",
+  energy: "Energy — overriding or bargaining with strain can leave less for what matters.",
+  rest: "Rest — the body stops while attention remains occupied or alert.",
+  connection: "Connection — short-term protection can quietly create distance over time.",
+  self_trust: "Self-trust — one difficult moment starts becoming evidence about who you are.",
+} as const;
+
+export const DeepPortrait = ({ portrait }: { portrait: ReturnType<typeof buildScanPortrait> }) => {
+  const costs = [...new Set(
+    [portrait.primary, portrait.secondary]
+      .filter((pattern): pattern is ScanPortraitPattern => Boolean(pattern))
+      .flatMap((pattern) => pattern.evidence.flatMap((item) => (item.cost ? [item.cost] : []))),
+  )].slice(0, 3);
+
+  return (
+    <section className="bg-brand-dark px-6 py-14 text-white md:py-20">
+      <div className="mx-auto max-w-4xl">
+        <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+          Your deeper portrait
+        </p>
+
+        {portrait.secondary ? (
+          <div className="mt-5">
+            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-white/52">
+              Another movement worth noticing
+            </p>
+            <h2 className="mt-4 max-w-3xl text-3xl font-bold leading-[1.12] tracking-[-0.025em] md:text-4xl">
+              {portrait.secondary.headline}
+            </h2>
+            <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-white/72">
+              {portrait.secondary.explanation}
+            </p>
+            <p className="mt-5 max-w-2xl border-l-2 border-brand-secondary pl-5 font-sans text-sm leading-7 text-white/76">
+              {portrait.secondary.protection}
+            </p>
+            <div className="mt-7 space-y-3 border-l-2 border-brand-secondary pl-5">
+              {portrait.secondary.evidence.slice(0, 2).map((item) => (
+                <p key={item.optionId} className="font-sans text-sm leading-7 text-white/76">
+                  {item.mirror}
+                </p>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <h2 className="mt-4 max-w-3xl text-3xl font-bold leading-[1.12] tracking-[-0.025em] md:text-4xl">
+            One Caveman move came through clearly; there was not enough evidence to name a second.
+          </h2>
+        )}
+
+        {costs.length > 0 && (
+          <div className="mt-12 border-t border-white/16 pt-10">
+            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-white/52">
+              Where the protection may become costly
+            </p>
+            <div className="mt-5 grid gap-4 md:grid-cols-3">
+              {costs.map((cost) => (
+                <p key={cost} className="border-l-2 border-brand-secondary pl-4 font-sans text-sm leading-7 text-white/76">
+                  {costCopy[cost]}
+                </p>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {portrait.contexts.length > 0 && (
+          <div className="mt-12 border-t border-white/16 pt-10">
+            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-white/52">
+              Where this Caveman move appeared
+            </p>
+            <p className="mt-4 max-w-3xl text-2xl font-bold leading-[1.4] tracking-[-0.012em]">
+              {portrait.contexts.slice(0, 6).join(" · ")}
+            </p>
+            <p className="mt-4 max-w-2xl font-sans text-sm leading-7 text-white/65">
+              This does not mean the response governs every part of these areas.
+              These are the contexts in which your selected responses gave us evidence.
+            </p>
+          </div>
+        )}
+
+        {portrait.supportedWatchtowers.length > 0 && (
+          <div className="mt-12 border-t border-white/16 pt-10">
+            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-white/52">
+              What your Caveman may be watching
+            </p>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              {portrait.supportedWatchtowers.map((item) => (
+                <div key={item.watchtower} className="border-l-2 border-brand-secondary pl-4">
+                  <h3 className="text-xl font-bold text-white">{item.label}</h3>
+                  <p className="mt-2 font-sans text-sm leading-7 text-white/72">
+                    {item.explanation}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-5 max-w-2xl font-sans text-xs leading-6 text-white/52">
+              We show a protective concern only when it appeared more than once.
+              A concern not shown here was not ruled out; this scan may simply not have gathered enough evidence for it.
+            </p>
+          </div>
+        )}
+
+        {portrait.flexibleMoments.length > 0 && portrait.primary.move !== "flexible_response" && (
+          <div className="mt-12 border-t border-white/16 pt-10">
+            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-white/52">
+              Where you already showed room to move
+            </p>
+            <p className="mt-4 max-w-2xl font-sans text-base leading-8 text-white/72">
+              In some moments, the first protective signal did not have to become
+              the next action. That does not cancel what you saw elsewhere. It
+              shows your response is not fixed.
+            </p>
+            <div className="mt-5 space-y-3 border-l-2 border-brand-secondary pl-5">
+              {portrait.flexibleMoments.map((item) => (
+                <p key={item.optionId} className="font-sans text-sm leading-7 text-white/76">
+                  {item.mirror}
+                </p>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+};
 
 export default CavemanScanResult;

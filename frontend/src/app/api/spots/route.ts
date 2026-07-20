@@ -16,7 +16,18 @@ export async function GET(req: Request) {
     });
 
     const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    const cleaned = Array.isArray(data)
+      ? data.map((spot) => {
+          const description = typeof spot.description === "string" ? spot.description : "";
+          const match = description.match(/^\[caveman-pattern:([^\]]+)\]\n?/);
+          return {
+            ...spot,
+            pattern: match?.[1] ?? null,
+            description: description.replace(/^\[caveman-pattern:[^\]]+\]\n?/, ""),
+          };
+        })
+      : data;
+    return NextResponse.json(cleaned, { status: res.status });
   } catch (error) {
     console.error("❌ Error in GET /api/spots/:", error);
     return NextResponse.json({ detail: "Internal server error" }, { status: 500 });

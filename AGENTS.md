@@ -9,12 +9,14 @@ The most important product reference is:
 - `frontend/docs/practice/PRACTICE_PRODUCT_CONTEXT.md`
 - `frontend/docs/practice/CHALLENGE_AUTHORING.md`
 - `frontend/docs/practice/DECISIONS.md`
+- `frontend/docs/scan/SCAN_AUTHORING.md`
 
 Read those before modifying anything under:
 
 - `frontend/src/app/practice/**`
 - `frontend/src/content/challenges/**`
 - any future practice, challenge, reinforcement, reminder, or behavior-change flow
+- `frontend/src/app/diagnostics/caveman-scan/**`
 
 ## Product Direction
 The Practice product is not a generic habit tracker, productivity tool, or quiz library.

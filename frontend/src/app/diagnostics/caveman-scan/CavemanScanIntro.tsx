@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { ArrowRight, Brain, Eye, MessageSquareText } from "lucide-react";
+import { ArrowRight, Eye, MessageSquareText, ScanSearch } from "lucide-react";
 
 interface Props {
   onStart: () => void;
@@ -24,9 +24,8 @@ const CavemanScanIntro = ({ onStart }: Props) => {
           </h1>
 
           <p className="mt-7 max-w-2xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark md:text-lg md:leading-8">
-            This scan helps you see how your Inner Caveman shows up in everyday
-            decisions &mdash; the reactions behind procrastination, hesitation,
-            distraction, and emotional loops.
+            This scan helps you recognise how your Inner Caveman may show up in
+            ordinary moments &mdash; before the reaction disappears back into the day.
           </p>
 
           <div className="mt-8 space-y-2.5 font-sans text-base font-semibold leading-7 text-brand-dark md:text-lg md:leading-8">
@@ -36,8 +35,8 @@ const CavemanScanIntro = ({ onStart }: Props) => {
           </div>
 
           <p className="mt-8 max-w-2xl font-sans text-base leading-8 text-brand-dark/78">
-            You&apos;ll go through a few short scenarios. After each one,
-            you&apos;ll see what&apos;s driving the response.
+            You&apos;ll move through twelve familiar situations. After each one,
+            you&apos;ll see the usual explanation beside the protective logic underneath it.
           </p>
 
           <button
@@ -56,18 +55,18 @@ const CavemanScanIntro = ({ onStart }: Props) => {
           <div className="mt-6 space-y-6">
             <ScanStep
               icon={<MessageSquareText className="h-5 w-5" />}
-              title="Short scenarios"
-              text="Every prompt is built around a familiar moment: avoidance, comparison, friction, or emotional momentum."
+              title="Lived moments"
+              text="Each scene returns to something you may have lived: waiting, scrolling, comparison, pressure, worry, guilt, or unrest."
             />
             <ScanStep
               icon={<Eye className="h-5 w-5" />}
-              title="Immediate reflection"
-              text="After you choose a response, the scan names the pattern underneath it."
+              title="A different reading"
+              text="Your response is met without judgment, then viewed through the Inner Caveman lens."
             />
             <ScanStep
-              icon={<Brain className="h-5 w-5" />}
-              title="Optional science"
-              text="When useful, you can open the deeper evolutionary explanation behind the reaction."
+              icon={<ScanSearch className="h-5 w-5" />}
+              title="A connected result"
+              text="At the end, the scan connects movements that appeared across different parts of life."
             />
           </div>
         </aside>

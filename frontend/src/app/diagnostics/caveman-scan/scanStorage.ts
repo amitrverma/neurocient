@@ -1,4 +1,5 @@
 import type { ScanScienceBlock } from "./questionsBank";
+import type { ScanOptionEvidence } from "./scanEvidence";
 
 export type CavemanScanStage = "intro" | "questions" | "result";
 
@@ -7,6 +8,7 @@ export type CavemanScanResponse = {
   type: "caveman" | "modern";
   reflection: string;
   science: ScanScienceBlock | null;
+  evidence?: ScanOptionEvidence;
 };
 
 export type CavemanScanState = {

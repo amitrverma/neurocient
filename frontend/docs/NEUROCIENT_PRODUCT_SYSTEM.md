@@ -108,6 +108,10 @@ The metaphor may support a calm, adult visual landscape in which Watchtowers, pa
 
 ## Purpose Of The Inner Caveman Scan
 
+Detailed scenario, choice, reflection, Watchtower-mapping, and science-note guidance lives in `frontend/docs/scan/SCAN_AUTHORING.md`.
+
+The Scan first helps a person recognise a recurring lived behaviour in an ordinary moment and begin appreciating how the Inner Caveman may be shaping it.
+
 The Scan is not a quiz, personality assessment, psychometric test, diagnosis, or behavior score. It is a recognition experience.
 
 It helps a person notice:
@@ -125,9 +129,9 @@ Recognition, not numerical precision, is the primary success metric. The final r
 
 ### Experience model
 
-Ordinary moment → familiar inner voice → underlying drive or Rational Mind → pattern across moments → portrait of the Inner Caveman
+Concrete lived scene → honest continuation → conventional interpretation → Inner Caveman contrast → optional science → evidence across moments
 
-Scenarios should feel ordinary, recent, ambiguous, emotionally safe, and open to more than one believable interpretation. The prompt should orient the user toward the voice that arrives first or feels most familiar, not the response that seems wisest.
+Scenarios should feel ordinary, recent, concrete, emotionally safe, and drawn from behaviour established on the landing page. Ask what happens next in the lived moment rather than asking the user to explain themselves through the framework. Write the scene truthfully first and assign internal Watchtower evidence second. Never force all five drives into one scenario.
 
 ## Why Rational Mind Is Essential
 
@@ -237,20 +241,26 @@ These systems should be connected and reused. Do not create parallel auth, progr
 
 ## Scan Foundation Status
 
-The first Watchtower Scan foundation uses:
+The current recognition Scan uses:
 
-- scan version `watchtowers-1`;
-- scoring version `evidence-1`;
-- report foundation version `portrait-foundation-1`;
-- a versioned 20-scenario bank with a deterministic, unique-trigger draw of 12;
-- Watchtower evidence and Rational Mind evidence stored separately;
-- immutable story, option, and mapping snapshots on every response;
-- anonymous backend sessions protected by an unguessable access token;
-- optional ownership linking after authentication;
-- deterministic portrait inputs containing Watchtower totals, trigger contexts, Rational Mind contexts, and pattern shape.
+- scan version `recognition-1`;
+- evidence version `protective-moves-1`;
+- report version `two-level-portrait-1`;
+- the 12 landing-page-derived lived scenarios documented in the Scan authoring guide;
+- option-level protective moves, possible concerns, evidence strength, mirror language, costs, and optional Watchtower evidence;
+- deterministic portrait generation based on recurrence across different scenarios rather than a Caveman score;
+- an open primary portrait at `/diagnostics/caveman-scan/result`, followed by an authenticated deeper portrait at `/my-caveman`; and
+- versioned authenticated backend sessions containing responses, evidence, and the generated portrait.
 
-The first end-to-end UI now consumes this foundation at `/diagnostics/caveman-scan`. It includes randomized option presentation, progressive reflections after four and eight moments, a meaningful anonymous portrait preview, an account transition for the deeper living portrait, account linking, and a deterministic full report with relevant routes into Inner Caveman 101 and Practice.
+The deeper portrait adds a supported secondary movement, life contexts, likely costs, moments of flexibility, repeated protective concerns, and a continuation selected from the primary movement. A concern is shown only when supported more than once, and missing evidence is never presented as a quiet Watchtower.
 
-All wording, progressive observations, report prose, gating presentation, and visual treatment remain version-one product material. They should be improved through validation without weakening the evidence and persistence contracts.
+Authenticated users can revisit their latest completed portrait at `/my-caveman`. When the browser does not contain a current Scan, this dedicated personal surface loads the latest completed account portrait. Local storage remains a resume convenience rather than the account retrieval mechanism.
 
-Authenticated users can revisit their latest completed portrait at `/diagnostics/caveman-scan`. The route loads the latest account-linked Scan from backend persistence when no current browser session is present. Local storage is a resume convenience, not the account retrieval mechanism.
+The post-portrait progression is staged rather than presented as a tools menu:
+
+1. `/my-caveman` offers one personalised recognition cue.
+2. `/my-caveman/spot` records a real moment through the existing Spots system.
+3. The first Spot reinforces observation only; repeated evidence opens the microchallenge surface.
+4. Completed microchallenges may lead into Practice only when a relevant authored Practice exists. The current direct handoff is limited to procrastination; other Caveman movements must not be forced into it.
+
+Saved Spots matching the primary movement are reflected back inside `/my-caveman`. The personal portrait therefore progresses from scan evidence to lived evidence and changes its single next action accordingly. Internal pattern identifiers stored with Spots are never displayed to users and “patterns” must not become the user-facing frame for the journey.

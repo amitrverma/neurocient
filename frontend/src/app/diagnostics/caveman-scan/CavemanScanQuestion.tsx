@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { ArrowLeft, ArrowRight, ChevronDown } from "lucide-react";
 import type { ScanQuestion, ScanOption } from "./questionsBank";
 import CavemanScanFeedback from "./CavemanScanFeedback";
@@ -26,12 +26,19 @@ const CavemanScanQuestion = ({
   progress,
   total,
 }: Props) => {
+  const scenarioRef = useRef<HTMLElement>(null);
+
   useEffect(() => {
-    // Reserved for future per-question side effects.
+    scenarioRef.current?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, [question.id]);
 
   return (
-    <main className="caveman-scan-page min-h-screen bg-[#f8f6f0] font-serif text-brand-dark">
+    <main
+      ref={scenarioRef}
+      tabIndex={-1}
+      className="caveman-scan-page min-h-screen bg-[#f8f6f0] font-serif text-brand-dark outline-none"
+    >
       <section className="mx-auto flex min-h-[calc(100svh-5rem)] w-full max-w-5xl flex-col px-6 pb-7 pt-8 md:pb-9 md:pt-10">
         <div>
           <div className="mb-3 flex items-center justify-between gap-4 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.17em] text-brand-dark/58">

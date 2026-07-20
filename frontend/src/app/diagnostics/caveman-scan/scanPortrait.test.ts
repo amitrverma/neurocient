@@ -45,4 +45,15 @@ describe("buildScanPortrait", () => {
     expect(portrait.contexts).toContain("meaningful work");
     expect(portrait.contexts).not.toContain("progress and comparison");
   });
+
+  it("connects the usual intervention to its missing Caveman explanation", () => {
+    const relief = buildScanPortrait(evidence([3, 0], [8, 0], [15, 2]));
+    const control = buildScanPortrait(evidence([1, 0], [9, 0], [12, 1]));
+
+    expect(relief.primary.usualAdvice).toContain("distraction");
+    expect(relief.primary.whatItMisses).toContain("easier thing");
+    expect(relief.primary.immediatePayoff).not.toBe(relief.primary.laterCost);
+    expect(control.primary.usualAdvice).toContain("plan");
+    expect(control.primary.usualAdvice).not.toBe(relief.primary.usualAdvice);
+  });
 });

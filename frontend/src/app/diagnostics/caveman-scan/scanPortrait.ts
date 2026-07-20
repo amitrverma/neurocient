@@ -4,7 +4,12 @@ type PatternCopy = {
   eyebrow: string;
   headline: string;
   explanation: string;
+  usualAdvice: string;
+  whyItHelps: string;
+  whatItMisses: string;
   protection: string;
+  immediatePayoff: string;
+  laterCost: string;
   cue: string;
 };
 
@@ -145,8 +150,13 @@ const patternCopy: Record<Exclude<ProtectiveMove, "flexible_response">, PatternC
     headline: "When discomfort rises, your attention looks for relief.",
     explanation:
       "The situations changed, but the movement was similar: away from what asked more of you and towards something easier, clearer, or immediately rewarding.",
+    usualAdvice: "Remove the distraction, manage your time better, and use more discipline.",
+    whyItHelps: "Limits, plans, and friction can interrupt the behaviour and create a useful window of control.",
+    whatItMisses: "They do not explain why the easier thing becomes most attractive when something meaningful feels effortful, uncertain, or emotionally heavy.",
     protection:
       "Your Inner Caveman is reducing the discomfort of this moment. The relief is real. The cost often arrives later as lost momentum, energy, or rest.",
+    immediatePayoff: "Less effort, uncertainty, or emotional weight right now.",
+    laterCost: "The meaningful thing remains, often joined by lost momentum, pressure, or guilt.",
     cue: "Something meaningful starts to feel heavy, and an easier thing suddenly becomes unusually attractive.",
   },
   restore_control: {
@@ -154,8 +164,13 @@ const patternCopy: Record<Exclude<ProtectiveMove, "flexible_response">, PatternC
     headline: "When life feels uncertain, you try to make it orderly again.",
     explanation:
       "Planning, organising, tightening the system, or promising a cleaner restart can make a messy moment feel manageable before anything has actually changed.",
+    usualAdvice: "Make a better plan, build a stronger routine, and become more consistent.",
+    whyItHelps: "A plan creates clarity and briefly reduces the discomfort of not knowing how things will go.",
+    whatItMisses: "The feeling of control can become the reward, allowing planning, organising, or restarting to replace entering an imperfect reality.",
     protection:
       "Your Inner Caveman gets certainty now. But sometimes the plan quietly replaces the life the plan was meant to support.",
+    immediatePayoff: "Order, closure, and the feeling that the situation is manageable again.",
+    laterCost: "The plan becomes cleaner while action, rest, or self-trust moves further away.",
     cue: "Entering the moment feels uncomfortable, and improving the plan begins to feel more urgent than using it.",
   },
   social_monitoring: {
@@ -163,8 +178,13 @@ const patternCopy: Record<Exclude<ProtectiveMove, "flexible_response">, PatternC
     headline: "When the social picture is unclear, you begin reading between the lines.",
     explanation:
       "Someone else’s progress, a pause, or an uncertain response can turn your attention into a monitor for where you stand and what the moment might mean about you.",
+    usualAdvice: "Stop comparing, stop overthinking, and pay less attention to what other people think.",
+    whyItHelps: "Distance and reframing can quiet the social signal for a while.",
+    whatItMisses: "Your attention is not merely collecting information. It may be checking belonging, position, or acceptance before a social change becomes costly.",
     protection:
       "Your Inner Caveman is trying to catch a change in status, belonging, or connection before it becomes costly. The watch can continue even when there is little evidence of danger.",
+    immediatePayoff: "A sense that you are detecting a social threat early enough to respond.",
+    laterCost: "Ambiguous details become stories about your worth, position, or relationships.",
     cue: "A small social detail starts producing a much larger story about where you stand.",
   },
   create_distance: {
@@ -172,8 +192,13 @@ const patternCopy: Record<Exclude<ProtectiveMove, "flexible_response">, PatternC
     headline: "When contact feels risky, distance offers protection.",
     explanation:
       "Silence, postponement, withdrawal, or letting the moment pass can remove the possibility of awkwardness, conflict, or rejection right now.",
+    usualAdvice: "Communicate better, be brave, and just have the difficult conversation.",
+    whyItHelps: "A direct action can reconnect people and prevent avoidance from becoming permanent.",
+    whatItMisses: "Contact is difficult precisely because the relationship matters; speaking can feel like risking conflict, rejection, or proof that the bond has changed.",
     protection:
       "Your Inner Caveman protects the bond by avoiding a dangerous moment inside it. That can preserve the present while allowing distance to grow over time.",
+    immediatePayoff: "No awkwardness, conflict, or rejection has to be faced in this moment.",
+    laterCost: "The short-term safety of silence can quietly become loneliness or relational distance.",
     cue: "You care about the connection, but waiting for a safer moment starts to feel wiser than making contact now.",
   },
   override_signal: {
@@ -181,8 +206,13 @@ const patternCopy: Record<Exclude<ProtectiveMove, "flexible_response">, PatternC
     headline: "When your system signals strain, you ask it to keep performing.",
     explanation:
       "Pressure or low energy does not always lead you to stop. Sometimes you contain it, force your way through, or treat the signal as another obstacle to overcome.",
+    usualAdvice: "Push through, build resilience, and do not let tiredness become an excuse.",
+    whyItHelps: "Effort can preserve performance and carry an immediate demand across the finish line.",
+    whatItMisses: "It treats every internal signal as resistance instead of asking whether the system is protecting limited energy or carrying accumulated strain.",
     protection:
       "Pushing through can preserve competence and keep demands moving. It can also prevent the strain from being understood until it emerges somewhere else.",
+    immediatePayoff: "Competence is preserved and the demand keeps moving.",
+    laterCost: "Strain remains unread and may return as exhaustion, shutdown, or a larger reaction.",
     cue: "Your body or mood signals that something is too much, and your first response is to become stricter with yourself.",
   },
   discharge_pressure: {
@@ -190,8 +220,13 @@ const patternCopy: Record<Exclude<ProtectiveMove, "flexible_response">, PatternC
     headline: "Pressure stays contained—until a small moment gives it somewhere to go.",
     explanation:
       "The final question or interruption may be ordinary, but it lands on a system that has been carrying much more than the person in front of you can see.",
+    usualAdvice: "Control your temper, calm down, and respond more rationally.",
+    whyItHelps: "Regulation skills can create a pause and reduce harm in the immediate interaction.",
+    whatItMisses: "It focuses on the final reaction while overlooking the deadlines, interruptions, vigilance, and unfinished demands already filling the system.",
     protection:
       "Your Inner Caveman is trying to create space from one more demand. The reaction protects capacity in the moment, while someone nearby may receive the accumulated force of the day.",
+    immediatePayoff: "The next demand is pushed away and a little capacity is reclaimed.",
+    laterCost: "Accumulated pressure reaches someone who may have had little to do with creating it.",
     cue: "A response feels larger than the immediate event. Look behind it for everything your system has already been carrying.",
   },
   self_verdict: {
@@ -199,8 +234,13 @@ const patternCopy: Record<Exclude<ProtectiveMove, "flexible_response">, PatternC
     headline: "A difficult moment can quickly become a verdict about you.",
     explanation:
       "Instead of remaining one missed day, one comparison, one awkward pause, or one tired morning, the moment begins to say something larger about who you are.",
+    usualAdvice: "Be more positive, stop being hard on yourself, and try again with greater discipline.",
+    whyItHelps: "Encouragement or a new commitment can briefly restore hope and direction.",
+    whatItMisses: "The harsh verdict is doing something: it turns an ambiguous setback into a certain explanation, even when that explanation is painful.",
     protection:
       "A harsh conclusion creates certainty: if you are the problem, the ambiguity is over. But that certainty can cost self-trust and make the next attempt feel heavier.",
+    immediatePayoff: "A confusing moment receives a clear cause and the uncertainty ends.",
+    laterCost: "One event becomes identity evidence, making the next beginning heavier.",
     cue: "Notice when the sentence changes from ‘this happened’ to ‘this is what I am like.’",
   },
 };
@@ -243,8 +283,13 @@ export const buildScanPortrait = (allEvidence: ScanOptionEvidence[]): ScanPortra
       headline: "You often left the moment as it was, without making it larger.",
       explanation:
         "Across these situations, you frequently noticed the pull without needing to follow it. That is flexibility in these moments—not proof that protective reactions never appear elsewhere.",
+      usualAdvice: "Stay disciplined and keep making the rational choice.",
+      whyItHelps: "Clear intentions can support the pause you already showed in these moments.",
+      whatItMisses: "Your answers do not show an absence of protective signals. They show that the first signal did not always have to become the decision.",
       protection:
         "The Inner Caveman still speaks first. Your answers suggest that, in these particular scenes, its signal did not have to become the decision.",
+      immediatePayoff: "You allowed discomfort or ambiguity to remain without needing to remove it first.",
+      laterCost: "There is no single repeated protective cost supported strongly enough by these answers.",
       cue: "Keep noticing the small pause between the first signal and what you do next.",
     };
     const primaryMove = "flexible_response" as const;

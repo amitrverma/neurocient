@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowRight, Eye } from "lucide-react";
 import { questionsBank } from "./questionsBank";
@@ -111,23 +112,64 @@ const PatternExplanation = ({ pattern }: { pattern: ScanPortraitPattern }) => (
     <h2 className="mt-4 max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.025em] md:text-5xl">
       {pattern.headline}
     </h2>
-    <div className="mt-7 grid gap-7 md:grid-cols-2 md:gap-12">
-      <div>
+    <div className="mt-8 border-y border-brand-dark/12">
+      <ResultLayer number="01" title="What connects your moments">
+        {pattern.explanation}
+      </ResultLayer>
+      <ResultLayer number="02" title="The usual intervention">
+        <p>{pattern.usualAdvice}</p>
+        <p className="mt-4 text-brand-dark/58">
+          <strong className="text-brand-dark/78">Why it can help:</strong>{" "}
+          {pattern.whyItHelps}
+        </p>
+      </ResultLayer>
+      <ResultLayer number="03" title="What that intervention misses">
+        {pattern.whatItMisses}
+      </ResultLayer>
+      <ResultLayer number="04" title="The Inner Caveman explanation">
+        {pattern.protection}
+      </ResultLayer>
+    </div>
+
+    <div className="mt-8 grid gap-4 md:grid-cols-2">
+      <div className="border-l-2 border-brand-teal bg-brand-teal/[0.055] px-5 py-5">
         <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
-          What connects the moments
+          What it gives you now
         </p>
         <p className="mt-3 font-sans text-base leading-8 text-brand-dark/72">
-          {pattern.explanation}
+          {pattern.immediatePayoff}
         </p>
       </div>
-      <div>
-        <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
-          The Inner Caveman angle
+      <div className="border-l-2 border-brand-primary bg-brand-primary/[0.045] px-5 py-5">
+        <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
+          What it may cost later
         </p>
         <p className="mt-3 font-sans text-base leading-8 text-brand-dark/72">
-          {pattern.protection}
+          {pattern.laterCost}
         </p>
       </div>
+    </div>
+  </div>
+);
+
+const ResultLayer = ({
+  number,
+  title,
+  children,
+}: {
+  number: string;
+  title: string;
+  children: ReactNode;
+}) => (
+  <div className="grid gap-3 border-b border-brand-dark/12 py-6 last:border-b-0 md:grid-cols-[3rem_13rem_1fr] md:gap-6 md:py-7">
+    <span className="font-sans text-xs font-bold tracking-[0.14em] text-brand-primary">
+      {number}
+    </span>
+    <h3 className="font-sans text-sm font-semibold leading-6 text-brand-dark">
+      {title}
+    </h3>
+    <div className="font-sans text-base leading-8 text-brand-dark/72">
+      {children}
     </div>
   </div>
 );

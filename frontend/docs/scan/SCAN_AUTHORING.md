@@ -174,6 +174,19 @@ Do not expand either result inline beneath the Scan. The open result reads the j
 
 Never ask a person to create an account merely to discover whether the Scan found anything.
 
+## Result Narrative
+
+The result must complete the same argument begun on the landing page. It should not jump from selected moments to a protective-move label. For the primary movement, connect these layers in order:
+
+1. the lived challenges the person recognised;
+2. the conventional intervention they are likely to hear or try;
+3. why that intervention can genuinely help for a while;
+4. what it does not explain about the pull of the behaviour;
+5. the immediate protection or payoff the Inner Caveman receives; and
+6. the possible later cost in momentum, energy, rest, connection, or self-trust.
+
+The conventional intervention must not be mocked or dismissed. The distinction is that it usually addresses what to do, while the Inner Caveman lens explains why the competing response can feel useful in the moment. Use the person's selected evidence to make this a synthesis of lived moments, not a personality-style classification.
+
 ## Immediate Reflection
 
 The reflection is where Neurocient adds value. The user often already knows that they compare, scroll, delay, worry, or keep planning. Repeating the behaviour back is not enough.

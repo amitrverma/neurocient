@@ -880,10 +880,61 @@ Implication:
 ## 2026-07-20: The end-to-end Caveman journey preserves one narrative and one next move
 
 - Landing copy remains the source of truth and must not be rewritten as part of Scan work. The Scan and everything after it help the person realise, meet, and gradually recognise their Inner Caveman; “patterns” is not the user-facing product frame.
-- The active Scan does not advertise optional science until verified science notes actually exist.
+- Optional science remains available after the immediate reflection. It should deepen the Inner Caveman reading without interrupting the recognition flow or competing with the primary result.
 - The open result ends with one primary transition into the deeper portrait; generic reading links do not compete with that handoff.
 - Spots return to `/my-caveman` as visible lived evidence so the portrait does not remain a static scan report.
 - The portrait advances its next action from first Spot, to repeated Spot, to a small experiment.
 - Guided microchallenge arrivals suppress dashboard metrics, reduce visible catalogue choice, and use experiment language.
 - Machine-readable Spot metadata and internal pattern identifiers remain implementation details and must not appear in the user's awareness log or journey copy.
 - Legacy quick-test promotion is removed; `/diagnostics/spot-your-caveman` redirects to the canonical Scan.
+
+## 2026-07-20: The Scan introduction demonstrates the reading instead of explaining the interface
+
+The Caveman Scan introduction opens with concrete moment fragments and previews the contrast between the usual take and the Inner Caveman take.
+
+Reason:
+
+- The Scan earns interest through recognition, not a feature list or broad self-help questions.
+- A small example makes the Scan’s compassionate value clearer than explaining its internal sequence.
+- Setting expectations such as approximate time, no score, and no right answers reduces test anxiety without turning the page into instructions.
+
+Implication:
+
+- Intro copy should remain grounded in behaviour already established on the landing page.
+- The preview may demonstrate the interpretive lens, but it must not diagnose the reader or pre-empt their result.
+- Mobile shows the promise and primary action before the explanatory example; desktop may expand this into a two-part editorial composition.
+
+## 2026-07-20: The open Scan result leads with the personalised protective bargain
+
+The open result leads with the recurring protective movement, its immediate payoff, and its later cost. It then connects concrete selected scenes before explaining supported drives and the missing layer beneath familiar advice.
+
+Reason:
+
+- Repeating the landing-page Caveman illustration does not add information after the person has completed the Scan.
+- Analytical mirror statements alone feel like paraphrases of answers; the result must show how concrete selected scenes connect through one immediate-versus-later bargain.
+- The familiar intervention becomes useful context only when the result also explains why it helps and what protective logic it leaves untouched.
+
+Implication:
+
+- Do not repeat the landing-page illustration as the result hero; lead with synthesis unique to the person's answers.
+- Show selected scenes, selected actions, and their protective function before abstracting to the recurring movement.
+- Show only drives directly supported by selected evidence.
+- Do not rank drives, calculate drive percentages, infer absent drives, or call one drive dominant from the current scenario set.
+- Keep the open result meaningful: personalised synthesis, selected evidence, supported drives, recurring movement, immediate protection, later cost, and one real-life cue all remain available before authentication.
+
+## 2026-07-20: The Scan gate previews Neurocient's way forward, not more diagnosis
+
+The authentication transition after the open result briefly explains how Neurocient Labs works differently, while the authenticated portrait contains the personalised practical detail.
+
+Reason:
+
+- The open result has already explained what the Caveman is protecting; promising more analysis weakens the natural next question: what do I do instead?
+- Generic discipline and routine advice starts at action. Neurocient first corrects the self-story, preserves the protective explanation, changes the conditions around the moment, and then offers a small matched response.
+- The gate should create informed curiosity without withholding the core Scan result or dumping the full method before the person opts into continuity.
+
+Implication:
+
+- The open gate names Neurocient Labs, contrasts its approach with willpower-first advice, and previews the practical transformation briefly.
+- After authentication, the way forward appears before secondary analysis and expands the user's self-story, reframe, environment, matched action, and retrieval cue without naming the internal IKEA framework.
+- Account language remains about keeping and returning to a personal way forward, not paying to discover what the Scan found.
+- The authenticated continuation answers how to work with the result: the self-story the movement can create, a more accurate reframe, an environmental adjustment, one matched action, and a retrieval cue. These stages follow the product framework internally but are expressed in ordinary language rather than framework labels.

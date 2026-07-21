@@ -88,6 +88,20 @@ The question should naturally continue the scene, for example:
 
 Do not use the same question mechanically for all 12 scenarios.
 
+## Visual Story Beats
+
+A scenario may include a small code-native visual when an object or interruption materially helps the reader enter the moment—for example, a notification, message preview, calendar cue, or unfinished task.
+
+The visual should:
+
+- appear inside the story at the moment the cue arrives;
+- represent an authored object from the scene rather than decorate the page;
+- remain legible and meaningful on a narrow screen;
+- use structured scenario data so the treatment can be reused; and
+- support, not replace, the written scene.
+
+Use visuals selectively. Do not give every scenario an illustration by default, and do not turn the Scan into a sequence of generic stock images.
+
 ## Writing Choices
 
 Use four choices by default. A fifth is acceptable when it protects honesty with a credible low-activation or non-activation path.

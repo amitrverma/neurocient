@@ -22,15 +22,42 @@ export interface ScanQuestion {
   id: number;
   text: string;
   scene?: string[];
+  sceneEmphasis?: Record<number, string[]>;
+  visual?: {
+    type: "mail-notification" | "moment-card";
+    app: string;
+    message: string;
+    count?: number;
+    caption: string;
+    detail?: string;
+    icon?: "home" | "play" | "chat" | "shoe" | "check" | "dinner" | "book" | "battery" | "clock";
+  };
   prompt?: string;
   options: ScanOption[];
 }
 
 const taskAvoidanceReflection = `
-  <p><strong>The usual take?</strong></p>
-  <p>You’re procrastinating.</p>
-  <p>But your caveman sees ambiguity as risk.</p>
-  <p>Better to use energy on something safe and familiar.</p>
+  <p><strong>First, your response makes sense.</strong></p>
+  <p>You did not leave work for something obviously pointless. You moved towards work that was clear, quick to finish, and still let you feel useful.</p>
+  <p>Each email gives you a visible ending. The report does not. It asks you to decide what comes next, sit with a half-formed thought, and risk writing something that may need changing.</p>
+
+  <p><strong>The usual take</strong></p>
+  <p>“Eat the frog.” Do the hardest thing first. Close the inbox, block distractions, and break the report into smaller pieces.</p>
+  <p>That advice can help. It protects time and can make the first step clearer. But it mostly tells you <em>what to do</em>. It does not explain why the smaller work suddenly feels so convincing.</p>
+
+  <p><strong>The Inner Caveman take</strong></p>
+  <p>The report holds uncertainty: no quick finish, no immediate reward, and no guarantee that the first attempt will be good. The inbox offers the opposite—clear questions, small completions, and relief right now.</p>
+  <p>Your Inner Caveman is not deciding that email matters more. It is moving towards the place where effort feels safer and completion is close enough to touch.</p>
+
+  <blockquote>The inbox is not only a distraction. In that moment, it is relief that still looks like work.</blockquote>
+`;
+
+const taskEngagementReflection = `
+  <p><strong>You stayed with the harder thing.</strong></p>
+  <p>That does not mean the pull of the inbox was absent, or that you are simply “more disciplined.” You felt the easier ending nearby and began the uncertain work anyway.</p>
+  <p><strong>The Inner Caveman take</strong></p>
+  <p>In this moment, the promise of quick relief did not choose the next move for you. That is evidence of flexibility here—not a score, and not proof that every morning will go the same way.</p>
+  <blockquote>You did not need the whole report to feel easy. You only needed the first imperfect sentence to be possible.</blockquote>
 `;
 
 const taskAvoidanceScience: ScanScienceBlock = {
@@ -129,47 +156,59 @@ const endOfDayGuiltReflection = `
 const authoredQuestions: ScanQuestion[] = [
   {
     id: 1,
-    text: "It is just after nine. Your coffee is still hot, your laptop is open, and the document you need to work on is sitting in front of you. You know this is the thing that matters today. You move the cursor towards it and notice seventeen unread emails in the corner of the screen. One will take less than a minute. Another only needs a quick reply. You also remember the small form you meant to submit yesterday. Nothing is especially urgent. Still, the document begins to feel heavier while everything else suddenly feels easy. What do you find yourself doing next?",
+    text: "9:04 AM. Steam rises off your coffee, carrying that first warm hit of aroma. The cursor blinks beneath the title of the report. This is the one that matters today. A notification slides in: 17 unread messages. You glance over. Your hand moves before you decide it should. The inbox fills the screen. None of it is loud. None of it is urgent. But the report behind that tab suddenly feels miles away. What do you find yourself doing next?",
     scene: [
-      "It is just after nine. Your coffee is still hot, your laptop is open, and the document you need to work on is sitting in front of you.",
-      "You know this is the thing that matters today.",
-      "You move the cursor towards it and notice seventeen unread emails in the corner of the screen. One will take less than a minute. Another only needs a quick reply. You also remember the small form you meant to submit yesterday.",
-      "Nothing is especially urgent. Still, the document begins to feel heavier while everything else suddenly feels easy.",
+      "9:04 AM. Steam rises off your coffee, carrying that first warm hit of aroma. The cursor blinks beneath the title of the report. This is the one that matters today.",
+      "You glance over.",
+      "Your hand moves before you decide it should. Click. The inbox fills the screen—a wall of bold subject lines. One email: ten seconds to read. Another: “just needs a quick reply.”",
+      "None of it is loud. None of it is urgent. But the report behind that tab suddenly feels miles away—and every little task in front of you feels like something you could finish right now.",
     ],
+    sceneEmphasis: {
+      0: [
+        "9:04 AM.",
+        "carrying that first warm hit of aroma.",
+        "This is the one that matters today.",
+      ],
+      2: ["Click."],
+      3: ["None of it is loud. None of it is urgent."],
+    },
+    visual: {
+      type: "mail-notification",
+      app: "Mail",
+      message: "17 unread messages",
+      count: 17,
+      caption: "Ding. A notification slides in from the corner.",
+    },
     prompt: "What do you find yourself doing next?",
     options: [
       {
-        label: "Let me clear these emails first. Then I’ll be able to focus properly.",
+        label: "I answer the email at the top. Then the next one. Twenty minutes disappear.",
         type: "caveman",
         reflection: taskAvoidanceReflection,
         science: taskAvoidanceScience,
       },
       {
-        label: "I just need one quick win before I deal with the big thing.",
+        label: "I read one email, then open chat to ping a colleague about it. Three other messages are waiting there too.",
         type: "caveman",
         reflection: taskAvoidanceReflection,
         science: taskAvoidanceScience,
       },
       {
-        label: "Actually, I should update my task list so I know exactly what needs doing.",
+        label: "I go back to the report, fix a few typos, and make the page look cleaner.",
         type: "caveman",
         reflection: taskAvoidanceReflection,
         science: taskAvoidanceScience,
       },
       {
-        label: "I open the document, stare at it for a minute, then find myself back in my inbox.",
+        label: "I click back to the report, read the same sentence twice, then reopen my inbox.",
         type: "caveman",
         reflection: taskAvoidanceReflection,
         science: taskAvoidanceScience,
       },
       {
-        label: "I leave the emails alone and begin the work I originally sat down to do.",
+        label: "I close the inbox and type the first imperfect sentence that comes to mind.",
         type: "modern",
-        reflection: `
-          <p>Most people would say: good discipline.</p>
-          <p>But you overrode the caveman’s urge to avoid discomfort.</p>
-          <p>That’s a quiet win.</p>
-        `,
+        reflection: taskEngagementReflection,
       },
     ]
   },
@@ -637,8 +676,11 @@ const protectiveReflection = (
   cavemanTake: string,
   retrievableInsight: string,
 ) => `
+  <p><strong>First, this makes sense.</strong></p>
+  <p>Something in this response offered protection in the momentâ€”relief, certainty, distance, or a way to feel back in control. That does not make you weak or irrational.</p>
   <p><strong>The usual take?</strong></p>
   <p>${usualTake}</p>
+  <p>That advice can be useful. But it tells you what to change without fully explaining why the other response felt compelling when the moment arrived.</p>
   <p><strong>The Inner Caveman take?</strong></p>
   <p>${cavemanTake}</p>
   <blockquote>${retrievableInsight}</blockquote>
@@ -650,6 +692,178 @@ const groundedReflection = (body: string, retrievableInsight: string) => `
   <p>This does not mean the Caveman has disappeared. In this moment, it did not need to turn the situation into something larger.</p>
   <blockquote>${retrievableInsight}</blockquote>
 `;
+
+const scenarioPresentations: Partial<
+  Record<number, Pick<ScanQuestion, "visual" | "sceneEmphasis">>
+> = {
+  2: {
+    visual: { type: "moment-card", icon: "home", app: "Instagram", message: "We bought a house!", detail: "1,284 likes · 96 comments", caption: "You look at the photographs once more." },
+    sceneEmphasis: { 0: ["Dinner is over."], 2: ["new house"], 3: ["You are happy for her."] },
+  },
+  3: {
+    visual: { type: "moment-card", icon: "play", app: "Screen time", message: "40 minutes", detail: "The next reel has already started", caption: "The laptop screen has gone dim." },
+    sceneEmphasis: { 0: ["Saturday afternoon."], 2: ["forty minutes have passed"], 3: ["put the phone down"] },
+  },
+  5: {
+    visual: { type: "moment-card", icon: "chat", app: "Message draft", message: "Hey, it has been ages.", detail: "Not sent", caption: "Your thumb hovers over Send." },
+    sceneEmphasis: { 0: ["Sunday evening."], 2: ["nothing particularly impressive"], 3: ["hovers over Send"] },
+  },
+  8: {
+    visual: { type: "moment-card", icon: "shoe", app: "6:20 PM", message: "Shoes still by the door", detail: "The phone is already in your hand", caption: "The plan was half an hour before dinner." },
+    sceneEmphasis: { 0: ["6:20 in the evening."], 2: ["Your body feels heavy."] },
+  },
+  9: {
+    visual: { type: "moment-card", icon: "check", app: "Morning routine", message: "Day 4", detail: "✓  ✓  ✓  —", caption: "The empty space is louder than the three checks." },
+    sceneEmphasis: { 0: ["wake up, stretch, journal"], 2: ["The plan already looks broken."] },
+  },
+  10: {
+    visual: { type: "moment-card", icon: "dinner", app: "Friday night", message: "Groceries. Bills. Weekend.", detail: "Everything except the two of you", caption: "The words “I miss us” reach the back of your throat." },
+    sceneEmphasis: { 0: ["Friday night."], 1: ["talk for hours"], 3: ["I miss us."] },
+  },
+  11: {
+    visual: { type: "moment-card", icon: "chat", app: "8:07 PM", message: "Did you remember to send that thing?", detail: "An ordinary question", caption: "Your body reacts before the rest of you catches up." },
+    sceneEmphasis: { 0: ["one long chain"], 2: ["ordinary question"] },
+  },
+  12: {
+    visual: { type: "moment-card", icon: "book", app: "Sunday afternoon", message: "Page 2", detail: "Email · bill · appointment", caption: "Your body is on the sofa. The rest of you is back inside the list." },
+    sceneEmphasis: { 0: ["nowhere you need to be"], 2: ["back inside the list"] },
+  },
+  13: {
+    visual: { type: "moment-card", icon: "chat", app: "Earlier today", message: "“Fine.”", detail: "A half-second pause", caption: "At the sink, the pause starts getting louder." },
+    sceneEmphasis: { 0: ["before bed"], 1: ["paused for half a second"], 3: ["worse possibilities"] },
+  },
+  14: {
+    visual: { type: "moment-card", icon: "battery", app: "Saturday morning", message: "7 h 58 m asleep", detail: "Still heavy. Already full.", caption: "You did everything that was supposed to help." },
+    sceneEmphasis: { 0: ["almost eight hours"], 2: ["finally felt rested"] },
+  },
+  15: {
+    visual: { type: "moment-card", icon: "clock", app: "11:47 PM", message: "The plan is still on the wall", detail: "The gym bag is still on the chair", caption: "The room is quiet enough for the guilt to catch up." },
+    sceneEmphasis: { 0: ["11:47 at night."], 2: ["most of the day disappeared"], 3: ["guilt to catch up"] },
+  },
+};
+
+const scenarioScienceRevisions: Partial<Record<number, ScanScienceBlock>> = {
+  3: {
+    title: "Why the next reel is so easy to watch",
+    subtitle: "Immediate novelty can keep winning while the delayed task stays effortful",
+    body: `<h5>Variable rewards</h5><p>Feeds do not tell you what comes next. That uncertainty can make each swipe unusually compelling: the next item may be boring, useful, funny, or socially important.</p><h5>Present bias</h5><p>The feed pays out now. The benefit of closing it and beginning difficult work arrives later. When you are tired or already avoiding discomfort, the immediate reward can carry more weight.</p><blockquote>The next reel is certain to arrive. The reward from the task is still somewhere ahead.</blockquote>`,
+  },
+  5: {
+    title: "Why an old friendship can feel hard to re-enter",
+    subtitle: "Uncertainty about belonging can make silence feel safer than a simple message",
+    body: `<h5>Social uncertainty</h5><p>Reaching out after a long gap leaves several questions unanswered: how the other person will receive you, what the silence meant, and whether the relationship still has a place for you.</p><h5>Avoidance brings immediate relief</h5><p>Closing the draft removes the risk for now. That relief can reinforce waiting, even when the longer-term cost is more distance.</p><blockquote>Silence resolves the uncertainty for tonight by postponing the relationship.</blockquote>`,
+  },
+  10: {
+    title: "Why an honest sentence can feel risky inside a close bond",
+    subtitle: "The relationships that matter most can also carry the highest emotional stakes",
+    body: `<h5>Bond protection</h5><p>When a relationship matters, signs of distance can feel consequential. Naming the distance creates the possibility of repair, but also the possibility of conflict, disappointment, or hearing something painful.</p><h5>Short-term safety</h5><p>Staying with logistics keeps the evening predictable. Avoidance reduces discomfort now, even though repeated avoidance can allow disconnection to grow.</p><blockquote>The silence protects the bond from one difficult evening while making the distance harder to name.</blockquote>`,
+  },
+  11: {
+    title: "Why a small question can trigger a large reaction",
+    subtitle: "Stress responses reflect accumulated load, not only the final event",
+    body: `<h5>Accumulated load</h5><p>Repeated demands can leave attention and emotion with less room to absorb one more interruption. The final question may be ordinary while the system receiving it is already strained.</p><h5>Reduced response flexibility</h5><p>Under load, fast defensive reactions can arrive before a more proportionate response. This does not excuse harm; it helps explain why the intensity belongs to more than the last few seconds.</p><blockquote>The question was small. The load it landed on was not.</blockquote>`,
+  },
+  12: {
+    title: "Why unfinished things follow you into rest",
+    subtitle: "Open tasks remain easier to recall than tasks that feel complete",
+    body: `<h5>Open loops</h5><p>Unfinished intentions can stay mentally accessible, especially when there is no clear plan for when they will be handled. Remembering them is the mind's attempt not to lose something important.</p><h5>Rest without closure</h5><p>Listing, doing, or scrolling may each reduce the discomfort briefly. A trusted plan for later can sometimes provide enough closure for attention to return to the present.</p><blockquote>Your body stopped. The unfinished intentions stayed active.</blockquote>`,
+  },
+  13: {
+    title: "Why the conversation gets louder after it ends",
+    subtitle: "Ambiguous social cues invite the mind to keep searching for meaning",
+    body: `<h5>Ambiguity keeps attention open</h5><p>A pause or change in tone has many possible explanations. When belonging or judgment feels relevant, the mind may keep reviewing the scene in search of certainty.</p><h5>Review can become rehearsal</h5><p>Reflection can help us learn. Repetition stops helping when no new evidence is available and each replay produces another possible threat.</p><blockquote>The mind keeps reviewing because the pause never supplied a clear answer.</blockquote>`,
+  },
+  14: {
+    title: "Why sleep and restoration are not always the same",
+    subtitle: "Time asleep matters, but it is not the only influence on how rested you feel",
+    body: `<h5>Sleep has several dimensions</h5><p>Duration is only one part of sleep. Timing, continuity, sleep quality, health, stress, and individual need can all affect morning energy.</p><h5>The second struggle</h5><p>Feeling tired can be difficult enough. Treating tiredness as proof that you rested incorrectly adds frustration and another problem to solve before the day has begun.</p><blockquote>Eight hours is information. It is not a guarantee or a verdict.</blockquote>`,
+  },
+  15: {
+    title: "Why guilt often produces another perfect plan",
+    subtitle: "Self-criticism can increase threat without making the next action easier",
+    body: `<h5>Relief now, cost later</h5><p>Easy stimulation can reduce discomfort in the moment. When the cost becomes visible later, guilt may turn the whole day into evidence about the self.</p><h5>The clean-slate pull</h5><p>A strict plan for tomorrow offers immediate order and distance from today's disappointment. The promise can feel relieving before any behaviour has changed.</p><blockquote>The perfect tomorrow can become one more way not to look gently at today.</blockquote>`,
+  },
+};
+
+const optionLabelRevisions: Partial<Record<number, string[]>> = {
+  2: [
+    "I zoom in on the keys, then catch myself counting how far behind I am.",
+    "I open her profile and scroll back through the milestones I missed.",
+    "I put my phone down, but my own life suddenly feels smaller than it did at dinner.",
+    "I keep scrolling and start noticing everyone else who seems further ahead.",
+    "I tap like, feel happy for her, and let the post stay about her life.",
+  ],
+  3: [
+    "I watch the reel that is already playing. Then I swipe to the next one.",
+    "I send one reel to a friend and stay to see what appears next.",
+    "I save a productivity video, then keep scrolling instead of opening the laptop.",
+    "I lock the phone, stare at the dim screen, then unlock it again a minute later.",
+    "I lock the phone, put it across the room, and wake the laptop up.",
+  ],
+  5: [
+    "I delete the draft and close the chat before I can overthink it further.",
+    "I rewrite the opening three times, then leave it sitting unsent.",
+    "I open their profile to look for a reason to message, but never return to the draft.",
+    "I tell myself I will send it when I have something better to say.",
+    "I stop polishing the message and press Send while it still feels awkward.",
+  ],
+  8: [
+    "I sit down with my phone and the shoes stay by the door.",
+    "I start scrolling for ten minutes and look up when it is nearly time for dinner.",
+    "I search for a shorter workout, then keep comparing videos without choosing one.",
+    "I carry the shoes into the bedroom so I do not have to keep looking at them.",
+    "I put the phone down, change my shoes, and begin with five minutes.",
+  ],
+  9: [
+    "I leave the fourth box empty and decide I will restart properly on Monday.",
+    "I rewrite the routine with stricter times and more rules.",
+    "I turn the page so I do not have to see the broken row of checks.",
+    "I stop doing the routine because the streak no longer feels intact.",
+    "I mark today as a new day and continue without repairing the missing check.",
+  ],
+  10: [
+    "I swallow the words and ask whether we need anything else from the shop.",
+    "I clear the plates and keep the conversation safely on the weekend plans.",
+    "I ask, “Everything okay?” in a tone that makes “yes” the easiest answer.",
+    "I reach for my phone and let the opening pass.",
+    "I say, “I miss us. Can we talk about how distant this has felt?”",
+  ],
+  11: [
+    "I snap, “Can everyone stop asking me for things for five minutes?”",
+    "I answer far more sharply than the question deserves, then see their face change.",
+    "I keep chopping in silence while the anger runs through the conversation in my head.",
+    "I leave the kitchen before I say the thing already forming in my mouth.",
+    "I put the knife down and say, “I am overloaded. Give me a minute.”",
+  ],
+  12: [
+    "I put the book down and answer the email so I can earn the rest.",
+    "I open my notes and capture every unfinished thing I can remember.",
+    "I keep holding the book while mentally arranging the rest of the afternoon.",
+    "I pick up my phone and scroll until the list in my head goes quiet for a while.",
+    "I leave the phone face down and return to the sentence in front of me.",
+  ],
+  13: [
+    "I replay the pause and decide I must have said something wrong.",
+    "I run through my exact words, changing the tone each time.",
+    "I rinse, reach for my phone, and start drafting, “Are we okay?”",
+    "I promise myself I will talk less the next time I see them.",
+    "I notice the replay, admit I do not know what the pause meant, and leave it there.",
+  ],
+  14: [
+    "I stay under the covers, angry that doing everything right still did not work.",
+    "I reach for my phone and scroll while I wait to feel awake enough to move.",
+    "I force myself up, make the strongest coffee I can, and push into the day.",
+    "I search for another sleep routine that might finally fix this.",
+    "I get up slowly and make the morning gentler without turning it into a failure.",
+  ],
+  15: [
+    "I stare at the plan and ask myself how I managed to waste another whole day.",
+    "I make tomorrow's plan stricter before I go to bed.",
+    "I pick the phone back up because the day already feels ruined.",
+    "I turn away from the plan and leave the gym bag where it is.",
+    "I put the phone down, let today end, and choose one small start for tomorrow.",
+  ],
+};
 
 const scenarioRevisions: Partial<Record<number, ScenarioRevision>> = {
   3: {
@@ -722,15 +936,8 @@ const scenarioRevisions: Partial<Record<number, ScenarioRevision>> = {
 
 const reflectionRevisions: Partial<Record<number, ReflectionRevision>> = {
   1: {
-    protective: protectiveReflection(
-      "You are procrastinating. Stop avoiding the important work and be more disciplined.",
-      "The important document is unclear, effortful, and capable of exposing what you do not yet know. The inbox offers visible endings and small rewards. Your Caveman is not choosing what matters most; it is choosing what feels safest to complete right now.",
-      "The easier task is not more important. It is more certain.",
-    ),
-    grounded: groundedReflection(
-      "You noticed the pull of the smaller, clearer tasks without letting them decide what happened next. The uncertainty remained, but it did not have to be removed before you began.",
-      "You began before the work felt easy.",
-    ),
+    protective: taskAvoidanceReflection,
+    grounded: taskEngagementReflection,
   },
   2: {
     protective: protectiveReflection(
@@ -879,12 +1086,42 @@ const applyReflectionRevision = (question: ScanQuestion): ScanQuestion => {
   const revision = reflectionRevisions[question.id];
   if (!revision) return question;
 
+  const scenarioScience = question.options.find(
+    (option) => option.science,
+  )?.science;
+
   return {
     ...question,
     options: question.options.map((option) => ({
       ...option,
       reflection: option.type === "caveman" ? revision.protective : revision.grounded,
-      science: null,
+      science: option.science ?? scenarioScience ?? null,
+    })),
+  };
+};
+
+const applyScenarioPresentation = (question: ScanQuestion): ScanQuestion => ({
+  ...question,
+  ...scenarioPresentations[question.id],
+});
+
+const applyScenarioScience = (question: ScanQuestion): ScanQuestion => {
+  const science = scenarioScienceRevisions[question.id];
+  if (!science) return question;
+  return {
+    ...question,
+    options: question.options.map((option) => ({ ...option, science })),
+  };
+};
+
+const applyOptionLabels = (question: ScanQuestion): ScanQuestion => {
+  const labels = optionLabelRevisions[question.id];
+  if (!labels || labels.length !== question.options.length) return question;
+  return {
+    ...question,
+    options: question.options.map((option, index) => ({
+      ...option,
+      label: labels[index],
     })),
   };
 };
@@ -900,6 +1137,9 @@ const applyEvidence = (question: ScanQuestion): ScanQuestion => ({
 const activeQuestions = authoredQuestions
   .filter((question) => !removedScenarioIds.has(question.id))
   .map(applyScenarioRevision)
+  .map(applyScenarioPresentation)
+  .map(applyScenarioScience)
+  .map(applyOptionLabels)
   .map(applyReflectionRevision)
   .map(applyEvidence);
 

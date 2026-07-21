@@ -52,7 +52,7 @@ const e = (
 const evidenceSeeds: Record<number, EvidenceSeed[]> = {
   1: [
     e("restore_control", "You cleared smaller tasks before entering the uncertain work.", "uncertainty", "strong", "momentum", "horizon"),
-    e("seek_relief", "You reached for a quick completion before the work that mattered.", "uncertainty", "moderate", "momentum"),
+    e("seek_relief", "One small email carried you into another channel of easier demands.", "uncertainty", "moderate", "momentum"),
     e("restore_control", "You organised the work instead of entering it.", "uncertainty", "strong", "momentum", "horizon"),
     e("seek_relief", "You touched the difficult work, then returned to the safer inbox.", "uncertainty", "strong", "momentum", "horizon"),
     e("flexible_response", "You began the meaningful work while it still felt uncomfortable.", "uncertainty", "moderate"),

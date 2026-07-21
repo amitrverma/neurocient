@@ -6,9 +6,8 @@ import { questionsBank } from "./questionsBank";
 
 import CavemanScanIntro from "./CavemanScanIntro";
 import CavemanScanQuestion from "./CavemanScanQuestion";
-import ScanScienceModal from "./ScanScienceModal";
 
-import type { ScanOption, ScanScienceBlock } from "./questionsBank";
+import type { ScanOption } from "./questionsBank";
 import {
   CAVEMAN_SCAN_STORAGE_KEY,
   isCavemanScanStage,
@@ -27,11 +26,16 @@ export default function CavemanScan() {
 
   const [responses, setResponses] = useState<CavemanScanResponse[]>([]);
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [scienceToShow, setScienceToShow] =
-    useState<ScanScienceBlock | null>(null);
-
   const question = questionsBank[current];
+  const storedResponse = responses[current];
+  const selectedOption = storedResponse
+    ? question.options.find(
+        (option) =>
+          (storedResponse.evidence?.optionId &&
+            option.evidence?.optionId === storedResponse.evidence.optionId) ||
+          option.label === storedResponse.label,
+      ) ?? null
+    : null;
 
   useEffect(() => {
     try {
@@ -110,35 +114,12 @@ export default function CavemanScan() {
         <>
           <CavemanScanQuestion
             question={question}
-            selected={
-              responses[current]
-                ? {
-                    label: responses[current].label,
-                    type: responses[current].type,
-                    reflection: responses[current].reflection,
-                    science: responses[current].science,
-                    evidence: responses[current].evidence,
-                  }
-                : null
-            }
+            selected={selectedOption}
             setSelected={handleSelect}
             onNext={handleNext}
             onPrevious={handlePrevious}
-            onShowScience={() => {
-              const science = responses[current]?.science;
-              if (science) {
-                setScienceToShow(science);
-                setModalOpen(true);
-              }
-            }}
             progress={current + 1}
             total={total}
-          />
-
-          <ScanScienceModal
-            open={modalOpen}
-            content={scienceToShow}
-            onClose={() => setModalOpen(false)}
           />
         </>
       )}

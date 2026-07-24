@@ -43,8 +43,8 @@ const CavemanScanQuestion = ({
       tabIndex={-1}
       className="caveman-scan-page min-h-screen bg-[#f8f6f0] font-serif text-brand-dark outline-none"
     >
-      <section className="mx-auto flex min-h-[calc(100svh-5rem)] w-full max-w-6xl flex-col px-6 pb-6 pt-7 md:pb-7 md:pt-8">
-        <div>
+      <section className="mx-auto flex min-h-[calc(100svh-5rem)] w-full max-w-6xl flex-col px-5 pb-8 pt-6 sm:px-6 md:pb-10 md:pt-8">
+        <div className="mx-auto w-full max-w-[39rem]">
           <div className="mb-3 flex items-center justify-between gap-4 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.17em] text-brand-dark/58">
             <span>{progress} of {total}</span>
             <span className="text-brand-teal">Inner Caveman Scan</span>
@@ -57,22 +57,27 @@ const CavemanScanQuestion = ({
           </div>
         </div>
 
-        <div className="pb-6 pt-7 md:pb-8 md:pt-9">
+        <div className="mx-auto w-full max-w-[39rem] pb-6 pt-7 md:pb-8 md:pt-8">
           {question.scene && question.prompt ? (
-            <div className="max-w-5xl">
-              <div className="max-w-4xl space-y-3.5 md:space-y-4">
+            <div>
+              {question.timeLabel ? (
+                <p className="mb-5 font-sans text-sm font-medium uppercase tracking-[0.16em] text-[#9d896a] sm:text-[0.95rem]">
+                  {question.timeLabel}
+                </p>
+              ) : null}
+              <div className="space-y-3.5 md:space-y-4">
                 {question.scene.map((paragraph, index) => (
                   <div key={paragraph}>
                     <p
                       className={
                         question.visual
-                          ? index === 0
-                            ? "max-w-[52rem] text-[1.25rem] font-normal leading-[1.4] tracking-[-0.012em] sm:text-[1.38rem] md:text-[1.55rem] md:leading-[1.36]"
-                            : index === 1
-                              ? "max-w-[52rem] font-sans text-[0.94rem] leading-6 text-brand-dark/58 sm:text-base"
-                              : index === question.scene!.length - 1
-                                ? "mt-5 max-w-[54rem] border-l-2 border-brand-secondary pl-4 font-sans text-[0.95rem] leading-7 text-brand-dark/72 sm:text-base md:pl-5 md:text-[1.05rem] md:leading-8"
-                                : "max-w-[54rem] font-sans text-[0.95rem] leading-7 text-brand-dark/72 sm:text-base md:text-[1.05rem] md:leading-8"
+                          ? index === question.calloutIndex
+                            ? "mt-2 border-l-[3px] border-[#c97a20] py-0.5 pl-4 text-[1.05rem] leading-[1.55] text-brand-dark/82 sm:pl-5 sm:text-[1.12rem] md:text-[1.2rem]"
+                            : index === 0
+                              ? "text-[1.08rem] font-normal leading-[1.55] tracking-[-0.008em] sm:text-[1.18rem] md:text-[1.25rem]"
+                              : index === 1 && question.timeLabel
+                                ? "text-[1.35rem] font-bold leading-[1.3] tracking-[-0.015em] sm:text-[1.48rem]"
+                                : "text-[1.05rem] leading-[1.6] text-brand-dark/82 sm:text-[1.12rem] md:text-[1.2rem]"
                           : index === 0
                             ? "text-[1.3rem] font-bold leading-[1.35] tracking-[-0.015em] sm:text-[1.45rem] md:text-[1.7rem] md:leading-[1.3]"
                             : index === question.scene!.length - 1
@@ -85,14 +90,14 @@ const CavemanScanQuestion = ({
                         phrases={question.sceneEmphasis?.[index]}
                       />
                     </p>
-                    {index === 0 && question.visual ? (
+                    {index === (question.visualAfter ?? 0) && question.visual ? (
                       <ScenarioVisual visual={question.visual} />
                     ) : null}
                   </div>
                 ))}
               </div>
-              <div className={`h-1 w-12 bg-[#d67b24] ${question.visual ? "mt-6" : "mt-5"}`} aria-hidden="true" />
-              <h1 className="mt-3 max-w-4xl text-[1.7rem] font-bold leading-[1.15] tracking-[-0.02em] sm:text-[1.95rem] md:text-[2.35rem]">
+              <div className={`h-0.5 w-12 bg-brand-dark ${question.visual ? "mt-8" : "mt-5"}`} aria-hidden="true" />
+              <h1 className="mt-5 text-[1.75rem] font-bold leading-[1.15] tracking-[-0.02em] sm:text-[2rem] md:text-[2.25rem]">
                 {question.prompt}
               </h1>
             </div>
@@ -105,7 +110,7 @@ const CavemanScanQuestion = ({
 
         <a
           href="#scan-choices"
-          className="mx-auto flex flex-col items-center gap-1 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-brand-dark/48 transition hover:text-brand-teal"
+          className="mx-auto mt-auto flex flex-col items-center gap-1 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-brand-dark/48 transition hover:text-brand-teal"
         >
           <span>Stay with it for a moment</span>
           <ChevronDown className="h-4 w-4" aria-hidden="true" />
@@ -254,11 +259,11 @@ const ScenarioVisual = ({
 }: {
   visual: NonNullable<ScanQuestion["visual"]>;
 }) => visual.type === "mail-notification" ? (
-  <figure className="my-5 sm:my-6">
-    <figcaption className="mb-4 text-left font-serif text-base italic leading-7 text-[#c66a1a] sm:text-lg">
+  <figure className="my-6 sm:my-7">
+    <figcaption className="mb-3 text-center font-serif text-[0.9rem] italic leading-6 text-[#c66a1a] sm:text-base">
       {visual.caption}
     </figcaption>
-    <div className="mx-auto flex w-full max-w-[17rem] items-center gap-3 rounded-2xl border border-brand-dark/10 bg-white px-4 py-3 shadow-[0_14px_34px_rgba(4,42,43,0.12)] sm:max-w-[19rem]">
+    <div className="mx-auto flex w-full max-w-[17rem] items-center gap-3 rounded-xl border border-[#ddd5c8] bg-white px-4 py-3 shadow-[0_12px_26px_rgba(91,71,42,0.09)] sm:max-w-[19rem]">
       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#d67b24] text-white">
         <Mail className="h-4 w-4" aria-hidden="true" />
       </span>

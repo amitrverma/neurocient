@@ -26,7 +26,7 @@ const CavemanScanIntro = ({ onStart }: Props) => {
 
           <p className="mt-7 max-w-[35rem] font-sans text-lg leading-8 text-brand-dark/78 sm:text-xl sm:leading-9">
             Twelve ordinary moments, slowed down just enough to notice what your
-            Inner Caveman may be trying to protect.
+            Inner Caveman reacts to before deliberate thought catches up.
           </p>
 
           <div className="mt-8 grid gap-3 border-y border-brand-dark/10 py-6 font-sans text-sm leading-6 text-brand-dark/78 sm:grid-cols-3 sm:gap-5">

@@ -50,7 +50,7 @@ const CavemanScanFeedback = ({
           <motion.aside
             role="dialog"
             aria-modal="true"
-            aria-label={showScience ? "Science note" : "What is driving this?"}
+            aria-label={showScience ? "Science note" : "Why this happens"}
             initial={{ opacity: 0, x: 28, y: 48, scale: 0.98 }}
             animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
             exit={{ opacity: 0, x: 24, y: 48, scale: 0.98 }}
@@ -59,7 +59,7 @@ const CavemanScanFeedback = ({
           >
             <header className="flex items-center justify-between gap-4 border-b border-brand-dark/10 px-5 py-4 sm:px-6">
               <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-brand-primary">
-                {showScience ? "Science note" : "What is driving this?"}
+                {showScience ? "Science note" : "Why this happens"}
               </p>
               <button
                 type="button"

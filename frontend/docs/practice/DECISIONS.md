@@ -938,3 +938,58 @@ Implication:
 - After authentication, the way forward appears before secondary analysis and expands the user's self-story, reframe, environment, matched action, and retrieval cue without naming the internal IKEA framework.
 - Account language remains about keeping and returning to a personal way forward, not paying to discover what the Scan found.
 - The authenticated continuation answers how to work with the result: the self-story the movement can create, a more accurate reframe, an environmental adjustment, one matched action, and a retrieval cue. These stages follow the product framework internally but are expressed in ordinary language rather than framework labels.
+
+## 2026-07-24: Visual Scan scenes use an editorial story hierarchy
+
+Visual Scan scenes are composed as a narrow reading column with authored metadata, story beats, an interruption object, a callout, and then the decision prompt.
+
+Reason:
+
+- The person should enter the lived moment before seeing the answer interface.
+- Separating time, the consequential line, and the interruption makes a dense scene easier to scan without removing substance.
+- A structured insertion point keeps notification and moment cards attached to the exact beat they represent.
+
+Implication:
+
+- Scenario data may specify a time label, the paragraph after which its visual appears, and a callout paragraph.
+- These are optional authored fields; scenes without them keep the default reusable rendering.
+- Visual hierarchy should remain mobile-first, text-rich, and restrained rather than becoming decorative illustration.
+
+## 2026-07-24: The Inner Caveman is a lens, not an agent
+
+User-facing copy treats the Inner Caveman as a useful lens on fast inherited responses. It does not personify it as an inner character that wants, decides, chooses, protects, speaks, or pursues a goal.
+
+Reason:
+
+- Agency language implies a separate intentional actor and misstates the product concept.
+- The value of the lens is noticing what becomes salient before deliberate thought catches up.
+- Contrasting deliberate advice with an immediate reward makes the knowing-doing gap vivid without inventing protective intent.
+
+Implication:
+
+- Prefer language about automatic weighting, salience, inherited sensitivity, immediate payoff, and fast signals.
+- “Eat the frog” may be contrasted with the Inner Caveman noticing the “donut” first: the deliberate task is known, but the immediate reward is already pulling attention.
+- Keep “lens” as an internal product description, not a user-facing section label. Let the scene and contrast carry the meaning without defensive disclaimers or redundant explanation.
+- Existing and future Scan, result, Practice, and reinforcement copy should be audited for agentic language as those surfaces are revised.
+
+## 2026-07-24: Grounded Scan choices are not an answer key
+
+The grounded continuation is written as an ordinary next action and appears in
+different positions across the Scan rather than consistently appearing last.
+
+Reason:
+
+- A repeated final "healthy" answer turns recognition into a test of whether
+  the person can identify the lesson.
+- Polished therapeutic language encourages aspirational answers rather than an
+  honest account of what happens next.
+- The Scan needs contrast without dividing the choices into four wrong answers
+  and one conspicuously mature answer.
+
+Implication:
+
+- Use concrete actions such as moving the phone, finishing the immediate task,
+  sending the simple message, or beginning one small step.
+- Avoid having the grounded choice explain its own psychological wisdom.
+- Attach canonical evidence before any display-only reordering so result
+  interpretation remains stable.

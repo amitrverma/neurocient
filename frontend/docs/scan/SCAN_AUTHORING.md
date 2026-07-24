@@ -17,7 +17,19 @@ The Scan is not a personality test, clinical assessment, psychometric instrument
 
 ## Continuity From The Landing Page
 
-The user arrives knowing that common fixes may work briefly and fade, recurring behaviour is not necessarily a personal failure, the Inner Caveman is fast and protective, and awareness comes before change.
+The user arrives knowing that common fixes may work briefly and fade, recurring behaviour is not necessarily a personal failure, the Inner Caveman is a useful lens on fast inherited responses, and awareness comes before change.
+
+The Inner Caveman has no agency. It is not an inner character with intentions, goals, a voice, or a plan to protect the person. It names the inherited tendencies through which immediate reward, threat, effort, uncertainty, status, belonging, and energy cost can become salient before deliberate thought catches up.
+
+Write:
+
+> The Inner Caveman lens shows why the immediate reward carries more weight.
+
+Do not write:
+
+> Your Inner Caveman wants relief, decides what matters, keeps you safe, or chooses the easier task.
+
+These are authoring constraints, not explanations to give the reader. User-facing copy should demonstrate the contrast through the moment itself. Do not label a passage “The Inner Caveman lens,” disclaim personification, or explain the metaphor after it has already landed. Trust the reader to make the connection.
 
 Scan scenarios must come from behaviour already established on the landing page. Do not add adjacent self-help problems merely to create variety or cover an internal construct.
 
@@ -119,6 +131,11 @@ Choices should:
 
 Do not use a polished Rational Mind paragraph as the visibly correct answer. If a grounded response belongs, write it in the same natural register as the other choices.
 
+Do not consistently place the grounded continuation last. Vary its display
+position across the set, and phrase it as an ordinary observable move rather
+than a summary of the lesson. Reordering must preserve the option's canonical
+evidence identity.
+
 The Scan should not merely confirm that the user compares, scrolls, delays, or worries. It should help them notice what that loop looks like as it unfolds.
 
 ## Watchtowers Are The Hidden Evidence Layer
@@ -196,7 +213,7 @@ The result must complete the same argument begun on the landing page. It should 
 2. the conventional intervention they are likely to hear or try;
 3. why that intervention can genuinely help for a while;
 4. what it does not explain about the pull of the behaviour;
-5. the immediate protection or payoff the Inner Caveman receives; and
+5. the immediate payoff or signal that becomes more salient through the Inner Caveman lens; and
 6. the possible later cost in momentum, energy, rest, connection, or self-trust.
 
 The conventional intervention must not be mocked or dismissed. The distinction is that it usually addresses what to do, while the Inner Caveman lens explains why the competing response can feel useful in the moment. Use the person's selected evidence to make this a synthesis of lived moments, not a personality-style classification.
@@ -213,19 +230,28 @@ Name the familiar judgment or conventional solution without caricaturing it: sto
 
 ### The Inner Caveman take
 
-Reveal what an older protective system may be trying to do. The contrast should reduce shame, explain the protective logic, connect an older concern to the modern situation, show the mismatch, remain specific, avoid diagnosis, and avoid rushing into advice.
+Reveal what a fast inherited response makes salient before deliberate thought catches up. The contrast should reduce shame, explain why the pull makes sense, connect an older bias to the modern situation, show the mismatch, remain specific, avoid diagnosis, and avoid rushing into advice.
 
 Example:
 
 > **Usual take:** Comparison is a bad habit. Stop measuring yourself against other people.
 >
-> **Inner Caveman take:** Your Caveman is not trying to be petty. It is checking where you stand. In a small group, changes in relative position could affect influence, opportunity, and security. A modern feed gives that old monitoring system an endless view of people appearing to move ahead.
+> **Inner Caveman lens:** In a small group, changes in relative position could affect influence, opportunity, and security. That inherited sensitivity makes other people's progress immediately salient. A modern feed gives it an endless stream of people appearing to move ahead.
 
 End with one retrievable contrast:
 
-> Her achievement is information about her life. Your Inner Caveman reads it as information about yours.
+> Her achievement is information about her life. The fast comparison system turns it into information about yours.
 
 The purpose is an "oh" moment, not a complete lesson or behaviour prescription.
+
+The immediate reflection must answer **why this happens**, not merely redescribe the trade-off. Connect the modern moment to the older condition that made the response useful: uncertain future reward, energy cost, available food, social position, belonging, bond security, threat detection, or another genuinely supported pressure. Then return to the concrete modern scene. This establishes the Inner Caveman in the moment and fulfils the landing-page promise.
+
+Keep the layers distinct:
+
+1. **Immediate reflection:** the usual advice, the older logic, and the modern mismatch in clear human language.
+2. **Want the science?:** optional evolutionary psychology, behavioural science, and neuroscience that deepen the explanation with careful claims and sources.
+
+Do not make the first layer so thin that the scientific layer is the only place the user learns why they responded as they did.
 
 ## Optional Science
 

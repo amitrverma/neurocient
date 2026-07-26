@@ -993,3 +993,34 @@ Implication:
 - Avoid having the grounded choice explain its own psychological wisdom.
 - Attach canonical evidence before any display-only reordering so result
   interpretation remains stable.
+
+## 2026-07-26: Scan results enter through the problem people recognise
+
+The open Scan result first names the relatable modern problems people commonly
+seek help for—such as procrastination, scrolling, overthinking, motivation,
+communication, anger, and difficulty switching off—before connecting them
+through the Inner Caveman interpretation.
+
+Reason:
+
+- Broad categories describe where a struggle appears but do not explain why the
+  competing response keeps feeling useful in the moment.
+- People should recognise the problem they came to solve before Neurocient asks
+  them to consider a different account of it.
+- Neurocient's distinctive contribution is not to deny conventional advice, but
+  to show the mismatch layer that advice often leaves unexplained.
+
+Implication:
+
+- Result copy should move from the familiar problem, to the usual intervention,
+  to its missing explanation, and then to the immediate-versus-later mismatch.
+- Prefer lived help-seeking language over internal categories such as
+  productivity, emotional regulation, or protective-move names.
+- Derive the named problems, conventional response, and mismatch explanation
+  from the person's selected recurring evidence; do not place a generic category
+  narrative around otherwise personalised cards.
+- Use recognizable life-level struggles such as stress, low motivation, lost
+  productivity, relationship strain, overthinking, or low energy in the result
+  headline. Keep the more nuanced scene language in the evidence cards beneath it.
+- Use the qualified formulation "may not be only" rather than claiming every
+  modern difficulty is entirely or conclusively caused by evolutionary mismatch.

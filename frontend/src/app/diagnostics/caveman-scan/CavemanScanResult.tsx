@@ -102,6 +102,42 @@ const momentNames: Record<number, string> = {
   15: "The plan still on the wall at 11:47",
 };
 
+const helpSeekingChallenge: Record<number, string> = {
+  1: "I keep procrastinating on important work.",
+  2: "I always feel behind in life.",
+  3: "I cannot stop scrolling.",
+  5: "I find it hard to reconnect with people.",
+  8: "I cannot motivate myself to exercise.",
+  9: "I cannot stick to a routine.",
+  10: "We cannot talk about what is really wrong.",
+  11: "I snap at the people closest to me.",
+  12: "I cannot switch off and relax.",
+  13: "I replay conversations in my head.",
+  14: "I feel tired even after resting.",
+  15: "I waste the day, then plan a perfect tomorrow.",
+};
+
+const challengeThemes: Record<number, string[]> = {
+  1: ["lost productivity"],
+  2: ["low confidence"],
+  3: ["poor focus", "lost productivity"],
+  5: ["disconnection"],
+  8: ["low motivation", "fitness"],
+  9: ["low motivation"],
+  10: ["relationship strain"],
+  11: ["stress"],
+  12: ["stress", "difficulty switching off"],
+  13: ["overthinking"],
+  14: ["low energy", "sleep problems"],
+  15: ["lost productivity", "low motivation"],
+};
+
+const joinNaturally = (items: string[]) => {
+  if (items.length <= 1) return items[0] ?? "a problem to fix";
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")}, and ${items.at(-1)}`;
+};
+
 export const buildPersonalizedForward = (pattern: ScanPortraitPattern) => {
   const base = wayForwardCopy[pattern.move];
   const anchor = [...pattern.evidence].sort(
@@ -143,36 +179,39 @@ const CavemanScanResult = ({ responses, onUnlock, onRestart }: Props) => {
     return {
       ...item,
       title: momentNames[scenarioId] ?? "An ordinary moment",
+      challenge: helpSeekingChallenge[scenarioId] ?? "Something here keeps repeating.",
       response: option?.label ?? item.mirror,
     };
   });
+  const selectedThemes = [...new Set(
+    portrait.primary.evidence.flatMap(
+      (item) => challengeThemes[Number(item.optionId.split("-")[0])] ?? [],
+    ),
+  )].slice(0, 3);
+  const familiarFrame = joinNaturally(selectedThemes);
+  const familiarHeadline = `${familiarFrame.charAt(0).toUpperCase()}${familiarFrame.slice(1)}.`;
 
   return (
     <main className="min-h-screen bg-[#f8f6f0] font-serif text-brand-dark">
       <section className="px-6 pb-14 pt-10 md:pb-20 md:pt-16">
         <div className="mx-auto max-w-5xl">
           <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-primary">
-            What your 12 answers reveal
+            Your Inner Caveman Scan
           </p>
           <h1 className="mt-5 max-w-4xl text-[clamp(2.5rem,7vw,5.6rem)] font-bold leading-[0.98] tracking-[-0.035em]">
-            {portrait.primary.headline}
+            {familiarHeadline}
           </h1>
           <p className="mt-7 max-w-3xl font-sans text-base leading-8 text-brand-dark/72 md:text-lg md:leading-9">
             {portrait.primary.explanation}
           </p>
-          {portrait.contexts.length > 0 ? (
-            <p className="mt-5 max-w-3xl font-sans text-sm leading-7 text-brand-dark/58">
-              This movement appeared in {portrait.contexts.slice(0, 4).join(", ")}.
-            </p>
-          ) : null}
           <div className="mt-10 grid overflow-hidden rounded-2xl border border-brand-dark/10 bg-white sm:grid-cols-2">
             <div className="p-5 sm:p-7">
-              <p className="font-sans text-xs font-semibold uppercase tracking-[0.15em] text-brand-teal">What it gave you then</p>
-              <p className="mt-3 font-sans text-base leading-8 text-brand-dark/72">{portrait.primary.immediatePayoff}</p>
+              <p className="font-sans text-xs font-semibold uppercase tracking-[0.15em] text-brand-dark/45">The familiar reading</p>
+              <p className="mt-3 font-sans text-base leading-8 text-brand-dark/72">{portrait.primary.usualAdvice}</p>
             </div>
             <div className="border-t border-brand-dark/10 p-5 sm:border-l sm:border-t-0 sm:p-7">
-              <p className="font-sans text-xs font-semibold uppercase tracking-[0.15em] text-brand-primary">What arrived later</p>
-              <p className="mt-3 font-sans text-base leading-8 text-brand-dark/72">{portrait.primary.laterCost}</p>
+              <p className="font-sans text-xs font-semibold uppercase tracking-[0.15em] text-brand-teal">What your answers add</p>
+              <p className="mt-3 font-sans text-base leading-8 text-brand-dark/72">{portrait.primary.whatItMisses}</p>
             </div>
           </div>
         </div>
@@ -181,10 +220,10 @@ const CavemanScanResult = ({ responses, onUnlock, onRestart }: Props) => {
       <section className="bg-brand-dark px-6 py-14 text-white md:py-20">
         <div className="mx-auto max-w-4xl">
           <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-secondary">
-            Why these answers belong together
+            The problems you recognise
           </p>
           <h2 className="mt-4 max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.025em] md:text-5xl">
-            Different scenes. The same protective bargain.
+            They look separate in everyday life.
           </h2>
           <div className="mt-9 grid gap-4 md:grid-cols-3">
             {selectedMoments.map((item, index) => (
@@ -193,9 +232,9 @@ const CavemanScanResult = ({ responses, onUnlock, onRestart }: Props) => {
                 className="rounded-2xl border border-white/14 bg-white/[0.045] p-5 sm:p-6"
               >
                 <p className="font-sans text-xs font-bold tracking-[0.14em] text-brand-secondary">0{index + 1}</p>
-                <h3 className="mt-4 text-xl font-bold leading-7 text-white">{item.title}</h3>
+                <h3 className="mt-4 text-xl font-bold leading-7 text-white">{item.challenge}</h3>
+                <p className="mt-3 font-sans text-xs leading-6 text-white/45">{item.title}</p>
                 <p className="mt-4 font-sans text-sm leading-7 text-white/72">{item.response}</p>
-                <p className="mt-5 border-t border-white/12 pt-4 font-sans text-xs leading-6 text-white/52">What it did: {item.mirror}</p>
               </article>
             ))}
           </div>
@@ -208,15 +247,13 @@ const CavemanScanResult = ({ responses, onUnlock, onRestart }: Props) => {
       <section className="border-b border-brand-dark/10 bg-white px-6 py-14 md:py-20">
         <div className="mx-auto max-w-6xl">
           <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-primary">
-            The drives underneath your answers
+            The mismatch underneath
           </p>
           <h2 className="mt-4 max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.025em] md:text-5xl">
-            What was your Caveman trying to keep safe?
+            Different problems. A familiar ancient bargain.
           </h2>
           <p className="mt-6 max-w-3xl font-sans text-base leading-8 text-brand-dark/68">
-            Everyone carries all five drives. These are the ones directly
-            supported by the moments you selected—not a ranking, and not a claim
-            about the drives these scenarios did not test.
+            {portrait.primary.whatItMisses}
           </p>
           <div className="mt-9 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {supportedDrives.length > 0 ? supportedDrives.map((drive) => (
@@ -334,16 +371,16 @@ const PatternExplanation = ({ pattern }: { pattern: ScanPortraitPattern }) => (
 
 const MechanismExplanation = ({ pattern }: { pattern: ScanPortraitPattern }) => (
   <div>
-    <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-primary">What the usual advice misses</p>
-    <h2 className="mt-4 max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.025em] md:text-5xl">The advice is not necessarily wrong. It starts too late.</h2>
+    <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-primary">A different reading</p>
+    <h2 className="mt-4 max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.025em] md:text-5xl">The advice is not necessarily wrong. The lens is incomplete.</h2>
     <div className="mt-9 grid gap-4 md:grid-cols-2">
       <article className="rounded-2xl border border-brand-dark/10 bg-white p-5 sm:p-6">
-        <p className="font-sans text-xs font-semibold uppercase tracking-[0.15em] text-brand-dark/45">What people usually suggest</p>
+        <p className="font-sans text-xs font-semibold uppercase tracking-[0.15em] text-brand-dark/45">Solve the visible problem</p>
         <p className="mt-4 font-sans text-base leading-8 text-brand-dark/72">{pattern.usualAdvice}</p>
         <p className="mt-4 font-sans text-sm leading-7 text-brand-dark/55"><strong className="text-brand-dark/75">Why it can help:</strong> {pattern.whyItHelps}</p>
       </article>
       <article className="rounded-2xl border border-brand-teal/25 bg-brand-teal/[0.045] p-5 sm:p-6">
-        <p className="font-sans text-xs font-semibold uppercase tracking-[0.15em] text-brand-teal">The missing layer</p>
+        <p className="font-sans text-xs font-semibold uppercase tracking-[0.15em] text-brand-teal">Understand the mismatch</p>
         <p className="mt-4 font-sans text-base leading-8 text-brand-dark/72">{pattern.whatItMisses}</p>
       </article>
     </div>

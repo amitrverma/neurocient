@@ -1024,3 +1024,27 @@ Implication:
   headline. Keep the more nuanced scene language in the evidence cards beneath it.
 - Use the qualified formulation "may not be only" rather than claiming every
   modern difficulty is entirely or conclusively caused by evolutionary mismatch.
+
+## 2026-07-26: The authenticated Scan portrait is an evolving practice surface
+
+The post-authentication screen does not repeat the open result as a longer
+report. It saves one accurate reframe, returns one personalised cue, and asks
+the person to catch that movement in real life.
+
+Reason:
+
+- The open result has already delivered the interpretation; more diagnosis is
+  not a meaningful reason to create an account.
+- Account value begins with continuity, lived evidence, and guidance that changes
+  as the person notices the movement outside the Scan.
+- A five-step explanation of the internal behavior-change method adds cognitive
+  load before the person has gathered new evidence.
+
+Implication:
+
+- With no Spots, the primary action is to catch the movement once.
+- After one Spot, the primary action is to catch it again.
+- After repeated Spots, the primary action may become one small matched
+  experiment.
+- Secondary movements, costs, supported concerns, and flexibility evidence remain
+  available under progressive disclosure rather than competing with the next move.

@@ -6,7 +6,7 @@ import { ArrowRight, Eye } from "lucide-react";
 import { questionsBank } from "./questionsBank";
 import { buildScanPortrait, type ScanPortraitPattern } from "./scanPortrait";
 import type { CavemanScanResponse } from "./scanStorage";
-import type { ProtectiveConcern, Watchtower } from "./scanEvidence";
+import type { ProtectiveConcern, ScanOptionEvidence, Watchtower } from "./scanEvidence";
 import type { ProtectiveMove } from "./scanEvidence";
 
 interface Props {
@@ -138,6 +138,16 @@ const joinNaturally = (items: string[]) => {
   return `${items.slice(0, -1).join(", ")}, and ${items.at(-1)}`;
 };
 
+const challengeHeadlineFrom = (evidence: ScanOptionEvidence[]) => {
+  const themes = [...new Set(
+    evidence.flatMap(
+      (item) => challengeThemes[Number(item.optionId.split("-")[0])] ?? [],
+    ),
+  )].slice(0, 3);
+  const frame = joinNaturally(themes);
+  return `${frame.charAt(0).toUpperCase()}${frame.slice(1)}.`;
+};
+
 export const buildPersonalizedForward = (pattern: ScanPortraitPattern) => {
   const base = wayForwardCopy[pattern.move];
   const anchor = [...pattern.evidence].sort(
@@ -183,13 +193,7 @@ const CavemanScanResult = ({ responses, onUnlock, onRestart }: Props) => {
       response: option?.label ?? item.mirror,
     };
   });
-  const selectedThemes = [...new Set(
-    portrait.primary.evidence.flatMap(
-      (item) => challengeThemes[Number(item.optionId.split("-")[0])] ?? [],
-    ),
-  )].slice(0, 3);
-  const familiarFrame = joinNaturally(selectedThemes);
-  const familiarHeadline = `${familiarFrame.charAt(0).toUpperCase()}${familiarFrame.slice(1)}.`;
+  const familiarHeadline = challengeHeadlineFrom(portrait.primary.evidence);
 
   return (
     <main className="min-h-screen bg-[#f8f6f0] font-serif text-brand-dark">
@@ -426,6 +430,8 @@ export const CavemanScanDetailedResult = ({
     return hydrated ? [hydrated] : [];
   });
   const portrait = buildScanPortrait(evidence);
+  const forward = buildPersonalizedForward(portrait.primary);
+  const challengeHeadline = challengeHeadlineFrom(portrait.primary.evidence);
   const matchingSpots = spots.filter(
     (spot) => spot.pattern === portrait.primary.move,
   );
@@ -455,41 +461,37 @@ export const CavemanScanDetailedResult = ({
       <section className="px-6 pb-14 pt-10 md:pb-20 md:pt-16">
         <div className="mx-auto max-w-4xl">
           <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-primary">
-            Your deeper portrait
+            Your result is saved
           </p>
           <h1 className="mt-5 max-w-3xl text-[clamp(2.5rem,7vw,5.4rem)] font-bold leading-[0.98] tracking-[-0.035em]">
-            A fuller picture of your Inner Caveman.
+            {challengeHeadline}
           </h1>
           <p className="mt-7 max-w-2xl font-sans text-base leading-8 text-brand-dark/70 md:text-lg md:leading-9">
-            This brings together the protective moves that repeated across
-            your scan. It is not a diagnosis or a fixed type. It is a closer
-            look at what your Inner Caveman may be doing in these moments.
+            {forward.reframe}
           </p>
         </div>
       </section>
 
       <section className="border-y border-brand-dark/10 bg-white px-6 py-14 md:py-20">
         <div className="mx-auto max-w-4xl">
-          <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-teal">
-            Your primary movement
-          </p>
-          <PatternExplanation pattern={portrait.primary} />
-          <div className="mt-9 divide-y divide-brand-dark/10 border-y border-brand-dark/10">
-            {portrait.primary.evidence.map((item) => (
-              <p key={item.optionId} className="py-5 font-sans text-sm leading-7 text-brand-dark/72 md:text-base">
-                {item.mirror}
-              </p>
-            ))}
+          <div className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
+            <Eye className="h-5 w-5" aria-hidden="true" />
           </div>
+          <p className="mt-6 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-primary">
+            The moment to catch
+          </p>
+          <h2 className="mt-4 max-w-3xl text-2xl font-bold leading-[1.35] tracking-[-0.015em] md:text-4xl">
+            {portrait.primary.cue}
+          </h2>
+          <p className="mt-6 max-w-2xl font-sans text-base leading-8 text-brand-dark/68">
+            Do not change it yet. Notice what was happening, what you felt pulled
+            to do, and what that response offered immediately.
+          </p>
         </div>
       </section>
 
-      <WayForward pattern={portrait.primary} />
-
-      <DeepPortrait portrait={portrait} />
-
       {matchingSpots.length > 0 && (
-        <section className="border-y border-brand-dark/10 bg-white px-6 py-14 md:py-20">
+        <section className="px-6 py-14 md:py-20">
           <div className="mx-auto max-w-4xl">
             <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-primary">
               Evidence from real life
@@ -534,20 +536,31 @@ export const CavemanScanDetailedResult = ({
             {nextStep.cta}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
-          <p className="mt-6 font-sans text-sm text-white/62">
-            Want to understand it first?{" "}
+        </div>
+      </section>
+
+      <section className="border-b border-brand-dark/10 bg-white px-6 py-12 md:py-16">
+        <div className="mx-auto max-w-4xl">
+          <details className="group border-y border-brand-dark/10">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 font-sans text-sm font-semibold text-brand-dark marker:content-none">
+              See the fuller picture
+              <span className="text-xl font-normal text-brand-primary transition-transform group-open:rotate-45" aria-hidden="true">+</span>
+            </summary>
+            <div className="border-t border-brand-dark/10 pb-8 pt-2">
+              <DeepPortrait portrait={portrait} embedded />
+            </div>
+          </details>
+          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 font-sans text-sm">
             <Link
               href={portrait.continuation.href}
-              className="font-semibold text-white underline decoration-white/35 underline-offset-4"
+              className="font-semibold text-brand-primary underline decoration-brand-primary/30 underline-offset-4"
             >
               {portrait.continuation.cta}
             </Link>
-          </p>
-          <div className="mt-10 border-t border-white/18 pt-6">
             <button
               type="button"
               onClick={onRetake}
-              className="font-sans text-sm text-white/65 underline decoration-white/30 underline-offset-4 transition hover:text-white"
+              className="text-brand-dark/55 underline decoration-brand-dark/20 underline-offset-4 transition hover:text-brand-dark"
             >
               Retake the scan
             </button>
@@ -668,7 +681,13 @@ const costCopy = {
   self_trust: "Self-trust — one difficult moment starts becoming evidence about who you are.",
 } as const;
 
-export const DeepPortrait = ({ portrait }: { portrait: ReturnType<typeof buildScanPortrait> }) => {
+export const DeepPortrait = ({
+  portrait,
+  embedded = false,
+}: {
+  portrait: ReturnType<typeof buildScanPortrait>;
+  embedded?: boolean;
+}) => {
   const costs = [...new Set(
     [portrait.primary, portrait.secondary]
       .filter((pattern): pattern is ScanPortraitPattern => Boolean(pattern))
@@ -676,7 +695,7 @@ export const DeepPortrait = ({ portrait }: { portrait: ReturnType<typeof buildSc
   )].slice(0, 3);
 
   return (
-    <section className="bg-brand-dark px-6 py-14 text-white md:py-20">
+    <section className={`${embedded ? "mt-6 rounded-2xl" : ""} bg-brand-dark px-6 py-14 text-white md:py-20`}>
       <div className="mx-auto max-w-4xl">
         <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-secondary">
           Your deeper portrait

@@ -1048,3 +1048,30 @@ Implication:
   experiment.
 - Secondary movements, costs, supported concerns, and flexibility evidence remain
   available under progressive disclosure rather than competing with the next move.
+
+## 2026-08-27: Each Scan moment separates recognition from interpretation
+
+The Scan presents each moment in two beats: first the lived scene and an honest
+continuation choice, then an alternate reading that appears immediately after
+selection in a bottom sheet on mobile and a bottom-corner panel on desktop.
+
+Reason:
+
+- A forced full-screen scroll made a repeated 12-moment experience feel heavier
+  and more questionnaire-like than intended.
+- Alphabetic answer markers implied a scored quiz even though the choices are
+  evidence from lived experience rather than correct or incorrect answers.
+- The alternate reading is the Scan's primary value and should arrive at the
+  moment of recognition without requiring a second confirmation action.
+
+Implication:
+
+- At every breakpoint, the scene, prompt, and continuation choices form one
+  uninterrupted editorial sequence. Wider screens may increase measure and
+  breathing room, but must not place choices beside the scene.
+- Selecting a continuation opens its alternate reading immediately in a
+  responsive overlay while preserving the selected response beneath it.
+- Reflections keep optional science under progressive disclosure and provide a
+  single next-moment action.
+- Progress and back navigation remain available in both beats without adding
+  quiz-like answer labels or competing navigation controls.

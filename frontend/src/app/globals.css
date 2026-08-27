@@ -76,6 +76,24 @@ body {
   font-family: var(--font-landing-sans);
 }
 
+.scrollbar-subtle {
+  scrollbar-color: rgb(4 42 43 / 28%) transparent;
+  scrollbar-width: thin;
+}
+
+.scrollbar-subtle::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-subtle::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-subtle::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgb(4 42 43 / 28%);
+}
+
 @keyframes landing-cycle-draw {
   0% { opacity: 0.18; stroke-dashoffset: 1; }
   8% { opacity: 1; }

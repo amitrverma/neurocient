@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, BatteryLow, BookOpen, CheckSquare2, ChevronDown, Clock3, Footprints, House, Mail, MessageCircle, Play, Utensils } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import type { ScanQuestion, ScanOption } from "./questionsBank";
 import CavemanScanFeedback from "./CavemanScanFeedback";
 
@@ -32,57 +32,75 @@ const CavemanScanQuestion = ({
   );
 
   useEffect(() => {
-    scenarioRef.current?.focus({ preventScroll: true });
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     setFeedbackOpen(false);
   }, [question.id]);
 
+  useEffect(() => {
+    if (feedbackOpen) return;
+    scenarioRef.current?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [feedbackOpen, question.id]);
+
   return (
+    <>
     <main
       ref={scenarioRef}
       tabIndex={-1}
       className="caveman-scan-page min-h-screen bg-[#f8f6f0] font-serif text-brand-dark outline-none"
     >
-      <section className="mx-auto flex min-h-[calc(100svh-5rem)] w-full max-w-6xl flex-col px-5 pb-8 pt-6 sm:px-6 md:pb-10 md:pt-8">
-        <div className="mx-auto w-full max-w-[39rem]">
-          <div className="mb-3 flex items-center justify-between gap-4 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.17em] text-brand-dark/58">
-            <span>{progress} of {total}</span>
-            <span className="text-brand-teal">Inner Caveman Scan</span>
-          </div>
-          <div className="h-1 w-full overflow-hidden rounded-full bg-brand-dark/10">
-            <div
-              className="h-full rounded-full bg-brand-primary transition-all duration-500"
-              style={{ width: `${(progress / total) * 100}%` }}
-            />
+      <header className="sticky top-0 z-20 border-b border-brand-dark/8 bg-[#f8f6f0]/95 px-5 py-4 backdrop-blur sm:px-6">
+        <div className="mx-auto flex w-full max-w-5xl items-center gap-4">
+          <button
+            type="button"
+            onClick={onPrevious}
+            disabled={progress === 1}
+            aria-label="Previous moment"
+            className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full border border-brand-dark/15 text-brand-dark/65 transition hover:border-brand-teal hover:text-brand-teal disabled:pointer-events-none disabled:opacity-25"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          </button>
+          <div className="min-w-0 flex-1">
+            <div className="mb-2 flex items-center justify-between gap-3 font-sans text-[0.66rem] font-semibold uppercase tracking-[0.16em]">
+              <span className="text-brand-dark/55">Moment {progress} of {total}</span>
+              <span className="text-brand-teal">Inner Caveman Scan</span>
+            </div>
+            <div className="h-1 overflow-hidden rounded-full bg-brand-dark/10">
+              <div
+                className="h-full rounded-full bg-brand-primary transition-all duration-500"
+                style={{ width: `${(progress / total) * 100}%` }}
+              />
+            </div>
           </div>
         </div>
+      </header>
 
-        <div className="mx-auto w-full max-w-[39rem] pb-6 pt-7 md:pb-8 md:pt-8">
+      <section className="mx-auto w-full max-w-5xl px-5 pb-8 pt-4 sm:px-6 sm:pb-12 sm:pt-6 lg:pb-14 lg:pt-7">
+        <article className="max-w-4xl rounded-[1.5rem] border border-brand-dark/10 bg-[linear-gradient(135deg,rgba(255,254,250,0.96),rgba(246,243,233,0.88))] p-5 shadow-[0_18px_50px_rgba(4,42,43,0.07)] sm:p-7">
           {question.scene && question.prompt ? (
             <div>
               {question.timeLabel ? (
-                <p className="mb-5 font-sans text-sm font-medium uppercase tracking-[0.16em] text-[#9d896a] sm:text-[0.95rem]">
+                <p className="mb-5 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-[#9d896a]">
                   {question.timeLabel}
                 </p>
               ) : null}
-              <div className="space-y-3.5 md:space-y-4">
+              <div className="space-y-2.5 sm:space-y-3">
                 {question.scene.map((paragraph, index) => (
                   <div key={paragraph}>
                     <p
                       className={
                         question.visual
                           ? index === question.calloutIndex
-                            ? "mt-2 border-l-[3px] border-[#c97a20] py-0.5 pl-4 text-[1.05rem] leading-[1.55] text-brand-dark/82 sm:pl-5 sm:text-[1.12rem] md:text-[1.2rem]"
+                            ? "mt-2 max-w-3xl border-l-2 border-[#c97a20] py-0.5 pl-4 font-sans text-[0.9rem] leading-6 text-brand-dark/72 sm:text-[0.96rem] sm:leading-7"
                             : index === 0
-                              ? "text-[1.08rem] font-normal leading-[1.55] tracking-[-0.008em] sm:text-[1.18rem] md:text-[1.25rem]"
+                              ? "max-w-3xl text-[1.2rem] font-normal leading-[1.42] tracking-[-0.012em] sm:text-[1.38rem]"
                               : index === 1 && question.timeLabel
-                                ? "text-[1.35rem] font-bold leading-[1.3] tracking-[-0.015em] sm:text-[1.48rem]"
-                                : "text-[1.05rem] leading-[1.6] text-brand-dark/82 sm:text-[1.12rem] md:text-[1.2rem]"
+                                ? "max-w-3xl text-[1.16rem] font-bold leading-[1.35] tracking-[-0.01em] sm:text-[1.28rem]"
+                                : "max-w-3xl font-sans text-[0.9rem] leading-6 text-brand-dark/68 sm:text-[0.96rem] sm:leading-7"
                           : index === 0
-                            ? "text-[1.3rem] font-bold leading-[1.35] tracking-[-0.015em] sm:text-[1.45rem] md:text-[1.7rem] md:leading-[1.3]"
+                            ? "max-w-3xl text-[1.28rem] font-bold leading-[1.38] tracking-[-0.015em] sm:text-[1.5rem]"
                             : index === question.scene!.length - 1
-                              ? "pt-1 text-[1.08rem] font-bold leading-[1.5] text-brand-dark/85 sm:text-[1.16rem] md:text-[1.28rem]"
-                              : "max-w-[44rem] font-sans text-[0.94rem] leading-7 text-brand-dark/70 sm:text-base sm:leading-8 md:text-[1.05rem]"
+                              ? "max-w-3xl pt-0.5 text-[1rem] font-bold leading-[1.45] text-brand-dark/82 sm:text-[1.08rem]"
+                              : "max-w-3xl font-sans text-[0.9rem] leading-6 text-brand-dark/66 sm:text-[0.96rem] sm:leading-7"
                       }
                     >
                       <EmphasizedText
@@ -90,41 +108,24 @@ const CavemanScanQuestion = ({
                         phrases={question.sceneEmphasis?.[index]}
                       />
                     </p>
-                    {index === (question.visualAfter ?? 0) && question.visual ? (
-                      <ScenarioVisual visual={question.visual} />
-                    ) : null}
                   </div>
                 ))}
               </div>
-              <div className={`h-0.5 w-12 bg-brand-dark ${question.visual ? "mt-8" : "mt-5"}`} aria-hidden="true" />
-              <h1 className="mt-5 text-[1.75rem] font-bold leading-[1.15] tracking-[-0.02em] sm:text-[2rem] md:text-[2.25rem]">
-                {question.prompt}
-              </h1>
             </div>
           ) : (
             <h1 className="max-w-4xl text-2xl font-bold leading-tight tracking-[-0.015em] md:text-4xl">
               {question.text}
             </h1>
           )}
-        </div>
+        </article>
 
-        <a
-          href="#scan-choices"
-          className="mx-auto mt-auto flex flex-col items-center gap-1 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-brand-dark/48 transition hover:text-brand-teal"
-        >
-          <span>Stay with it for a moment</span>
-          <ChevronDown className="h-4 w-4" aria-hidden="true" />
-        </a>
-      </section>
+        <h1 id="scan-prompt" className="mt-7 max-w-4xl text-[1.85rem] font-bold leading-[1.16] tracking-[-0.02em] sm:mt-9 sm:text-[2.2rem] lg:text-[2.55rem]">
+            {question.prompt ?? question.text}
+        </h1>
 
-      <section id="scan-choices" className="scroll-mt-20 border-y border-brand-dark/10 bg-white px-6 py-12 md:py-16">
-        <div className="mx-auto w-full max-w-3xl">
-          <p className="mb-6 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.19em] text-brand-primary">
-            Which feels closest?
-          </p>
-
-          <div className="border-t border-brand-dark/12">
-            {displayedOptions.map((opt, index) => {
+        <section aria-labelledby="scan-prompt" className="mt-6 sm:mt-7">
+          <div className="grid max-w-3xl gap-2.5">
+            {displayedOptions.map((opt) => {
               const isSelected = selected?.label === opt.label;
               return (
                 <button
@@ -134,21 +135,21 @@ const CavemanScanQuestion = ({
                     setFeedbackOpen(true);
                   }}
                   aria-pressed={isSelected}
-                  className={`group grid w-full cursor-pointer grid-cols-[2rem_1fr] items-start gap-3 border-b border-l-2 py-5 pl-3 pr-2 text-left font-sans text-[0.93rem] leading-7 transition sm:grid-cols-[2.25rem_1fr] sm:gap-4 sm:py-6 sm:pl-4 sm:text-base ${
+                  className={`group grid min-h-12 w-full cursor-pointer grid-cols-[1.5rem_1fr] items-start gap-2.5 rounded-xl border px-4 py-3 text-left font-sans text-[0.9rem] leading-6 shadow-sm transition sm:px-4 sm:py-3.5 sm:text-[0.95rem] ${
                     isSelected
-                      ? "border-b-brand-dark/12 border-l-brand-primary bg-brand-secondary/15"
-                      : "border-b-brand-dark/12 border-l-transparent hover:border-l-brand-teal hover:bg-brand-teal/[0.035]"
+                      ? "border-brand-primary bg-brand-secondary/16 shadow-[0_10px_28px_rgba(4,42,43,0.07)]"
+                      : "border-brand-dark/10 bg-white/80 hover:border-brand-teal/55 hover:bg-white"
                   }`}
                 >
                   <span
-                    className={`mt-0.5 grid h-7 w-7 place-items-center rounded-full border text-[0.65rem] font-bold ${
+                    className={`mt-0.5 grid h-5 w-5 place-items-center rounded-full border ${
                       isSelected
                         ? "border-brand-primary bg-brand-primary text-white"
                         : "border-brand-dark/20 text-brand-dark/45 transition group-hover:border-brand-teal group-hover:text-brand-teal"
                     }`}
                     aria-hidden="true"
                   >
-                    {String.fromCharCode(65 + index)}
+                    {isSelected ? <Check className="h-3 w-3" /> : <span className="h-1.5 w-1.5 rounded-full bg-current opacity-35" />}
                   </span>
                   <span>{opt.label}</span>
                 </button>
@@ -156,45 +157,19 @@ const CavemanScanQuestion = ({
             })}
           </div>
 
-          <div className="mt-7 flex flex-wrap items-center justify-between gap-3">
-            <button
-              onClick={onPrevious}
-              disabled={progress === 1}
-              className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark/25 px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark/70 transition hover:border-brand-teal hover:text-brand-teal disabled:pointer-events-none disabled:opacity-30"
-            >
-              <ArrowLeft className="h-4 w-4" /> Previous
-            </button>
-            <div className="ml-auto flex items-center gap-3">
-              {selected ? (
-              <button
-                onClick={() => setFeedbackOpen(true)}
-                className="cursor-pointer font-sans text-sm font-semibold text-brand-primary transition hover:text-brand-accent"
-              >
-                Review explanation
-              </button>
-              ) : null}
-              <button
-                onClick={onNext}
-                disabled={!selected}
-                className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:opacity-90 disabled:pointer-events-none disabled:opacity-30"
-              >
-                Continue <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
+        </section>
       </section>
-
-      {selected ? (
-        <CavemanScanFeedback
-          open={feedbackOpen}
-          reflection={selected.reflection}
-          science={typeof selected.science === "object" ? selected.science : null}
-          onClose={() => setFeedbackOpen(false)}
-          onContinue={onNext}
-        />
-      ) : null}
     </main>
+    {selected ? (
+      <CavemanScanFeedback
+        open={feedbackOpen}
+        reflection={selected.reflection}
+        science={typeof selected.science === "object" ? selected.science : null}
+        onClose={() => setFeedbackOpen(false)}
+        onContinue={onNext}
+      />
+    ) : null}
+    </>
   );
 };
 
@@ -252,63 +227,6 @@ const EmphasizedText = ({
       part
     ),
   );
-};
-
-const ScenarioVisual = ({
-  visual,
-}: {
-  visual: NonNullable<ScanQuestion["visual"]>;
-}) => visual.type === "mail-notification" ? (
-  <figure className="my-6 sm:my-7">
-    <figcaption className="mb-3 text-center font-serif text-[0.9rem] italic leading-6 text-[#c66a1a] sm:text-base">
-      {visual.caption}
-    </figcaption>
-    <div className="mx-auto flex w-full max-w-[17rem] items-center gap-3 rounded-xl border border-[#ddd5c8] bg-white px-4 py-3 shadow-[0_12px_26px_rgba(91,71,42,0.09)] sm:max-w-[19rem]">
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#d67b24] text-white">
-        <Mail className="h-4 w-4" aria-hidden="true" />
-      </span>
-      <span className="min-w-0 flex-1 font-sans">
-        <span className="block text-[0.65rem] font-semibold uppercase tracking-[0.08em] text-brand-dark/45">
-          {visual.app}
-        </span>
-        <span className="block text-sm font-semibold text-brand-dark">
-          {visual.message}
-        </span>
-      </span>
-      <span className="grid h-6 min-w-6 place-items-center rounded-full bg-brand-accent px-1.5 font-sans text-[0.65rem] font-bold text-white">
-        {visual.count}
-      </span>
-    </div>
-  </figure>
-) : (
-  <figure className="my-5 sm:my-6">
-    <figcaption className="mb-4 text-left font-serif text-base italic leading-7 text-[#c66a1a] sm:text-lg">
-      {visual.caption}
-    </figcaption>
-    <div className="mx-auto flex w-full max-w-[21rem] items-center gap-3 rounded-2xl border border-brand-dark/10 bg-white px-4 py-3.5 shadow-[0_14px_34px_rgba(4,42,43,0.1)]">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-teal/12 text-brand-primary">
-        <MomentIcon name={visual.icon} />
-      </span>
-      <span className="min-w-0 flex-1 font-sans">
-        <span className="block text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-brand-dark/45">{visual.app}</span>
-        <span className="mt-0.5 block text-sm font-semibold leading-5 text-brand-dark">{visual.message}</span>
-        {visual.detail ? <span className="mt-0.5 block text-xs leading-5 text-brand-dark/55">{visual.detail}</span> : null}
-      </span>
-    </div>
-  </figure>
-);
-
-const MomentIcon = ({ name }: { name?: NonNullable<ScanQuestion["visual"]>["icon"] }) => {
-  const className = "h-5 w-5";
-  if (name === "home") return <House className={className} aria-hidden="true" />;
-  if (name === "play") return <Play className={className} aria-hidden="true" />;
-  if (name === "chat") return <MessageCircle className={className} aria-hidden="true" />;
-  if (name === "shoe") return <Footprints className={className} aria-hidden="true" />;
-  if (name === "check") return <CheckSquare2 className={className} aria-hidden="true" />;
-  if (name === "dinner") return <Utensils className={className} aria-hidden="true" />;
-  if (name === "book") return <BookOpen className={className} aria-hidden="true" />;
-  if (name === "battery") return <BatteryLow className={className} aria-hidden="true" />;
-  return <Clock3 className={className} aria-hidden="true" />;
 };
 
 export default CavemanScanQuestion;

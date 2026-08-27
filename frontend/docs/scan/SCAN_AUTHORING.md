@@ -102,10 +102,17 @@ Do not use the same question mechanically for all 12 scenarios.
 
 ## Visual Story Beats
 
-A scenario may include a small code-native visual when an object or interruption materially helps the reader enter the moment—for example, a notification, message preview, calendar cue, or unfinished task.
+A scenario should remain prose-led. The current Scan does not render embedded
+notification or moment cards when the authored scene already communicates the
+same cue.
+
+Reintroduce a small code-native visual only through a deliberate product
+decision when an object communicates something the prose cannot convey
+efficiently.
 
 The visual should:
 
+- add information rather than repeat the surrounding prose;
 - appear inside the story at the moment the cue arrives;
 - represent an authored object from the scene rather than decorate the page;
 - remain legible and meaningful on a narrow screen;

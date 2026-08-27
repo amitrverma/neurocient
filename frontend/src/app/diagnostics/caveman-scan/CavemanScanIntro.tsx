@@ -19,8 +19,8 @@ const CavemanScanIntro = ({ onStart }: Props) => {
             The Inner Caveman Scan <span className="mx-2 text-brand-dark/25">·</span> About 5 minutes
           </p>
 
-          <h1 className="mt-6 max-w-[12ch] text-[clamp(3rem,12vw,5.5rem)] font-bold leading-[0.94] tracking-[-0.035em] text-brand-dark">
-            Meet the part of you that acts
+          <h1 className="mt-6 max-w-[12ch] text-[clamp(2.8rem,11vw,5.1rem)] font-bold leading-[0.94] tracking-[-0.035em] text-brand-dark">
+            Meet the part of you that reacts
             <span className="block font-normal italic text-brand-accent">even before you think.</span>
           </h1>
 
@@ -29,13 +29,7 @@ const CavemanScanIntro = ({ onStart }: Props) => {
             Inner Caveman reacts to before deliberate thought catches up.
           </p>
 
-          <div className="mt-8 grid gap-3 border-y border-brand-dark/10 py-6 font-sans text-sm leading-6 text-brand-dark/78 sm:grid-cols-3 sm:gap-5">
-            <p>The task you keep circling.</p>
-            <p>The scroll that outlasts the break.</p>
-            <p>The rest that never feels restful.</p>
-          </div>
-
-          <div className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+          <div className="mt-8">
             <button
               onClick={onStart}
               className="inline-flex min-h-13 w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-7 py-3.5 font-sans text-sm font-semibold text-white shadow-[0_10px_30px_rgba(4,42,43,0.14)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(4,42,43,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal focus-visible:ring-offset-2 sm:w-auto"
@@ -43,9 +37,6 @@ const CavemanScanIntro = ({ onStart }: Props) => {
               See what shows up
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </button>
-            <p className="font-sans text-xs leading-5 text-brand-dark/55">
-              No score. No right answers.
-            </p>
           </div>
         </div>
 

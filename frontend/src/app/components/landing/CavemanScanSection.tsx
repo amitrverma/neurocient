@@ -14,9 +14,9 @@ export default function CavemanScanSection() {
             </SectionHeading>
 
             <div className="mt-10 max-w-4xl py-8 md:mt-12 md:py-10">
-              <h3 className="max-w-3xl font-serif text-2xl font-bold leading-9 md:text-3xl md:leading-10">It&rsquo;s a quick way to notice which of these survival drives shows up most often in your everyday decisions.</h3>
+              <h3 className="max-w-3xl font-serif text-2xl font-bold leading-9 md:text-3xl md:leading-10">It&rsquo;s a quick way to notice what your automatic processing gives weight to in everyday moments.</h3>
               <p className="mt-5 max-w-3xl font-sans text-base leading-8 text-white/70 md:text-lg md:leading-9">
-                <strong>It won&apos;t judge you or label you.</strong> It simply gives you a clearer picture of the patterns that may be shaping your thoughts, emotions, and behaviour.
+                <strong>It won&apos;t judge you or label you.</strong> It slows those moments down so you can see which signals become important before deliberate thought catches up.
               </p>
             </div>
           </div>
@@ -30,7 +30,7 @@ export default function CavemanScanSection() {
               href="/diagnostics/caveman-scan"
               className="group mt-8 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-brand-secondary px-8 font-sans text-sm font-bold text-brand-dark outline-none transition hover:bg-white focus-visible:ring-4 focus-visible:ring-brand-teal/60 sm:w-auto"
             >
-              Understand Your Patterns
+              Start the Scan
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>

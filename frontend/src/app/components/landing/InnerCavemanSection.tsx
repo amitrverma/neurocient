@@ -29,7 +29,8 @@ export default function InnerCavemanSection() {
           <div className="mt-9 max-w-5xl text-brand-dark/75 md:mt-11">
             <p className="max-w-4xl border-l-4 border-brand-secondary py-1 pl-6 font-serif text-xl font-bold leading-8 text-brand-dark md:text-2xl md:leading-9">
               It&rsquo;s not a villain. It is not something you need to get rid of.
-              It is simply trying to keep you safe the only way it knows how.
+              It is an older survival system: fast, reactive, energy-saving,
+              and tuned to what felt safest in a very different world.
             </p>
             <p className="mt-8 max-w-5xl font-sans text-base leading-8 md:mt-10 md:text-lg md:leading-9">
               The patterns you recognised earlier&mdash;waiting to feel ready,
@@ -78,7 +79,8 @@ export default function InnerCavemanSection() {
 
       <div className="relative z-10 mx-auto mt-8 max-w-6xl font-sans text-base leading-8 text-brand-dark/75 md:mt-10">
         <p className="max-w-4xl font-serif text-2xl font-bold leading-9 tracking-[-0.02em] text-brand-dark md:text-3xl md:leading-10">
-          Every person has all five drives. What differs is which one becomes active most often, and how it shapes the way you think, feel, and <em className="font-bold italic text-brand-primary">respond</em>.
+          Every person has all five drives. Different situations activate
+          different drives, shaping how you think, feel, and <em className="font-bold italic text-brand-primary">respond</em>.
         </p>
         <p className="mt-6 max-w-5xl md:whitespace-nowrap md:text-lg md:leading-9">
           Grounded in decades of research across evolutionary psychology and behavioural science.

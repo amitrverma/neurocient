@@ -16,7 +16,7 @@ const CavemanScanIntro = ({ onStart }: Props) => {
       <section className="relative mx-auto grid w-full max-w-6xl gap-12 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:gap-20">
         <div className="max-w-2xl">
           <p className="font-sans text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-brand-teal sm:text-xs">
-            The Inner Caveman Scan <span className="mx-2 text-brand-dark/25">·</span> About 5 minutes
+            The Inner Caveman Scan
           </p>
 
           <h1 className="mt-6 max-w-[12ch] text-[clamp(2.8rem,11vw,5.1rem)] font-bold leading-[0.94] tracking-[-0.035em] text-brand-dark">
@@ -24,17 +24,12 @@ const CavemanScanIntro = ({ onStart }: Props) => {
             <span className="block font-normal italic text-brand-accent">even before you think.</span>
           </h1>
 
-          <p className="mt-7 max-w-[35rem] font-sans text-lg leading-8 text-brand-dark/78 sm:text-xl sm:leading-9">
-            Twelve ordinary moments, slowed down just enough to notice what your
-            Inner Caveman reacts to before deliberate thought catches up.
-          </p>
-
           <div className="mt-8">
             <button
               onClick={onStart}
               className="inline-flex min-h-13 w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-7 py-3.5 font-sans text-sm font-semibold text-white shadow-[0_10px_30px_rgba(4,42,43,0.14)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(4,42,43,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal focus-visible:ring-offset-2 sm:w-auto"
             >
-              See what shows up
+              Start the Scan
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
@@ -45,13 +40,13 @@ const CavemanScanIntro = ({ onStart }: Props) => {
           <div className="relative overflow-hidden rounded-[1.6rem] border border-brand-dark/10 bg-white/80 shadow-[0_24px_70px_rgba(4,42,43,0.08)] backdrop-blur-sm">
             <div className="border-b border-brand-dark/10 px-6 py-5 sm:px-8">
               <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-accent">
-                One moment. A different reading.
+                Ordinary moments, different readings.
               </p>
             </div>
 
             <div className="px-6 py-7 sm:px-8 sm:py-9">
               <p className="font-serif text-2xl leading-9 text-brand-dark sm:text-[1.75rem] sm:leading-10">
-                You know what you meant to do. Your hand reaches for the phone anyway.
+                You open the laptop to start. A minute later, the phone is in your hand.
               </p>
 
               <div className="my-7 h-px bg-brand-dark/10" />
@@ -60,13 +55,13 @@ const CavemanScanIntro = ({ onStart }: Props) => {
                 <Reading number="01" label="The usual take">
                   You need more discipline. Put the phone away.
                 </Reading>
-                <Reading number="02" label="The Caveman take" accent>
-                  Something more immediate may be offering relief before the harder thing has even begun.
+                <Reading number="02" label="The Inner Caveman reading" accent>
+                  The easier reward is closer, faster, and less uncertain than the harder thing in front of you.
                 </Reading>
               </div>
 
               <p className="mt-8 border-l-2 border-brand-secondary pl-4 font-sans text-sm italic leading-6 text-brand-dark/66">
-                The Scan looks for what repeats across moments—not what is “wrong” with you.
+                Not a flaw. A moment where the old system shows up.
               </p>
             </div>
           </div>

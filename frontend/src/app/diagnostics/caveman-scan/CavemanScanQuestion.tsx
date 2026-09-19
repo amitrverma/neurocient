@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import type { ScanQuestion, ScanOption } from "./questionsBank";
 import CavemanScanFeedback from "./CavemanScanFeedback";
 
@@ -61,7 +61,7 @@ const CavemanScanQuestion = ({
           </button>
           <div className="min-w-0 flex-1">
             <div className="mb-2 flex items-center justify-between gap-3 font-sans text-[0.66rem] font-semibold uppercase tracking-[0.16em]">
-              <span className="text-brand-dark/55">Moment {progress} of {total}</span>
+              <span className="text-brand-dark/55">{progress} of {total}</span>
               <span className="text-brand-teal">Inner Caveman Scan</span>
             </div>
             <div className="h-1 overflow-hidden rounded-full bg-brand-dark/10">
@@ -75,34 +75,34 @@ const CavemanScanQuestion = ({
       </header>
 
       <section className="mx-auto w-full max-w-5xl px-5 pb-8 pt-4 sm:px-6 sm:pb-12 sm:pt-6 lg:pb-14 lg:pt-7">
-        <article className="max-w-4xl rounded-[1.5rem] border border-brand-dark/10 bg-[linear-gradient(135deg,rgba(255,254,250,0.96),rgba(246,243,233,0.88))] p-5 shadow-[0_18px_50px_rgba(4,42,43,0.07)] sm:p-7">
+        <article className="mx-auto max-w-3xl rounded-2xl border border-brand-dark/10 bg-[#fffefa] p-5 shadow-[0_14px_36px_rgba(4,42,43,0.055)] sm:p-6 lg:p-7">
           {question.scene && question.prompt ? (
             <div>
-              {question.timeLabel ? (
-                <p className="mb-5 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-[#9d896a]">
-                  {question.timeLabel}
-                </p>
-              ) : null}
-              <div className="space-y-2.5 sm:space-y-3">
+              <div className="space-y-3 sm:space-y-3.5">
                 {question.scene.map((paragraph, index) => (
                   <div key={paragraph}>
                     <p
                       className={
                         question.visual
                           ? index === question.calloutIndex
-                            ? "mt-2 max-w-3xl border-l-2 border-[#c97a20] py-0.5 pl-4 font-sans text-[0.9rem] leading-6 text-brand-dark/72 sm:text-[0.96rem] sm:leading-7"
+                            ? "mt-3 max-w-[42rem] border-l-2 border-[#c97a20] bg-white/55 py-2 pl-4 pr-3 font-sans text-[0.92rem] leading-7 text-brand-dark/72 sm:text-[0.96rem]"
                             : index === 0
-                              ? "max-w-3xl text-[1.2rem] font-normal leading-[1.42] tracking-[-0.012em] sm:text-[1.38rem]"
+                              ? "max-w-[42rem] text-[1.12rem] font-normal leading-[1.5] sm:text-[1.24rem]"
                               : index === 1 && question.timeLabel
-                                ? "max-w-3xl text-[1.16rem] font-bold leading-[1.35] tracking-[-0.01em] sm:text-[1.28rem]"
-                                : "max-w-3xl font-sans text-[0.9rem] leading-6 text-brand-dark/68 sm:text-[0.96rem] sm:leading-7"
+                                ? "max-w-[42rem] text-[1.04rem] font-bold leading-[1.45] sm:text-[1.14rem]"
+                                : "max-w-[42rem] font-sans text-[0.94rem] leading-7 text-brand-dark/68 sm:text-[0.98rem]"
                           : index === 0
-                            ? "max-w-3xl text-[1.28rem] font-bold leading-[1.38] tracking-[-0.015em] sm:text-[1.5rem]"
+                            ? "max-w-[42rem] text-[1.16rem] font-bold leading-[1.45] sm:text-[1.32rem]"
                             : index === question.scene!.length - 1
-                              ? "max-w-3xl pt-0.5 text-[1rem] font-bold leading-[1.45] text-brand-dark/82 sm:text-[1.08rem]"
-                              : "max-w-3xl font-sans text-[0.9rem] leading-6 text-brand-dark/66 sm:text-[0.96rem] sm:leading-7"
+                              ? "max-w-[42rem] pt-0.5 text-[1rem] font-bold leading-[1.5] text-brand-dark/82 sm:text-[1.06rem]"
+                              : "max-w-[42rem] font-sans text-[0.94rem] leading-7 text-brand-dark/66 sm:text-[0.98rem]"
                       }
                     >
+                      {index === 0 && question.timeLabel ? (
+                        <span className="font-normal text-brand-dark">
+                          {question.timeLabel}.{" "}
+                        </span>
+                      ) : null}
                       <EmphasizedText
                         text={paragraph}
                         phrases={question.sceneEmphasis?.[index]}
@@ -119,12 +119,12 @@ const CavemanScanQuestion = ({
           )}
         </article>
 
-        <h1 id="scan-prompt" className="mt-7 max-w-4xl text-[1.85rem] font-bold leading-[1.16] tracking-[-0.02em] sm:mt-9 sm:text-[2.2rem] lg:text-[2.55rem]">
+        <h1 id="scan-prompt" className="mx-auto mt-7 max-w-3xl text-[1.85rem] font-bold leading-[1.16] tracking-[-0.02em] sm:mt-9 sm:text-[2.2rem] lg:text-[2.55rem]">
             {question.prompt ?? question.text}
         </h1>
 
         <section aria-labelledby="scan-prompt" className="mt-6 sm:mt-7">
-          <div className="grid max-w-3xl gap-2.5">
+          <div className="mx-auto grid max-w-3xl gap-2.5">
             {displayedOptions.map((opt) => {
               const isSelected = selected?.label === opt.label;
               return (
@@ -155,6 +155,27 @@ const CavemanScanQuestion = ({
                 </button>
               );
             })}
+          </div>
+
+          <div className="mx-auto mt-6 flex max-w-3xl items-center justify-between gap-3 font-sans">
+            <button
+              type="button"
+              onClick={onPrevious}
+              disabled={progress === 1}
+              className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-brand-dark/15 bg-white/70 px-5 py-2.5 text-sm font-semibold text-brand-dark/70 transition hover:border-brand-teal hover:text-brand-teal disabled:pointer-events-none disabled:opacity-35"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              Previous
+            </button>
+            <button
+              type="button"
+              onClick={onNext}
+              disabled={!selected}
+              className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-brand-dark px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:pointer-events-none disabled:opacity-35"
+            >
+              Next
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </button>
           </div>
 
         </section>

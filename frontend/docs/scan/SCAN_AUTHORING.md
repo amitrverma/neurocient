@@ -68,13 +68,13 @@ Avoid "attention", "protection", "flow", "moment", and similar poetic or therape
 
 "Automatic processing" is the product term for operation without deliberate choice. Do not turn the description of an autonomic system into a claim that these behaviours are all functions of the anatomical autonomic nervous system.
 
-Older terms below such as "protective move" and Watchtower, and existing identifiers such as `ProtectiveMove`, describe the legacy evidence model. They do not establish a protective purpose or prescribe user-facing language. Use "recurring automatic response" when discussing the result concept; any schema migration is separate implementation work.
+Older terms below such as "protective move" and Watchtower, and existing identifiers such as `ProtectiveMove`, describe the legacy evidence model. They do not establish a protective purpose or prescribe user-facing language. They are not used to generate the public result headline; any schema migration is separate implementation work.
 
 ## Result As The Bridge To The Product
 
-The result must connect the landing page's argument, the person's selected situations, and Neurocient's approach to behaviour change. It must both show how automatic responses can appear in the answers and explain why IKEA, reinforcement, and the available tools are relevant. It must not classify the person by a dominant drive or manufacture a problem to justify a product recommendation.
+The result must complete the landing page's argument: establish whether the Inner Caveman appeared in the answers, explain automatic processing alongside deliberate reasoning, and then connect that understanding to IKEA, reinforcement, and the available tools. It must not classify the person by a dominant drive or manufacture a problem to justify a product recommendation.
 
-Explain Spot the Caveman and microchallenges by what they let the person do. Describe Practice as in development. The exact result structure, science presentation, and login boundary are still being explored; this correction does not settle those design choices or approve the existing implementation.
+Explain Spot the Caveman and microchallenges by what they let the person do. Describe Practice as in development. The first result implementation is defined in `RESULT_APPROACH.md`: public recognition and product explanation, then login to use the product. Content remains accessible within the existing guest reading limits before login is requested.
 
 ## Experience Model
 
@@ -181,9 +181,11 @@ One answer is evidence, not a conclusion. The portrait must emerge from protecti
 
 Watchtower names and mappings remain internal unless a public experience deliberately teaches and earns the metaphor.
 
-## Result Evidence Model
+## Legacy Portrait Evidence Model
 
-The result must not count Caveman answers or present a Caveman-versus-Modern percentage. A selected option records several distinct layers:
+The evidence model below remains available to older authenticated portrait surfaces. It does not define the public result narrative. The current public result uses only whether an answer reflects automatic processing or deliberate choice; see `RESULT_APPROACH.md`.
+
+The result must not present a Caveman answer count, Caveman-versus-Modern percentage, or rationality score. Internal editorial rules for selecting an appropriate result are documented in `RESULT_APPROACH.md`; they do not establish psychological categories. A selected option records several distinct layers:
 
 1. the concrete situation;
 2. the protective move visible in the continuation;
@@ -210,36 +212,37 @@ A portrait should normally require the same protective move to recur across at l
 
 The canonical option-level map lives in `frontend/src/app/diagnostics/caveman-scan/scanEvidence.ts`. Update it whenever scenario options change. The scan validates that every active option has a corresponding evidence entry.
 
-## Two-Level Result Access
+## Result And Product Access
 
 The result must deliver meaningful recognition before authentication.
 
-The open result includes the primary recurring protective move, concrete evidence from the person's selected moments, the connection across those moments, the Inner Caveman interpretation, and one real-life cue to notice. It must fulfil the core Scan promise and must not behave like a teaser.
+The public result states whether the Inner Caveman appeared and introduces Neurocient through IKEA, reinforcement, and the existing tools. It does not repeat selected situations, name a recurring behaviour, or invent a connection between answers. If every answer reflects deliberate choice, the user receives a positive result and a comfortable exit. The result must fulfil the Scan promise before asking for login.
 
-Authentication may unlock the deeper portrait: a secondary recurring movement when supported, later costs across life areas, moments of flexibility, and a more relevant continuation. The access transition should explicitly acknowledge that the primary result already belongs to the reader.
+The product CTA opens the existing authentication modal, then continues to Spot the Caveman at `/tools/spots`. Authenticated users continue directly. Dismissing login preserves the public result. Do not claim the result has been saved to an account when no save has occurred.
 
-The three route responsibilities are deliberate:
+Route responsibilities:
 
 - `/diagnostics/caveman-scan` contains the Scan itself;
-- `/diagnostics/caveman-scan/result` contains the meaningful open primary result and the transition to authentication; and
+- `/diagnostics/caveman-scan/result` contains the public result, the Neurocient approach, and the transition to authentication;
+- `/tools/spots` is the first product destination from this result; and
 - `/my-caveman` contains the authenticated deeper portrait as an ongoing personal product surface.
 
-Do not expand either result inline beneath the Scan. The open result reads the just-completed local responses. The deeper portrait opens from those responses after authentication and restores the latest account portrait when local state is unavailable.
+Do not expand the result inline beneath the Scan. The public result reads and validates the completed local answers using canonical option identities. `/my-caveman` remains an existing account surface, but is not the destination of this first result design. Its older presentation is separate follow-up work. Reading links continue through existing guest limits and login gates; no new entitlement rules are introduced here.
 
 Never ask a person to create an account merely to discover whether the Scan found anything.
 
 ## Result Narrative
 
-The result must complete the same argument begun on the landing page. It should not jump from selected moments to a protective-move label. For the primary movement, connect these layers in order:
+The result must complete the same argument begun on the landing page. Use this order:
 
-1. the lived challenges the person recognised;
-2. the conventional intervention they are likely to hear or try;
-3. why that intervention can genuinely help for a while;
-4. what it does not explain about the pull of the behaviour;
-5. the immediate payoff or signal that becomes more salient through the Inner Caveman lens; and
-6. the possible later cost in momentum, energy, rest, connection, or self-trust.
+1. state whether the Inner Caveman appeared in the selected answers;
+2. explain that deliberate reasoning and evolved automatic processing can both influence behaviour;
+3. clarify that the result does not make planning, organisation, discipline, or rational thought unimportant;
+4. explain why correct advice may remain incomplete when it addresses only what to do;
+5. introduce Neurocient's IKEA and reinforcement approach; and
+6. describe the existing product before asking for login.
 
-The conventional intervention must not be mocked or dismissed. The distinction is that it usually addresses what to do, while the Inner Caveman lens explains why the competing response can feel useful in the moment. Use the person's selected evidence to make this a synthesis of lived moments, not a personality-style classification.
+Do not replay the selected scenarios or create a personalised headline from an inferred recurring behaviour. The Scan already supplied recognition and alternative readings. The result moves the user from that experience into the shared Inner Caveman explanation and then the product.
 
 ## Immediate Reflection
 

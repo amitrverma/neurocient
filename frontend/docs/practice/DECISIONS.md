@@ -1,5 +1,15 @@
 # Practice Decisions
 
+## 2026-09-19: First public result connects the Scan to the product
+
+Implement the agreed sequence: the landing page introduces the Inner Caveman, the Scan lets the person see it in ordinary situations, and the public result establishes whether it appeared before introducing Neurocient's IKEA and reinforcement approach. Login follows that explanation and leads into the existing product. Reading retains the existing guest allowance and login gates.
+
+Correction after review: the opening is not a synthesis of recurring behaviours and does not repeat selected scenarios. That treatment missed the result's purpose and could misrepresent useful behaviours such as planning and organising as the problem. The opening now states whether the Inner Caveman appeared, explains automatic and deliberate processing together, and explicitly avoids a dominant drive or personality conclusion. If it did not appear in the selected situations, the user receives a positive result and an easy exit.
+
+The result remains visually continuous with the wider product. It uses the Scan's `caveman-scan-page` typography context and the product's full-width, background-separated sections. Content within those bands uses open layouts and simple rules; result sections are not placed inside invented rounded, bordered containers. Buttons and accents reuse existing product treatments.
+
+The remainder introduces a concrete IKEA example, optional sourced science, and the roles of Spot the Caveman, microchallenges, and Practice (in development). The product CTA uses the existing AuthModal and `/tools/spots`; authenticated users continue directly. Existing account portrait routes remain available but are not part of this handoff, and the result does not claim an account save. The current contract is in `../scan/RESULT_APPROACH.md` and supersedes the earlier result-pattern interpretation for this public screen.
+
 ## 2026-09-19: Evolved automatic processing and the result's product role
 
 The Inner Caveman is a system operating according to evolved tendencies without intention or agency. It is not a protector, guardian, or inner personality. Removing explicit intention while still explaining every behaviour as protection does not satisfy this distinction. An evolved response need not be useful in current conditions.

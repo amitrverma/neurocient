@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AuthModal from "@/app/components/AuthModal";
 import { useAuth } from "@/app/context/AuthContext";
-import CavemanScanResult from "../CavemanScanResult";
-import { questionsBank } from "../questionsBank";
-import { clearSavedPortraitMarker } from "../scanPersistence";
+import CavemanScanResult from "../ScanResultStory";
+import { restoreResultResponses } from "../scanResultSummary";
 import {
   CAVEMAN_SCAN_STORAGE_KEY,
   type CavemanScanResponse,
@@ -25,16 +24,22 @@ export default function CavemanScanResultPage() {
         router.replace("/diagnostics/caveman-scan");
         return;
       }
-      const parsed = JSON.parse(saved) as { stage?: unknown; responses?: unknown };
-      if (
-        parsed.stage !== "result" ||
-        !Array.isArray(parsed.responses) ||
-        parsed.responses.length !== questionsBank.length
-      ) {
+      const parsed: unknown = JSON.parse(saved);
+      // A direct visit while taking the Scan must preserve the in-progress draft.
+      if (parsed && typeof parsed === "object" && "stage" in parsed &&
+          (parsed.stage === "intro" || parsed.stage === "questions")) {
         router.replace("/diagnostics/caveman-scan");
         return;
       }
-      setResponses(parsed.responses as CavemanScanResponse[]);
+      const restored = restoreResultResponses(parsed);
+      if (!restored) {
+        // Clear invalid completed state before redirecting; otherwise Scan sends
+        // the same invalid state straight back to this page.
+        window.localStorage.removeItem(CAVEMAN_SCAN_STORAGE_KEY);
+        router.replace("/diagnostics/caveman-scan");
+        return;
+      }
+      setResponses(restored);
     } catch {
       window.localStorage.removeItem(CAVEMAN_SCAN_STORAGE_KEY);
       router.replace("/diagnostics/caveman-scan");
@@ -43,7 +48,7 @@ export default function CavemanScanResultPage() {
 
   if (!responses) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f8f6f0] px-6 font-sans text-brand-dark/65">
+      <main className="flex min-h-screen items-center justify-center bg-white px-6 font-sans text-brand-dark/65">
         <p>Opening your result…</p>
       </main>
     );
@@ -53,14 +58,12 @@ export default function CavemanScanResultPage() {
     <>
       <CavemanScanResult
         responses={responses}
+        signedIn={Boolean(user)}
+        ready={ready}
         onUnlock={() => {
-          if (ready && user) router.push("/my-caveman");
+          if (!ready) return;
+          if (user) router.push("/tools/spots");
           else setShowAuth(true);
-        }}
-        onRestart={() => {
-          window.localStorage.removeItem(CAVEMAN_SCAN_STORAGE_KEY);
-          clearSavedPortraitMarker();
-          router.push("/diagnostics/caveman-scan");
         }}
       />
       <AuthModal
@@ -68,9 +71,9 @@ export default function CavemanScanResultPage() {
         onClose={() => setShowAuth(false)}
         onSuccess={() => {
           setShowAuth(false);
-          router.push("/my-caveman");
+          router.push("/tools/spots");
         }}
-        context="open your deeper Caveman portrait"
+        context="start spotting your Caveman"
       />
     </>
   );

@@ -25,7 +25,7 @@ The landing page introduces the problem and the Inner Caveman concept. The Scan 
 
 The result has two linked responsibilities: explain what the answers support about automatic behaviour, and explain how Neurocient addresses behaviour change through IKEA and reinforcement. Introduce Spot the Caveman and microchallenges through their actual purpose; describe Practice honestly as in development. Avoid classifying the person by a dominant drive or forcing a difficulty onto answers that do not support one.
 
-The exact result sequence, presentation of science, and authentication boundary remain under discussion. The September 2026 discussion establishes the conceptual and language constraints, not approval of a particular result design or gate.
+The first result attempt follows landing page -> Scan -> public result establishing the presence or absence of the Inner Caveman -> Neurocient approach -> login -> product. It does not repeat the Scan's scenarios or name a recurring behaviour as the user's result. The product continuation uses the existing Spot the Caveman tool. Reading remains available through existing guest limits before login is requested. Practice is previewed as in development. See `../scan/RESULT_APPROACH.md` for the current contract.
 
 ## Market Positioning
 The self-help and behavior-change app market is saturated. Practice should not compete by adding more advice, more content, more tracking, or more motivation.

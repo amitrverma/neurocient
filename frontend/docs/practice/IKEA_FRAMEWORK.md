@@ -6,7 +6,7 @@ The Practice product is built on **IKEA + Reinforcement + Behavioral Design**.
 IKEA is the behavior-change spine:
 
 - **Identity**: who the user believes they are, and what feels consistent or inconsistent with that self-image.
-- **Knowledge**: what the user comes to understand about why the behavior exists; the hidden motive, fear, reward, protection, or emotional logic.
+- **Knowledge**: what the user comes to understand about why the behavior occurs; automatic responses, learned associations, fear, reward, and emotional logic.
 - **Environment**: the context that quietly makes the old behavior easier and the new behavior harder.
 - **Action**: the smallest concrete move that fits the understood pattern.
 - **Reinforcement**: repeated retrieval and practice over time, because forgetting is real.
@@ -59,7 +59,7 @@ Avoid:
 ## Knowledge
 Knowledge asks why the behavior makes sense.
 
-For procrastination, delay may be protecting the user from:
+For procrastination, delay may be associated with:
 
 - failure
 - success and raised expectations
@@ -68,6 +68,8 @@ For procrastination, delay may be protecting the user from:
 - emotional discomfort
 - low immediate reward
 - decision fatigue
+
+The Inner Caveman refers to evolved automatic processing, not a protector with intentions. Explain how a response occurs and what reinforces it without assuming that it exists to help the person. Use concrete descriptions of behaviour rather than poetic framing around attention, protection, flow, or moments. See `PRACTICE_PRODUCT_CONTEXT.md` for the shared language constraints and the Scan result's role as the bridge to the product.
 
 Knowledge should make the user feel:
 

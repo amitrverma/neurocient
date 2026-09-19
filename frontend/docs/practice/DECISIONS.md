@@ -1,5 +1,15 @@
 # Practice Decisions
 
+## 2026-09-19: Evolved automatic processing and the result's product role
+
+The Inner Caveman is a system operating according to evolved tendencies without intention or agency. It is not a protector, guardian, or inner personality. Removing explicit intention while still explaining every behaviour as protection does not satisfy this distinction. An evolved response need not be useful in current conditions.
+
+Product copy must be concrete and direct. Avoid poetic or therapeutic framing around "attention", "protection", "flow", "moment", and similar abstractions. Describe the situation, behaviour, and automatic response. Use "automatic processing" without implying that all the behaviours discussed belong to the anatomical autonomic nervous system.
+
+The Scan result is the bridge between the landing page and the product: it connects the person's answers to an understanding of automatic behaviour and then explains Neurocient's approach and relevant tools. Do not classify the person by a dominant drive, force a problem onto their answers, or replace their result with a generic sales page. Explain IKEA and reinforcement in relation to behaviour change, distinguish the purposes of Spot the Caveman and microchallenges, and acknowledge that Practice is in development.
+
+This clarification supersedes older protector framing and abstract copy examples. Existing evidence identifiers and historical decisions remain as implementation/history references, not copy guidance. Result sequencing, science presentation, and authentication placement remain open design questions; the preceding discussion was exploratory, not approval of a specific design.
+
 ## 2026-07-18: The Scan Begins With Lived Recognition
 
 The Inner Caveman Scan should help users recognise recurring behaviour in concrete everyday scenes and begin appreciating how the Inner Caveman may be shaping it.
@@ -959,6 +969,8 @@ Implication:
 
 User-facing copy treats the Inner Caveman as a useful lens on fast inherited responses. It does not personify it as an inner character that wants, decides, chooses, protects, speaks, or pursues a goal.
 
+Clarification recorded 2026-08-28: the Inner Caveman is not a tiny guardian inside a person's head. It is shorthand for a highly efficient automated processing system operating through biological automation. A response may have a protective function without implying a separate protector, conscious intention, or deliberate intervention.
+
 Reason:
 
 - Agency language implies a separate intentional actor and misstates the product concept.
@@ -968,6 +980,7 @@ Reason:
 Implication:
 
 - Prefer language about automatic weighting, salience, inherited sensitivity, immediate payoff, and fast signals.
+- Validate content by asking whether it attributes thought, speech, care, choice, vigilance, or intention to the Inner Caveman. If so, rewrite it in terms of automated processing, biological response, weighting, salience, or sensitivity.
 - “Eat the frog” may be contrasted with the Inner Caveman noticing the “donut” first: the deliberate task is known, but the immediate reward is already pulling attention.
 - Keep “lens” as an internal product description, not a user-facing section label. Let the scene and contrast carry the meaning without defensive disclaimers or redundant explanation.
 - Existing and future Scan, result, Practice, and reinforcement copy should be audited for agentic language as those surfaces are revised.

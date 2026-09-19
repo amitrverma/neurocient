@@ -5,11 +5,27 @@ Practice is the new product surface for applying Neurocient concepts to lived be
 
 It starts on the web and may later become a mobile-native app. The web version should therefore avoid assumptions that only work for static portal pages.
 
-Practice can be described, for now, as a personal growth system. Its deeper orientation is evolutionary psychology and evolutionary mismatch: many repeating behavior loops are not signs of personal failure, but old protective drives meeting modern environments with different incentives, friction, cues, and rewards.
+Practice can be described, for now, as a personal growth system. Its deeper orientation is evolutionary psychology and evolutionary mismatch: recurring behaviours can reflect evolved automatic responses operating in modern environments with different incentives, friction, cues, and rewards.
 
 The product promise is: **Get more life from life**.
 
 This means a fuller life where less time, attention, energy, and possibility are lost to autopilot. Procrastination is not only task delay; it is a recurring moment where life quietly leaks into avoidance, background guilt, and postponed agency.
+
+## Inner Caveman And Product Language
+
+The Inner Caveman is a system operating according to evolved tendencies. It has no intention or agency and is not a protector, guardian, or inner personality trying to help the person. Its responses need not serve the person's current goals. Explain the automatic response and the conditions in which it occurs; do not invent a protective purpose for every behaviour.
+
+Use "automatic processing" for this broad product concept. The description of an autonomic system emphasises operation without deliberate choice; it is not an anatomical claim that all these behaviours belong to the autonomic nervous system.
+
+Use concrete, direct language. Avoid "attention", "protection", "flow", "moment", and similar poetic or therapeutic abstractions as the recurring vocabulary of the product. Name the situation, behaviour, immediate consequence, and relevant explanation instead. Precise scientific or implementation uses remain distinct from product copy.
+
+## The Scan Result As The Product Bridge
+
+The landing page introduces the problem and the Inner Caveman concept. The Scan lets the person recognise relevant behaviours in their own answers. The result must connect that recognition to an explanation of Neurocient's approach and the product available to them.
+
+The result has two linked responsibilities: explain what the answers support about automatic behaviour, and explain how Neurocient addresses behaviour change through IKEA and reinforcement. Introduce Spot the Caveman and microchallenges through their actual purpose; describe Practice honestly as in development. Avoid classifying the person by a dominant drive or forcing a difficulty onto answers that do not support one.
+
+The exact result sequence, presentation of science, and authentication boundary remain under discussion. The September 2026 discussion establishes the conceptual and language constraints, not approval of a particular result design or gate.
 
 ## Market Positioning
 The self-help and behavior-change app market is saturated. Practice should not compete by adding more advice, more content, more tracking, or more motivation.

@@ -19,7 +19,9 @@ The Scan is not a personality test, clinical assessment, psychometric instrument
 
 The user arrives knowing that common fixes may work briefly and fade, recurring behaviour is not necessarily a personal failure, the Inner Caveman is a useful lens on fast inherited responses, and awareness comes before change.
 
-The Inner Caveman has no agency. It is not an inner character with intentions, goals, a voice, or a plan to protect the person. It names the inherited tendencies through which immediate reward, threat, effort, uncertainty, status, belonging, and energy cost can become salient before deliberate thought catches up.
+The Inner Caveman has no agency. It is not a tiny guardian inside the head, an inner character with intentions, goals, a voice, or a plan to protect the person. It is shorthand for a highly efficient automated processing system operating through biological automation: inherited tendencies through which immediate reward, threat, effort, uncertainty, status, belonging, and energy cost can become salient before deliberate thought catches up.
+
+Use this as a content-validation test: if a sentence would require the Inner Caveman to think, speak, care, decide, watch over the person, or intentionally intervene, rewrite it in terms of automatic processing and concrete behaviour. Do not use protection as the default explanation even after removing explicit intention. The system operates according to evolved tendencies; its responses are not necessarily useful in present conditions.
 
 Write:
 
@@ -59,6 +61,20 @@ Current source territory includes:
 - realising close relationships have drifted into the bare minimum;
 - avoiding conflict or judgment and accepting surface-level relationships; and
 - becoming triggered by small things while feeling under pressure all day.
+
+## Language Constraint (2026-09-19)
+
+Avoid "attention", "protection", "flow", "moment", and similar poetic or therapeutic devices in product copy. Describe the situation, what the person selected or did, and the automatic response plainly. For example, prefer "You kept checking the plan instead of starting the report" to "Your attention sought protection from a difficult moment."
+
+"Automatic processing" is the product term for operation without deliberate choice. Do not turn the description of an autonomic system into a claim that these behaviours are all functions of the anatomical autonomic nervous system.
+
+Older terms below such as "protective move" and Watchtower, and existing identifiers such as `ProtectiveMove`, describe the legacy evidence model. They do not establish a protective purpose or prescribe user-facing language. Use "recurring automatic response" when discussing the result concept; any schema migration is separate implementation work.
+
+## Result As The Bridge To The Product
+
+The result must connect the landing page's argument, the person's selected situations, and Neurocient's approach to behaviour change. It must both show how automatic responses can appear in the answers and explain why IKEA, reinforcement, and the available tools are relevant. It must not classify the person by a dominant drive or manufacture a problem to justify a product recommendation.
+
+Explain Spot the Caveman and microchallenges by what they let the person do. Describe Practice as in development. The exact result structure, science presentation, and login boundary are still being explored; this correction does not settle those design choices or approve the existing implementation.
 
 ## Experience Model
 

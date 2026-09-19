@@ -38,6 +38,12 @@ It is a guided behavior-change experience built around:
 
 Short form: **IKEA + Reinforcement**.
 
+## Inner Caveman And Product Language
+- The Inner Caveman means evolved automatic processing: a system operating according to evolved tendencies, without intention or agency. It is not a protector, guardian, inner personality, or actor trying to help the user. An evolved response is not necessarily useful in present conditions.
+- Use direct, concrete explanations of situations, behaviour, and automatic responses. Avoid poetic or therapeutic framing built around words such as "attention", "protection", "flow", and "moment". Explain what the person actually does and why. Precise technical uses in code or scientific discussion are distinct from product copy.
+- The Scan result is the bridge between the landing page and the product. Connect the person's actual answers to the Inner Caveman explanation and make Neurocient's approach and relevant tools understandable. Do not reduce it to a personality classification, generic report, or sales interstitial.
+- These constraints apply across landing, Scan, results, tools, Practice, and reinforcement. Older protector language in docs or implementation is legacy wording, not a precedent for new copy.
+
 ## Non-Negotiables
 - Neurocient is a mobile-first product. Design and implement the mobile experience as the default, then expand deliberately for desktop. Desktop support remains required, but it must not drive the initial information hierarchy, interaction model, or layout decisions.
 - Neurocient is intentionally text-rich. Do not treat removing substance as the default accessibility solution. Use exceptional hierarchy, pacing, typography, grouping, progressive disclosure, interaction, and visual storytelling to make dense ideas easy to enter and understand.

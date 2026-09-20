@@ -1,6 +1,6 @@
 # Neurocient deployment runbook
 
-Status: deployment-ready repository work in progress. No deployment has been triggered from the monorepo yet.
+Status: the first monorepo backend image was deployed manually on 2026-09-20. The frontend has not yet been migrated to a new Vercel project.
 
 ## Deployment contract
 
@@ -33,10 +33,21 @@ Read-only inspection on 2026-09-20 confirmed:
 - Public origin: `https://neurocient.whitehill-8e8f7233.centralindia.azurecontainerapps.io`
 - Ingress: external HTTPS, target port `8000`, insecure HTTP disabled
 - Scale: exactly one replica (`minReplicas=1`, `maxReplicas=1`)
-- Current healthy revision: `neurocient--0000010`, image tag `1.5`
+- Previous healthy revision: `neurocient--0000010`, image tag `1.5`
+- Current healthy revision: `neurocient--0000011`, image tag `ea2369bc41ea7fc11d258f081665bee19d5b8eff`
 - Registry pulls: the Container Apps environment's system-assigned identity has `AcrPull`
 
-The current `1.5` image predates `/healthz`, so that path returns `404` until the first monorepo image is deployed. Before migration, use Azure's healthy-revision status and a known read-only API route rather than `/healthz` as the smoke signal.
+The previous `1.5` image predates `/healthz`. The current monorepo image exposes that endpoint and it is part of the release smoke check.
+
+## Deployment history
+
+### 2026-09-20 — first monorepo backend deployment
+
+- Source commit: `ea2369bc41ea7fc11d258f081665bee19d5b8eff`
+- ACR digest: `sha256:4502e04ee7bcf719f5b09adfac728870cb82f7cf496ee9483fe76d68bec07249`
+- Azure revision: `neurocient--0000011`
+- Scheduler: explicitly enabled; scale retained at one replica
+- Evidence: revision healthy with 100% traffic, `/healthz` returned `200`, and the database-backed `/challenges/all` route returned `200`
 
 ## Release order
 

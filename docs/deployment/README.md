@@ -1,6 +1,6 @@
 # Neurocient deployment runbook
 
-Status: the first monorepo backend image was deployed manually on 2026-09-20. The frontend has not yet been migrated to a new Vercel project.
+Status: the first monorepo backend image was deployed manually on 2026-09-20. The existing Vercel project still needs its Root Directory changed to `frontend` before the merged monorepo `main` is pushed.
 
 ## Deployment contract
 
@@ -9,9 +9,17 @@ Status: the first monorepo backend image was deployed manually on 2026-09-20. Th
 - A commit must pass frontend build/tests, backend tests, and the backend image build before it is a release candidate.
 - Production secrets live in Vercel or Azure, never in Git or image layers.
 - Backend production deployment is performed manually with authenticated Azure CLI and Docker commands.
-- The operator must deploy from `monorepo-clean` with a clean, committed working tree.
+- The operator must deploy from `main` with a clean, committed working tree.
 - Backend images use the Git commit SHA, so an Azure revision can be identified and rolled back.
 - The frontend reaches Azure only from server-side Next.js route handlers through `API_BASE_URL`.
+
+## Branch and promotion model
+
+- `dev` is the integration and development branch. Feature work is merged into `dev` and validated there.
+- `main` is the production branch for both applications. Vercel deploys the frontend from `main`; Azure backend images are built manually from `main`.
+- Promote a release by passing CI and preview checks on `dev`, then merging `dev` into `main`.
+- Protect `main` from direct feature commits and require the `Monorepo CI` checks before promotion.
+- The first monorepo backend image was built immediately before this branch policy was adopted. Its source commit is an ancestor of the promoted `main` history.
 
 ## What the legacy repositories actually did
 
@@ -51,16 +59,12 @@ The previous `1.5` image predates `/healthz`. The current monorepo image exposes
 
 ## Release order
 
-1. Push `monorepo-clean` so GitHub and Vercel can see the current commits. Do not trigger production yet.
-2. Use the existing `neurocient` Azure Container App and `neurocient` registry described above. Do not create replacement Azure resources for this migration.
-3. Migrate sensitive runtime values to Container App secrets as described below. Preserve ingress on target port `8000`; add an HTTP health probe for `/healthz` with the first monorepo image or immediately afterward.
-4. Run `Monorepo CI` on `monorepo-clean`, or run all local release checks below before a manual release.
-5. Follow the manual Azure CLI procedure below. Verify `/healthz`, startup logs, database connectivity, and a read-only API path.
-6. Create a separate Vercel project for the monorepo migration, with Root Directory set to `frontend` and Production Branch set to `monorepo-clean`. Copy the environment variables from the current project, changing `API_BASE_URL` to the new Azure HTTPS origin.
-7. Deploy and smoke-test the Vercel project using a preview/test domain. Test sign-in, session refresh, a database-backed read, and one reversible write with synthetic data.
-8. Move the Neurocient domains to the new Vercel project only after the smoke checks pass. Keep the old Vercel deployment available for rollback.
-
-Using a separate Vercel project avoids changing the current project's root directory while its production branch still expects the Next.js application at the repository root.
+1. In the existing Vercel project, change Root Directory to `frontend`, keep Production Branch as `main`, and configure the variables from `frontend/.env.example`. Set `API_BASE_URL` to the Azure Container App HTTPS origin.
+2. Push `dev`. Confirm `Monorepo CI` passes and use its Vercel preview deployment for smoke testing.
+3. Test sign-in, session refresh, a database-backed read, and one reversible write with synthetic data on the preview URL.
+4. Merge `dev` into `main` and push `main`. Vercel will deploy the production frontend from that push.
+5. For subsequent backend releases, build and deploy only a clean, verified commit reachable from `main` using the manual procedure below.
+6. Verify the production frontend, backend `/healthz`, startup logs, database connectivity, and a read-only API path after each promotion.
 
 ## Vercel project settings
 
@@ -70,7 +74,7 @@ Using a separate Vercel project avoids changing the current project's root direc
 - Install Command: default (`npm install`/`npm ci` as selected by Vercel)
 - Build Command: `npm run build`
 - Output Directory: Next.js default
-- Production Branch for the migration: `monorepo-clean`
+- Production Branch: `main`
 
 Set the variables in `frontend/.env.example` for Production and Preview as appropriate. `API_BASE_URL` is server-only and must be the Azure backend origin without a trailing slash. Values prefixed with `NEXT_PUBLIC_` are embedded into browser assets and must not contain secrets.
 
@@ -81,7 +85,7 @@ Vercel's current monorepo guidance requires selecting the application directory 
 Run these commands from the repository root in PowerShell. The clean-tree check ensures the image tag identifies its exact source.
 
 ```powershell
-git switch monorepo-clean
+git switch main
 git diff --quiet
 git diff --cached --quiet
 

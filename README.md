@@ -38,3 +38,6 @@ The frontend runs on `http://localhost:3000`.
 The backend runs on `http://127.0.0.1:8000`.
 
 The previous frontend README is now at `frontend/README.md`.
+
+Deployment architecture, configuration, rollout, and rollback are documented in
+`docs/deployment/README.md`.

@@ -3,7 +3,7 @@ from datetime import date
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import CavemanSpot, MicrochallengeLog, WebPushSubscription
+from app.models import CavemanSpot, MicrochallengeLog, UserMicrochallenge, WebPushSubscription
 from app.utils.pushnotification import send_push
 from app.models import User
 from app.Routes.whatsapp_routes import send_whatsapp_message
@@ -19,8 +19,11 @@ async def has_spotted_today(user_id, db: AsyncSession):
 
 
 async def has_logged_micro_today(user_id, db: AsyncSession):
-    stmt = select(MicrochallengeLog).where(
-        MicrochallengeLog.user_id == user_id,
+    stmt = select(MicrochallengeLog).join(
+        UserMicrochallenge,
+        MicrochallengeLog.assignment_id == UserMicrochallenge.id,
+    ).where(
+        UserMicrochallenge.user_id == user_id,
         MicrochallengeLog.log_date == date.today()
     )
     result = await db.execute(stmt)
@@ -52,9 +55,11 @@ async def send_spot_pushes(db: AsyncSession):
 
         # Web push
         for sub in subscriptions:
-            send_push(
+            await send_push(
                 {"endpoint": sub.endpoint, "keys": sub.keys},
-                payload=json.dumps({"title": title, "body": body})
+                payload=json.dumps({"title": title, "body": body}),
+                db=db,
+                sub_id=sub.id,
             )
 
         # WhatsApp message
@@ -88,9 +93,11 @@ async def send_microchallenge_pushes(db: AsyncSession):
 
         # Web push
         for sub in subscriptions:
-            send_push(
+            await send_push(
                 {"endpoint": sub.endpoint, "keys": sub.keys},
-                payload=json.dumps({"title": title, "body": body})
+                payload=json.dumps({"title": title, "body": body}),
+                db=db,
+                sub_id=sub.id,
             )
 
         # WhatsApp
@@ -119,7 +126,12 @@ async def send_daily_nudge(db: AsyncSession):
     push_success = 0
     for sub in subs:
         sub_info = {"endpoint": sub.endpoint, "keys": sub.keys}
-        if send_push(sub_info, payload=json.dumps(payload)):
+        if await send_push(
+            sub_info,
+            payload=json.dumps(payload),
+            db=db,
+            sub_id=sub.id,
+        ):
             push_success += 1
 
     # WhatsApp

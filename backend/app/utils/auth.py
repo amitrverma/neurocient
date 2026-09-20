@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.database import get_db
 from app.models import User
+from app.config import settings
 import os
 from typing import Optional
 
@@ -15,12 +16,12 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # ------------------------
 # Config
 # ------------------------
-SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-key")
+SECRET_KEY = settings.JWT_SECRET or "super-secret-key"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
 REFRESH_TOKEN_EXPIRE_DAYS = 30
 
-ENV = os.getenv("ENV", "dev")
+ENV = settings.ENV
 
 # Domain setup
 raw_domain = os.getenv("COOKIE_DOMAIN", None)

@@ -7,5 +7,7 @@ export function slugifyTag(tag: string) {
 }
 
 export function unslugifyTag(slug = "") {
-  return slug.replace(/-/g, " ");
+  return slug
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
 }

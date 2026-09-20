@@ -34,6 +34,8 @@ frontend/.env
 frontend/.env.*
 backend/.env
 backend/.env.*
+!frontend/.env.example
+!backend/.env.example
 
 # Editors and OS files
 .DS_Store

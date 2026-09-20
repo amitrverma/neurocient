@@ -1,32 +1,37 @@
+FROM python:3.12-slim AS builder
+
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+RUN python -m venv /opt/venv
+ENV PATH=/opt/venv/bin:$PATH
+
+WORKDIR /build
+COPY requirements.txt ./requirements.txt
+RUN python -m pip install --upgrade pip \
+    && python -m pip install --no-cache-dir -r requirements.txt
+
+
 FROM python:3.12-slim
 
-# Disable interactive prompts
-ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH=/opt/venv/bin:$PATH \
+    PYTHONPATH=/app \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-# Set project root in PYTHONPATH (important for Celery & FastAPI imports)
-ENV PYTHONPATH=/app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    libpq-dev \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set working directory
 WORKDIR /app
 
-# Copy code
-COPY . /app
+COPY --from=builder /opt/venv /opt/venv
+COPY app ./app
 
-# Upgrade pip
-RUN pip install --upgrade pip
+RUN groupadd --system app \
+    && useradd --system --gid app --home-dir /app app \
+    && chown -R app:app /app
 
-# Install dependencies (optimized for CPU)
-RUN pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
+USER app
 
-# Expose FastAPI port
 EXPOSE 8000
 
-# 👇 This is the only real change
-CMD ["gunicorn", "-w", "1", "-k", "uvicorn.workers.UvicornWorker", "app.main:app", "--bind", "0.0.0.0:8000"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"
+
+CMD ["gunicorn", "--workers", "1", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--access-logfile", "-", "--error-logfile", "-", "--capture-output", "app.main:app"]

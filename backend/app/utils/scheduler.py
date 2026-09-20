@@ -11,7 +11,6 @@ from app.utils.reminder_engine import (
     send_microchallenge_pushes,
     send_daily_nudge
 )
-from app.Routes.notifications_routes import send_daily_nudge
 
 # Setup logging for visibility in Azure logs
 logging.basicConfig(level=logging.INFO)
@@ -22,11 +21,21 @@ scheduler = AsyncIOScheduler()
 india_tz = timezone("Asia/Kolkata")
 
 def start_scheduler():
-    scheduler.add_job(run_behavioral_job, CronTrigger(hour=9, minute=0, timezone=india_tz), id="behavioral_job")
-    scheduler.add_job(run_challenge_job, CronTrigger(hour=13, minute=0, timezone=india_tz), id="challenge_job")
-    scheduler.add_job(run_spot_job, CronTrigger(hour=20, minute=0, timezone=india_tz), id="spot_job")
+    if scheduler.running:
+        logger.info("Scheduler is already running")
+        return
+
+    scheduler.add_job(run_behavioral_job, CronTrigger(hour=9, minute=0, timezone=india_tz), id="behavioral_job", replace_existing=True)
+    scheduler.add_job(run_challenge_job, CronTrigger(hour=13, minute=0, timezone=india_tz), id="challenge_job", replace_existing=True)
+    scheduler.add_job(run_spot_job, CronTrigger(hour=20, minute=0, timezone=india_tz), id="spot_job", replace_existing=True)
     scheduler.start()
     logger.info("✅ Scheduler started with behavioral (9AM), challenge (12PM), and spot (8PM) jobs")
+
+def stop_scheduler():
+    if scheduler.running:
+        scheduler.shutdown(wait=False)
+        logger.info("Scheduler stopped")
+
 
 # Robust safe DB wrapper
 async def run_safe(task_func, name: str):

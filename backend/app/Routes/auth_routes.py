@@ -20,6 +20,7 @@ from jose import jwt, JWTError
 
 from firebase_admin import auth as firebase_auth, credentials, initialize_app, exceptions
 from app.analytics.posthog_client import track_event, identify_user
+from app.config import settings
 
 # ---------------- Firebase init ----------------
 firebase_creds_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
@@ -50,7 +51,7 @@ class AuthRequest(BaseModel):
     email: EmailStr
     password: str
 
-SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-key")
+SECRET_KEY = settings.JWT_SECRET or "super-secret-key"
 ALGORITHM = "HS256"
 
 # ---------------- Signup ----------------

@@ -1,16 +1,17 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
 from app.config import settings
 
-engine = create_async_engine(settings.DATABASE_URL, echo=True)
+if not settings.DATABASE_URL:
+    raise RuntimeError("Missing required runtime configuration: DATABASE_URL")
 
 engine = create_async_engine(
     settings.DATABASE_URL,
-    echo=False, # Set to True for debugging, False for production
+    echo=False,
     pool_size=5,
     max_overflow=10,
     pool_recycle=1800,
-    pool_pre_ping=True, # Ensures connections are alive before using them
+    pool_pre_ping=True,
     pool_timeout=30,
 )
 

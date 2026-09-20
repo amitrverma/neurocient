@@ -26,7 +26,7 @@ async def send_push(subscription: dict, payload: str, db: AsyncSession, sub_id=N
 
     except WebPushException as ex:
         status_code = getattr(ex.response, "status_code", None)
-        logger.error(f"WebPushException: {ex} (status {status_code})")
+        logger.error("Web push delivery failed (status %s)", status_code)
 
         # ❌ Remove expired/invalid subscriptions from DB
         if status_code in (404, 410):  # not found / gone

@@ -59,6 +59,8 @@ def test_start_scheduler(monkeypatch):
     calls = []
 
     class DummyScheduler:
+        running = False
+
         def add_job(self, *args, **kwargs):
             calls.append(("add", args, kwargs))
 
@@ -73,3 +75,18 @@ def test_start_scheduler(monkeypatch):
     add_calls = [c for c in calls if c[0] == "add"]
     assert len(add_calls) == 3
     assert ("start",) in calls
+
+
+def test_start_scheduler_is_idempotent(monkeypatch):
+    class RunningScheduler:
+        running = True
+
+        def add_job(self, *args, **kwargs):
+            raise AssertionError("must not add duplicate jobs")
+
+        def start(self):
+            raise AssertionError("must not start twice")
+
+    monkeypatch.setattr(scheduler, "scheduler", RunningScheduler())
+
+    scheduler.start_scheduler()

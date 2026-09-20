@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import AuthModal from '../src/app/components/AuthModal';
 
 vi.mock('../src/app/context/AuthContext', () => ({

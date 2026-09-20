@@ -1,138 +1,90 @@
 # AGENTS.md
 
 ## Purpose
-This guide defines how to evolve Neurocient Labs pages and long-form insight articles.
-Primary goal: improve clarity, readability, and engagement without altering author-provided meaning.
+This repository is evolving Neurocient from a content portal into a broader behavior-change product. Future work must preserve the conceptual spine behind that expansion, especially the Practice product and the IKEA framework.
 
-The current landing page in `src/app/components/LandingPage.tsx` is the site-wide reference for upgraded copy, IA, typography, layout, and color use.
+The most important product reference is:
 
-## Scope
-Applies to:
-- top-level marketing and resource pages under `src/app/**/page.tsx`
-- shared site components under `src/app/components/**`
-- `src/content/insights/*.mdx`
-- `src/app/insights/[slug]/page.tsx`
-- `src/app/globals.css`
+- `frontend/docs/practice/IKEA_FRAMEWORK.md`
+- `frontend/docs/practice/PRACTICE_PRODUCT_CONTEXT.md`
+- `frontend/docs/practice/CHALLENGE_AUTHORING.md`
+- `frontend/docs/practice/DECISIONS.md`
+- `frontend/docs/scan/SCAN_AUTHORING.md`
 
-Do not apply article-specific styling globally unless explicitly requested. Site-wide utilities may be added only when they support repeated page patterns and match the landing page system.
+Read those before modifying anything under:
+
+- `frontend/src/app/practice/**`
+- `frontend/src/content/challenges/**`
+- any future practice, challenge, reinforcement, reminder, or behavior-change flow
+- `frontend/src/app/diagnostics/caveman-scan/**`
+
+## Product Direction
+The Practice product is not a generic habit tracker, productivity tool, or quiz library.
+
+The self-help app market is saturated. Practice is intended to create a niche through:
+
+1. exceptional UI/UX
+2. emotionally lightweight behavior change
+
+For Practice work, cognitive load is a product constraint. The experience should feel easier, calmer, and more precise than typical self-help/productivity apps.
+
+It is a guided behavior-change experience built around:
+
+1. **Identity**: the self-story and cognitive dissonance around the behavior.
+2. **Knowledge**: what we understand about why we do what we do; the emotional logic beneath behavior.
+3. **Environment**: the context that makes actions easier or harder.
+4. **Action**: the smallest concrete move that fits the real cause.
+5. **Reinforcement**: repeated retrieval over time because forgetting is real.
+
+Short form: **IKEA + Reinforcement**.
+
+## Inner Caveman And Product Language
+- The Inner Caveman means evolved automatic processing: a system operating according to evolved tendencies, without intention or agency. It is not a protector, guardian, inner personality, or actor trying to help the user. An evolved response is not necessarily useful in present conditions.
+- Use direct, concrete explanations of situations, behaviour, and automatic responses. Avoid poetic or therapeutic framing built around words such as "attention", "protection", "flow", and "moment". Explain what the person actually does and why. Precise technical uses in code or scientific discussion are distinct from product copy.
+- The Scan result is the bridge between the landing page and the product. Connect the person's actual answers to the Inner Caveman explanation and make Neurocient's approach and relevant tools understandable. Do not reduce it to a personality classification, generic report, or sales interstitial.
+- These constraints apply across landing, Scan, results, tools, Practice, and reinforcement. Older protector language in docs or implementation is legacy wording, not a precedent for new copy.
 
 ## Non-Negotiables
-- Preserve article content meaning. If user says "do not modify content", do not rewrite claims or arguments.
-- Prefer structure/presentation changes over wording changes.
-- Save MDX files as UTF-8. Avoid cp1252 encoding artifacts, replacement characters, and mojibake.
-- Keep changes scoped to the target article when experimenting.
-- Do not overwrite existing user edits. Inspect dirty files before changing them.
-- Fix visible mojibake when touching nearby copy, but avoid broad copy rewrites unless requested.
+- Neurocient is a mobile-first product. Design and implement the mobile experience as the default, then expand deliberately for desktop. Desktop support remains required, but it must not drive the initial information hierarchy, interaction model, or layout decisions.
+- Neurocient is intentionally text-rich. Do not treat removing substance as the default accessibility solution. Use exceptional hierarchy, pacing, typography, grouping, progressive disclosure, interaction, and visual storytelling to make dense ideas easy to enter and understand.
+- Do not reduce Practice to a list of tips.
+- Do not start Practice flows with action unless the user explicitly asks for that; action comes after Identity, Knowledge, and Environment.
+- Do not make each challenge a one-off page if it can be expressed through shared challenge data and reusable flow components.
+- Do not force the Practice surface to match the portal's existing brand-heavy UI. It is allowed to have a calmer, more minimal visual language.
+- Preserve emotional safety. The tone should reduce shame and make change feel possible.
+- Keep progress meaningful. Prefer moments of recognition, retrieval, environmental changes, and tiny actions over raw streak mechanics.
+- Prefer progressive disclosure: one decision or recognition at a time.
+- Prefer concrete action/lack-of-action moments over abstract labels.
+- Trust the user. Avoid instructional microcopy for obvious interactions; use copy for meaning, not hand-holding.
 
-## Brand Background Colors
-- Use only two brand background colors for page and section backgrounds: white/background (`--background: #ffffff`, exposed as `--color-background`) and `brand-dark` (`--color-brand-dark: #042a2b`), as defined in `src/app/globals.css`.
-- Do not introduce additional background color treatments unless the user explicitly requests them.
+## Current Architecture
+The previous localStorage Practice MVP has been retired. The current `/practice` route is a clean shell for the rebuilt experience.
 
-## Landing Page Design System
-Use the current landing page as the default direction for non-article page upgrades:
-- Layout: full-width white or brand-dark sections with constrained inner containers (`max-w-6xl`), generous vertical rhythm, and clear section sequencing.
-- Typography: serif headlines with strong hierarchy; Montserrat/sans for labels, navigation, metadata, buttons, and dense UI copy.
-- Headlines: prefer specific, editorial lines over generic page titles. Use italic accent spans sparingly for meaningful pivots.
-- Section labels: use the landing-page pattern of small uppercase sans text, wider tracking, and a thin rule.
-- Copy rhythm: favor short paragraphs, line breaks for emphasis, and strong narrative progression over dense blocks.
-- Cards: keep cards compact, purposeful, and no more than `rounded-lg` unless an existing component requires otherwise.
-- Buttons: prefer rounded full CTAs for primary page actions; pair text with lucide icons when helpful.
-- Color: use brand tokens (`brand-dark`, `brand-primary`, `brand-secondary`, `brand-accent`, `brand-teal`) rather than ad hoc hex values.
-- Backgrounds: keep section backgrounds to white or brand-dark. Use borders, rules, and text color for hierarchy instead of extra background fills.
-- Imagery: use real product/framework/site assets where useful; avoid decorative-only visuals.
+Future Practice work should reuse existing repo infrastructure where possible:
 
-## Site Upgrade Strategy
-When upgrading the rest of the website after the landing page refresh:
-1. Inventory the target page purpose, primary user question, current CTAs, and downstream routes.
-2. Preserve factual meaning first, then tighten IA and presentation.
-3. Rebuild the page around landing-page patterns: section label, editorial headline, concise intro, high-signal modules, and clear CTA.
-4. Replace generic centered hero/card grids where they feel old, especially on `about`, `resources`, `insights`, `diagnostics`, `books`, `tools`, and legal/support pages.
-5. Unify repeated motifs into small shared helpers only after at least two pages need the same pattern.
-6. Keep interactive tool pages denser and more utilitarian than marketing pages, but still align typography, colors, spacing, and buttons.
-7. Verify mobile text wrapping, card density, nav spacing, and contrast against both white and brand-dark sections.
+- auth and account creation
+- membership/subscription gates
+- user preferences
+- WhatsApp support
+- microchallenge assignment/logging/progress
+- Spot the Caveman
+- insight access
+- `IkeaWorksheet` and `IkeaTracker`
 
-## Page Priority Notes
-- `about`: convert from plain article block to origin/mission narrative using the landing-page editorial rhythm.
-- `resources`, `insights`, `diagnostics`, `books`: replace generic centered titles and large rounded cards with clearer IA and compact, scannable modules.
-- `inner-caveman`: align long-form typography with the premium article system and remove visible mojibake.
-- `tools`: keep dashboard utility, but update headings, cards, empty states, and CTAs to match the new system.
-- `Navbar` and `Footer`: align borders, background treatment, link hierarchy, and mobile menu with the refreshed page style.
+Do not create a parallel auth, progress, reminder, or reinforcement system unless the existing systems genuinely block the product experience.
 
-## Standard Article Frontmatter
-Use these fields unless user requests otherwise:
-- `title`
-- `excerpt`
-- `description`
-- `date` (ISO format `YYYY-MM-DD`)
-- `author`
-- `tags`
-- `keywords`
-- `conversation` (optional but preferred when audio exists)
-  - `blobName`
-  - `duration`
-  - `reflection`
-- `typographyVariant` (optional, for article-specific visual treatment)
+## Updating Context
+When product thinking changes, update the reference docs in `frontend/docs/practice/` in the same work session. These docs are part of the implementation, not optional commentary.
 
-## Audio Placement Rules
-- Default behavior renders audio near top from frontmatter `conversation`.
-- If article requires delayed audio placement:
-  - add `<ConversationBreak />` in MDX where audio should appear
-  - in `page.tsx`, suppress top audio for that variant and inject `ConversationBreak` component
-- Keep this behavior variant-scoped.
+When adding a new challenge, update `CHALLENGE_AUTHORING.md` if the schema, flow, or content conventions change.
 
-## Typography + IA Strategy
-When article is "dry" or dense, improve scanability with:
-- pull quotes for key pivots
-- line-stacks (one thought per line, no bullets if requested)
-- stronger section rhythm (heading hierarchy, separators, spacing)
-- selective emphasis (`strong`) only for high-signal lines
-- premium reference modules, such as a Further Reading table
+When making a meaningful product/design decision, add it to `DECISIONS.md` with the date.
 
-Avoid:
-- overdecorating the full article background unless requested
-- adding distracting nav widgets if user flags distraction
+## Verification
+For frontend work, run:
 
-## Variant Pattern (Recommended)
-- For newer long-form insight articles, default to `typographyVariant: "prologue"` unless a different treatment is explicitly needed.
-- Treat `prologue` as the shared premium long-form typography system, not as a one-off style for `the-past-is-prologue`.
-- Add `typographyVariant: "name"` in article frontmatter when a genuinely separate article treatment is needed.
-- In `src/app/insights/[slug]/page.tsx`, compute class:
-  - `prose prose-article prose-variant-${typographyVariant} max-w-none`
-- Implement styles in `globals.css` under:
-  - `.prose-article.prose-variant-name { ... }`
+```powershell
+npm.cmd run build
+```
 
-The `prologue` variant is the default baseline for new premium essays. Keep experiments isolated only when a piece needs something materially different.
-
-## Lists and Line Breaks
-If user requests "separate lines without bullets":
-- Use plain lines with `<br />` inside wrapper blocks.
-- Prefer the shared utility wrapper:
-  - `<div className="article-line-stack">...</div>`
-- Legacy `prologue-line-stack` is still supported for backward compatibility.
-- Do not render `ul/li` bullets.
-
-## Further Reading Conventions
-Preferred rich format for dense educational articles:
-- table with columns `Author` and `Work`
-- clear row separators
-- responsive behavior on mobile
-- Prefer the shared wrappers:
-  - `.article-reading-list`
-  - `.article-reading-table`
-- Legacy `prologue-reading-list` / `prologue-reading-table` remain supported.
-
-## QA Checklist Before Finalizing
-- Article renders without encoding artifacts or mojibake.
-- No unintended global style regressions.
-- Audio placement matches request.
-- Excerpt is compelling and aligned with article thesis.
-- No duplicate separators, such as `hr` plus heading border creating double lines.
-- New component/style references are fully removed if reverted later.
-- Upgraded pages retain the landing-page visual language on mobile and desktop.
-
-## Quick Workflow
-1. Inspect the current landing page, similar existing pages, and current prose styles.
-2. Add or update content, IA, and page structure.
-3. If needed, add scoped shared utilities or variant-scoped typography in `globals.css`.
-4. Wire variant behavior in `page.tsx` only.
-5. Verify with grep/status and visual sanity checks.
+`npm.cmd run lint` may currently fail on unrelated existing issues. If lint fails, inspect whether any reported issue belongs to the files you changed.

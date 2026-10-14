@@ -297,7 +297,7 @@ const MicrochallengesPage = () => {
       <section className="mx-auto grid w-full max-w-6xl gap-10 px-6 pb-6 pt-12 md:grid-cols-[0.78fr_1.22fr] md:items-start md:pb-8 md:pt-16">
         <div>
           <SectionLabel>Daily experiment</SectionLabel>
-          <h1 className="text-[clamp(2.6rem,5vw,5.1rem)] font-bold leading-[0.98] tracking-[-0.03em] text-brand-dark">
+          <h1 className="page-title text-brand-dark">
             Small actions.
             <br />
             <span className="italic text-brand-accent">Repeated enough.</span>
@@ -718,7 +718,7 @@ const SectionLabel = ({
   tone?: "light" | "dark";
 }) => (
   <div
-    className={`mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] ${
+    className={`page-eyebrow mb-7 flex items-center gap-3 ${
       tone === "dark" ? "text-brand-secondary" : "text-brand-teal"
     }`}
   >

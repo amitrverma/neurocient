@@ -29,12 +29,12 @@ export default function AboutPage() {
       <section className="border-b border-brand-dark/10 px-6 py-16 md:px-10 md:py-24">
         <div className="mx-auto w-full max-w-6xl">
           <div className="max-w-5xl">
-            <div className="mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">
+            <div className="page-eyebrow mb-7 flex items-center gap-3 text-brand-teal">
               <span className="h-px w-12 bg-brand-dark" />
               <span>About Neurocient Labs</span>
             </div>
 
-            <h1 className="text-[clamp(3rem,6.5vw,6.25rem)] font-bold leading-[1.01] text-brand-dark">
+            <h1 className="page-title text-brand-dark">
               The hardest problems
               <br />
               are rarely technical.
@@ -42,7 +42,7 @@ export default function AboutPage() {
               <span className="italic text-brand-accent">They are human.</span>
             </h1>
 
-            <p className="mt-8 max-w-3xl border-l-4 border-brand-secondary pl-5 font-sans text-lg leading-8 text-brand-dark md:text-xl md:leading-9">
+            <p className="page-lede mt-8 max-w-3xl border-l-4 border-brand-secondary pl-5 text-brand-dark">
               Neurocient Labs explores the ancient wiring behind modern
               behavior, then turns that understanding into practical ways to
               live, work, and change.
@@ -271,7 +271,7 @@ const SectionLabel = ({
   tone?: "light" | "dark";
 }) => (
   <div
-    className={`mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] ${
+    className={`page-eyebrow mb-7 flex items-center gap-3 ${
       tone === "dark" ? "text-brand-secondary" : "text-brand-teal"
     }`}
   >

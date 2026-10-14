@@ -94,7 +94,7 @@ const ResultSummary = ({ responses, onRestart }: Props) => {
       <section className="px-6 py-12 md:py-16">
         <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
           <div>
-            <div className="mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">
+            <div className="page-eyebrow mb-7 flex items-center gap-3 text-brand-teal">
               <span>CIC result</span>
               <span className="h-px flex-1 bg-brand-dark/15" />
             </div>
@@ -102,7 +102,7 @@ const ResultSummary = ({ responses, onRestart }: Props) => {
             <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
               Workplace instinct profile
             </p>
-            <h1 className="mt-3 text-[clamp(2.45rem,5vw,5rem)] font-bold leading-[0.98] tracking-[-0.03em] text-brand-dark">
+            <h1 className="page-title mt-3 text-brand-dark">
               Your team&apos;s
               <br />
               <span className="italic text-brand-accent">caveman pattern</span>
@@ -146,7 +146,7 @@ const ResultSummary = ({ responses, onRestart }: Props) => {
       <section className="bg-brand-dark px-6 py-12 text-white md:py-14">
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
           <div>
-            <div className="mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-secondary">
+            <div className="page-eyebrow mb-7 flex items-center gap-3 text-brand-secondary">
               <span>What showed up</span>
               <span className="h-px flex-1 bg-white/20" />
             </div>

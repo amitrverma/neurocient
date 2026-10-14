@@ -34,16 +34,16 @@ export default function ProgramPage() {
   return (
     <main className="bg-white px-6 py-14 font-serif text-brand-dark md:py-20">
       <section className="mx-auto w-full max-w-6xl">
-        <div className="mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">
+        <div className="page-eyebrow mb-7 flex items-center gap-3 text-brand-teal">
           <span>Programs</span>
           <span className="h-px flex-1 bg-brand-dark/15" />
         </div>
-        <h1 className="text-3xl font-bold leading-tight text-brand-dark md:text-5xl">
+        <h1 className="page-title text-brand-dark">
           Structured transformation.
           <br />
           <span className="italic text-brand-accent">Built on the science.</span>
         </h1>
-        <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-brand-dark/72">
+        <p className="page-lede mt-5 text-brand-dark/72">
           Not content dumps. Guided experiences designed around how old systems
           actually change: slowly, with repetition, practice, and the right
           friction.

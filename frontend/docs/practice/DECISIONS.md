@@ -1,5 +1,19 @@
 # Practice Decisions
 
+## 2026-10-14: One design foundation across the Neurocient product
+
+Landing, Scan, insights, Practice, tools, programs, and account surfaces use one
+product-wide typography, color, navigation, and hierarchy foundation. Journey-specific
+composition remains deliberate: Scan may stay scene-led, Practice remains calm and
+progressively disclosed, and articles retain a sustained-reading mode. These are modes
+of one product rather than separate visual brands.
+
+Playfair Display is the shared display face, Inter is the shared UI and explanatory
+body face, and the system editorial serif stack is reserved for long-form reading.
+Top-level routes use the shared page-title and eyebrow roles. Every route owns one
+`main` landmark, and global navigation remains available with a visible current-page
+state. The governing reference is `../DESIGN_SYSTEM.md`.
+
 ## 2026-09-19: First public result connects the Scan to the product
 
 Implement the agreed sequence: the landing page introduces the Inner Caveman, the Scan lets the person see it in ordinary situations, and the public result establishes whether it appeared before introducing Neurocient's IKEA and reinforcement approach. Login follows that explanation and leads into the existing product. Reading retains the existing guest allowance and login gates.

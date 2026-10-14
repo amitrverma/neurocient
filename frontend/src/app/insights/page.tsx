@@ -75,14 +75,14 @@ export default function InsightsPage() {
 
         <div className="grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
           <div>
-            <h1 className="text-[clamp(2.4rem,4.4vw,4.55rem)] font-bold leading-[0.98] tracking-[-0.03em] text-brand-dark">
+            <h1 className="page-title text-brand-dark">
               Insights for
               <br />
               <span className="italic text-brand-accent">
                 old patterns.
               </span>
             </h1>
-            <p className="mt-6 max-w-lg border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark">
+            <p className="page-lede mt-6 max-w-lg border-l-4 border-brand-secondary pl-5 text-brand-dark">
               Short articles on the ancient wiring behind modern behavior.
             </p>
 
@@ -198,7 +198,7 @@ const ArticleRow = ({ article }: { article: ArticleMeta }) => (
 );
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <div className="mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">
+  <div className="page-eyebrow mb-7 flex items-center gap-3 text-brand-teal">
     <span>{children}</span>
     <span className="h-px flex-1 bg-brand-dark/15" />
   </div>

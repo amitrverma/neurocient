@@ -72,7 +72,7 @@ export default function AllInsightsPage() {
 
         <div className="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
           <div>
-            <h1 className="text-[clamp(2.8rem,5.4vw,5.6rem)] font-bold leading-[0.94] tracking-[-0.03em] text-brand-dark">
+            <h1 className="page-title text-brand-dark">
               The full
               <br />
               <span className="italic text-brand-accent">field guide.</span>
@@ -173,7 +173,7 @@ const ArticleRow = ({
 );
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <div className="mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">
+  <div className="page-eyebrow mb-7 flex items-center gap-3 text-brand-teal">
     <span>{children}</span>
     <span className="h-px flex-1 bg-brand-dark/15" />
   </div>

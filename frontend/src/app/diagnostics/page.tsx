@@ -32,12 +32,12 @@ export default function DiagnosticsPage() {
 
         <div className="grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
           <div>
-            <h1 className="text-[clamp(2.6rem,5vw,5.35rem)] font-bold leading-[0.98] tracking-[-0.03em] text-brand-dark">
+            <h1 className="page-title text-brand-dark">
               See what reacts first
               <br />
               <span className="italic text-brand-accent">while it is happening.</span>
             </h1>
-            <p className="mt-6 max-w-xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark">
+            <p className="page-lede mt-6 max-w-xl border-l-4 border-brand-secondary pl-5 text-brand-dark">
               Safety, status, and belonging still shape how you think, feel, and
               act. These diagnostics help you see those instincts more clearly.
             </p>
@@ -133,7 +133,7 @@ const SectionLabel = ({
   tone?: "light" | "dark";
 }) => (
   <div
-    className={`mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] ${
+    className={`page-eyebrow mb-7 flex items-center gap-3 ${
       tone === "dark" ? "text-brand-secondary" : "text-brand-teal"
     }`}
   >

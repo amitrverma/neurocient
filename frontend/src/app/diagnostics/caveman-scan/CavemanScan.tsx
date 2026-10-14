@@ -105,7 +105,7 @@ export default function CavemanScan() {
   if (!hasRestored) return null;
 
   return (
-    <div className="caveman-scan-page">
+    <main className="caveman-scan-page">
       {stage === "intro" && (
         <CavemanScanIntro onStart={() => setStage("questions")} />
       )}
@@ -124,7 +124,7 @@ export default function CavemanScan() {
         </>
       )}
 
-    </div>
+    </main>
   );
 }
 

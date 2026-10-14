@@ -3,7 +3,7 @@
 const HeroSection = () => {
   return (
     <section className="text-center space-y-6">
-      <h1 className="text-3xl md:text-5xl font-bold text-brand-dark leading-tight font-serif">
+      <h1 className="page-title text-brand-dark">
         You know what to do.
         <br />
         <span className="text-brand-primary">

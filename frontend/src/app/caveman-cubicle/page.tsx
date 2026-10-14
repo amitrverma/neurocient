@@ -69,12 +69,12 @@ export default function CavemanInTheCubiclePage() {
         <div className="mx-auto grid w-full max-w-6xl gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:items-center">
           <div>
             <SectionLabel>Workplace behavior</SectionLabel>
-            <h1 className="text-[clamp(3rem,6.2vw,6.1rem)] font-bold leading-[0.96] tracking-[-0.035em] text-brand-dark">
+            <h1 className="page-title text-brand-dark">
               Caveman in
               <br />
               <span className="italic text-brand-accent">the Cubicle.</span>
             </h1>
-            <p className="mt-7 max-w-2xl border-l-4 border-brand-secondary pl-5 font-sans text-lg leading-8 text-brand-dark md:text-xl md:leading-9">
+            <p className="page-lede mt-7 max-w-2xl border-l-4 border-brand-secondary pl-5 text-brand-dark">
               A leadership reset grounded in how people actually behave, not
               how we wish they behaved under pressure.
             </p>
@@ -313,7 +313,7 @@ const SectionLabel = ({
   tone?: "light" | "dark";
 }) => (
   <div
-    className={`mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] ${
+    className={`page-eyebrow mb-7 flex items-center gap-3 ${
       tone === "dark" ? "text-brand-secondary" : "text-brand-teal"
     }`}
   >

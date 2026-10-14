@@ -4,10 +4,10 @@ export default function PrivacyPage() {
   return (
     <main className="bg-white px-6 py-14 font-serif text-brand-dark md:py-20">
       <article className="mx-auto max-w-3xl">
-        <p className="font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">
+        <p className="page-eyebrow text-brand-teal">
           Legal
         </p>
-        <h1 className="mt-4 text-4xl font-bold leading-tight tracking-[-0.02em] md:text-5xl">
+        <h1 className="page-title mt-4">
           Privacy Policy
         </h1>
         <p className="mt-4 font-sans text-sm text-brand-dark/60">

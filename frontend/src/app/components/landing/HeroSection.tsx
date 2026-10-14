@@ -68,7 +68,7 @@ export default function HeroSection() {
 
             <a
               href="#hero-story"
-              className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-1 whitespace-nowrap rounded-full px-4 py-2 font-sans text-[0.62rem] font-bold uppercase tracking-[0.18em] text-brand-dark/55 transition hover:text-brand-dark focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-teal md:bottom-7"
+              className="page-eyebrow absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-1 whitespace-nowrap rounded-full px-4 py-2 text-brand-dark/55 transition hover:text-brand-dark focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-teal md:bottom-7"
             >
               See what&apos;s underneath
               <ChevronDown className="h-5 w-5 text-brand-teal motion-safe:animate-bounce" />
@@ -90,7 +90,7 @@ export default function HeroSection() {
               Maybe it was realizing you&apos;d started getting <strong>triggered by the smallest things</strong>, like you were under pressure all day, every day, and you don&apos;t want your body and mind to keep paying the price.
             </p>
             <div className="mt-2 text-brand-dark md:col-span-6 md:mt-2">
-              <div className="flex items-center gap-4 font-sans text-[0.65rem] font-bold tracking-[0.18em] text-brand-primary" aria-hidden="true">
+              <div className="page-eyebrow flex items-center gap-4 text-brand-primary" aria-hidden="true">
                 <span>04</span>
                 <span className="h-px flex-1 bg-brand-primary/75" />
               </div>

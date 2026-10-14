@@ -279,7 +279,7 @@ const ArticleLayout = ({
   );
 
   return (
-    <div className="relative">
+    <main className="relative">
       <div className="sticky top-16 z-50 w-full bg-white dark:bg-brand-dark">
         <ScrollProgress />
       </div>
@@ -454,7 +454,7 @@ const ArticleLayout = ({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-    </div>
+    </main>
   );
 };
 

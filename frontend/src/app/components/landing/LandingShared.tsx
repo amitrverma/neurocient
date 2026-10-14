@@ -8,7 +8,7 @@ export const SectionLabel = ({
   tone?: "light" | "dark";
 }) => (
   <div
-    className={`mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] ${
+    className={`page-eyebrow mb-7 flex items-center gap-3 ${
       tone === "dark" ? "text-brand-secondary" : "text-brand-teal"
     }`}
   >
@@ -35,7 +35,7 @@ export const SectionHeading = ({
   className?: string;
 }) => (
   <h2
-    className={`max-w-5xl text-balance text-[clamp(2.75rem,6.5vw,6rem)] font-bold leading-[0.96] tracking-[-0.045em] ${
+    className={`page-section-title max-w-5xl ${
       tone === "dark" ? "text-white" : "text-brand-dark"
     } ${className}`}
   >

@@ -92,12 +92,12 @@ const ToolsPage = () => {
         <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
           <div>
             <SectionLabel>Tools</SectionLabel>
-            <h1 className="text-[clamp(2.6rem,4.8vw,5rem)] font-bold leading-[0.98] tracking-[-0.03em] text-brand-dark">
+            <h1 className="page-title text-brand-dark">
               Practice the
               <br />
               <span className="italic text-brand-accent">new response.</span>
             </h1>
-            <p className="mt-6 max-w-xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark">
+            <p className="page-lede mt-6 max-w-xl border-l-4 border-brand-secondary pl-5 text-brand-dark">
               A working space for meeting your Inner Caveman in real moments,
               trying micro-experiments, and building awareness through repetition.
             </p>
@@ -250,7 +250,7 @@ const SectionLabel = ({
   tone?: "light" | "dark";
 }) => (
   <div
-    className={`mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] ${
+    className={`page-eyebrow mb-7 flex items-center gap-3 ${
       tone === "dark" ? "text-brand-secondary" : "text-brand-teal"
     }`}
   >

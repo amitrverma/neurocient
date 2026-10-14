@@ -12,12 +12,12 @@ const DiagnosticIntro = ({ onStart }: Props) => {
     <main className="min-h-[calc(100vh-5rem)] bg-white px-6 py-14 font-serif text-brand-dark md:py-20">
       <section className="mx-auto grid w-full max-w-6xl gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
         <div>
-          <div className="mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">
+          <div className="page-eyebrow mb-7 flex items-center gap-3 text-brand-teal">
             <span>Workplace diagnostic</span>
             <span className="h-px flex-1 bg-brand-dark/15" />
           </div>
 
-          <h1 className="max-w-4xl text-[clamp(2.65rem,5.2vw,5.25rem)] font-bold leading-[1] tracking-[-0.025em] text-brand-dark">
+          <h1 className="page-title max-w-4xl text-brand-dark">
             Caveman in
             <br />
             <span className="italic text-brand-accent">the Cubicle</span>

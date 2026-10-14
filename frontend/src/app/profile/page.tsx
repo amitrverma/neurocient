@@ -169,7 +169,7 @@ const ProfilePage = () => {
         <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
           <div>
             <SectionLabel>Account space</SectionLabel>
-            <h1 className="mt-6 text-[clamp(2.45rem,5vw,5rem)] font-bold leading-[0.98] tracking-[-0.03em]">
+            <h1 className="page-title mt-6">
               Your
               <br />
               <span className="italic text-brand-accent">profile.</span>
@@ -380,7 +380,7 @@ const ProfilePage = () => {
 };
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">
+  <div className="page-eyebrow flex items-center gap-3 text-brand-teal">
     <span>{children}</span>
     <span className="h-px flex-1 bg-brand-dark/15" />
   </div>

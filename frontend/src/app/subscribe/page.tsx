@@ -14,11 +14,11 @@ export default function SubscribePage() {
     <main className="bg-white px-6 py-14 font-serif text-brand-dark md:py-20">
       <section className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
         <div>
-          <div className="flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">
+          <div className="page-eyebrow flex items-center gap-3 text-brand-teal">
             <span>Subscribe</span>
             <span className="h-px flex-1 bg-brand-dark/15" />
           </div>
-          <h1 className="mt-6 text-[clamp(2.45rem,5vw,5rem)] font-bold leading-[0.98] tracking-[-0.03em]">
+          <h1 className="page-title mt-6">
             Membership
             <br />
             <span className="italic text-brand-accent">is coming soon.</span>

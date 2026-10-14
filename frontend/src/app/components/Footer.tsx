@@ -17,6 +17,7 @@ const footerGroups = [
   {
     title: "Practice",
     links: [
+      { href: "/practice", label: "Practice" },
       { href: "/diagnostics", label: "Diagnostics" },
       { href: "/tools", label: "Tools" },
       { href: "/saved", label: "Saved" },

@@ -23,11 +23,11 @@ export const PracticeHeader = ({
     </button>
 
     <div className="flex min-w-0 flex-1 items-center justify-center gap-3">
-      <span className="hidden text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal sm:inline">
+      <span className="page-eyebrow hidden text-brand-teal sm:inline">
         Practice
       </span>
       <div className="h-px w-full max-w-44 bg-brand-dark/10" />
-      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">
+      <span className="page-eyebrow text-brand-teal">
         {stepMeta[step] ?? "Start"}
       </span>
     </div>

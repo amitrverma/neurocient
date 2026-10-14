@@ -13,10 +13,10 @@ export const Screen = ({
   children: ReactNode;
 }) => (
   <section className="w-full max-w-3xl">
-    <p className="font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">
+    <p className="page-eyebrow text-brand-teal">
       {label}
     </p>
-    <h1 className="mt-4 text-[clamp(2.7rem,7vw,5.6rem)] font-normal leading-[0.98] tracking-[-0.01em] text-brand-dark">
+    <h1 className="page-title mt-4 text-brand-dark">
       {title}
     </h1>
     <p className="mt-6 max-w-2xl border-l-2 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark/72 md:text-lg md:leading-9">

@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import ScrollProgress from "./ui/ScrollProgress";
 import FurtherReads from "./FurtherReads";
-import type { PathwayId, ArticleRef } from "@/content/pathways";
+import type { ArticleRef } from "@/content/pathways";
 import Newsletter from "./Newsletter";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "./AuthModal";
@@ -53,7 +53,7 @@ interface ArticleLayoutProps {
   children: ReactNode;
   nextArticle?: { slug: string; title: string; excerpt?: string } | null;
   resources?: ArticleResources;
-  pathway?: { id: PathwayId; title: string } | null;
+  pathway?: { title: string } | null;
   prevInPath?: ArticleRef | null;
   nextInPath?: ArticleRef | null;
   spotPrompt: string | null;
@@ -390,14 +390,7 @@ const ArticleLayout = ({
         {pathway && (
           <div className="article-after-content mt-16 border-t pt-8 text-md text-brand-dark">
             <p>
-              This article is part of the{" "}
-              <Link
-                href={`/pathways?open=${pathway.id}`}
-                className="text-brand-primary hover:underline"
-              >
-                {pathway.title}
-              </Link>{" "}
-              Pathway.
+              This article is part of the {pathway.title} Pathway.
             </p>
             <div className="flex justify-between mt-3">
               {prevInPath ? (

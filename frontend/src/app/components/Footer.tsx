@@ -12,8 +12,6 @@ const footerGroups = [
     links: [
       { href: "/insights", label: "Insights" },
       { href: "/inner-caveman", label: "Inner Caveman" },
-      { href: "/pathways", label: "Pathways" },
-      { href: "/books", label: "Books" },
     ],
   },
   {

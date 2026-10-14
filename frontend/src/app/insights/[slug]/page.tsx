@@ -244,7 +244,7 @@ export default async function InsightPage(
   }
 
   // --- 🧭 Pathway navigation
-  let pathwayData: { id: PathwayId; title: string } | null = null;
+  let pathwayData: { title: string } | null = null;
   let prevInPath: ArticleRef | null = null;
   let nextInPath: ArticleRef | null = null;
 
@@ -262,7 +262,7 @@ export default async function InsightPage(
       if (idx > 0) prevInPath = sorted[idx - 1];
       if (idx < sorted.length - 1) nextInPath = sorted[idx + 1];
 
-      pathwayData = { id: pid, title: cluster.title };
+      pathwayData = { title: cluster.title };
     }
   }
 

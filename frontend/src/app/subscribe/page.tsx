@@ -33,10 +33,10 @@ export default function SubscribePage() {
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
-              href="/resources"
+              href="/insights"
               className="inline-flex items-center gap-2 rounded-full bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:bg-brand-primary"
             >
-              Explore resources
+              Explore insights
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link

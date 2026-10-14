@@ -1,5 +1,26 @@
 # Practice Decisions
 
+## 2026-10-14: The product journey does not replace the navbar taxonomy yet
+
+The primary product model is recognition, understanding, application,
+real-life use, and deeper support. The agreed language is Recognise through the
+Scan, Understand through Inner Caveman and Insights, Work with it through
+Practice, Use it in real life through Spots and Microchallenges, and Go deeper
+through a personal program or workplace offering.
+
+This journey guides transitions and page responsibilities, but does not replace
+the established navbar taxonomy yet. The navbar retains Insights, Practice,
+Diagnostics, Tools, Programs, and About, without a separate Start the Scan CTA.
+
+Personal evidence is not a separate “My Caveman” stage. It belongs inside the
+signed-in Profile together with reflections and continuity. The existing
+`/my-caveman` portrait may remain as a subordinate Scan detail while that account
+experience is consolidated. Saved and Profile remain account-owned utilities and
+do not return to the public footer.
+
+The route roles, audience paths, narrative contract, known gaps, and phased
+alignment criteria are recorded in `../PLATFORM_ALIGNMENT.md`.
+
 ## 2026-10-14: One design foundation across the Neurocient product
 
 Landing, Scan, insights, Practice, tools, programs, and account surfaces use one

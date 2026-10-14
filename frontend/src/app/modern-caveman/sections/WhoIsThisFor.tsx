@@ -33,15 +33,15 @@ const WhoIsThisFor: React.FC = () => {
   ];
 
   return (
-    <section className="w-full px-6 py-20 bg-white font-serif">
+    <section className="mc-section mc-fit">
       
       {/* ===========================
           Two-Column Grid
       ============================ */}
-      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10">
+      <div className="mc-fit-grid">
 
         {/* FOR YOU */}
-        <div className="bg-brand-secondary/10 border-l-4 border-brand-secondary p-6 rounded-2xl shadow-sm">
+        <div className="mc-fit-column mc-fit-yes">
           <div className="flex items-center mb-5">
             <div className="bg-brand-secondary text-brand-dark text-lg rounded-full w-10 h-10 flex items-center justify-center mr-3">
               ✅
@@ -62,7 +62,7 @@ const WhoIsThisFor: React.FC = () => {
         </div>
 
         {/* NOT FOR YOU */}
-        <div className="bg-brand-primary/10 border-l-4 border-brand-primary p-6 rounded-2xl shadow-sm">
+        <div className="mc-fit-column mc-fit-no">
           <div className="flex items-center mb-5">
             <div className="bg-brand-primary text-white text-lg rounded-full w-10 h-10 flex items-center justify-center mr-3">
               🚫
@@ -87,7 +87,7 @@ const WhoIsThisFor: React.FC = () => {
       {/* ===========================
           Closing Narrative
       ============================ */}
-      <div className="max-w-3xl mx-auto mt-20 text-center px-4 space-y-6">
+      <div className="mc-fit-close">
         <p className="text-lg italic text-brand-dark/70 leading-relaxed">
           This isn’t a motivational bonfire.  
           <br className="hidden md:block" />

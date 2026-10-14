@@ -16,40 +16,45 @@ export default function SavedArticlesPage() {
   const { user, ready } = useAuth();
   const [articles, setArticles] = useState<SavedArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [showAuth, setShowAuth] = useState(false);
 
   useEffect(() => {
     if (!ready) return;
 
     if (!user) {
+      setArticles([]);
+      setLoadFailed(false);
       setLoading(false);
       return;
     }
 
     const fetchSaved = async () => {
       setLoading(true);
+      setLoadFailed(false);
       try {
         const res = await fetch("/api/articles/saved", {
           method: "GET",
           credentials: "include",
         });
 
-        if (res.ok) {
-          const data = await res.json();
-          setArticles(data.saved || []);
-        }
+        if (!res.ok) throw new Error(`Failed to load saved articles: ${res.status}`);
+        const data = await res.json();
+        setArticles(data.saved || []);
       } catch (err) {
         console.error("Error loading saved articles:", err);
+        setLoadFailed(true);
       } finally {
         setLoading(false);
       }
     };
 
     fetchSaved();
-  }, [ready, user]);
+  }, [ready, user, reloadKey]);
 
   return (
-    <main className="bg-white font-serif text-brand-dark">
+    <main className="surface-page">
       <section className="px-6 pb-10 pt-14 md:pb-12 md:pt-20">
         <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
           <div>
@@ -68,7 +73,7 @@ export default function SavedArticlesPage() {
               </span>
               <div>
                 <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-                  {user ? `${articles.length} saved` : "Account required"}
+                  {loadFailed ? "Shelf unavailable" : user ? `${articles.length} saved` : "Account required"}
                 </p>
                 <p className="mt-3 font-sans text-base leading-8 text-brand-dark/72">
                   Keep the essays you want to return to when a pattern shows up
@@ -88,6 +93,22 @@ export default function SavedArticlesPage() {
               label="Loading"
               title="Opening your saved shelf"
               text="Reading your account and saved articles."
+            />
+          ) : loadFailed ? (
+            <StatePanel
+              icon={<Bookmark className="h-6 w-6" />}
+              label="Saved shelf unavailable"
+              title="Your saved insights could not be loaded"
+              text="Nothing has been counted as empty. Try again when the connection is available."
+              action={
+                <button
+                  onClick={() => setReloadKey((value) => value + 1)}
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark"
+                >
+                  Try again
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              }
             />
           ) : !user ? (
             <StatePanel

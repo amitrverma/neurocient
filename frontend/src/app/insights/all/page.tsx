@@ -80,9 +80,9 @@ export default function AllInsightsPage() {
           </div>
           <div>
             <p className="max-w-2xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark md:text-lg">
-              Browse every Neurocient essay on the ancient wiring behind modern
-              behavior: worry, comparison, avoidance, belonging, status, and the
-              patterns that keep repeating.
+              Browse every Neurocient explanation of modern behavior: worry,
+              comparison, avoidance, belonging, status, and the responses that
+              keep repeating.
             </p>
             <p className="mt-5 font-sans text-sm font-semibold uppercase tracking-[0.16em] text-brand-teal">
               {articles.length} articles across {tags.length} patterns

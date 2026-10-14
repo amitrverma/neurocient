@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   ArrowRight,
   Bell,
   BookOpen,
   Check,
+  Eye,
+  FlaskConical,
   LoaderCircle,
   LogOut,
+  NotebookPen,
   Settings,
   SlidersHorizontal,
   UserRound,
@@ -21,20 +25,21 @@ import { useNotification } from "../components/NotificationProvider";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
 
-type ProfileTab = "insights" | "settings" | "preferences";
+type ProfileTab = "evidence" | "reflections" | "settings" | "preferences";
 
 const tabs: {
   id: ProfileTab;
   label: string;
   icon: typeof BookOpen;
 }[] = [
-  { id: "insights", label: "Reflections", icon: BookOpen },
+  { id: "evidence", label: "My evidence", icon: Eye },
+  { id: "reflections", label: "Reflections", icon: BookOpen },
   { id: "settings", label: "Account", icon: Settings },
   { id: "preferences", label: "Preferences", icon: SlidersHorizontal },
 ];
 
 const ProfilePage = () => {
-  const [activeTab, setActiveTab] = useState<ProfileTab>("insights");
+  const [activeTab, setActiveTab] = useState<ProfileTab>("evidence");
   const [showAuth, setShowAuth] = useState(false);
   const { user, logout, ready } = useAuth();
 
@@ -47,6 +52,8 @@ const ProfilePage = () => {
   const [whatsAppNumber, setWhatsAppNumber] = useState("");
   const [pushEnabled, setPushEnabled] = useState(false);
   const [prefsLoading, setPrefsLoading] = useState(true);
+  const [prefsError, setPrefsError] = useState(false);
+  const [prefsReloadKey, setPrefsReloadKey] = useState(0);
   const [savingPrefs, setSavingPrefs] = useState(false);
   const [initialPrefs, setInitialPrefs] = useState<{
     nudgeEnabled: boolean;
@@ -66,10 +73,12 @@ const ProfilePage = () => {
 
     const loadPreferences = async () => {
       setPrefsLoading(true);
+      setPrefsError(false);
       try {
         const res = await fetch("/api/user/preferences", {
           credentials: "include",
         });
+        if (!res.ok) throw new Error(`Failed to load preferences: ${res.status}`);
         const data = await res.json();
         if (data) {
           const prefs = {
@@ -88,21 +97,23 @@ const ProfilePage = () => {
         }
       } catch (err) {
         console.error("Failed to load preferences:", err);
+        setPrefsError(true);
       } finally {
         setPrefsLoading(false);
       }
     };
 
     loadPreferences();
-  }, [ready, user]);
+  }, [ready, user, prefsReloadKey]);
 
   const savePrefs = async (updates: object) => {
-    await fetch("/api/user/preferences", {
+    const response = await fetch("/api/user/preferences", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify(updates),
     });
+    if (!response.ok) throw new Error(`Failed to save preferences: ${response.status}`);
   };
 
   const hasChanges = initialPrefs
@@ -164,7 +175,7 @@ const ProfilePage = () => {
   };
 
   return (
-    <main className="bg-white font-serif text-brand-dark">
+    <main className="surface-page">
       <section className="px-6 pb-10 pt-14 md:pb-12 md:pt-20">
         <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
           <div>
@@ -186,8 +197,8 @@ const ProfilePage = () => {
                   {user ? "Signed in" : "Signed out"}
                 </p>
                 <p className="mt-3 font-sans text-base leading-8 text-brand-dark/72">
-                  Manage your reading, reflections, nudges, and delivery
-                  preferences from one place.
+                  Return to your Scan, lived evidence, experiments,
+                  reflections, and delivery preferences from one place.
                 </p>
                 {!user && ready && (
                   <button
@@ -223,7 +234,7 @@ const ProfilePage = () => {
                 Log in to open your profile
               </h2>
               <p className="mt-3 max-w-2xl font-sans text-sm leading-7 text-brand-dark/72">
-                Your profile keeps personal preferences, saved reflections, and
+                Your profile keeps personal evidence, reflections, and
                 notification settings connected to your account.
               </p>
             </Panel>
@@ -261,7 +272,40 @@ const ProfilePage = () => {
               </aside>
 
               <div>
-                {activeTab === "insights" && (
+                {activeTab === "evidence" && (
+                  <Panel>
+                    <SectionKicker icon={<Eye className="h-5 w-5" />}>
+                      My evidence
+                    </SectionKicker>
+                    <p className="mt-5 max-w-2xl font-sans text-sm leading-7 text-brand-dark/70">
+                      These are different views of the same work: what the Scan
+                      suggested, what happened in real life, and what you tried
+                      next.
+                    </p>
+                    <div className="mt-7 grid gap-3">
+                      <EvidenceLink
+                        href="/my-caveman"
+                        icon={<Eye className="h-5 w-5" />}
+                        label="Scan portrait"
+                        text="Return to the result built from your answers."
+                      />
+                      <EvidenceLink
+                        href="/tools/spots"
+                        icon={<NotebookPen className="h-5 w-5" />}
+                        label="Spots"
+                        text="Review the concrete situations you recorded."
+                      />
+                      <EvidenceLink
+                        href="/tools/microchallenges"
+                        icon={<FlaskConical className="h-5 w-5" />}
+                        label="Microchallenges"
+                        text="Continue or review your small experiments."
+                      />
+                    </div>
+                  </Panel>
+                )}
+
+                {activeTab === "reflections" && (
                   <div className="grid gap-5">
                     <NudgeOfTheDay />
                     <WeeklyReflections />
@@ -281,10 +325,6 @@ const ProfilePage = () => {
                       />
                     </div>
                     <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-brand-dark/12 pt-6">
-                      <button className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark/25 px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-primary hover:text-brand-primary">
-                        Change password
-                        <ArrowRight className="h-4 w-4" />
-                      </button>
                       <button
                         onClick={() => logout()}
                         className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:bg-brand-primary"
@@ -306,6 +346,20 @@ const ProfilePage = () => {
                       <div className="mt-6 flex items-center gap-3 font-sans text-sm text-brand-dark/72">
                         <LoaderCircle className="h-5 w-5 animate-spin text-brand-accent" />
                         Loading preferences
+                      </div>
+                    ) : prefsError ? (
+                      <div className="mt-6 border-y border-brand-dark/12 py-6">
+                        <p className="font-sans text-sm leading-7 text-brand-dark/72">
+                          Your saved preferences could not be loaded. Nothing
+                          has been replaced with defaults.
+                        </p>
+                        <button
+                          onClick={() => setPrefsReloadKey((value) => value + 1)}
+                          className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark"
+                        >
+                          Try again
+                          <ArrowRight className="h-4 w-4" />
+                        </button>
                       </div>
                     ) : (
                       <>
@@ -407,6 +461,32 @@ const SectionKicker = ({
       {children}
     </p>
   </div>
+);
+
+const EvidenceLink = ({
+  href,
+  icon,
+  label,
+  text,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  text: string;
+}) => (
+  <Link
+    href={href}
+    className="group grid grid-cols-[2.5rem_1fr_auto] items-center gap-4 border-y border-brand-dark/12 bg-white px-1 py-4 font-sans first:border-b-0 last:border-t-0"
+  >
+    <span className="flex h-10 w-10 items-center justify-center border border-brand-teal/35 text-brand-accent">
+      {icon}
+    </span>
+    <span>
+      <strong className="block text-sm text-brand-dark">{label}</strong>
+      <span className="mt-1 block text-sm leading-6 text-brand-dark/62">{text}</span>
+    </span>
+    <ArrowRight className="h-4 w-4 text-brand-accent transition group-hover:translate-x-0.5" />
+  </Link>
 );
 
 const InfoTile = ({ label, value }: { label: string; value: string }) => (

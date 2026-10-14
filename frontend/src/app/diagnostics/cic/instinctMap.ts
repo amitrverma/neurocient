@@ -30,13 +30,13 @@ export const instinctMap: InstinctMap = {
       instinct: "Conflict Avoidance",
       feedback: "This reflects Conflict Avoidance — we’d rather agree than push for realism.",
       explanation: "In group settings, challenging timelines can feel confrontational. To stay liked or avoid friction, people often accept unrealistic plans.",
-      microShift: "Use anonymous estimation or a red-team role to safely challenge assumptions."
+      microShift: "Use anonymous estimation or a red-team role to challenge assumptions without making one person carry the social cost."
     },
     C: {
       motive: "Status & Social Hierarchy",
       instinct: "Status Anxiety",
       feedback: "This may be Status Anxiety — asking for more time can feel risky.",
-      explanation: "In hierarchical environments, admitting you need more time can feel like losing face. People avoid it to protect their perceived competence.",
+      explanation: "In hierarchical environments, asking for more time can be read as lower competence. People may avoid the request even when the estimate is unrealistic.",
       microShift: "Normalize check-in points where re-estimating is expected, not penalized."
     },
     D: {
@@ -134,7 +134,7 @@ export const instinctMap: InstinctMap = {
       motive: "Safety & Self-Protection",
       instinct: "Scarcity Mindset",
       feedback: "This may be Scarcity Mindset — rest feels like falling behind.",
-      explanation: "In high-pressure environments, pausing feels unsafe. Productivity becomes a protective behavior.",
+      explanation: "In high-pressure environments, pausing can look like falling behind or lacking commitment. Continued activity removes that visible risk for the moment.",
       microShift: "Make downtime visible and endorsed — model it from leadership."
     },
     B: {
@@ -155,7 +155,7 @@ export const instinctMap: InstinctMap = {
       motive: "Status & Social Hierarchy",
       instinct: "Lack of Norms for Recovery",
       feedback: "This shows Absence of Recovery Norms — there’s no shared script for slowing down.",
-      explanation: "If no one stops, no one feels safe to be the first. A break becomes a deviation instead of a design.",
+      explanation: "If no one stops, the first person to pause visibly departs from the group norm. A break becomes a deviation instead of part of the operating design.",
       microShift: "Build breaks into team rituals — Friday winds-down, async Mondays, etc."
     },
     E: {
@@ -185,7 +185,7 @@ export const instinctMap: InstinctMap = {
     C: {
       motive: "Status & Social Hierarchy",
       instinct: "Habit Inertia",
-      feedback: "This might be Habit Inertia — under stress, the old way feels safer.",
+      feedback: "This might be Habit Inertia — under stress, the old way requires fewer decisions and less relearning.",
       explanation: "Change needs energy. Under pressure, brains default to known paths — even inefficient ones.",
       microShift: "Build support systems that kick in when stress does — like fallback checklists."
     },
@@ -300,7 +300,7 @@ export const instinctMap: InstinctMap = {
       motive: "Status & Social Hierarchy",
       instinct: "Emotional Suppression",
       feedback: "This shows Emotional Suppression — people push through without signaling overwhelm.",
-      explanation: "Expressing strain feels unsafe — so people stay quiet until breakdown.",
+      explanation: "Expressing strain can be read as reduced commitment or capacity, so people may stay quiet until the cost becomes harder to hide.",
       microShift: "Normalize energy flags — color-coded check-ins, weekly ‘emotional standups.’"
     },
     D: {
@@ -323,15 +323,15 @@ export const instinctMap: InstinctMap = {
     A: {
       motive: "Safety & Self-Protection",
       instinct: "Error Aversion",
-      feedback: "This may be Error Aversion — admitting gaps feels unsafe.",
+      feedback: "This may be Error Aversion — admitting a gap can expose competence to judgment.",
       explanation: "When perfection is prized, people hide imperfection — even when it would help to share it.",
-      microShift: "Share leadership mistakes openly — model safety around imperfection."
+      microShift: "Share leadership mistakes openly and show what changed because they were named."
     },
     B: {
       motive: "Affiliation & Belonging",
       instinct: "Psychological Insecurity",
       feedback: "This reflects Psychological Insecurity — fear blocks open challenge.",
-      explanation: "In unsafe teams, even smart disagreements stay buried.",
+      explanation: "When disagreement is ignored or punished, even well-supported concerns stay buried.",
       microShift: "Run 'conflict sprints' — space where challenge is welcome and expected."
     },
     C: {
@@ -344,9 +344,9 @@ export const instinctMap: InstinctMap = {
     D: {
       motive: "Status & Social Hierarchy",
       instinct: "Trust Fragmentation",
-      feedback: "This may be Trust Fragmentation — safety depends on who’s in the room.",
-      explanation: "Inconsistent norms across teams/managers erode safety at scale.",
-      microShift: "Standardize safety rituals — check-ins, closers, inclusive facilitation across teams."
+      feedback: "This may be Trust Fragmentation — candor depends on who is in the room.",
+      explanation: "Inconsistent responses from teams and managers make openness a local gamble instead of an organisational norm.",
+      microShift: "Standardize check-ins, meeting closers, and inclusive facilitation across teams."
     },
     E: {
             motive: "",   
@@ -384,7 +384,7 @@ export const instinctMap: InstinctMap = {
       instinct: "Avoidance Loop",
       feedback: "This may be Avoidance Loop — we delay what feels like sustained effort.",
       explanation: "The brain avoids long, uncertain tasks — it defaults to shallow wins.",
-      microShift: "Time-box deep work and protect the start ritual (no Slack, no email)."
+      microShift: "Time-box deep work and reserve the start for the task itself (no Slack, no email)."
     },
     E: {
             motive: "",   

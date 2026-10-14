@@ -1,4 +1,5 @@
 import PracticeFlow from "./PracticeFlow";
+import "../nav-surfaces.css";
 
 export const metadata = {
   title: "Practice",

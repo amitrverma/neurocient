@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, CheckCircle2, FlaskConical } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "../AuthModal";
@@ -28,11 +28,14 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
   const [showAuth, setShowAuth] = useState(false);
   const [showMembership, setShowMembership] = useState(false);
   const [challenge, setChallenge] = useState<Microchallenge | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [assigning, setAssigning] = useState(false);
   const [alreadyAssigned, setAlreadyAssigned] = useState(false);
 
   useEffect(() => {
     const fetchChallenge = async () => {
+      setLoadFailed(false);
       try {
         const res = await fetch(`/api/challenges/${id}`);
         if (!res.ok) throw new Error("Failed to fetch challenge");
@@ -40,11 +43,12 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
         setChallenge(data);
       } catch (err) {
         console.error("Error fetching challenge:", err);
+        setLoadFailed(true);
       }
     };
 
     if (id) fetchChallenge();
-  }, [id]);
+  }, [id, reloadKey]);
 
   const startChallenge = async () => {
     setAssigning(true);
@@ -96,6 +100,25 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
     }
     startChallenge();
   };
+
+  if (loadFailed) {
+    return (
+      <aside className="not-prose my-8 rounded-lg border border-brand-teal/45 bg-white px-4 py-4 text-brand-dark">
+        <p className="font-sans text-sm leading-6 text-brand-dark/75">
+          This microchallenge could not be loaded. No experiment has been
+          assigned.
+        </p>
+        <button
+          type="button"
+          onClick={() => setReloadKey((value) => value + 1)}
+          className="mt-3 inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-brand-teal/45 px-3.5 py-1.5 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-brand-teal"
+        >
+          Try again
+          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+        </button>
+      </aside>
+    );
+  }
 
   if (!challenge) {
     return (

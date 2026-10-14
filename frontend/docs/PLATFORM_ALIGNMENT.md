@@ -146,33 +146,22 @@ concepts whose exposure must be earned by the experience.
 - Logged-in article membership enforcement reads a local usage count that the
   article journey does not increment, so the stated access contract and runtime
   behaviour can diverge.
-- `/tools` displays fixed streak values even though the product doctrine rejects
-  raw streaks as the primary progress model and the values are not user evidence.
 
 ### Information architecture
 
-- Diagnostics, Tools, and Programs expose internal containers rather than user
-  purposes.
-- Personal evidence is split across My Caveman, Spots, challenges, and Profile
-  instead of being brought together within the signed-in Profile.
-- Personal and workplace diagnostics are presented as peers without first
-  distinguishing the two audience paths.
 - Spotting exists as both the general `/tools/spots` surface and the staged
   `/my-caveman/spot` continuation. Their relationship is meaningful internally
   but not yet clear to users.
 
 ### Narrative and content
 
-- Protector language and personified “caveman brain” language remain across the
-  landing page, Inner Caveman guide, Scan source material, tools, programs, and
-  Insights.
+- Protector language and personified “caveman brain” language remain in older
+  landing, Inner Caveman, article, and inactive Scan source material. Current
+  Scan, CIC, Spots, Microchallenges, and account handoffs use direct response
+  language, but this is not yet a whole-content migration.
 - “Ancient wiring,” “nervous system,” “dominant patterns,” “train your brain,”
   and “work with your biology” are used as interchangeable explanations even
   though they make different scientific claims.
-- Insights is organised mainly by recency and taxonomy rather than the lived
-  questions that bring a user there.
-- Programs and Practice both promise structured transformation without clearly
-  distinguishing self-guided product work from high-touch facilitation.
 
 ### Trust and product state
 
@@ -182,6 +171,9 @@ concepts whose exposure must be earned by the experience.
   Neurocient Labs.
 - Metadata, sitemap coverage, navigation labels, and page titles do not yet
   describe destinations consistently.
+- Microchallenge completion is currently calculated with different thresholds
+  by assignment, logging, and progress endpoints. Product ownership must define
+  the completion rule before those endpoints are consolidated.
 
 ## Delivery Sequence
 

@@ -1133,3 +1133,160 @@ Implication:
   single next-moment action.
 - Progress and back navigation remain available in both beats without adding
   quiz-like answer labels or competing navigation controls.
+
+## 2026-10-14: The Modern Caveman page is one guided programme decision
+
+The Modern Caveman sales page preserves its substantive programme content but
+organises it as a single mobile-first narrative: recognise the gap between
+knowing and doing, inspect the four-week experience and outcomes, assess
+personal fit, and then consider the investment.
+
+Reason:
+
+- The previous page presented individually styled content sections without a
+  clear relationship between explanation, programme mechanics, fit, and price.
+- A high-consideration guided programme needs enough substance to support an
+  informed decision without making the user assemble the offer themselves.
+- Eligibility belongs before pricing; reassurance and frequently asked
+  questions belong after the offer rather than delaying the programme model.
+- Founder biography and programme-origin sections are omitted here because the
+  wider platform already establishes the point of view, while this route needs
+  to help the person evaluate the programme itself.
+
+Implication:
+
+- Keep the programme page visually related to the wider platform while giving
+  it a more focused editorial rhythm than discovery routes.
+- Preserve the payment destination, price, guarantee, programme inclusions, and
+  week-by-week claims when changing presentation.
+- Prefer open, sequenced reading and clear dividers over a collection of
+  interchangeable marketing cards.
+
+## 2026-10-14: The workplace offer begins with observable team behaviour
+
+The Caveman in the Cubicle page leads with workplace situations a leader can
+recognise, then explains the automatic social responses that may sustain them.
+Its two continuations are the CIC diagnostic and a workshop conversation.
+
+Reason:
+
+- The workplace path has a different actor and decision from the personal
+  product journey: a leader is evaluating a team pattern and a facilitated
+  organisational intervention.
+- Language such as "leading nervous systems," generic threat, or belonging
+  protection is too vague to explain what people actually do at work.
+- A workplace buyer needs to see the problem, the explanatory lens, the way of
+  working, and the resulting capability without moving through repeated sales
+  claims.
+
+Implication:
+
+- Begin with observable actions in meetings, decisions, feedback, hierarchy,
+  and follow-through.
+- Explain the immediate social consequence that can keep each response useful
+  without assigning intention or agency to an Inner Caveman character.
+- Keep the diagnostic self-serve path and workshop conversation visibly
+  distinct while allowing either to be a valid next step.
+
+## 2026-10-14: Insights begins with lived questions, not publishing taxonomy
+
+The Insights landing page uses familiar situations and questions as its
+primary entry points. Recency, topic tags, and the complete article archive
+remain available as secondary discovery tools.
+
+Reason:
+
+- A person usually arrives with a repeated behaviour they cannot explain, not
+  a publication date or an internal content category.
+- Asking for a taxonomy choice before recognition makes the visitor translate
+  their experience into the platform's organisational model.
+- Insights supports understanding within the wider Neurocient journey; it is
+  not a separate media feed competing for attention.
+
+Implication:
+
+- Curate the entry page around concrete moments such as scrolling, replaying
+  conflict, worrying, comparing, stress eating, or workplace silence.
+- Keep every article discoverable through the full archive and topic routes;
+  curation must not become an access restriction.
+- Introduce the immediate-payoff and later-cost lens before asking the person
+  to choose an explanation.
+
+## 2026-10-14: Every primary navigation destination has one job
+
+The five action-oriented top-level destinations now answer different user
+questions: Practice guides active self-service work, Diagnostics helps a person
+choose the right context for recognition, Tools records evidence and supports
+small experiments, Programs explains high-touch offers, and About establishes
+the organisation, method, and trust context.
+
+Reason:
+
+- Container names alone made the platform feel like a collection of sections
+  and left visitors to infer how the parts related.
+- Practice and Programs need an explicit boundary between self-guided product
+  work and facilitated support.
+- Personal and workplace diagnostics serve different actors and decisions, so
+  the context choice must precede either scan.
+- Spots and Microchallenges are complementary parts of an evidence-and-
+  experiment loop; fabricated streaks misrepresent both progress and state.
+
+Implication:
+
+- Keep shared typography, colour, and editorial rhythm across public navigation
+  surfaces while giving each route an information structure suited to its job.
+- Preserve Practice as the calmer authenticated product surface; public routes
+  may orient or route users but must not duplicate its guided flow.
+- Show account evidence only when it comes from persisted user data, and show a
+  truthful loading or failure state when that evidence is unavailable.
+- Let the global footer own exhaustive company and legal navigation so About
+  can focus on purpose, method, founder context, and useful next doors.
+
+## 2026-10-14: Profile owns personal evidence; tools own the work
+
+The signed-in Profile is the home for returning to a Scan portrait, real-life
+Spots, Microchallenges, reflections, and delivery preferences. Spots and
+Microchallenges remain focused working surfaces rather than becoming a second
+account dashboard.
+
+Reason:
+
+- A person should not need to understand several account destinations to find
+  what they previously noticed or tried.
+- Calling the Tools index a dashboard confused a public support index with a
+  private account home.
+- Personal evidence is account-owned continuity, not another public stage in
+  the navigation.
+
+Implication:
+
+- Keep Profile behind authentication and link its evidence section to the
+  existing portrait, Spots, and Microchallenges routes.
+- Keep Saved as a separate reading utility in the account menu.
+- Do not add a Dashboard alias unless a distinct signed-in dashboard is later
+  designed and given a clear job.
+
+## 2026-10-14: Missing account data is not empty account data
+
+Account surfaces distinguish loading, unavailable, signed-out, genuinely empty,
+and populated states. A failed request must not produce a zero count, an empty
+shelf, default preferences, or a behavioural recommendation based on presumed
+absence.
+
+Reason:
+
+- False emptiness contradicts the user's memory and erodes trust in saved
+  evidence.
+- The next step after a Scan depends on whether a matching Spot exists; a
+  network failure cannot safely answer that question.
+- Reminder settings and daily logs affect real behaviour and must remain scoped
+  to the authenticated account and assignment.
+
+Implication:
+
+- Spots, Microchallenges, Saved, Profile preferences, and the saved Scan
+  portrait expose explicit unavailable states and retry where useful.
+- Daily Microchallenge completion comes from the persisted assignment rather
+  than a browser-global flag.
+- Keep persistence and authorization decisions on existing backend boundaries;
+  UI fallbacks must not invent state.

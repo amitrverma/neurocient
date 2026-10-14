@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import "./caveman-cubicle.css";
 
 export const metadata: Metadata = {
   title: "Caveman in the Cubicle | Inner Caveman",

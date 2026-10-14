@@ -42,14 +42,15 @@ const shifts: ShiftItem[] = [
 // ===========================
 const ProgramShift: React.FC = () => {
   return (
-    <section className="w-full px-6 py-20 bg-white font-serif">
-      <div className="max-w-6xl mx-auto space-y-12">
+    <section className="mc-section mc-shift">
+      <div className="mc-wide">
 
         {/* ===========================
             Top: Header Section
         ============================ */}
-        <div className="max-w-3xl space-y-6">
-          <h2 className="text-2xl md:text-4xl font-bold text-brand-dark leading-snug">
+        <div className="mc-section-heading">
+          <span className="mc-kicker">What you will work on</span>
+          <h2>
             <span className="text-brand-accent">Reshape</span> your habits, decisions,
             <br />
             choices, and daily environment
@@ -63,14 +64,14 @@ const ProgramShift: React.FC = () => {
         {/* ===========================
             Bottom: Cards in a 4-Card Grid
         ============================ */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="mc-numbered-grid">
           {shifts.map((shift: ShiftItem, index: number) => (
             <div
               key={index}
-              className="bg-white border rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300"
+              className="mc-numbered-item"
             >
               {/* Icon */}
-              <div className="flex items-center justify-center w-12 h-12 bg-brand-secondary/20 rounded-full mb-4 text-xl">
+              <div className="mc-item-icon">
                 {shift.icon}
               </div>
 

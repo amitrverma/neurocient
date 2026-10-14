@@ -14,9 +14,13 @@ interface Nudge {
 const NudgeOfTheDay = () => {
   const [nudge, setNudge] = useState<Nudge | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     const fetchNudge = async () => {
+      setLoading(true);
+      setLoadFailed(false);
       try {
         const res = await fetch("/api/nudges", {
           credentials: "include",
@@ -26,13 +30,14 @@ const NudgeOfTheDay = () => {
         setNudge(data);
       } catch (err) {
         console.error("Failed to fetch nudge:", err);
+        setLoadFailed(true);
       } finally {
         setLoading(false);
       }
     };
 
     fetchNudge();
-  }, []);
+  }, [reloadKey]);
 
   return (
     <section className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-sm md:p-8">
@@ -51,8 +56,22 @@ const NudgeOfTheDay = () => {
 
       {loading ? (
         <p className="mt-5 font-sans text-sm leading-7 text-brand-dark/72">
-          Loading today's prompt.
+          Loading today&apos;s prompt.
         </p>
+      ) : loadFailed ? (
+        <div className="mt-5">
+          <p className="font-sans text-sm leading-7 text-brand-dark/72">
+            Today&apos;s prompt could not be loaded.
+          </p>
+          <button
+            type="button"
+            onClick={() => setReloadKey((value) => value + 1)}
+            className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark px-4 py-2 font-sans text-sm font-semibold text-brand-dark"
+          >
+            Try again
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
       ) : nudge ? (
         <div className="mt-5 space-y-4 font-sans text-sm leading-7 text-brand-dark/76 md:text-base md:leading-8">
           {nudge.title && (
@@ -63,7 +82,7 @@ const NudgeOfTheDay = () => {
 
           {nudge.type === "text" ? (
             <p className="border-l-4 border-brand-secondary pl-5 italic">
-              "{nudge.paragraphs?.[0] || nudge.quote}"
+              &ldquo;{nudge.paragraphs?.[0] || nudge.quote}&rdquo;
             </p>
           ) : (
             <>
@@ -72,7 +91,7 @@ const NudgeOfTheDay = () => {
               ))}
               {nudge.quote && (
                 <p className="border-l-4 border-brand-secondary pl-5 italic">
-                  "{nudge.quote}"
+                  &ldquo;{nudge.quote}&rdquo;
                 </p>
               )}
               {nudge.link && (

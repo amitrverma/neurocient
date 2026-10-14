@@ -48,7 +48,7 @@ const CavemanScanQuestion = ({
       tabIndex={-1}
       className="caveman-scan-page min-h-screen bg-[#f8f6f0] font-serif text-brand-dark outline-none"
     >
-      <header className="sticky top-0 z-20 border-b border-brand-dark/8 bg-[#f8f6f0]/95 px-5 py-4 backdrop-blur sm:px-6">
+      <header className="sticky top-16 z-20 border-b border-brand-dark/8 bg-[#f8f6f0]/95 px-5 py-4 backdrop-blur sm:px-6">
         <div className="mx-auto flex w-full max-w-5xl items-center gap-4">
           <button
             type="button"

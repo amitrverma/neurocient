@@ -78,11 +78,11 @@ const insights = [
 
 const ChangeIsHard = () => {
   return (
-    <section className="w-full px-6 py-24 bg-white font-serif">
-      <div className="max-w-5xl mx-auto space-y-16">
+    <section className="mc-section mc-dark-section">
+      <div className="mc-wide">
 
         {/* Heading */}
-        <h2 className="text-3xl md:text-4xl font-bold text-brand-dark text-center leading-snug tracking-tight">
+        <h2 className="mc-section-title">
           Why change feels so hard —
           <br className="hidden md:block" />
           <span className="inline-block mt-1">
@@ -91,11 +91,11 @@ const ChangeIsHard = () => {
         </h2>
 
         {/* Insight Blocks */}
-        <div className="space-y-12">
+        <div className="mc-insight-list">
           {insights.map((block, index) => (
             <div
               key={index}
-              className="flex items-start gap-5"
+              className="mc-insight-row"
             >
               {block.icon}
               <p className="text-brand-dark/85 leading-relaxed text-[1.05rem] md:text-lg tracking-tight">

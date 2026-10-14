@@ -26,6 +26,7 @@ import { incrementUsage, usageLimits } from "../utils/usage";
 import MembershipModal from "./MembershipModal";
 import { trackEvent } from "../utils/analytics";
 import { slugifyTag } from "../utils/slug";
+import CavemanSpot from "./ui/CavemanSpot";
 
 interface ResourceItem {
   title: string;
@@ -111,8 +112,8 @@ const ArticleLayout = ({
 
   const { user, ready } = useAuth();
   const { notify } = useNotification();
-  const [showResources, setShowResources] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [savedStateUnavailable, setSavedStateUnavailable] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showMembership, setShowMembership] = useState(false);
   const [authContext, setAuthContext] = useState<string | null>(null);
@@ -122,8 +123,12 @@ const ArticleLayout = ({
 
   // Detect if saved
   useEffect(() => {
-    if (!user || !slug) return;
+    if (!user || !slug) {
+      setSavedStateUnavailable(false);
+      return;
+    }
     const checkSaved = async () => {
+      setSavedStateUnavailable(false);
       try {
         const res = await fetch(`/api/articles/saved/${slug}`, {
           method: "GET",
@@ -132,8 +137,11 @@ const ArticleLayout = ({
         if (res.ok) {
           const data = await res.json();
           setIsSaved(data.isSaved);
+        } else {
+          setSavedStateUnavailable(true);
         }
       } catch (err) {
+        setSavedStateUnavailable(true);
         console.error("❌ Error checking saved:", err);
       }
     };
@@ -193,7 +201,7 @@ const ArticleLayout = ({
       window.removeEventListener("scroll", onScroll);
       clearTimeout(timeout);
     };
-  }, [slug, ready]);
+  }, [slug, ready, user]);
 
   // Save / Unsave
   const handleSave = async (
@@ -201,7 +209,7 @@ const ArticleLayout = ({
     skipAuthCheck = false,
   ) => {
     e?.preventDefault();
-    if (!slug || !ready) return;
+    if (!slug || !ready || savedStateUnavailable) return;
     if (!skipAuthCheck && !user) {
       setAuthContext("save this article");
       setAuthCallback(() => () => handleSave(undefined, true));
@@ -259,12 +267,19 @@ const ArticleLayout = ({
       </a>
       <button
         onClick={handleSave}
+        disabled={Boolean(user) && savedStateUnavailable}
         className={`transition ${
           isSaved
             ? "text-brand-primary"
             : "text-brand-dark hover:text-brand-primary"
         }`}
-        title={isSaved ? "Remove from saved" : "Save for later"}
+        title={
+          savedStateUnavailable
+            ? "Saved status unavailable"
+            : isSaved
+              ? "Remove from saved"
+              : "Save for later"
+        }
       >
         <Bookmark size={20} fill={isSaved ? "currentColor" : "none"} />
       </button>
@@ -360,7 +375,7 @@ const ArticleLayout = ({
         {/* Read next */}
         {nextArticle && (
           <div ref={nextRef} className="article-after-content mt-16 border-t pt-8">
-            <p className="text-md text-brand-dark mb-2">You might also like:</p>
+            <p className="text-md text-brand-dark mb-2">Continue this question:</p>
             <Link
               href={`/insights/${nextArticle.slug}`}
               className="text-xl font-semibold text-brand-teal hover:text-brand-primary transition"
@@ -375,13 +390,14 @@ const ArticleLayout = ({
 
         {/* Default article CTAs */}
         <div className="article-after-content mt-12">
+          {spotPrompt && <CavemanSpot prompt={spotPrompt} />}
           <ArticleScanCTA />
         </div>
 
         <div className="mt-10">
           <Newsletter
             variant="feature"
-            subtext="Join thousands of readers getting weekly insights on the ancient wiring behind modern struggles and practical ways to work with it. No fluff. No gimmicks. Just science made human."
+            subtext="Receive new explanations of familiar behaviours and practical ways to test what helps in daily life."
             logoSrc="/logo/newsletter.png"
           />
         </div>
@@ -418,13 +434,6 @@ const ArticleLayout = ({
           </div>
         )}
       </article>
-
-      {/* Desktop further reads */}
-      {resources && showResources && (
-        <div className="hidden lg:block absolute right-0 bottom-24 w-72">
-          <FurtherReads {...resources} />
-        </div>
-      )}
 
       {/* Auth / Membership */}
       <AuthModal
@@ -466,11 +475,11 @@ const ArticleScanCTA = () => (
     <div>
       <p className="article-scan-cta-label">Inner Caveman Scan</p>
       <h2 className="article-scan-cta-title">
-        Meet the Inner Caveman behind your everyday reactions.
+        See which automatic responses recur in everyday situations.
       </h2>
       <p className="article-scan-cta-copy">
-        Twelve lived moments that connect everyday reactions with the
-        protective logic that may sit underneath them.
+        Twelve lived moments that connect what happens, what you do next, and
+        the immediate consequence that can make the response repeat.
       </p>
     </div>
     <Link href="/diagnostics/caveman-scan" className="article-scan-cta-button">

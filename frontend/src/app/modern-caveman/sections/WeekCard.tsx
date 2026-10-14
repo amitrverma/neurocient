@@ -27,15 +27,15 @@ const WeekCard: React.FC<WeekCardProps> = ({
     title.toLowerCase().includes("week 4");
 
   return (
-    <div className="w-full bg-white border rounded-2xl shadow-sm p-6 md:p-8 font-serif flex flex-col gap-10 max-w-5xl">
+    <article className="mc-week-card">
 
       {/* Title */}
-      <h3 className="text-xl md:text-2xl font-bold text-brand-dark leading-snug">
+      <h3>
         {title}
       </h3>
 
       {/* Modules / Focus Label */}
-      <div className="space-y-4">
+      <div className="mc-week-modules">
         {(isLiveSession || isApplicationWeek) && (
           <div className="flex items-center gap-2 text-brand-dark/70 text-sm font-medium">
             {isLiveSession ? (
@@ -65,7 +65,7 @@ const WeekCard: React.FC<WeekCardProps> = ({
       </div>
 
       {/* Bullet List */}
-      <ul className="space-y-3 text-brand-dark/80 text-base md:text-lg leading-relaxed">
+      <ul className="mc-week-bullets">
         {bullets.map((b: string, i: number) => (
           <li key={i} className="flex items-start">
             <span className="mr-2 text-brand-secondary font-bold">–</span>
@@ -75,7 +75,7 @@ const WeekCard: React.FC<WeekCardProps> = ({
       </ul>
 
       {/* Tools Block */}
-      <div className="bg-brand-secondary/10 border border-brand-secondary rounded-xl p-6 shadow-sm">
+      <div className="mc-week-tools">
         <p className="font-semibold text-brand-dark mb-4 text-lg">
           🛠️ Tools & Support
         </p>
@@ -86,7 +86,7 @@ const WeekCard: React.FC<WeekCardProps> = ({
           ))}
         </ul>
       </div>
-    </div>
+    </article>
   );
 };
 

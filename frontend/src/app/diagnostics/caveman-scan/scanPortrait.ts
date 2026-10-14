@@ -46,24 +46,24 @@ const scenarioContexts: Record<number, string> = {
 
 const watchtowerCopy: Record<Watchtower, { label: string; explanation: string }> = {
   horizon: {
-    label: "Safety & certainty",
-    explanation: "Your system repeatedly looked for what felt safer, clearer, or more containable.",
+    label: "Certainty & control",
+    explanation: "Your answers repeatedly favored what felt clearer, more predictable, or easier to contain.",
   },
   campfire: {
     label: "Belonging",
-    explanation: "Your system repeatedly watched for signs that connection or acceptance might have shifted.",
+    explanation: "Your answers repeatedly watched for signs that connection or acceptance might have shifted.",
   },
   high_ground: {
     label: "Status & position",
-    explanation: "Your system repeatedly checked what the moment might mean about where you stand.",
+    explanation: "Your answers repeatedly checked what the moment might mean about where you stand.",
   },
   home_path: {
-    label: "Bond security",
-    explanation: "Your system repeatedly moved to protect an important close bond from possible disruption.",
+    label: "Close bonds",
+    explanation: "Your answers repeatedly avoided actions that could introduce conflict or uncertainty into an important bond.",
   },
   care_circle: {
     label: "Care for your people",
-    explanation: "Your system repeatedly became alert around the safety or wellbeing of people close to you.",
+    explanation: "Your answers repeatedly became alert around the needs or wellbeing of people close to you.",
   },
 };
 
@@ -77,7 +77,7 @@ const continuationCopy: Record<ProtectiveMove, ScanPortrait["continuation"]> = {
   restore_control: {
     href: "/insights/anticipatory-anxiety",
     title: "Understand the mind’s search for certainty",
-    body: "Continue with how anticipation and control can keep a protective system active.",
+    body: "Continue with how anticipation and control can keep checking, planning, or delay active.",
     cta: "Explore certainty and control",
   },
   social_monitoring: {
@@ -88,21 +88,21 @@ const continuationCopy: Record<ProtectiveMove, ScanPortrait["continuation"]> = {
   },
   create_distance: {
     href: "/insights/connections",
-    title: "See how protection can become distance",
+    title: "See how avoiding risk can become distance",
     body: "Continue with the tension between avoiding risk now and preserving connection over time.",
     cta: "Explore connection",
   },
   override_signal: {
     href: "/insights/struggle-to-exercise",
     title: "Understand what your energy is negotiating",
-    body: "Continue with the protective logic beneath effort, fatigue, and pushing through.",
-    cta: "Explore energy protection",
+    body: "Continue with the immediate trade-off beneath effort, fatigue, and pushing through.",
+    cta: "Explore effort and energy",
   },
   discharge_pressure: {
     href: "/inner-caveman",
     title: "Understand why the final moment carries the whole day",
-    body: "Continue with how a protective system stays braced and reacts when one more demand arrives.",
-    cta: "Meet the protective system",
+    body: "Continue with how accumulated pressure changes the response to one more demand.",
+    cta: "Understand accumulated pressure",
   },
   self_verdict: {
     href: "/insights/willpower",
@@ -113,7 +113,7 @@ const continuationCopy: Record<ProtectiveMove, ScanPortrait["continuation"]> = {
   flexible_response: {
     href: "/inner-caveman",
     title: "Learn what creates room around the signal",
-    body: "Continue with the protective system that still speaks first, even when it does not decide what happens next.",
+    body: "Continue with the automatic signal that can appear first without deciding what happens next.",
     cta: "Understand your Inner Caveman",
   },
 };
@@ -154,7 +154,7 @@ const patternCopy: Record<Exclude<ProtectiveMove, "flexible_response">, PatternC
     whyItHelps: "Limits, plans, and friction can interrupt the behaviour and create a useful window of control.",
     whatItMisses: "They do not explain why the easier thing becomes most attractive when something meaningful feels effortful, uncertain, or emotionally heavy.",
     protection:
-      "Your Inner Caveman is reducing the discomfort of this moment. The relief is real. The cost often arrives later as lost momentum, energy, or rest.",
+      "The response reduces discomfort in this moment. The relief is real. The cost often arrives later as lost momentum, energy, or rest.",
     immediatePayoff: "Less effort, uncertainty, or emotional weight right now.",
     laterCost: "The meaningful thing remains, often joined by lost momentum, pressure, or guilt.",
     cue: "Something meaningful starts to feel heavy, and an easier thing suddenly becomes unusually attractive.",
@@ -168,7 +168,7 @@ const patternCopy: Record<Exclude<ProtectiveMove, "flexible_response">, PatternC
     whyItHelps: "A plan creates clarity and briefly reduces the discomfort of not knowing how things will go.",
     whatItMisses: "The feeling of control can become the reward, allowing planning, organising, or restarting to replace entering an imperfect reality.",
     protection:
-      "Your Inner Caveman gets certainty now. But sometimes the plan quietly replaces the life the plan was meant to support.",
+      "Planning creates certainty now. But sometimes the plan quietly replaces the life the plan was meant to support.",
     immediatePayoff: "Order, closure, and the feeling that the situation is manageable again.",
     laterCost: "The plan becomes cleaner while action, rest, or self-trust moves further away.",
     cue: "Entering the moment feels uncomfortable, and improving the plan begins to feel more urgent than using it.",
@@ -182,21 +182,21 @@ const patternCopy: Record<Exclude<ProtectiveMove, "flexible_response">, PatternC
     whyItHelps: "Distance and reframing can quiet the social signal for a while.",
     whatItMisses: "Your attention is not merely collecting information. It may be checking belonging, position, or acceptance before a social change becomes costly.",
     protection:
-      "Your Inner Caveman is trying to catch a change in status, belonging, or connection before it becomes costly. The watch can continue even when there is little evidence of danger.",
-    immediatePayoff: "A sense that you are detecting a social threat early enough to respond.",
+      "Social monitoring tries to catch a change in status, belonging, or connection before it becomes costly. The checking can continue even when the evidence remains incomplete.",
+    immediatePayoff: "A sense that you are detecting a social change early enough to respond.",
     laterCost: "Ambiguous details become stories about your worth, position, or relationships.",
     cue: "A small social detail starts producing a much larger story about where you stand.",
   },
   create_distance: {
     eyebrow: "The move that repeated",
-    headline: "When contact feels risky, distance offers protection.",
+    headline: "When contact feels risky, distance removes the immediate uncertainty.",
     explanation:
       "Silence, postponement, withdrawal, or letting the moment pass can remove the possibility of awkwardness, conflict, or rejection right now.",
     usualAdvice: "Communicate better, be brave, and just have the difficult conversation.",
     whyItHelps: "A direct action can reconnect people and prevent avoidance from becoming permanent.",
     whatItMisses: "Contact is difficult precisely because the relationship matters; speaking can feel like risking conflict, rejection, or proof that the bond has changed.",
     protection:
-      "Your Inner Caveman protects the bond by avoiding a dangerous moment inside it. That can preserve the present while allowing distance to grow over time.",
+      "Avoiding the conversation removes the possibility of conflict or rejection now. That can preserve the present while allowing distance to grow over time.",
     immediatePayoff: "No awkwardness, conflict, or rejection has to be faced in this moment.",
     laterCost: "The short-term safety of silence can quietly become loneliness or relational distance.",
     cue: "You care about the connection, but waiting for a safer moment starts to feel wiser than making contact now.",
@@ -208,7 +208,7 @@ const patternCopy: Record<Exclude<ProtectiveMove, "flexible_response">, PatternC
       "Pressure or low energy does not always lead you to stop. Sometimes you contain it, force your way through, or treat the signal as another obstacle to overcome.",
     usualAdvice: "Push through, build resilience, and do not let tiredness become an excuse.",
     whyItHelps: "Effort can preserve performance and carry an immediate demand across the finish line.",
-    whatItMisses: "It treats every internal signal as resistance instead of asking whether the system is protecting limited energy or carrying accumulated strain.",
+    whatItMisses: "It treats every internal signal as resistance instead of asking whether energy is limited or strain has accumulated.",
     protection:
       "Pushing through can preserve competence and keep demands moving. It can also prevent the strain from being understood until it emerges somewhere else.",
     immediatePayoff: "Competence is preserved and the demand keeps moving.",
@@ -224,7 +224,7 @@ const patternCopy: Record<Exclude<ProtectiveMove, "flexible_response">, PatternC
     whyItHelps: "Regulation skills can create a pause and reduce harm in the immediate interaction.",
     whatItMisses: "It focuses on the final reaction while overlooking the deadlines, interruptions, vigilance, and unfinished demands already filling the system.",
     protection:
-      "Your Inner Caveman is trying to create space from one more demand. The reaction protects capacity in the moment, while someone nearby may receive the accumulated force of the day.",
+      "The larger reaction pushes one more demand away and creates space in the moment, while someone nearby may receive the accumulated force of the day.",
     immediatePayoff: "The next demand is pushed away and a little capacity is reclaimed.",
     laterCost: "Accumulated pressure reaches someone who may have had little to do with creating it.",
     cue: "A response feels larger than the immediate event. Look behind it for everything your system has already been carrying.",
@@ -282,14 +282,14 @@ export const buildScanPortrait = (allEvidence: ScanOptionEvidence[]): ScanPortra
       eyebrow: "What appeared across the scan",
       headline: "You often left the moment as it was, without making it larger.",
       explanation:
-        "Across these situations, you frequently noticed the pull without needing to follow it. That is flexibility in these moments—not proof that protective reactions never appear elsewhere.",
+        "Across these situations, you frequently noticed the pull without needing to follow it. That is flexibility in these moments—not proof that automatic reactions never appear elsewhere.",
       usualAdvice: "Stay disciplined and keep making the rational choice.",
       whyItHelps: "Clear intentions can support the pause you already showed in these moments.",
-      whatItMisses: "Your answers do not show an absence of protective signals. They show that the first signal did not always have to become the decision.",
+      whatItMisses: "Your answers do not show an absence of automatic signals. They show that the first signal did not always have to become the decision.",
       protection:
-        "The Inner Caveman still speaks first. Your answers suggest that, in these particular scenes, its signal did not have to become the decision.",
+        "An automatic signal can still appear first. Your answers suggest that, in these particular scenes, it did not have to become the decision.",
       immediatePayoff: "You allowed discomfort or ambiguity to remain without needing to remove it first.",
-      laterCost: "There is no single repeated protective cost supported strongly enough by these answers.",
+      laterCost: "There is no single repeated later cost supported strongly enough by these answers.",
       cue: "Keep noticing the small pause between the first signal and what you do next.",
     };
     const primaryMove = "flexible_response" as const;
@@ -313,7 +313,7 @@ export const buildScanPortrait = (allEvidence: ScanOptionEvidence[]): ScanPortra
   return {
     headline: primary.headline,
     introduction:
-      "Your answers do not define a personality type. They show a movement that appeared across different parts of ordinary life—and the protective logic that may sit underneath it.",
+      "Your answers do not define a personality type. They show a response that appeared across different parts of ordinary life—and the immediate consequence that may keep it easy to repeat.",
     primary,
     secondary: secondaryEntry ? makePattern(secondaryEntry[0], secondaryEntry[1]) : undefined,
     flexibleMoments: flexibleMoments.slice(0, 2),

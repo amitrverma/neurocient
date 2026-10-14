@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type React from "react";
-import { Bookmark, LayoutDashboard, LogOut, Menu, UserRound, X } from "lucide-react";
+import { Bookmark, LogOut, Menu, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -82,13 +82,6 @@ const Navbar = () => {
                 {showDropdown && (
                   <div className="absolute right-0 mt-3 w-52 rounded-lg border border-brand-dark/12 bg-white p-2 text-sm shadow-[0_20px_60px_rgba(4,42,43,0.14)]">
                     <AccountLink
-                      href="/tools"
-                      icon={<LayoutDashboard className="h-4 w-4" />}
-                      onClick={() => setShowDropdown(false)}
-                    >
-                      Dashboard
-                    </AccountLink>
-                    <AccountLink
                       href="/saved"
                       icon={<Bookmark className="h-4 w-4" />}
                       onClick={() => setShowDropdown(false)}
@@ -155,9 +148,6 @@ const Navbar = () => {
             ))}
             {user ? (
               <>
-                <Link href="/tools" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
-                  Dashboard
-                </Link>
                 <Link href="/saved" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
                   Saved
                 </Link>

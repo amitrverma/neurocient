@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PenLine, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "../AuthModal";
 import { useNotification } from "../NotificationProvider";
@@ -15,7 +15,7 @@ interface CavemanSpotProps {
 }
 
 const CavemanSpot = ({
-  prompt = "Notice a caveman instinct? Log it here.",
+  prompt = "Notice the response in a real situation? Record it here.",
   onAdded,
 }: CavemanSpotProps) => {
   const [note, setNote] = useState("");
@@ -43,7 +43,7 @@ const CavemanSpot = ({
     }
 
     try {
-      const res = await fetch("/api/spots/", {
+      const res = await fetch("/api/spots", {
         method: "POST",
         credentials: "include",
         headers: {
@@ -122,7 +122,7 @@ const CavemanSpot = ({
     <AuthModal
       isOpen={showAuth}
       onClose={() => setShowAuth(false)}
-      context="start spotting your caveman"
+      context="save this real-life observation"
       disableEscape
     />
   </aside>

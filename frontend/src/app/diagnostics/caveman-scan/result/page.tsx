@@ -73,7 +73,7 @@ export default function CavemanScanResultPage() {
           setShowAuth(false);
           router.push("/tools/spots");
         }}
-        context="start spotting your Caveman"
+        context="start recording real-life evidence"
       />
     </>
   );

@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight, LibraryBig } from "lucide-react";
 import { slugifyTag } from "../utils/slug";
 
 interface ArticleMeta {
@@ -13,16 +13,62 @@ interface ArticleMeta {
   tags?: string[];
 }
 
+interface QuestionPath {
+  slug: string;
+  question: string;
+  situation: string;
+  context: "Everyday life" | "At work";
+}
+
 const insightsDir = path.join(process.cwd(), "src/content/insights");
+
+const questionPaths: QuestionPath[] = [
+  {
+    slug: "doomscrolling",
+    question: "Why do I keep scrolling long after I meant to stop?",
+    situation: "You open your phone for one thing. An hour disappears.",
+    context: "Everyday life",
+  },
+  {
+    slug: "replay-arguments",
+    question: "Why do I keep replaying an argument?",
+    situation: "The conversation is over. Your mind keeps restarting it.",
+    context: "Everyday life",
+  },
+  {
+    slug: "anticipatory-anxiety",
+    question: "Why am I worrying before anything has happened?",
+    situation: "One uncertain possibility begins to feel like the likely outcome.",
+    context: "Everyday life",
+  },
+  {
+    slug: "why-we-compare",
+    question: "Why do I keep comparing myself with other people?",
+    situation: "Someone else’s progress quietly changes how yours feels.",
+    context: "Everyday life",
+  },
+  {
+    slug: "stress-comfort-food",
+    question: "Why does stress send me towards sugar and snacks?",
+    situation: "The harder the day gets, the more immediate relief matters.",
+    context: "Everyday life",
+  },
+  {
+    slug: "silent-team",
+    question: "Why does the room go quiet when honesty matters?",
+    situation: "The meeting invites candor, but rank and consequence are still present.",
+    context: "At work",
+  },
+];
 
 const cleanText = (value: string) =>
   value
-    .replaceAll("â€”", "-")
-    .replaceAll("â€“", "-")
-    .replaceAll("â€™", "'")
-    .replaceAll("â€œ", '"')
-    .replaceAll("â€", '"')
-    .replaceAll("â€˜", "'")
+    .replaceAll("â€”", "—")
+    .replaceAll("â€“", "–")
+    .replaceAll("â€™", "’")
+    .replaceAll("â€œ", "“")
+    .replaceAll("â€", "”")
+    .replaceAll("â€˜", "‘")
     .replaceAll("Â", "");
 
 const formatDate = (date?: string) => {
@@ -35,9 +81,10 @@ const formatDate = (date?: string) => {
   }).format(new Date(date));
 };
 
-export default function InsightsPage() {
-  const articles: ArticleMeta[] = fs
+const getArticles = (): ArticleMeta[] =>
+  fs
     .readdirSync(insightsDir)
+    .filter((file) => file.endsWith(".mdx"))
     .map((file) => {
       const raw = fs.readFileSync(path.join(insightsDir, file), "utf-8");
       const { data } = matter(raw);
@@ -55,151 +102,150 @@ export default function InsightsPage() {
         new Date(b.date || "").getTime() - new Date(a.date || "").getTime(),
     );
 
-  const [featuredArticle, ...secondaryArticles] = articles.slice(0, 7);
-  const tagCounts: Record<string, number> = {};
+export default function InsightsPage() {
+  const articles = getArticles();
+  const articlesBySlug = new Map(articles.map((article) => [article.slug, article]));
+  const guidedQuestions = questionPaths
+    .map((path) => ({ ...path, article: articlesBySlug.get(path.slug) }))
+    .filter(
+      (path): path is QuestionPath & { article: ArticleMeta } =>
+        Boolean(path.article),
+    );
+  const guidedSlugs = new Set(guidedQuestions.map((path) => path.slug));
+  const moreArticles = articles
+    .filter((article) => !guidedSlugs.has(article.slug))
+    .slice(0, 6);
+  const tagCounts = new Map<string, number>();
 
   articles.forEach((article) => {
     article.tags?.forEach((tag) => {
-      tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+      tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
     });
   });
 
-  const topTags = Object.entries(tagCounts)
+  const topTags = [...tagCounts.entries()]
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 7);
+    .slice(0, 8);
 
   return (
-    <main className="bg-white font-serif text-brand-dark">
-      <section className="mx-auto w-full max-w-6xl px-6 pt-14 pb-10 md:pt-16 md:pb-12">
-        <SectionLabel>Insights</SectionLabel>
+    <main className="insights-page">
+      <section className="insights-hero">
+        <div className="insights-hero-copy">
+          <p className="insights-eyebrow">Understand what keeps happening</p>
+          <h1>
+            Start with the behavior
+            <span>you cannot quite explain.</span>
+          </h1>
+          <p className="insights-hero-lede">
+            Insights connects ordinary situations to the automatic responses
+            beneath them—so you can understand the immediate pull, the later
+            cost, and what familiar advice may be missing.
+          </p>
+          <a className="insights-anchor" href="#questions">
+            Find your question <ArrowRight aria-hidden="true" />
+          </a>
+        </div>
 
-        <div className="grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
-          <div>
-            <h1 className="page-title text-brand-dark">
-              Insights for
-              <br />
-              <span className="italic text-brand-accent">
-                old patterns.
-              </span>
-            </h1>
-            <p className="page-lede mt-6 max-w-lg border-l-4 border-brand-secondary pl-5 text-brand-dark">
-              Short articles on the ancient wiring behind modern behavior.
-            </p>
+        <aside className="insights-method" aria-label="How to use Insights">
+          <p>Start with the moment</p>
+          <ol>
+            <li>
+              <span>01</span>
+              <strong>What happened?</strong>
+              <small>Name the concrete situation.</small>
+            </li>
+            <li>
+              <span>02</span>
+              <strong>What felt useful immediately?</strong>
+              <small>Find the payoff that arrived first.</small>
+            </li>
+            <li>
+              <span>03</span>
+              <strong>What did it cost later?</strong>
+              <small>See the mismatch without turning it into an identity.</small>
+            </li>
+          </ol>
+        </aside>
+      </section>
 
-            <div className="mt-7">
-              <p className="mb-3 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-                Browse by pattern
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {topTags.map(([tag, count]) => (
-                  <Link
-                    key={tag}
-                    href={`/tags/${slugifyTag(tag)}`}
-                    className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark/15 px-4 py-2 font-sans text-xs font-semibold text-brand-dark transition hover:border-brand-teal hover:text-brand-teal"
-                  >
-                    {cleanText(tag)}
-                    <span className="text-brand-dark/45">{count}</span>
-                  </Link>
-                ))}
+      <section id="questions" className="insights-section insights-questions">
+        <header className="insights-section-heading">
+          <p className="insights-eyebrow">What brought you here?</p>
+          <h2>Choose the question that feels familiar.</h2>
+          <p>
+            You do not need the right category. Begin with a moment you have
+            actually lived.
+          </p>
+        </header>
+
+        <div className="insights-question-grid">
+          {guidedQuestions.map((path, index) => (
+            <Link
+              key={path.slug}
+              href={`/insights/${path.slug}`}
+              className="insights-question-card"
+            >
+              <div>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <small>{path.context}</small>
               </div>
-            </div>
-          </div>
-
-          {featuredArticle ? (
-            <FeaturedArticle article={featuredArticle} />
-          ) : null}
+              <h3>{path.question}</h3>
+              <p>{path.situation}</p>
+              <strong>
+                Understand this pattern <ArrowUpRight aria-hidden="true" />
+              </strong>
+            </Link>
+          ))}
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-6 pt-4 pb-14 md:pt-6 md:pb-20">
-        <div className="mb-8 flex items-end justify-between gap-6">
-          <div>
-            <h2 className="text-3xl font-bold leading-tight tracking-[-0.02em] text-brand-dark md:text-5xl">
-              Recent articles.
-            </h2>
-          </div>
-          <Link
-            href="/insights/all"
-            className="hidden cursor-pointer items-center gap-2 rounded-full border border-brand-dark/25 px-5 py-3 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-primary hover:text-brand-primary sm:inline-flex"
-          >
-            View all
-            <ArrowRight className="h-4 w-4" />
+      <section className="insights-section insights-more">
+        <header className="insights-section-heading">
+          <p className="insights-eyebrow insights-eyebrow-light">More explanations</p>
+          <h2>Keep following what you recognise.</h2>
+        </header>
+
+        <div className="insights-article-list">
+          {moreArticles.map((article, index) => (
+            <Link key={article.slug} href={`/insights/${article.slug}`}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <div>
+                <small>{formatDate(article.date) ?? "Insight"}</small>
+                <h3>{article.title}</h3>
+              </div>
+              <ArrowRight aria-hidden="true" />
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="insights-section insights-library">
+        <div className="insights-library-copy">
+          <LibraryBig aria-hidden="true" />
+          <p className="insights-eyebrow">The complete library</p>
+          <h2>Browse every explanation.</h2>
+          <p>
+            Use the archive when you already know what you are looking for—or
+            explore a topic across several situations.
+          </p>
+          <Link href="/insights/all" className="insights-library-button">
+            View all {articles.length} insights
+            <ArrowRight aria-hidden="true" />
           </Link>
         </div>
 
-        <div className="border-y border-brand-dark/12">
-          {secondaryArticles.map((article) => (
-            <ArticleRow key={article.slug} article={article} />
-          ))}
+        <div className="insights-topics">
+          <p>Browse by topic</p>
+          <div>
+            {topTags.map(([tag, count]) => (
+              <Link key={tag} href={`/tags/${slugifyTag(tag)}`}>
+                <span>{cleanText(tag)}</span>
+                <small>{count}</small>
+              </Link>
+            ))}
+          </div>
         </div>
-
-        <Link
-          href="/insights/all"
-          className="mt-8 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-6 py-3 font-sans text-sm font-semibold text-white transition hover:opacity-90 sm:hidden"
-        >
-          View all articles
-          <ArrowRight className="h-4 w-4" />
-        </Link>
       </section>
     </main>
   );
 }
-
-const FeaturedArticle = ({ article }: { article: ArticleMeta }) => (
-  <Link
-    href={`/insights/${article.slug}`}
-    className="group block cursor-pointer rounded-lg border border-brand-dark bg-brand-dark p-6 text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-brand-dark/95 hover:shadow-md md:p-8"
-  >
-    <span className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-secondary">
-      Featured
-    </span>
-    <h2 className="mt-4 text-3xl font-bold leading-tight tracking-[-0.02em] md:text-4xl">
-      {article.title}
-    </h2>
-    <p className="mt-4 font-sans text-sm leading-7 text-white/68">
-      {article.excerpt}
-    </p>
-    <div className="mt-7 flex flex-wrap items-center gap-3 font-sans text-xs text-white/55">
-      {formatDate(article.date) ? <span>{formatDate(article.date)}</span> : null}
-      {article.tags?.slice(0, 2).map((tag) => (
-        <span
-          key={tag}
-          className="rounded-full border border-white/15 px-3 py-1 text-white/68"
-        >
-          {cleanText(tag)}
-        </span>
-      ))}
-    </div>
-    <span className="mt-7 inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-secondary">
-      Read article
-      <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-    </span>
-  </Link>
-);
-
-const ArticleRow = ({ article }: { article: ArticleMeta }) => (
-  <Link
-    href={`/insights/${article.slug}`}
-    className="group grid cursor-pointer gap-4 border-b border-brand-dark/12 py-6 transition last:border-b-0 md:grid-cols-[0.68fr_1fr_auto] md:items-center"
-  >
-    <div>
-      <p className="font-sans text-xs font-semibold uppercase tracking-[0.14em] text-brand-teal">
-        {formatDate(article.date) ?? "Article"}
-      </p>
-      <h3 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
-        {article.title}
-      </h3>
-    </div>
-    <p className="font-sans text-sm leading-7 text-brand-dark/72">
-      {article.excerpt}
-    </p>
-    <ArrowRight className="h-5 w-5 text-brand-accent transition group-hover:translate-x-0.5" />
-  </Link>
-);
-
-const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <div className="page-eyebrow mb-7 flex items-center gap-3 text-brand-teal">
-    <span>{children}</span>
-    <span className="h-px flex-1 bg-brand-dark/15" />
-  </div>
-);

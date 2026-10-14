@@ -64,12 +64,13 @@ const ProgramOverview = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
-    <section className="w-full px-6 py-20 bg-white font-serif">
+    <section id="programme" className="mc-section mc-programme">
       {/* ===========================
           Section Intro
       ============================ */}
-      <div className="text-center max-w-5xl mx-auto mb-16 space-y-8">
-        <h2 className="text-2xl md:text-4xl font-bold text-brand-dark">
+      <div className="mc-programme-intro">
+        <span className="mc-kicker">The four-week journey</span>
+        <h2>
           What You’ll Experience
         </h2>
 
@@ -102,7 +103,7 @@ const ProgramOverview = () => {
       {/* ===========================
           Carousel Wrapper
       ============================ */}
-      <div className="w-full max-w-5xl min-h-[520px] mx-auto relative">
+      <div className="mc-week-carousel">
 
         {/* Carousel Content */}
         <AnimatePresence mode="wait">
@@ -119,11 +120,12 @@ const ProgramOverview = () => {
         </AnimatePresence>
 
         {/* Left Arrow */}
-        <div className="absolute top-1/2 left-0 -translate-y-1/2">
+        <div className="mc-week-arrow mc-week-arrow-left">
           <button
             onClick={() => setActiveIndex((prev) => Math.max(prev - 1, 0))}
             disabled={activeIndex === 0}
-            className={`p-2 rounded-full transition ${
+            aria-label="Previous week"
+            className={`mc-arrow-button ${
               activeIndex === 0
                 ? "text-brand-dark/20 cursor-not-allowed"
                 : "text-brand-dark hover:bg-gray-100"
@@ -134,13 +136,14 @@ const ProgramOverview = () => {
         </div>
 
         {/* Right Arrow */}
-        <div className="absolute top-1/2 right-0 -translate-y-1/2">
+        <div className="mc-week-arrow mc-week-arrow-right">
           <button
             onClick={() =>
               setActiveIndex((prev) => Math.min(prev + 1, weeks.length - 1))
             }
             disabled={activeIndex === weeks.length - 1}
-            className={`p-2 rounded-full transition ${
+            aria-label="Next week"
+            className={`mc-arrow-button ${
               activeIndex === weeks.length - 1
                 ? "text-brand-dark/20 cursor-not-allowed"
                 : "text-brand-dark hover:bg-gray-100"
@@ -151,12 +154,14 @@ const ProgramOverview = () => {
         </div>
 
         {/* Dots */}
-        <div className="flex justify-center gap-3 mt-6">
+        <div className="mc-week-dots" aria-label="Choose a programme week">
           {weeks.map((_, index) => (
             <button
               key={index}
               onClick={() => setActiveIndex(index)}
-              className={`h-3 w-3 rounded-full transition-all duration-300 outline-none ring-offset-2 focus:ring-2 ${
+              aria-label={`Show ${weeks[index].title}`}
+              aria-current={activeIndex === index ? "step" : undefined}
+              className={`mc-week-dot ${
                 activeIndex === index
                   ? "bg-brand-dark scale-110"
                   : "bg-gray-300"
@@ -169,7 +174,7 @@ const ProgramOverview = () => {
       {/* ===========================
           Post Program Section
       ============================ */}
-      <div className="max-w-4xl mx-auto text-center mt-20 space-y-10">
+      <div className="mc-continuity">
         <h3 className="text-xl md:text-2xl font-semibold text-brand-dark">
           Your Caveman Crew, Forever.
         </h3>

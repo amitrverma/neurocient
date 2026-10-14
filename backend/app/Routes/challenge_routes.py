@@ -200,6 +200,7 @@ async def my_microchallenges(
 
             # progress percentage only
             "progress": progress,
+            "logged_today": any(log.log_date == date.today() for log in logs),
         })
 
     return response
@@ -242,7 +243,18 @@ async def log_today(
         )
     )
     if result.scalar_one_or_none():
-        return {"message": "Already logged today", "progress": assignment.progress}
+        logs_result = await db.execute(
+            select(MicrochallengeLog).where(
+                MicrochallengeLog.assignment_id == payload.assignment_id
+            )
+        )
+        progress = round((len(logs_result.scalars().all()) / 21) * 100, 1)
+        return {
+            "message": "Already logged today",
+            "progress": progress,
+            "status": assignment.status,
+            "completed_at": assignment.completed_at,
+        }
 
     # insert new log
     new_log = MicrochallengeLog(

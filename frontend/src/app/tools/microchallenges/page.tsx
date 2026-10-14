@@ -31,6 +31,7 @@ interface AssignedChallenge {
   tips: string[];
   closing: string;
   progress: number;
+  logged_today?: boolean;
   loggedToday?: boolean;
 }
 
@@ -77,6 +78,8 @@ const MicrochallengesPage = () => {
   const [note, setNote] = useState("");
   const [showAuth, setShowAuth] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [showNewChallenge, setShowNewChallenge] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [guidedEntry, setGuidedEntry] = useState(false);
@@ -96,10 +99,14 @@ const MicrochallengesPage = () => {
     const fetchChallenges = async () => {
       if (!ready) return;
       if (!user) {
+        setChallenges([]);
+        setLoadFailed(false);
         setLoading(false);
         return;
       }
 
+      setLoading(true);
+      setLoadFailed(false);
       try {
         const res = await fetch("/api/challenges/my", {
           method: "GET",
@@ -108,17 +115,15 @@ const MicrochallengesPage = () => {
         if (!res.ok) throw new Error("Failed to fetch challenges");
 
         const data = await res.json();
-        const todayKey = new Date().toISOString().slice(0, 10);
-        const stored = localStorage.getItem("loggedToday");
-
         setChallenges(
           data.map((challenge: AssignedChallenge) => ({
             ...challenge,
-            loggedToday: stored === todayKey,
+            loggedToday: Boolean(challenge.logged_today),
           })),
         );
       } catch (err) {
         console.error("Error fetching challenges:", err);
+        setLoadFailed(true);
         notify("Failed to load challenges.", "error");
       } finally {
         setLoading(false);
@@ -126,7 +131,7 @@ const MicrochallengesPage = () => {
     };
 
     fetchChallenges();
-  }, [user, ready, notify]);
+  }, [user, ready, notify, reloadKey]);
 
   useEffect(() => {
     if (!guidedEntry || !ready || !user) return;
@@ -170,9 +175,6 @@ const MicrochallengesPage = () => {
       }
 
       const data = await res.json();
-      const todayKey = new Date().toISOString().slice(0, 10);
-      localStorage.setItem("loggedToday", todayKey);
-
       if (data.status === "success") {
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 5000);
@@ -293,34 +295,35 @@ const MicrochallengesPage = () => {
   };
 
   return (
-    <main className="bg-white font-serif text-brand-dark">
-      <section className="mx-auto grid w-full max-w-6xl gap-10 px-6 pb-6 pt-12 md:grid-cols-[0.78fr_1.22fr] md:items-start md:pb-8 md:pt-16">
+    <main className="surface-page tool-detail-page">
+      <section className="tool-detail-hero">
         <div>
-          <SectionLabel>Daily experiment</SectionLabel>
-          <h1 className="page-title text-brand-dark">
-            Small actions.
-            <br />
-            <span className="italic text-brand-accent">Repeated enough.</span>
+          <SectionLabel>Small experiment</SectionLabel>
+          <h1 className="tool-detail-title">
+            Change one condition.
+            <span>See what changes.</span>
           </h1>
-          <p className="mt-6 max-w-xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark">
+          <p className="tool-detail-lede">
             {guidedEntry
-              ? "You have caught your Caveman in real life. Now choose one tiny experiment—not to fix yourself, but to discover what else is possible."
-              : "Microchallenges are tiny behavior experiments. They lower the threat of change so your nervous system gets evidence through repetition."}
+              ? "You have recorded the response in real life. Now choose one small experiment that fits the pattern and changes one part of the situation."
+              : "Microchallenges are small behavior experiments. Change a cue, environment, or first action, then use repetition to learn what helps in real conditions."}
           </p>
         </div>
 
         {!guidedEntry && (
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Metric label="Active" value={activeChallenge ? "1" : "0"} />
-            <Metric label="Completed" value={String(completedCount)} />
-            <Metric label="Total" value={loading ? "..." : String(challenges.length)} />
-          </div>
+          <aside className="tool-detail-summary grid gap-4 sm:grid-cols-3">
+            <Metric label="Active" value={loadFailed || !user ? "—" : activeChallenge ? "1" : "0"} />
+            <Metric label="Completed" value={loadFailed || !user ? "—" : String(completedCount)} />
+            <Metric label="Assigned" value={loading ? "..." : loadFailed || !user ? "—" : String(challenges.length)} />
+          </aside>
         )}
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-6 pb-14 md:pb-16">
+      <section className="tool-detail-content">
         {loading ? (
           <LoadingBlock />
+        ) : loadFailed ? (
+          <LoadErrorBlock onRetry={() => setReloadKey((value) => value + 1)} />
         ) : !user ? (
           <SignedOutBlock onLogin={() => setShowAuth(true)} />
         ) : challenges.length === 0 && !guidedEntry ? (
@@ -347,8 +350,8 @@ const MicrochallengesPage = () => {
                     Keep going with {activeChallenge.title}
                   </h2>
                   <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
-                    Log one small repetition today. Consistency teaches the
-                    system faster than intensity.
+                    Log one repetition today. Repeated observations show
+                    whether the changed condition helps in real situations.
                   </p>
                   <button
                     onClick={() => toggleOpen(activeChallenge.assignment_id)}
@@ -412,7 +415,7 @@ const MicrochallengesPage = () => {
         )}
       </section>
 
-      <div className="mx-auto w-full max-w-6xl px-6 py-8">
+      <div className="tool-detail-return">
         <Link
           href={guidedEntry ? "/my-caveman" : "/tools"}
           className="inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-dark transition hover:text-brand-primary"
@@ -650,6 +653,24 @@ const LoadingBlock = () => (
     <p className="mt-3 font-sans text-sm font-semibold text-brand-dark">
       Loading microchallenges...
     </p>
+  </div>
+);
+
+const LoadErrorBlock = ({ onRetry }: { onRetry: () => void }) => (
+  <div className="border border-brand-dark/12 bg-white p-6">
+    <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
+      Account data unavailable
+    </p>
+    <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
+      Your challenges could not be loaded.
+    </h2>
+    <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
+      Nothing has been counted as empty or reset. Try again when the connection is available.
+    </p>
+    <button onClick={onRetry} className="surface-action">
+      Try again
+      <ArrowRight aria-hidden="true" />
+    </button>
   </div>
 );
 

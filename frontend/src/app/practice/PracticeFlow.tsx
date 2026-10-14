@@ -205,11 +205,11 @@ export default function PracticeFlow() {
   };
 
   return (
-    <main className="min-h-screen bg-white font-serif text-brand-dark">
-      <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-6 md:px-8 md:py-8">
+    <main className="practice-shell">
+      <section className="practice-shell-inner">
         <PracticeHeader progress={getProgress(step)} step={step} onBack={goBack} />
 
-        <div className="grid flex-1 gap-8 py-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-center lg:py-10">
+        <div className="practice-shell-grid">
           <div className="min-w-0">
             <PracticeStep
               step={step}

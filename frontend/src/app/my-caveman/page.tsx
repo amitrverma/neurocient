@@ -26,6 +26,7 @@ export default function MyCavemanPage() {
     description: string;
     pattern?: string | null;
   }>>([]);
+  const [spotsUnavailable, setSpotsUnavailable] = useState(false);
 
   useEffect(() => {
     if (!ready) return;
@@ -84,10 +85,13 @@ export default function MyCavemanPage() {
         return response.json();
       })
       .then((data) => {
-        if (Array.isArray(data)) setSpots(data);
+        if (Array.isArray(data)) {
+          setSpots(data);
+          setSpotsUnavailable(false);
+        }
       })
       .catch(() => {
-        // The portrait remains useful if lived evidence cannot be loaded.
+        setSpotsUnavailable(true);
       });
   }, [user]);
 
@@ -125,6 +129,7 @@ export default function MyCavemanPage() {
     <CavemanScanDetailedResult
       responses={responses}
       spots={spots}
+      spotsUnavailable={spotsUnavailable}
       onRetake={() => {
         window.localStorage.removeItem(CAVEMAN_SCAN_STORAGE_KEY);
         clearSavedPortraitMarker();

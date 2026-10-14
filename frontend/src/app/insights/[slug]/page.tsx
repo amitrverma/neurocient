@@ -230,18 +230,26 @@ export default async function InsightPage(
   const allFiles = fs.readdirSync(insightsDir).filter((f) => f.endsWith(".mdx"));
   const otherFiles = allFiles.filter((f) => f.replace(/\.mdx$/, "") !== slug);
 
-  let randomNext: { slug: string; title: string; excerpt?: string } | null = null;
-  if (otherFiles.length > 0) {
-    const randomFile = otherFiles[Math.floor(Math.random() * otherFiles.length)];
-    const rawNext = fs.readFileSync(path.join(insightsDir, randomFile), "utf-8");
-    const { data: nextData } = matter(rawNext);
-
-    randomNext = {
-      slug: randomFile.replace(/\.mdx$/, ""),
-      title: nextData.title,
-      excerpt: nextData.excerpt,
-    };
-  }
+  const currentTags = new Set((data.tags as string[] | undefined) || []);
+  const relatedNext =
+    otherFiles
+      .map((file) => {
+        const rawNext = fs.readFileSync(path.join(insightsDir, file), "utf-8");
+        const { data: nextData } = matter(rawNext);
+        const sharedTags = ((nextData.tags as string[] | undefined) || []).filter(
+          (tag) => currentTags.has(tag),
+        ).length;
+        return {
+          slug: file.replace(/\.mdx$/, ""),
+          title: nextData.title as string,
+          excerpt: nextData.excerpt as string | undefined,
+          sharedTags,
+        };
+      })
+      .sort(
+        (a, b) =>
+          b.sharedTags - a.sharedTags || a.title.localeCompare(b.title),
+      )[0] || null;
 
   // --- 🧭 Pathway navigation
   let pathwayData: { title: string } | null = null;
@@ -314,7 +322,7 @@ export default async function InsightPage(
         slug={slug}
         typographyVariant={typographyVariant}
         headings={headings}
-        nextArticle={randomNext}
+        nextArticle={relatedNext}
         resources={data.resources}
         pathway={pathwayData}
         prevInPath={prevInPath}

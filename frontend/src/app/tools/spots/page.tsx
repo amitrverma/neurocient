@@ -12,7 +12,7 @@ import {
 import { useAuth } from "@/app/context/AuthContext";
 import CavemanSpot from "../../components/ui/CavemanSpot";
 import AuthModal from "../../components/AuthModal";
-import { usageLimits } from "../../utils/usage";
+import { hasActiveMembership, usageLimits } from "../../utils/usage";
 
 interface Spot {
   date: string;
@@ -87,7 +87,9 @@ const SpotsPage = () => {
   }, [user, ready]);
 
   const userLimit = usageLimits.user.spots || 0;
-  const hasReachedLimit = Boolean(user && spots.length >= userLimit);
+  const hasReachedLimit = Boolean(
+    user && !hasActiveMembership(user) && spots.length >= userLimit,
+  );
   const sortedSpots = [...spots].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );

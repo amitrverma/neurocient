@@ -32,7 +32,8 @@
 .surface-dark .surface-section-heading h2 { color: white; }
 
 /* Account and support destinations use the same hero hierarchy, with less height. */
-.surface-hero.utility-hero { min-height: min(38rem, calc(100svh - 4rem)); }
+.surface-hero.utility-hero { min-height: 0; padding-block: clamp(2rem,4vw,3.5rem); }
+.utility-hero .surface-title { font-size: clamp(2.6rem,5vw,4.75rem); }
 .utility-hero-card { min-width: 0; padding: clamp(1.5rem,4vw,2.5rem); border: 1px solid var(--surface-line); background: rgba(255,254,250,.82); box-shadow: .75rem .75rem 0 var(--surface-yellow); }
 .utility-hero-card > p { margin-bottom: 1.2rem; color: var(--surface-red); font-family: var(--font-sans); font-size: .75rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
 .utility-hero-card > strong { display: block; font-size: clamp(1.5rem,3vw,2.25rem); font-weight: 600; line-height: 1.2; }

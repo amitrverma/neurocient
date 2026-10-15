@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AuthModal from "@/app/components/AuthModal";
+import MembershipModal from "@/app/components/MembershipModal";
 import { useAuth } from "@/app/context/AuthContext";
 import {
   AdviceScreen,
@@ -28,6 +29,7 @@ import {
   clearPendingPracticeDraft,
   fetchCurrentPractice,
   keepPendingPracticeDraft,
+  MembershipRequiredError,
   readPendingPracticeDraft,
   savePracticeDraft,
   type PracticeDraft,
@@ -44,6 +46,7 @@ export default function PracticeFlow() {
   const [selectedAdvice, setSelectedAdvice] = useState<AdviceId[]>([]);
   const [effect, setEffect] = useState<EffectId | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
+  const [membershipOpen, setMembershipOpen] = useState(false);
   const [pendingDraft, setPendingDraft] = useState<PracticeDraft | null>(null);
   const [saveStatus, setSaveStatus] = useState<PracticeSaveStatus>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -89,6 +92,9 @@ export default function PracticeFlow() {
       await loadSavedPractice();
     } catch (error) {
       setSaveStatus("error");
+      if (error instanceof MembershipRequiredError) {
+        setMembershipOpen(true);
+      }
       setSaveError(
         error instanceof Error
           ? error.message
@@ -274,6 +280,10 @@ export default function PracticeFlow() {
         onClose={() => setAuthOpen(false)}
         context="remember this loop"
         onSuccess={completeAuthHandoff}
+      />
+      <MembershipModal
+        isOpen={membershipOpen}
+        onClose={() => setMembershipOpen(false)}
       />
     </>
   );

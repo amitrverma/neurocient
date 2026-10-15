@@ -79,14 +79,13 @@ journey.
 | `/programs` | “What deeper ways of working with Neurocient exist?” | Offer index, not the centre of the self-guided product | Relevant personal or workplace offer |
 | `/saved` | “What did I want to return to?” | Account utility for saved reading | Saved item |
 | `/profile` | “What have I noticed, tried, and changed?” | Signed-in home for personal evidence, reflections, account settings, and delivery preferences | One relevant next move |
-| `/membership` | “What access can I buy?” | Commercial access explanation | Purchase or a truthful wait state |
+| `/membership` | “What access can I buy?” | USD 9/month self-guided access after free limits | Hosted checkout or assisted activation |
 | `/about` | “Who is behind this, and why should I trust it?” | Founder, mission, method, and credibility | A relevant starting point or contact |
 | `/contact` | “How can I speak with Neurocient?” | Personal, workplace, and collaboration contact | Successful enquiry |
 
 `/insights/all` and `/tags/[tag]` are discovery utilities within Insights.
-`/privacy` and `/terms` are trust and legal utilities. `/subscribe` currently
-duplicates and contradicts Membership and should not remain a separate product
-destination once the commercial model is resolved.
+`/privacy` and `/terms` are trust and legal utilities. `/subscribe` is a legacy
+commercial route that redirects to the canonical Membership page.
 
 ## Global Navigation Contract
 
@@ -139,13 +138,11 @@ concepts whose exposure must be earned by the experience.
 
 ### Critical product coherence
 
-- Membership is presented as a $9 manual plan, as “coming soon,” and as a usage
-  gate. The access model must have one truthful state.
 - The Scan result describes Practice as in development although `/practice` is
   already a working guided experience.
-- Logged-in article membership enforcement reads a local usage count that the
-  article journey does not increment, so the stated access contract and runtime
-  behaviour can diverge.
+- Article limits are incremented consistently for anonymous and signed-in users,
+  but remain browser-local rather than authoritative account usage. They should
+  move to persisted account enforcement with the payment integration.
 
 ### Information architecture
 
@@ -171,9 +168,6 @@ concepts whose exposure must be earned by the experience.
   Neurocient Labs.
 - Metadata, sitemap coverage, navigation labels, and page titles do not yet
   describe destinations consistently.
-- Microchallenge completion is currently calculated with different thresholds
-  by assignment, logging, and progress endpoints. Product ownership must define
-  the completion rule before those endpoints are consolidated.
 
 ## Delivery Sequence
 
@@ -206,9 +200,9 @@ concepts whose exposure must be earned by the experience.
   the same loop rather than a tools catalogue.
 - Replace fixed or activity-only progress with real-life evidence.
 
-### Phase 5 — Resolve offers and access
+### Phase 5 — Complete offers and access
 
-- Decide and implement one membership state and entitlement model.
+- Connect a payment gateway to the provider-neutral Membership entitlement.
 - Distinguish free self-guided product, paid membership, live personal program,
   and workplace services.
 - Remove or redirect duplicate commercial routes and update every gate.
@@ -242,13 +236,10 @@ concepts whose exposure must be earned by the experience.
 
 ## Decisions Still Requiring Product Ownership
 
-1. Whether paid Membership is open, manually sold, waitlisted, or absent.
-2. Whether The Modern Caveman remains a purchasable live program in its current
-   form, becomes the umbrella for Practice, or is retired.
-3. Whether the CIC diagnostic is a public self-serve lead-in or part of a
-   facilitated workplace sales journey.
-4. Which claims have evidence owners: subscriber count, participant outcomes,
-   neuroscience statements, and guarantees.
+1. The holistic evidence and governance model for public claims: subscriber
+   count, participant outcomes, neuroscience statements, and guarantees.
+2. The redesigned relationship between `/my-caveman` and the staged
+   `/my-caveman/spot` continuation.
 
-These decisions block commercial and claim-level convergence. They do not block
-the footer alignment or the personal product-journey work.
+Claims governance is intentionally deferred as a whole-platform workstream.
+Existing article narratives remain unchanged until that review.

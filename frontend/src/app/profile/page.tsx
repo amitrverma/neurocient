@@ -176,32 +176,25 @@ const ProfilePage = () => {
 
   return (
     <main className="surface-page">
-      <section className="surface-hero utility-hero">
+      <section className="border-b border-brand-dark/10 bg-white px-6 py-8 md:py-10">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-5">
           <div>
-            <p className="surface-eyebrow">Account space</p>
-            <h1 className="surface-title">
-              Your
-              <span>profile.</span>
-            </h1>
+            <p className="page-eyebrow text-brand-teal">Account space</p>
+            <h1 className="page-section-title mt-2">Your profile</h1>
           </div>
-
-          <aside className="utility-hero-card">
-            <p>{user ? "Signed in" : "Signed out"}</p>
-            <strong>Your account, in one place.</strong>
-            <span>Return to your Scan, lived evidence, experiments, reflections, and delivery preferences.</span>
-            {!user && ready && (
-              <button
-                onClick={() => setShowAuth(true)}
-                className="mt-6 inline-flex cursor-pointer items-center gap-2 rounded-full bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:bg-brand-primary"
-              >
-                Log in
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            )}
-          </aside>
+          {!user && ready ? (
+            <button
+              onClick={() => setShowAuth(true)}
+              className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:bg-brand-primary"
+            >
+              Log in
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          ) : null}
+        </div>
       </section>
 
-      <section className="px-6 pb-16 md:pb-20">
+      <section className="px-6 pb-16 pt-6 md:pb-20 md:pt-8">
         <div className="mx-auto max-w-6xl">
           {!ready ? (
             <Panel>
@@ -226,8 +219,8 @@ const ProfilePage = () => {
             </Panel>
           ) : (
             <div className="grid gap-8 lg:grid-cols-[0.3fr_1fr] lg:items-start">
-              <aside className="rounded-lg border border-brand-dark/12 bg-white p-3 shadow-sm">
-                <div className="border-b border-brand-dark/10 p-4">
+              <aside className="rounded-lg border border-brand-dark/12 bg-white p-2 shadow-sm lg:p-3">
+                <div className="hidden border-b border-brand-dark/10 p-4 lg:block">
                   <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
                     Signed in as
                   </p>
@@ -235,7 +228,7 @@ const ProfilePage = () => {
                     {String(user.name || user.email || "Member")}
                   </p>
                 </div>
-                <div className="space-y-1 p-2">
+                <div className="flex gap-1 overflow-x-auto p-1 lg:block lg:space-y-1 lg:p-2">
                   {tabs.map((tab) => {
                     const Icon = tab.icon;
                     const isActive = activeTab === tab.id;
@@ -243,7 +236,7 @@ const ProfilePage = () => {
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`flex w-full cursor-pointer items-center gap-3 rounded-md px-4 py-3 text-left font-sans text-sm font-semibold transition ${
+                        className={`flex shrink-0 cursor-pointer items-center gap-2 rounded-md px-3 py-3 text-left font-sans text-sm font-semibold transition lg:w-full lg:gap-3 lg:px-4 ${
                           isActive
                             ? "bg-brand-dark text-white"
                             : "text-brand-dark hover:bg-brand-dark/5"

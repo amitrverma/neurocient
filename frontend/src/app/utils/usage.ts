@@ -1,15 +1,22 @@
-export type UsageType = "articles" | "spots" | "microchallenges";
+export type UsageType = "articles" | "spots" | "microchallenges" | "practice";
 
 interface UsageLimits {
   articles: number;
   spots?: number;
   microchallenges?: number;
+  practice?: number;
 }
 
 export const usageLimits: Record<"guest" | "user", UsageLimits> = {
   guest: { articles: 5 },
-  user: { articles: 20, spots: 15, microchallenges: 5 },
+  user: { articles: 20, spots: 15, microchallenges: 5, practice: 1 },
 };
+
+export function hasActiveMembership(
+  user: { membership?: { is_active?: boolean } } | null | undefined,
+) {
+  return user?.membership?.is_active === true;
+}
 
 function storageKey(isLoggedIn: boolean) {
   return isLoggedIn ? "usage_user" : "usage_guest";

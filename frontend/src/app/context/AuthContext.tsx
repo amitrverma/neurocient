@@ -7,6 +7,11 @@ interface User {
   id?: string;
   email?: string;
   name?: string;
+  membership?: {
+    status?: string;
+    is_active?: boolean;
+    current_period_end?: string | null;
+  };
   [key: string]: unknown;
 }
 

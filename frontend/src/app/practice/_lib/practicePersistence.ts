@@ -39,6 +39,13 @@ export type SavedPractice = {
   createdAt: string | null;
 };
 
+export class MembershipRequiredError extends Error {
+  constructor(message = "Membership is required to save another practice.") {
+    super(message);
+    this.name = "MembershipRequiredError";
+  }
+}
+
 export const buildPracticeDraft = ({
   scene,
   adviceIds,
@@ -98,7 +105,15 @@ export const savePracticeDraft = async (
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data?.detail || "Could not keep this practice yet.");
+    if (
+      res.status === 402 ||
+      data?.detail?.code === "membership_required"
+    ) {
+      throw new MembershipRequiredError(data?.detail?.message);
+    }
+    throw new Error(
+      data?.detail?.message || data?.detail || "Could not keep this practice yet.",
+    );
   }
 
   return data as PracticeSaveResult;

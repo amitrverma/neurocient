@@ -6,7 +6,12 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "../AuthModal";
 import MembershipModal from "../MembershipModal";
-import { getUsage, incrementUsage, usageLimits } from "../../utils/usage";
+import {
+  getUsage,
+  hasActiveMembership,
+  incrementUsage,
+  usageLimits,
+} from "../../utils/usage";
 import { trackEvent } from "../../utils/analytics";
 import { useNotification } from "../NotificationProvider";
 
@@ -52,7 +57,6 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
 
   const startChallenge = async () => {
     setAssigning(true);
-    incrementUsage("microchallenges", true);
     trackEvent("Microchallenge Started", { id });
 
     try {
@@ -63,6 +67,13 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
 
       if (!res.ok) {
         const errData = await res.json();
+        if (
+          res.status === 402 ||
+          errData?.detail?.code === "membership_required"
+        ) {
+          setShowMembership(true);
+          return;
+        }
         if (errData.detail === "You already have an active challenge") {
           setAlreadyAssigned(true);
           notify(
@@ -74,6 +85,9 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
         throw new Error(errData.detail || "Failed to start challenge");
       }
 
+      if (!hasActiveMembership(user)) {
+        incrementUsage("microchallenges", true);
+      }
       notify("Microchallenge started successfully", "success");
       router.push("/tools/microchallenges");
     } catch (err) {
@@ -92,6 +106,7 @@ const MicrochallengeBox = ({ id }: MicrochallengeBoxProps) => {
       return;
     }
     if (
+      !hasActiveMembership(user) &&
       getUsage("microchallenges", true) >=
       (usageLimits.user.microchallenges || 0)
     ) {

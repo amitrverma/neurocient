@@ -1290,3 +1290,63 @@ Implication:
   than a browser-global flag.
 - Keep persistence and authorization decisions on existing backend boundaries;
   UI fallbacks must not invent state.
+
+## 2026-10-15: Free use leads to account use, then Membership
+
+The self-guided platform uses a three-stage access model: anonymous use up to
+the existing anonymous limit, authenticated free use up to the existing account
+limits, then paid Membership at USD 9 per month. A free account may save one
+Practice loop. Paid Membership removes the self-guided limits.
+
+Reason:
+
+- The product should demonstrate value before asking for identity or payment.
+- Login preserves continuity; Membership pays for continued self-guided use.
+- The previous coming-soon and manual-plan language contradicted active usage
+  gates and the stated price.
+
+Implication:
+
+- Preserve the current limits of 5 anonymous article reads and, for a free
+  account, 20 article reads, 15 Spots, 5 Microchallenges, and 1 Practice loop.
+- Represent paid access with a provider-neutral account entitlement. Manual
+  activation and a future gateway webhook update the same boundary.
+- `/membership` uses a hosted checkout when `MEMBERSHIP_CHECKOUT_URL` is
+  configured and assisted WhatsApp purchase otherwise. `/subscribe` redirects
+  to the canonical Membership page.
+- A browser redirect never grants access; verified entitlement state does.
+
+## 2026-10-15: A Microchallenge is a 21-day experiment with an 80% threshold
+
+A Microchallenge remains active through its twenty-first calendar day. After
+that day, 17 or more distinct daily logs is `success`; fewer is `failed`.
+Progress is completed days out of 21 and is capped at 100%.
+
+Reason:
+
+- The previous listing, logging, and progress endpoints completed at 21, 19,
+  and 17 logs respectively and used conflicting terminal statuses.
+- Seventeen days is approximately 80% of the experiment and permits imperfect
+  repetition without turning the experience into a streak.
+- Finalising only after day 21 keeps the final day available for logging.
+
+Implication:
+
+- Canonical statuses are `active`, `success`, `failed`, and `removed`.
+- One assignment accepts at most one log per calendar day.
+- Re-entry through listing, progress, or direct logging must converge on the
+  same outcome; logging after the experiment ends is rejected.
+
+## 2026-10-15: Facilitated programs remain separate from Membership
+
+The Modern Caveman remains a paid, cohort-based facilitated personal program.
+The Caveman in the Cubicle diagnostic remains a public self-serve assessment
+that leads to the facilitated CIC program. Neither offer is bundled into the
+$9 self-guided Membership by default.
+
+## 2026-10-15: Claims governance is deferred as one platform decision
+
+Evidence ownership, verification, review cadence, and removal rules for public
+claims will be designed holistically. Existing article narratives remain in
+place until that workstream begins; individual claims should not be migrated
+piecemeal in the meantime.

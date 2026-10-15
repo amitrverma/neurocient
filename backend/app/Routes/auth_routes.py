@@ -21,6 +21,7 @@ from jose import jwt, JWTError
 from firebase_admin import auth as firebase_auth, credentials, initialize_app
 from app.analytics.posthog_client import track_event, identify_user
 from app.config import settings
+from app.services.membership import membership_summary
 
 # ---------------- Firebase init ----------------
 firebase_creds_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
@@ -105,11 +106,15 @@ async def login(req: AuthRequest, db: AsyncSession = Depends(get_db)):
 
 # ---------------- Me ----------------
 @router.get("/me")
-async def get_me(current_user: User = Depends(get_current_user)):
+async def get_me(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     return {
         "id": str(current_user.id),
         "email": current_user.email,
         "name": current_user.name,
+        "membership": await membership_summary(db, current_user.id),
     }
 
 # ---------------- Refresh ----------------
@@ -143,6 +148,7 @@ async def refresh(req: Request, db: AsyncSession = Depends(get_db)):
                 "id": str(user.id),
                 "name": user.name,
                 "email": user.email,
+                "membership": await membership_summary(db, user.id),
             },
         }
     )

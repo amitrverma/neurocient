@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Eye } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
+import MembershipModal from "@/app/components/MembershipModal";
 import { questionsBank } from "@/app/diagnostics/caveman-scan/questionsBank";
 import { buildScanPortrait } from "@/app/diagnostics/caveman-scan/scanPortrait";
 import { loadLatestPortrait } from "@/app/diagnostics/caveman-scan/scanPersistence";
@@ -27,6 +28,7 @@ export default function SpotMyCavemanPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showMembership, setShowMembership] = useState(false);
 
   useEffect(() => {
     if (!ready) return;
@@ -126,7 +128,17 @@ export default function SpotMyCavemanPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ description }),
       });
-      if (!response.ok) throw new Error("Could not keep this Spot.");
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        if (
+          response.status === 402 ||
+          data?.detail?.code === "membership_required"
+        ) {
+          setShowMembership(true);
+          return;
+        }
+        throw new Error(data?.detail?.message || "Could not keep this Spot.");
+      }
       setPatternSpotCount((count) => count + 1);
       setSaved(true);
     } catch (saveError) {
@@ -238,6 +250,10 @@ export default function SpotMyCavemanPage() {
           {saving ? "Keeping this Spot…" : "Keep this Spot"}
           {!saving && <ArrowRight className="h-4 w-4" />}
         </button>
+        <MembershipModal
+          isOpen={showMembership}
+          onClose={() => setShowMembership(false)}
+        />
       </div>
     </main>
   );

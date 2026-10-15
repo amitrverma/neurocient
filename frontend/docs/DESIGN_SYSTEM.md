@@ -64,6 +64,9 @@ or a specific information state requires it.
   the shorter `.utility-hero` variant so their task content remains close.
 - Results, questionnaires, and long-form articles may use a narrower task or
   reading composition without creating a separate visual system.
+- Account and other task-first screens put their usable controls and current
+  state near the top. They share typography and color with destination pages,
+  but must not spend the first viewport on a promotional hero.
 
 ## Information architecture
 

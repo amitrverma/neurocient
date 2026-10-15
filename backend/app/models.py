@@ -17,6 +17,32 @@ class User(Base):
     whatsapp_opt_in = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+
+class MembershipEntitlement(Base):
+    """Provider-neutral paid access state for manual or gateway activation."""
+
+    __tablename__ = "membership_entitlements"
+
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    status = Column(String, nullable=False, default="inactive", index=True)
+    provider = Column(String, nullable=True)
+    provider_customer_id = Column(String, nullable=True, index=True)
+    provider_subscription_id = Column(String, nullable=True, unique=True)
+    current_period_end = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False,
+    )
+
+    user = relationship("User")
+
 class UserPreferences(Base):
     __tablename__ = "user_preferences"
 

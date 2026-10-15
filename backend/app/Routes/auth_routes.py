@@ -18,7 +18,7 @@ import json
 import os
 from jose import jwt, JWTError
 
-from firebase_admin import auth as firebase_auth, credentials, initialize_app, exceptions
+from firebase_admin import auth as firebase_auth, credentials, initialize_app
 from app.analytics.posthog_client import track_event, identify_user
 from app.config import settings
 
@@ -168,10 +168,10 @@ async def firebase_login(request: Request, db: AsyncSession = Depends(get_db)):
 
         try:
             decoded_token = firebase_auth.verify_id_token(id_token, clock_skew_seconds=60)
-        except exceptions.InvalidIdTokenError:
-            raise HTTPException(status_code=401, detail="Invalid Firebase token")
-        except exceptions.ExpiredIdTokenError:
+        except firebase_auth.ExpiredIdTokenError:
             raise HTTPException(status_code=401, detail="Expired Firebase token")
+        except firebase_auth.InvalidIdTokenError:
+            raise HTTPException(status_code=401, detail="Invalid Firebase token")
         except Exception:
             raise HTTPException(status_code=401, detail="Firebase verification failed")
 

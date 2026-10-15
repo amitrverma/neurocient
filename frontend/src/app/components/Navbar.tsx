@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type React from "react";
-import { Bookmark, LayoutDashboard, LogOut, Menu, UserRound, X } from "lucide-react";
+import { Bookmark, LogOut, Menu, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -12,9 +12,9 @@ import AuthModal from "./AuthModal";
 const navLinks = [
   { href: "/insights", label: "Insights" },
   { href: "/practice", label: "Practice" },
-  { href: "/resources", label: "Resources" },
   { href: "/diagnostics", label: "Diagnostics" },
   { href: "/tools", label: "Tools" },
+  { href: "/programs", label: "Programs" },
   { href: "/about", label: "About" },
 ];
 
@@ -22,39 +22,17 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [showHomeNav, setShowHomeNav] = useState(false);
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
-  useEffect(() => {
-    if (pathname !== "/") {
-      setShowHomeNav(true);
-      return;
-    }
-
-    setShowHomeNav(false);
-    const scanSection = document.getElementById("caveman-scan-section");
-    if (!scanSection) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setShowHomeNav(entry.isIntersecting),
-      { threshold: 0.08 },
-    );
-
-    observer.observe(scanSection);
-    return () => observer.disconnect();
-  }, [pathname]);
-
   const closeMobile = () => setIsOpen(false);
+  const isActive = (href: string) =>
+    pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
 
   return (
     <nav
-      aria-hidden={pathname === "/" && !showHomeNav}
-      className={`fixed left-0 top-0 z-50 w-full border-b border-brand-dark/12 bg-white/92 font-sans text-brand-dark backdrop-blur-md transition duration-500 motion-reduce:transition-none ${
-        pathname === "/" && !showHomeNav
-          ? "pointer-events-none -translate-y-full opacity-0"
-          : "translate-y-0 opacity-100"
-      }`}
+      aria-label="Primary navigation"
+      className="fixed left-0 top-0 z-50 w-full border-b border-brand-dark/12 bg-white/92 font-sans text-brand-dark backdrop-blur-md"
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
@@ -69,12 +47,17 @@ const Navbar = () => {
             />
           </Link>
 
-          <div className="hidden items-center gap-7 md:flex">
+          <div className="hidden items-center gap-5 lg:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm font-semibold transition hover:text-brand-primary"
+                aria-current={isActive(link.href) ? "page" : undefined}
+                className={`border-b-2 py-1 text-sm font-semibold transition ${
+                  isActive(link.href)
+                    ? "border-brand-primary text-brand-primary"
+                    : "border-transparent hover:text-brand-primary"
+                }`}
               >
                 {link.label}
               </Link>
@@ -98,13 +81,6 @@ const Navbar = () => {
 
                 {showDropdown && (
                   <div className="absolute right-0 mt-3 w-52 rounded-lg border border-brand-dark/12 bg-white p-2 text-sm shadow-[0_20px_60px_rgba(4,42,43,0.14)]">
-                    <AccountLink
-                      href="/tools"
-                      icon={<LayoutDashboard className="h-4 w-4" />}
-                      onClick={() => setShowDropdown(false)}
-                    >
-                      Dashboard
-                    </AccountLink>
                     <AccountLink
                       href="/saved"
                       icon={<Bookmark className="h-4 w-4" />}
@@ -144,7 +120,7 @@ const Navbar = () => {
 
           <button
             onClick={() => setIsOpen((prev) => !prev)}
-            className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-brand-dark/18 text-brand-dark md:hidden"
+            className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-brand-dark/18 text-brand-dark lg:hidden"
             aria-label="Toggle menu"
           >
             {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -153,23 +129,25 @@ const Navbar = () => {
       </div>
 
       {isOpen && (
-        <div className="border-t border-brand-dark/12 bg-white md:hidden">
+        <div className="border-t border-brand-dark/12 bg-white lg:hidden">
           <div className="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-4 font-sans text-sm font-semibold">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={closeMobile}
-                className="rounded-md px-3 py-3 hover:bg-brand-dark/5"
+                aria-current={isActive(link.href) ? "page" : undefined}
+                className={`rounded-md px-3 py-3 ${
+                  isActive(link.href)
+                    ? "bg-brand-dark/5 text-brand-primary"
+                    : "hover:bg-brand-dark/5"
+                }`}
               >
                 {link.label}
               </Link>
             ))}
             {user ? (
               <>
-                <Link href="/tools" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
-                  Dashboard
-                </Link>
                 <Link href="/saved" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
                   Saved
                 </Link>

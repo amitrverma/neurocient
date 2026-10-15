@@ -70,7 +70,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400..800;1,400..800&family=Quattrocento:wght@400;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400..800;1,400..800&display=swap"
           rel="stylesheet"
         />
 
@@ -99,7 +99,7 @@ export default function RootLayout({
           <AuthProvider>
             <PostHogProvider>
               <Navbar />
-              <main className="pt-20 font-serif has-[.landing-page]:pt-0">{children}</main>
+              <div className="pt-16 font-serif">{children}</div>
               <Footer />
             </PostHogProvider>
           </AuthProvider>

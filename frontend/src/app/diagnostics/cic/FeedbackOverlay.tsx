@@ -9,6 +9,12 @@ interface Props {
   option: string;
 }
 
+const motiveLabels: Record<string, string> = {
+  "Safety & Self-Protection": "Exposure & uncertainty",
+  "Status & Social Hierarchy": "Standing & competence",
+  "Affiliation & Belonging": "Harmony & inclusion",
+};
+
 const FeedbackOverlay = ({ questionId, option }: Props) => {
   const [showDetail, setShowDetail] = useState(false);
   const insight = instinctMap[questionId]?.[option];
@@ -22,7 +28,7 @@ const FeedbackOverlay = ({ questionId, option }: Props) => {
   return (
     <aside className="rounded-lg border border-brand-dark/10 bg-white p-6 shadow-sm">
       <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-        Behavioral read
+        Response pattern
       </p>
 
       {insight.instinct ? (
@@ -32,7 +38,7 @@ const FeedbackOverlay = ({ questionId, option }: Props) => {
           </h2>
           {insight.motive && (
             <p className="mt-2 font-sans text-xs font-semibold uppercase tracking-[0.14em] text-brand-teal">
-              {insight.motive}
+              {motiveLabels[insight.motive] ?? insight.motive}
             </p>
           )}
           <p className="mt-4 font-sans text-sm leading-7 text-brand-dark/72">
@@ -43,7 +49,7 @@ const FeedbackOverlay = ({ questionId, option }: Props) => {
             onClick={() => setShowDetail((value) => !value)}
             className="mt-5 inline-flex cursor-pointer items-center gap-2 font-sans text-sm font-semibold text-brand-accent transition hover:text-brand-primary"
           >
-            {showDetail ? "Hide the deeper read" : "Why this happens"}
+            {showDetail ? "Hide the fuller explanation" : "Why this can repeat"}
             {showDetail ? (
               <ChevronUp className="h-4 w-4" />
             ) : (

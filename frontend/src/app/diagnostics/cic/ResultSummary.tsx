@@ -25,7 +25,7 @@ const motiveLabels: Record<
   }
 > = {
   "Safety & Self-Protection": {
-    title: "Safety & Self-Protection",
+    title: "Reduce exposure and uncertainty",
     summary:
       "Your team may avoid uncertainty, exposure, or difficult ownership when the risk feels unclear.",
     microShift:
@@ -33,7 +33,7 @@ const motiveLabels: Record<
     icon: ShieldAlert,
   },
   "Status & Social Hierarchy": {
-    title: "Status & Social Hierarchy",
+    title: "Preserve standing and competence",
     summary:
       "Rank, visibility, and perceived competence may be shaping who speaks, owns, challenges, or pauses.",
     microShift:
@@ -41,7 +41,7 @@ const motiveLabels: Record<
     icon: Compass,
   },
   "Affiliation & Belonging": {
-    title: "Affiliation & Belonging",
+    title: "Preserve harmony and inclusion",
     summary:
       "Harmony and inclusion may be protected at the cost of candor, clarity, and timely conflict.",
     microShift:
@@ -75,83 +75,74 @@ const ResultSummary = ({ responses, onRestart }: Props) => {
 
   const totalResponses =
     Object.values(motiveCount).reduce((sum, val) => sum + val, 0) + noIssueCount;
-  const cavemanScore = Object.values(motiveCount).reduce(
+  const patternCount = Object.values(motiveCount).reduce(
     (sum, val) => sum + val,
     0,
   );
-  const cavemanPercent =
-    totalResponses > 0 ? Math.round((cavemanScore / totalResponses) * 100) : 0;
-  const modernPercent = 100 - cavemanPercent;
+  const patternPercent =
+    totalResponses > 0 ? Math.round((patternCount / totalResponses) * 100) : 0;
+  const noIssuePercent = 100 - patternPercent;
 
   const sortedMotives = Object.entries(motiveCount)
     .filter(([, count]) => count > 0)
     .sort((a, b) => b[1] - a[1]);
 
-  const topMotive = sortedMotives[0]?.[0] || "No dominant instinct";
+  const topMotive = sortedMotives[0]?.[0] || "No repeated pressure";
 
   return (
-    <main className="bg-white font-serif text-brand-dark">
-      <section className="px-6 py-12 md:py-16">
-        <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
+    <main className="surface-page">
+      <section className="surface-hero">
           <div>
-            <div className="mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">
-              <span>CIC result</span>
-              <span className="h-px flex-1 bg-brand-dark/15" />
-            </div>
-
-            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-              Workplace instinct profile
-            </p>
-            <h1 className="mt-3 text-[clamp(2.45rem,5vw,5rem)] font-bold leading-[0.98] tracking-[-0.03em] text-brand-dark">
-              Your team&apos;s
-              <br />
-              <span className="italic text-brand-accent">caveman pattern</span>
+            <p className="surface-eyebrow">Your workplace result</p>
+            <h1 className="surface-title">
+              See the response.
+              <span>Redesign the condition.</span>
             </h1>
-            <p className="mt-6 max-w-xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark md:text-lg">
-              This is not a personality label. It is a read on which ancient
-              workplace instincts may be influencing execution, candor,
-              ownership, and energy.
+            <p className="surface-lede">
+              This is not a personality label or a measure of how evolved a
+              team is. It reflects the situations where your answers identified
+              a recurring workplace response rather than “no issue.”
             </p>
           </div>
 
-          <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-[0_20px_60px_rgba(4,42,43,0.06)] md:p-8">
+          <aside className="journey-summary">
+            <span>What your answers contain</span>
             <div className="grid gap-4 sm:grid-cols-2">
-              <ScoreTile label="Instinct pressure" value={cavemanPercent} />
-              <ScoreTile label="Clear operating space" value={modernPercent} />
+              <ScoreTile label="Situations with a pattern" value={patternPercent} />
+              <ScoreTile label="No issue selected" value={noIssuePercent} />
             </div>
 
             <div className="mt-7">
               <div className="mb-3 flex items-center justify-between font-sans text-xs font-semibold uppercase tracking-[0.14em] text-brand-dark/60">
-                <span>Ancient pressure</span>
-                <span>Modern design</span>
+                <span>Pattern noticed</span>
+                <span>No issue selected</span>
               </div>
               <div className="h-3 w-full overflow-hidden rounded-full bg-brand-dark/10">
                 <div
                   className="h-full rounded-full bg-brand-accent transition-all duration-500"
-                  style={{ width: `${cavemanPercent}%` }}
+                  style={{ width: `${patternPercent}%` }}
                 />
               </div>
             </div>
 
             <p className="mt-6 font-sans text-sm leading-7 text-brand-dark/72">
-              Dominant signal:{" "}
+              Most frequent response family:{" "}
               <strong className="text-brand-dark">{topMotive}</strong>. The
               useful move is to design around that pressure instead of asking
               people to simply be braver, clearer, or more disciplined.
             </p>
-          </div>
-        </div>
+          </aside>
       </section>
 
       <section className="bg-brand-dark px-6 py-12 text-white md:py-14">
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
           <div>
-            <div className="mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-secondary">
+            <div className="page-eyebrow mb-7 flex items-center gap-3 text-brand-secondary">
               <span>What showed up</span>
               <span className="h-px flex-1 bg-white/20" />
             </div>
             <h2 className="text-3xl font-bold leading-tight tracking-[-0.02em] md:text-4xl">
-              The percentage matters less than the motive.
+              The useful question is what the response changes now.
             </h2>
           </div>
 
@@ -170,7 +161,7 @@ const ResultSummary = ({ responses, onRestart }: Props) => {
                       <span className="text-brand-primary">
                         {String(index + 1).padStart(2, "0")}
                       </span>
-                      <span className="text-brand-teal">{count} triggers</span>
+                      <span className="text-brand-teal">{count} situations</span>
                     </div>
                     <div className="mt-3 flex items-start gap-4">
                       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
@@ -194,7 +185,7 @@ const ResultSummary = ({ responses, onRestart }: Props) => {
             ) : (
               <article className="rounded-lg border border-white/16 bg-white p-6 text-brand-dark shadow-sm">
                 <h3 className="text-2xl font-bold leading-tight text-brand-dark">
-                  No major instinct pattern surfaced.
+                  No repeated workplace pattern surfaced.
                 </h3>
                 <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
                   Your answers suggest the listed workplace frictions may not be
@@ -221,7 +212,7 @@ const ResultSummary = ({ responses, onRestart }: Props) => {
             icon={<Compass className="h-5 w-5" />}
             label="Diagnostics"
             title="Compare with the personal scan"
-            text="See how your individual Inner Caveman patterns may interact with the professional ones."
+            text="Compare these team situations with the automatic responses that appear in ordinary personal life."
             href="/diagnostics/caveman-scan"
             cta="Take scan"
           />

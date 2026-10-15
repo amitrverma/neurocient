@@ -28,6 +28,6 @@ describe("buildPersonalizedForward", () => {
     );
 
     expect(forward.anchor?.mirror).toBeTruthy();
-    expect(forward.drive?.name).toBe("Safety & Survival");
+    expect(forward.drive?.name).toBe("Certainty & Control");
   });
 });

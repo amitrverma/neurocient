@@ -98,7 +98,7 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
         <div className="mt-10 grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
           <div>
             <p className="mb-4 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-              Choose the closest team pattern
+              Choose what happens most often
             </p>
 
             <div className="space-y-3">
@@ -151,11 +151,11 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
             ) : (
               <div className="rounded-lg border border-brand-dark/10 bg-white p-6 shadow-sm">
                 <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-                  Behavioral read appears here
+                  What this response changes immediately
                 </p>
                 <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
-                  Pick a response to see the instinct that may be shaping the
-                  workplace pattern.
+                  Pick a response to see why it can remain easy to repeat in
+                  this workplace situation.
                 </p>
               </div>
             )}

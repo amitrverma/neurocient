@@ -21,9 +21,9 @@ export const WelcomeScreen = ({
   onSkip: () => void;
 }) => (
   <Screen
-    label="Procrastination"
-    title="When the task keeps getting heavier."
-    body="Find the moment where it starts. Leave with one move you can actually see yourself doing."
+    label="Practice · Procrastination"
+    title="Work with one loop, not your whole life."
+    body="Begin with a recent moment when a task kept getting heavier. Understand what happened, then leave with one move you can actually see yourself doing."
   >
     <div className="flex flex-col gap-3 sm:flex-row">
       <PrimaryButton onClick={onStart}>Start</PrimaryButton>

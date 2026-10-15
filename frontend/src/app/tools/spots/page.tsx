@@ -37,36 +37,53 @@ const relatedInsights = [
 const SpotsPage = () => {
   const [spots, setSpots] = useState<Spot[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
 
   const { user, ready } = useAuth();
 
   useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+
     const fetchSpots = async () => {
       if (!ready) return;
       if (!user) {
-        setLoading(false);
+        if (active) {
+          setSpots([]);
+          setLoadFailed(false);
+          setLoading(false);
+        }
         return;
       }
 
+      setLoading(true);
+      setLoadFailed(false);
       try {
         const res = await fetch("/api/spots/", {
           method: "GET",
           credentials: "include",
+          signal: controller.signal,
         });
 
         if (!res.ok) throw new Error(`Failed to fetch spots: ${res.statusText}`);
 
-        const data = await res.json();
-        setSpots(data);
+        const data = (await res.json()) as Spot[];
+        if (active) setSpots(data);
       } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
         console.error("Error loading spots:", err);
+        if (active) setLoadFailed(true);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
-    fetchSpots();
+    void fetchSpots();
+    return () => {
+      active = false;
+      controller.abort();
+    };
   }, [user, ready]);
 
   const userLimit = usageLimits.user.spots || 0;
@@ -76,30 +93,35 @@ const SpotsPage = () => {
   );
 
   return (
-    <main className="bg-white font-serif text-brand-dark">
-      <section className="mx-auto grid w-full max-w-6xl gap-10 px-6 pb-6 pt-12 md:grid-cols-[0.78fr_1.22fr] md:items-start md:pb-8 md:pt-16">
+    <main className="surface-page tool-detail-page">
+      <section className="tool-detail-hero">
         <div>
           <SectionLabel>Awareness log</SectionLabel>
-          <h1 className="text-[clamp(2.6rem,5vw,5.1rem)] font-bold leading-[0.98] tracking-[-0.03em] text-brand-dark">
-            Spot your Caveman
-            <br />
-            <span className="italic text-brand-accent">while it is active.</span>
+          <h1 className="tool-detail-title">
+            Catch the response.
+            <span>Keep the evidence.</span>
           </h1>
-          <p className="mt-6 max-w-xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark">
-            A place to record the small moments when ancient wiring shows up:
-            avoidance, comparison, defensiveness, craving, or the need for
-            reassurance.
+          <p className="tool-detail-lede">
+            Record one concrete situation, what you did next, and what changed
+            immediately. Repeated spots show which responses recur and the
+            conditions around them.
           </p>
         </div>
 
-        <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-sm md:p-7">
+        <aside className="tool-detail-summary">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
                 Your log
               </p>
               <h2 className="mt-2 text-3xl font-bold leading-tight text-brand-dark">
-                {loading ? "Loading spots" : `${spots.length} spots logged`}
+                {loading
+                  ? "Loading your evidence"
+                  : loadFailed
+                    ? "Your log is unavailable"
+                    : !user
+                      ? "Sign in to see your log"
+                      : `${spots.length} ${spots.length === 1 ? "spot" : "spots"} recorded`}
               </h2>
             </div>
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
@@ -111,17 +133,22 @@ const SpotsPage = () => {
             </span>
           </div>
           <p className="mt-4 font-sans text-sm leading-7 text-brand-dark/72">
-            Do not make the entry perfect. Name the moment in plain language so
-            you can notice it earlier next time.
+            Name what happened in plain language. A useful spot is specific
+            enough to recognise if a similar situation appears again.
           </p>
-        </div>
+        </aside>
       </section>
 
-      <section className="mx-auto grid w-full max-w-6xl gap-8 px-6 pb-14 md:grid-cols-[0.78fr_1.22fr] md:items-start md:pb-16">
+      <section className="tool-detail-content grid gap-8 md:grid-cols-[0.78fr_1.22fr] md:items-start">
         <div>
-          {user && !hasReachedLimit && (
+          {loadFailed ? (
+            <EmptyBlock
+              title="Your spots could not be loaded."
+              text="Your saved evidence has not been replaced or counted as zero. Refresh when the connection is available."
+            />
+          ) : user && !hasReachedLimit && (
             <CavemanSpot
-              prompt="What is one caveman instinct you noticed today?"
+              prompt="What happened, what did you do next, and what did that response change immediately?"
               onAdded={(spot) => setSpots((prev) => [spot, ...prev])}
             />
           )}
@@ -154,8 +181,8 @@ const SpotsPage = () => {
               </h2>
               <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
                 Your spots are private entries. Sign in to save them, revisit
-                these moments, and build a record of what your Inner Caveman
-                tends to protect.
+                these moments, and build a record of which responses repeat
+                under which conditions.
               </p>
               <button
                 onClick={() => setShowAuth(true)}
@@ -176,6 +203,11 @@ const SpotsPage = () => {
 
           {loading ? (
             <LoadingBlock label="Loading your saved spots" />
+          ) : loadFailed ? (
+            <EmptyBlock
+              title="Saved spots are temporarily unavailable."
+              text="Nothing has been counted as empty. Try again after the connection recovers."
+            />
           ) : user && sortedSpots.length === 0 ? (
             <EmptyBlock
               title="No spots logged yet."
@@ -210,7 +242,7 @@ const SpotsPage = () => {
           <div>
             <SectionLabel tone="dark">Related insights</SectionLabel>
             <h2 className="text-3xl font-bold leading-tight md:text-4xl">
-              Understand the Caveman behind the moments.
+              Understand the response behind the moment.
             </h2>
           </div>
           <div className="grid gap-3">
@@ -231,7 +263,7 @@ const SpotsPage = () => {
         </div>
       </section>
 
-      <div className="mx-auto w-full max-w-6xl px-6 py-8">
+      <div className="tool-detail-return">
         <Link
           href="/tools"
           className="inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-dark transition hover:text-brand-primary"
@@ -244,7 +276,7 @@ const SpotsPage = () => {
       <AuthModal
         isOpen={showAuth}
         onClose={() => setShowAuth(false)}
-        context="start spotting your caveman"
+        context="start recording real-life evidence"
       />
     </main>
   );
@@ -279,7 +311,7 @@ const SectionLabel = ({
   tone?: "light" | "dark";
 }) => (
   <div
-    className={`mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] ${
+    className={`page-eyebrow mb-7 flex items-center gap-3 ${
       tone === "dark" ? "text-brand-secondary" : "text-brand-teal"
     }`}
   >

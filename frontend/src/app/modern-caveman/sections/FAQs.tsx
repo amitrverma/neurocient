@@ -122,23 +122,26 @@ const FAQs: React.FC = () => {
     setOpenIndex(openIndex === index ? null : index);
 
   return (
-    <section className="w-full px-6 py-20 bg-white font-serif">
-      <div className="max-w-4xl mx-auto">
+    <section className="mc-section mc-faqs">
+      <div className="mc-faq-inner">
 
         {/* Header */}
-        <h2 className="text-2xl md:text-4xl font-bold text-brand-dark text-center mb-14">
-          Frequently Asked Questions
-        </h2>
+        <div className="mc-section-heading">
+          <span className="mc-kicker">Before you decide</span>
+          <h2>Frequently Asked Questions</h2>
+        </div>
 
         {/* FAQ List */}
-        <div className="divide-y divide-brand-accent/30">
+        <div className="mc-faq-list">
           {faqs.map((faq: FAQItem, index) => (
             <div key={index}>
 
               {/* Question Button */}
               <button
                 onClick={() => toggle(index)}
-                className="w-full flex justify-between items-center py-4 text-left transition-colors"
+                aria-expanded={openIndex === index}
+                aria-controls={`modern-caveman-faq-${index}`}
+                className="mc-faq-button"
               >
                 <span
                   className={`text-lg font-medium ${
@@ -157,7 +160,7 @@ const FAQs: React.FC = () => {
 
               {/* Answer */}
               {openIndex === index && (
-                <div className="py-3 pl-4 border-l-4 border-brand-secondary text-brand-dark/80 whitespace-pre-line leading-relaxed">
+                <div id={`modern-caveman-faq-${index}`} className="mc-faq-answer">
                   {faq.a}
                 </div>
               )}

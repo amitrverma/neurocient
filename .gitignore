@@ -58,3 +58,6 @@ frontend/.vercel/
 *.tsbuildinfo
 next-env.d.ts
 frontend/next-env.d.ts
+
+#Codex Output
+.codex_output/

@@ -42,11 +42,11 @@ export interface ScanQuestion {
 const taskAvoidanceReflection = `
   <p><strong>Eat that frog.</strong></p>
   <p>Do the hardest thing first. Close the inbox, block distractions, and begin the report.</p>
-  <p>Good advice. But before you quite register the frog in your hand, your Inner Caveman has spotted a donut.</p>
+  <p>Good advice. But the inbox still offers a closer, clearer reward than the report.</p>
   <p>For most of human history, a certain reward now was a good bargain. Food could disappear. Effort cost energy. Tomorrow offered no guarantees. So what was close, clear, and rewarding carried weight.</p>
   <p>The world changed. That bias did not disappear.</p>
   <p>The report asks for effort now and offers an uncertain reward later. The inbox offers small rewards immediately: a clear question, a quick answer, something finished.</p>
-  <blockquote>You are not confused about what matters. Your Inner Caveman is responding to what pays off first.</blockquote>
+  <blockquote>You are not confused about what matters. The automatic response gives more weight to what pays off first.</blockquote>
 `;
 
 const taskEngagementReflection = `
@@ -135,7 +135,7 @@ const unrestoredReflection = `
   <p>You need more sleep, a better routine, or more discipline with your rest.</p>
   <p>But time away does not always feel like rest to a system that has stayed alert underneath it.</p>
   <p>Your body may have stopped for the night while your caveman continued carrying pressure, unfinished demands, and the sense that something still needed attention.</p>
-  <p>The problem is not always that you failed to rest properly. Sometimes the protective system never received the message that it was safe to stand down.</p>
+  <p>The problem is not always that you failed to rest properly. Sometimes unresolved demands keep automatic readiness active even when you have stopped working.</p>
 `;
 
 const endOfDayGuiltReflection = `
@@ -321,7 +321,7 @@ const authoredQuestions: ScanQuestion[] = [
                     body: `
                             <h5 class="text-sm font-semibold text-dark mt-2 mb-1">Affiliation Anxiety & Tribal Reflexes</h5>
                             <p>Your brain is deeply wired for affiliation — the need to belong, sync, and stay connected to others. In early human tribes, falling out of step with the group could mean exclusion. And exclusion wasn’t just emotional; it was existential. Being pushed out of the tribe meant losing access to food, safety, and protection. So your brain evolved to constantly scan for signs of social misalignment — tone, posture, facial expressions — anything that might signal disconnection.</p>
-                            <p>That’s why even during something as simple as watching a show, part of you might monitor your partner’s reactions. Your nervous system is doing its ancient job: checking, “Are we still in sync?” The stakes are no longer life-or-death, but the software hasn’t updated.</p>
+                            <p>That is why even during something as simple as watching a show, you might monitor your partner’s reactions. Automatic social monitoring keeps checking whether the interaction has changed, even when no new evidence has appeared.</p>
                             <p>In The Modern Caveman, we explore how these ancient reflexes still shape modern relationships — and how to quiet them when they no longer serve you.</p>
                           `,
                   }
@@ -666,28 +666,6 @@ type ReflectionRevision = {
   protective: string;
   grounded: string;
 };
-
-const protectiveReflection = (
-  usualTake: string,
-  cavemanTake: string,
-  retrievableInsight: string,
-) => `
-  <p><strong>First, this makes sense.</strong></p>
-  <p>The faster response put more weight on what was immediate: relief, certainty, distance, or a feeling of control. That does not make you weak or irrational.</p>
-  <p><strong>The usual take?</strong></p>
-  <p>${usualTake}</p>
-  <p>That advice can be useful. But it tells you what to change without fully explaining why the other response felt compelling when the moment arrived.</p>
-  <p><strong>Before thought catches up</strong></p>
-  <p>${cavemanTake}</p>
-  <blockquote>${retrievableInsight}</blockquote>
-`;
-
-const groundedReflection = (body: string, retrievableInsight: string) => `
-  <p><strong>What happened here?</strong></p>
-  <p>${body}</p>
-  <p>This does not mean the Inner Caveman disappeared. Its fast signal was present; it simply did not become the next action.</p>
-  <blockquote>${retrievableInsight}</blockquote>
-`;
 
 const scenarioPresentations: Partial<
   Record<number, Pick<ScanQuestion, "visual" | "sceneEmphasis">>
@@ -1069,7 +1047,7 @@ const reflectionRevisions: Partial<Record<number, ReflectionRevision>> = {
       <p><strong>Put the phone down.</strong></p>
       <p>Block the app. Set a timer. Have enough self-control to return to what matters.</p>
       <p>Good advice. But the next reel is not competing fairly with the dim laptop beside you.</p>
-      <p>In a changing environment, new information deserved attention. A movement, a sound, or a shift in the group might reveal danger, food, opportunity, or something worth knowing. The Inner Caveman is highly responsive to what is new.</p>
+      <p>In a changing environment, new information deserved attention. A movement, a sound, or a shift in the group might reveal danger, food, opportunity, or something worth knowing. Automatic processing still gives unusual priority to what is new.</p>
       <p>A feed turns that sensitivity into an endless surface. Every swipe brings a fresh face, sound, joke, threat, or social signal. There is no natural end—only another piece of information already arriving.</p>
       <p>The work asks you to stay with uncertainty and wait for its reward. The feed replaces uncertainty every few seconds and rewards the smallest possible movement.</p>
       <blockquote>You are not choosing forty minutes of scrolling. You are choosing the next few seconds—again and again.</blockquote>
@@ -1086,7 +1064,7 @@ const reflectionRevisions: Partial<Record<number, ReflectionRevision>> = {
       <p><strong>Just send the message.</strong></p>
       <p>If you miss someone, reach out. Stop making it complicated.</p>
       <p>Good advice. But after a year of silence, this is no longer only a message. It is a small test of whether your old place in the relationship still exists.</p>
-      <p>For most of human history, bonds were practical as well as emotional. The people around you shared food, knowledge, care, and protection. Losing a place in the group—or discovering that a bond had weakened—could carry real consequences. That sensitivity is part of your Inner Caveman.</p>
+      <p>For most of human history, bonds were practical as well as emotional. The people around you shared food, knowledge, care, and resources. Losing a place in the group—or discovering that a bond had weakened—could carry real consequences. Automatic processing still gives social uncertainty unusual weight.</p>
       <p>The modern message is harmless. The answer is uncertain. Deleting the draft keeps the friendship possible without forcing that uncertainty to resolve.</p>
       <blockquote>The words are simple. What the reply might reveal about where you belong is not.</blockquote>
     `,
@@ -1103,7 +1081,7 @@ const reflectionRevisions: Partial<Record<number, ReflectionRevision>> = {
       <p>Do not wait for motivation. Change your shoes and get moving. You never regret a workout.</p>
       <p>The plan makes perfect sense—except the version of you who made it imagined the benefit. The version sitting by the door is meeting the cost.</p>
       <p>For most of human history, movement usually answered something immediate: find food, carry water, reach shelter, follow the group. Energy spent had a visible reason. Exercise asks you to spend it now for health, strength, or mood that mostly arrives later.</p>
-      <p>That mismatch is where your Inner Caveman appears. The phone offers relief without another demand. The shoes ask an already tired body to pay first.</p>
+      <p>That mismatch changes the next response. The phone offers relief without another demand. The shoes ask an already tired body to pay first.</p>
       <blockquote>Your future self receives the benefit. Your present body receives the bill.</blockquote>
     `,
     grounded: `
@@ -1119,7 +1097,7 @@ const reflectionRevisions: Partial<Record<number, ReflectionRevision>> = {
       <p><strong>One empty box should be easy to ignore.</strong></p>
       <p>Yesterday happened. Continue today. Never miss twice.</p>
       <p>Yet your eyes keep finding the gap, because it has already changed what the page means.</p>
-      <p>Your Inner Caveman is sensitive to breaks in a pattern. In less predictable environments, noticing that something had changed—a route, a food source, the weather, another person's behaviour—could matter more than noticing that three days had stayed the same.</p>
+      <p>Automatic processing gives priority to breaks in a pattern. In less predictable environments, noticing that something had changed—a route, a food source, the weather, another person's behaviour—could matter more than noticing that three days had stayed the same.</p>
       <p>The notebook turns that old sensitivity toward your own progress. Three checks say the plan is working. One gap introduces uncertainty. Monday offers a clean pattern again, without asking you to continue inside one that is already imperfect.</p>
       <blockquote>The routine did not break. The picture of perfect progress did.</blockquote>
     `,
@@ -1135,7 +1113,7 @@ const reflectionRevisions: Partial<Record<number, ReflectionRevision>> = {
       <p><strong>From outside the dinner, the answer looks simple.</strong></p>
       <p>Stop avoiding the real conversation. Say what you feel before the distance grows.</p>
       <p>From inside it, “I miss us” does not only describe the bond. It tests it.</p>
-      <p>For most of human history, close bonds helped regulate distress and carried care, cooperation, protection, and continuity. Sensitivity to a change in an important bond is part of your Inner Caveman because the answer once reached far beyond one uncomfortable dinner.</p>
+      <p>For most of human history, close bonds carried care, cooperation, shared resources, and continuity. A possible change in an important bond still receives unusual weight because the answer once reached far beyond one uncomfortable dinner.</p>
       <p>Logistics preserves something familiar: the two of you are still functioning together. Naming the distance risks conflict—or confirmation that the other person feels it too.</p>
       <blockquote>Silence does not always mean the bond matters less. Sometimes the answer matters more.</blockquote>
     `,
@@ -1152,7 +1130,7 @@ const reflectionRevisions: Partial<Record<number, ReflectionRevision>> = {
       <p><strong>The reaction looks too large for the moment.</strong></p>
       <p>It was one ordinary question. The other person did not create the day you were carrying, and they did not deserve its full force.</p>
       <p>But your body did not begin responding at 8:07.</p>
-      <p>Calls, deadlines, interruptions, and unfinished demands had kept asking for readiness. That rapid mobilization is part of your Inner Caveman: useful when another demand requires action, costly when the system has had no clear moment to stand down.</p>
+      <p>Calls, deadlines, interruptions, and unfinished demands had kept asking for readiness. Rapid mobilization can be useful when another demand requires action and costly when one demand follows another without recovery.</p>
       <p>The question arrived as one more request for something you had not finished. Its words belonged to the kitchen. The intensity behind your answer belonged to the whole day.</p>
       <blockquote>The question was one sentence. Your body answered the accumulated day.</blockquote>
     `,
@@ -1169,7 +1147,7 @@ const reflectionRevisions: Partial<Record<number, ReflectionRevision>> = {
       <p>The phone is face down. The afternoon is free. The book is already open.</p>
       <p>Rest is usually presented as a simple instruction: stop working, put the list away, and be present. That changes what you are doing. It does not necessarily give an unfinished intention an ending.</p>
       <p>Still, the unfinished day keeps arriving—because stopping is something the clock can do. Feeling finished requires a different signal.</p>
-      <p>Your Inner Caveman is built to keep unmet needs available. Forgetting the food still to find, the shelter still to mend, or the person still waiting could once carry a real cost. An open intention earned another appearance in attention.</p>
+      <p>Automatic processing keeps unmet needs available. Forgetting the food still to find, the shelter still to mend, or the person still waiting could once carry a real cost. An open intention earned another appearance in thought.</p>
       <p>Modern life leaves far more things open than any afternoon can close. The sofa signals that work has stopped. The unanswered email, unpaid bill, and unbooked appointment still signal: <em>do not lose this.</em></p>
       <p>Doing one, listing all three, or drowning them out in the feed each offers a quicker ending than simply resting beside them.</p>
       <blockquote>Your body found the sofa. Your attention was still keeping the promises.</blockquote>
@@ -1187,7 +1165,7 @@ const reflectionRevisions: Partial<Record<number, ReflectionRevision>> = {
       <p><strong>The replay feels like a way to find out what happened.</strong></p>
       <p>From outside, it looks like overthinking: stop analysing the pause and move on. But moving on is difficult while the mind still treats the pause as missing social information.</p>
       <p>Slow the moment down. Examine the pause. Reconstruct your tone. There must be a detail that settles what they meant.</p>
-      <p>That search makes sense to your Inner Caveman. In a life built around other people, a shift in someone’s warmth, trust, or willingness to cooperate was valuable information. An ambiguous social cue was worth another look because where you stood with others could matter far beyond one conversation.</p>
+      <p>That search follows an old social-information bias. In a life built around other people, a shift in someone’s warmth, trust, or willingness to cooperate was valuable information. An ambiguous social cue was worth another look because where you stood with others could matter far beyond one conversation.</p>
       <p>But memory is not a second camera angle. Each replay is another interpretation made with the unease you feel now. The pause supplies no new evidence, so the mind begins producing possibilities—and then reacting to the possibilities it produced.</p>
       <blockquote>The conversation ended. Your social radar was left with a signal and no meaning.</blockquote>
     `,
@@ -1203,8 +1181,8 @@ const reflectionRevisions: Partial<Record<number, ReflectionRevision>> = {
     protective: `
       <p><strong>The number and the feeling disagree.</strong></p>
       <p>Nearly eight hours should equal energy. When it does not, the mind reaches quickly for a cause: the routine failed, the body failed, or something else needs fixing.</p>
-      <p>Your Inner Caveman is sensitive to available energy. Low energy changes what the body can afford—effort, exploration, patience, even how costly the day ahead appears. A state that affects readiness is useful to notice.</p>
-      <p>What the old system never had was a sleep score promising that readiness should already be here. The tracker turns one part of the night into an expectation. Waking heavy then feels less like a passing state and more like evidence that something has gone wrong.</p>
+      <p>Automatic processing responds to available energy. Low energy changes what the body can afford—effort, exploration, patience, even how costly the day ahead appears. A state that affects readiness is useful to notice.</p>
+      <p>What human automatic processing never had was a sleep score promising that readiness should already be here. The tracker turns one part of the night into an expectation. Waking heavy then feels less like a passing state and more like evidence that something has gone wrong.</p>
       <p>Scrolling waits for alertness without asking anything of you. Coffee overrides the signal. A new routine promises control. Each resolves the uncertainty faster than simply meeting the body you woke up in.</p>
       <blockquote>The body reports low energy. The mind turns it into a failed equation.</blockquote>
     `,
@@ -1220,7 +1198,7 @@ const reflectionRevisions: Partial<Record<number, ReflectionRevision>> = {
     protective: `
       <p><strong>The guilt appears to be the opposite of avoidance.</strong></p>
       <p>The scrolling said, <em>not now.</em> The voice at 11:47 says, <em>this is unacceptable.</em> One escaped the standard; the other seems determined to enforce it.</p>
-      <p>But both offer your Inner Caveman something immediate.</p>
+      <p>But both offer something immediate.</p>
       <p>The feed changed how the difficult moment felt without requiring the difficult action. Self-attack now converts a messy day into a simple cause: you lacked discipline. A perfect plan restores order just as quickly. Tonight, you can become the person who wakes early, follows every line, and finally gets it right.</p>
       <p>That imagined tomorrow relieves the distance between who you meant to be and what happened today. It does not yet change the boredom, uncertainty, effort, or discomfort that made the first step easy to avoid.</p>
       <blockquote>The feed softened the discomfort. The perfect plan softens the guilt.</blockquote>

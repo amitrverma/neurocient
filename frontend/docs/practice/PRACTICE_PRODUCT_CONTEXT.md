@@ -58,6 +58,12 @@ Practice should feel:
 - grounded in behavior change, not productivity theater
 - grounded in why the pattern makes sense before asking the user to change it
 
+Practice uses the shared Neurocient design foundation documented in
+`../DESIGN_SYSTEM.md`: product-wide font roles, brand colors, controls, focus
+treatment, and navigation language. Its calmer, progressively disclosed composition
+is a journey-specific mode of the same product, not a separate visual brand. Shared
+foundations must not be used to force Practice into a dense portal or dashboard.
+
 Practice should be treated as a design problem throughout. The experience must use product design, interaction design, behavior design, storytelling, and evidence of persistence to help the user live with the system long enough for it to work.
 
 ## What Practice Is Not

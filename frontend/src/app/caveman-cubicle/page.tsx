@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 import {
   ArrowRight,
   Brain,
@@ -7,50 +6,57 @@ import {
   Compass,
   Mail,
   Phone,
-  ShieldCheck,
   Users,
 } from "lucide-react";
 
 const workplaceSignals = [
   {
-    title: "People agree in the room, then drift afterward.",
-    label: "Belonging protection",
-    text: "The meeting sounded aligned, but the nervous system still read dissent as risky.",
+    number: "01",
+    situation: "People agree in the room, then drift afterward.",
+    pattern: "Belonging pressure",
+    explanation:
+      "Open disagreement can carry a social cost, so apparent alignment may arrive before genuine commitment.",
   },
   {
-    title: "Ownership is requested, but permission is still expected.",
-    label: "Hierarchy sensitivity",
-    text: "Teams may wait for signals of safety before acting with real agency.",
+    number: "02",
+    situation: "Ownership is requested, but permission is still expected.",
+    pattern: "Hierarchy sensitivity",
+    explanation:
+      "People continue reading rank and consequence even when leaders say they want independent action.",
   },
   {
-    title: "Feedback gets softened until nothing changes.",
-    label: "Status management",
-    text: "When rank feels fragile, truth becomes expensive and clarity gets diluted.",
+    number: "03",
+    situation: "Feedback gets softened until nothing changes.",
+    pattern: "Status management",
+    explanation:
+      "The immediate benefit of avoiding friction can outweigh the later benefit of saying what the work requires.",
   },
   {
-    title: "Smart people make cautious decisions under pressure.",
-    label: "Threat narrowing",
-    text: "Stress pushes attention toward protection, certainty, and familiar defaults.",
+    number: "04",
+    situation: "Capable teams become cautious under pressure.",
+    pattern: "Familiar defaults",
+    explanation:
+      "Urgency narrows the options people consider and makes established responses easier to repeat.",
   },
 ];
 
 const programAreas = [
   {
     title: "Decision-making pitfalls",
-    label: "Bias under pressure",
-    text: "Why optimism, sunk costs, loss aversion, and urgency distort execution even in capable teams.",
+    label: "See the distortion",
+    text: "Examine how optimism, sunk costs, loss aversion, and urgency alter execution in capable teams.",
     icon: Brain,
   },
   {
     title: "Leadership under the lens",
-    label: "Signals leaders send",
-    text: "How tone, timing, status, and ambiguity can trigger silence or initiative without anyone naming it.",
+    label: "Read the signals",
+    text: "Notice how tone, timing, rank, and ambiguity can produce silence or initiative before anyone names the cause.",
     icon: Users,
   },
   {
     title: "Behavior design",
-    label: "Systems over slogans",
-    text: "Practical nudges that make ownership, trust, and constructive dissent easier to repeat.",
+    label: "Change the conditions",
+    text: "Design practical cues and working conditions that make ownership, candor, and useful disagreement easier to repeat.",
     icon: Compass,
   },
 ];
@@ -58,245 +64,197 @@ const programAreas = [
 const takeaways = [
   "A sharper read on why teams hesitate, conform, defer, or disengage.",
   "Bias-aware reflexes for decisions, feedback, meetings, and execution.",
-  "Practical behavior-design moves that reduce threat and increase initiative.",
+  "Practical behavior-design moves that increase initiative and useful candor.",
   "A shared language for discussing human dynamics without blame.",
 ];
 
 export default function CavemanInTheCubiclePage() {
   return (
-    <main className="bg-white font-serif text-brand-dark">
-      <section className="border-b border-brand-dark/10 px-6 py-14 md:py-20">
-        <div className="mx-auto grid w-full max-w-6xl gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:items-center">
-          <div>
-            <SectionLabel>Workplace behavior</SectionLabel>
-            <h1 className="text-[clamp(3rem,6.2vw,6.1rem)] font-bold leading-[0.96] tracking-[-0.035em] text-brand-dark">
-              Caveman in
-              <br />
-              <span className="italic text-brand-accent">the Cubicle.</span>
-            </h1>
-            <p className="mt-7 max-w-2xl border-l-4 border-brand-secondary pl-5 font-sans text-lg leading-8 text-brand-dark md:text-xl md:leading-9">
-              A leadership reset grounded in how people actually behave, not
-              how we wish they behaved under pressure.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <a
-                href="mailto:hello@neurocient.com"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-dark/25 px-6 py-3 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-primary hover:text-brand-primary"
-              >
-                Discuss a workshop
-                <Mail className="h-4 w-4" />
-              </a>
-            </div>
+    <main className="cubicle-page">
+      <section className="cubicle-hero">
+        <div className="cubicle-hero-copy">
+          <p className="cubicle-eyebrow">A workplace programme by Neurocient</p>
+          <h1>
+            Caveman in
+            <span>the Cubicle.</span>
+          </h1>
+          <p className="cubicle-hero-lede">
+            The modern workplace runs on ancient social instincts. See what
+            happens to ownership, candor, and decisions when status, belonging,
+            and immediate consequences enter the room.
+          </p>
+          <div className="cubicle-actions">
+            <Link className="cubicle-button cubicle-button-primary" href="/diagnostics/cic">
+              Take the workplace diagnostic
+              <ArrowRight aria-hidden="true" />
+            </Link>
+            <a className="cubicle-button cubicle-button-secondary" href="mailto:hello@neurocient.com">
+              Discuss a workshop
+            </a>
           </div>
+        </div>
 
-          <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-[0_20px_60px_rgba(4,42,43,0.06)] md:p-8">
-            <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-              The hidden problem
+        <aside className="cubicle-brief" aria-label="The workplace gap">
+          <div className="cubicle-brief-header">
+            <BriefcaseBusiness aria-hidden="true" />
+            <span>The workplace gap</span>
+          </div>
+          <p>Leaders ask for</p>
+          <strong>Ownership · Candor · Initiative</strong>
+          <div className="cubicle-brief-divider" aria-hidden="true">
+            <span />
+            <small>but often get</small>
+            <span />
+          </div>
+          <strong>Deference · Silence · Familiar decisions</strong>
+          <p>
+            The gap is not explained by skill or intent alone. Automatic social
+            responses also shape what people do next.
+          </p>
+        </aside>
+      </section>
+
+      <section className="cubicle-section cubicle-signals">
+        <header className="cubicle-section-heading">
+          <p className="cubicle-eyebrow">Recognise it at work</p>
+          <h2>What looks like a people problem may be a pattern problem.</h2>
+          <p>
+            Start with what can be observed. Then examine the immediate social
+            payoff that can keep the behavior going.
+          </p>
+        </header>
+
+        <div className="cubicle-signal-list">
+          {workplaceSignals.map((signal) => (
+            <article key={signal.number} className="cubicle-signal">
+              <span className="cubicle-signal-number">{signal.number}</span>
+              <h3>{signal.situation}</h3>
+              <div>
+                <p>{signal.pattern}</p>
+                <span>{signal.explanation}</span>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="cubicle-section cubicle-reframe">
+        <div className="cubicle-reframe-title">
+          <p className="cubicle-eyebrow cubicle-eyebrow-light">A better leadership lens</p>
+          <h2>
+            Do not ask only,
+            <span>“What should they do?”</span>
+          </h2>
+        </div>
+        <div className="cubicle-reframe-copy">
+          <p>
+            Ask what the situation makes easy now. A meeting can reward quick
+            agreement. A review can make silence cheaper than honesty. An urgent
+            decision can make the familiar option feel more defensible.
+          </p>
+          <p>
+            Caveman in the Cubicle helps leaders recognise those conditions,
+            understand the automatic responses they invite, and redesign the
+            work around the behavior the organisation actually needs.
+          </p>
+          <blockquote>
+            The aim is not to label people. It is to make the forces shaping
+            behavior visible enough to change.
+          </blockquote>
+        </div>
+      </section>
+
+      <section className="cubicle-section cubicle-offer">
+        <header className="cubicle-section-heading">
+          <p className="cubicle-eyebrow">How the work begins</p>
+          <h2>Read the room. Then redesign what happens in it.</h2>
+        </header>
+
+        <div className="cubicle-paths">
+          <Link href="/diagnostics/cic" className="cubicle-diagnostic">
+            <span className="cubicle-path-index">01 · Diagnose</span>
+            <BriefcaseBusiness aria-hidden="true" />
+            <h3>Find the instincts shaping execution.</h3>
+            <p>
+              Use the CIC diagnostic to examine where hierarchy sensitivity,
+              conflict avoidance, status, and alignment breakdowns may be
+              influencing the team.
             </p>
-            <h2 className="mt-3 text-3xl font-bold leading-tight text-brand-dark md:text-4xl">
-              You are not leading spreadsheets.
-              <br />
-              You are leading nervous systems.
-            </h2>
-            <div className="mt-6 space-y-4 font-sans text-sm leading-7 text-brand-dark/72">
-              <p>
-                Leaders say the right things: open door, more ownership, more
-                initiative, more candor.
-              </p>
-              <p>
-                But teams still hesitate because hierarchy, belonging, status,
-                and safety are not abstract ideas to the brain. They are ancient
-                survival signals.
-              </p>
-            </div>
+            <strong>
+              Start CIC diagnostic <ArrowRight aria-hidden="true" />
+            </strong>
+          </Link>
+
+          <div className="cubicle-workshop">
+            <span className="cubicle-path-index">02 · Work together</span>
+            <h3>Bring the lens into a leadership workshop.</h3>
+            <p>
+              Move from abstract leadership advice to the specific decisions,
+              meetings, feedback loops, and working conditions your team needs
+              to examine.
+            </p>
+            <a href="mailto:hello@neurocient.com">
+              Discuss your team <ArrowRight aria-hidden="true" />
+            </a>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
-        <SectionLabel>What leadership training misses</SectionLabel>
-        <div className="grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
-          <div>
-            <h2 className="text-[clamp(2.5rem,4.8vw,5rem)] font-bold leading-[0.96] tracking-[-0.03em] text-brand-dark">
-              The issue is rarely intent.
-              <br />
-              <span className="italic text-brand-accent">It is threat.</span>
-            </h2>
-            <p className="mt-6 max-w-xl font-sans text-base leading-8 text-brand-dark">
-              Most workplace advice assumes people will act on what is logical.
-              Caveman in the Cubicle starts from a different premise: under
-              pressure, people first protect safety, status, and belonging.
-            </p>
-          </div>
-
-          <div className="border-y border-brand-dark/12">
-            {workplaceSignals.map((signal, index) => (
-              <article
-                key={signal.title}
-                className="grid gap-4 border-b border-brand-dark/12 py-6 last:border-b-0 md:grid-cols-[0.58fr_1fr]"
-              >
-                <div className="flex gap-4">
-                  <span className="mt-1 font-serif text-3xl font-bold text-brand-primary">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <div>
-                    <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
-                      {signal.label}
-                    </p>
-                    <h3 className="mt-2 text-xl font-bold leading-tight text-brand-dark">
-                      {signal.title}
-                    </h3>
-                  </div>
-                </div>
-                <p className="font-sans text-sm leading-7 text-brand-dark/72">
-                  {signal.text}
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-brand-dark px-6 py-14 text-white md:py-20">
-        <div className="mx-auto max-w-6xl">
-          <SectionLabel tone="dark">The shift</SectionLabel>
-          <div className="grid gap-10 md:grid-cols-[0.78fr_1.22fr] md:items-start">
-            <h2 className="text-3xl font-bold leading-tight tracking-[-0.02em] md:text-5xl">
-              From leadership scripts
-              <br />
-              to behavioral x-ray vision.
-            </h2>
-            <div className="space-y-5 font-sans text-base leading-8 text-white/72">
-              <p>
-                Most programs tell leaders what to do. This lens explains why
-                what they are already doing may not be landing.
-              </p>
-              <p>
-                It helps leaders spot the invisible social signals they send,
-                decode instinctive loops behind low ownership, and design
-                environments where useful behavior is easier to repeat.
-              </p>
-              <p className="border-l-4 border-brand-secondary pl-5 text-xl leading-9 text-white">
-                The work is not motivational fluff. It is behavior design for
-                ancient brains inside modern organizations.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
-        <SectionLabel>Program focus</SectionLabel>
-        <div className="grid gap-5 md:grid-cols-3">
-          {programAreas.map((area) => {
+      <section className="cubicle-section cubicle-focus">
+        <header className="cubicle-section-heading">
+          <p className="cubicle-eyebrow">Programme focus</p>
+          <h2>Three ways to see work differently.</h2>
+        </header>
+        <div className="cubicle-focus-grid">
+          {programAreas.map((area, index) => {
             const Icon = area.icon;
 
             return (
-              <article
-                key={area.title}
-                className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-sm"
-              >
-                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
-                  <Icon className="h-5 w-5" />
-                </span>
-                <p className="mt-5 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-                  {area.label}
-                </p>
-                <h3 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
-                  {area.title}
-                </h3>
-                <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
-                  {area.text}
-                </p>
+              <article key={area.title}>
+                <div>
+                  <span>0{index + 1}</span>
+                  <Icon aria-hidden="true" />
+                </div>
+                <p>{area.label}</p>
+                <h3>{area.title}</h3>
+                <span>{area.text}</span>
               </article>
             );
           })}
         </div>
       </section>
 
-      <section
-        id="diagnostic"
-        className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-14 md:grid-cols-[0.78fr_1.22fr] md:items-start md:py-16"
-      >
-        <div>
-          <SectionLabel>CIC Diagnostic</SectionLabel>
-          <h2 className="text-3xl font-bold leading-tight text-brand-dark md:text-5xl">
-            Start with a clearer read of the room.
-          </h2>
+      <section className="cubicle-section cubicle-outcomes">
+        <div className="cubicle-outcomes-heading">
+          <p className="cubicle-eyebrow">What leaders take back</p>
+          <h2>A shared lens that survives the workshop.</h2>
         </div>
-
-        <Link
-          href="/diagnostics/cic"
-          className="group block rounded-lg border border-brand-dark bg-brand-dark p-6 text-white shadow-sm transition hover:opacity-95 md:p-8"
-        >
-          <span className="inline-flex items-center gap-2 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-secondary">
-            <BriefcaseBusiness className="h-4 w-4" />
-            Workplace insight
-          </span>
-          <h3 className="mt-3 text-3xl font-bold leading-tight">
-            Find the instincts shaping execution.
-          </h3>
-          <p className="mt-4 max-w-2xl font-sans text-sm leading-7 text-white/72">
-            A diagnostic for seeing where status patterns, conflict avoidance,
-            hierarchy sensitivity, and alignment breakdowns may be shaping team
-            behavior.
-          </p>
-          <span className="mt-6 inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-secondary">
-            Start CIC diagnostic
-            <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-          </span>
-        </Link>
+        <ol>
+          {takeaways.map((takeaway, index) => (
+            <li key={takeaway}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <p>{takeaway}</p>
+            </li>
+          ))}
+        </ol>
       </section>
 
-      <section className="border-y border-brand-dark/10 px-6 py-14 md:py-16">
-        <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[0.78fr_1.22fr] md:items-start">
-          <div>
-            <SectionLabel>Takeaways</SectionLabel>
-            <h2 className="text-3xl font-bold leading-tight text-brand-dark md:text-4xl">
-              What leaders walk away with.
-            </h2>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {takeaways.map((takeaway) => (
-              <div
-                key={takeaway}
-                className="flex gap-3 rounded-lg border border-brand-dark/12 bg-white p-5 shadow-sm"
-              >
-                <ShieldCheck className="mt-1 h-5 w-5 shrink-0 text-brand-accent" />
-                <p className="font-sans text-sm leading-7 text-brand-dark/72">
-                  {takeaway}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-14 md:grid-cols-[0.78fr_1.22fr] md:items-start md:py-16">
+      <section className="cubicle-contact">
         <div>
-          <SectionLabel>Bring it to your team</SectionLabel>
-          <h2 className="text-3xl font-bold leading-tight text-brand-dark md:text-4xl">
-            Start with a conversation.
-          </h2>
-          <p className="mt-4 max-w-xl font-sans text-sm leading-7 text-brand-dark/72">
-            Use the diagnostic as a starting point, or bring the framework into
-            a leadership workshop.
+          <p className="cubicle-eyebrow cubicle-eyebrow-light">Bring it to work</p>
+          <h2>Start with the pattern your team keeps repeating.</h2>
+          <p>
+            Use the diagnostic as a starting point, or tell us what you are
+            seeing and explore a leadership workshop.
           </p>
         </div>
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          <a
-            href="mailto:hello@neurocient.com"
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-3 font-sans text-sm font-semibold text-white transition hover:opacity-90"
-          >
-            <Mail className="h-4 w-4" />
+        <div className="cubicle-contact-actions">
+          <a href="mailto:hello@neurocient.com">
+            <Mail aria-hidden="true" />
             hello@neurocient.com
           </a>
-          <a
-            href="tel:+918551915656"
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-dark/25 px-5 py-3 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-primary hover:text-brand-primary"
-          >
-            <Phone className="h-4 w-4" />
+          <a href="tel:+918551915656">
+            <Phone aria-hidden="true" />
             +91-85519 15656
           </a>
         </div>
@@ -304,24 +262,3 @@ export default function CavemanInTheCubiclePage() {
     </main>
   );
 }
-
-const SectionLabel = ({
-  children,
-  tone = "light",
-}: {
-  children: ReactNode;
-  tone?: "light" | "dark";
-}) => (
-  <div
-    className={`mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] ${
-      tone === "dark" ? "text-brand-secondary" : "text-brand-teal"
-    }`}
-  >
-    <span>{children}</span>
-    <span
-      className={`h-px flex-1 ${
-        tone === "dark" ? "bg-white/20" : "bg-brand-dark/15"
-      }`}
-    />
-  </div>
-);

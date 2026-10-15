@@ -23,7 +23,7 @@ export default function SpotMyCavemanPage() {
   const [spotCountReady, setSpotCountReady] = useState(false);
   const [moment, setMoment] = useState("");
   const [nextMove, setNextMove] = useState("");
-  const [protection, setProtection] = useState("");
+  const [immediateEffect, setImmediateEffect] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +98,7 @@ export default function SpotMyCavemanPage() {
   if (!ready || !user || !portrait || !spotCountReady) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#f8f6f0] px-6 font-sans text-brand-dark/65">
-        <p>Bringing your Caveman cue with you…</p>
+        <p>Opening the cue from your scan...</p>
       </main>
     );
   }
@@ -112,7 +112,9 @@ export default function SpotMyCavemanPage() {
       marker,
       `Moment: ${moment.trim()}`,
       `What happened next: ${nextMove.trim()}`,
-      protection.trim() ? `What it offered right then: ${protection.trim()}` : "",
+      immediateEffect.trim()
+        ? `Immediate effect: ${immediateEffect.trim()}`
+        : "",
     ]
       .filter(Boolean)
       .join("\n");
@@ -143,17 +145,18 @@ export default function SpotMyCavemanPage() {
             You caught it
           </p>
           <h1 className="mt-5 text-[clamp(2.5rem,7vw,5rem)] font-bold leading-[1] tracking-[-0.03em]">
-            You saw your Caveman while life was happening.
+            You caught an automatic response while life was happening.
           </h1>
           <p className="mt-7 max-w-2xl font-sans text-base leading-8 text-white/72">
-            That is the work for now. You did not need to defeat the response;
-            you noticed the movement before it disappeared back into the day.
+            That is enough for now. You recorded what happened before the
+            details disappeared back into the day.
           </p>
           {readyForExperiment ? (
             <div className="mt-10 border-t border-white/16 pt-8">
               <p className="font-sans text-sm leading-7 text-white/68">
-                You have now caught this movement more than once. A tiny
-                experiment can help you discover whether another response is possible.
+                You have now caught this response more than once. A tiny
+                experiment can help you test whether another response is easier
+                under different conditions.
               </p>
               <Link
                 href={`/tools/microchallenges?from=spot&move=${portrait.primary.move}`}
@@ -166,7 +169,7 @@ export default function SpotMyCavemanPage() {
           ) : (
             <div className="mt-10 border-t border-white/16 pt-8">
               <p className="font-sans text-sm leading-7 text-white/68">
-                Keep the same cue with you. Catching it again will tell you more
+                Keep the same cue with you. Recording it again will tell you more
                 than rushing straight into another solution.
               </p>
               <Link
@@ -190,7 +193,7 @@ export default function SpotMyCavemanPage() {
           <Eye className="h-5 w-5" />
         </div>
         <p className="mt-6 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-primary">
-          Spot your Caveman
+          Record a real-life Spot
         </p>
         <h1 className="mt-4 text-[clamp(2.35rem,7vw,4.6rem)] font-bold leading-[1] tracking-[-0.03em]">
           Bring one real moment into view.
@@ -217,10 +220,10 @@ export default function SpotMyCavemanPage() {
           />
           {moment.trim() && nextMove.trim() && (
             <Field
-              label="What did the move seem to offer right then?"
-              value={protection}
-              onChange={setProtection}
-              placeholder="Optional — relief, certainty, distance, reassurance, or simply less effort…"
+              label="What changed immediately?"
+              value={immediateEffect}
+              onChange={setImmediateEffect}
+              placeholder="Optional — perhaps relief, certainty, distance, reassurance, or simply less effort..."
             />
           )}
         </div>

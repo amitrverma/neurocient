@@ -33,11 +33,11 @@ export default function MembershipPage() {
   return (
     <main className="bg-brand-dark px-6 py-16 font-serif text-white md:py-24">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-secondary">
+        <div className="page-eyebrow mb-7 flex items-center gap-3 text-brand-secondary">
           <span>Membership</span>
           <span className="h-px flex-1 bg-white/20" />
         </div>
-        <h1 className="max-w-3xl text-3xl font-bold leading-tight md:text-5xl">
+        <h1 className="page-title max-w-3xl text-white">
           Go deeper. Work with your wiring.
         </h1>
         <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-white/70">

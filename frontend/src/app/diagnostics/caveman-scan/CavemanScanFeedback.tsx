@@ -61,7 +61,7 @@ const CavemanScanFeedback = ({ open, reflection, science, onClose, onContinue }:
             className="fixed inset-x-0 bottom-0 z-50 flex max-h-[88svh] flex-col overflow-hidden rounded-t-[1.5rem] border border-brand-dark/10 bg-[#fffefa] text-brand-dark shadow-[0_28px_90px_rgba(4,42,43,0.28)] md:bottom-6 md:left-auto md:right-6 md:w-[min(34rem,calc(100vw-3rem))] md:rounded-[1.5rem]"
           >
             <header className="flex items-center justify-between gap-4 border-b border-brand-dark/10 px-5 py-4 sm:px-6">
-              <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-brand-primary">
+              <p className="page-eyebrow text-brand-primary">
                 {showScience ? "Science note" : "What might be happening?"}
               </p>
               <button type="button" onClick={onClose} aria-label="Close explanation" className="grid h-9 w-9 cursor-pointer place-items-center rounded-full border border-brand-dark/15 text-brand-dark/60 transition hover:border-brand-primary hover:text-brand-primary">

@@ -2,265 +2,137 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowRight, ClipboardList, NotebookPen } from "lucide-react";
+import { ArrowRight, FlaskConical, NotebookPen } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
-import StreakBar from "../components/tools/StreakBar";
-import AuthModal from "../components/AuthModal";
 
 interface Spot {
   date: string;
   description: string;
 }
 
-const tools = [
+const toolPaths = [
   {
-    eyebrow: "Awareness log",
-    title: "Spot Your Inner Caveman",
-    icon: NotebookPen,
-    description:
-      "This is a simple awareness log for the moments when old wiring takes over. You might notice avoidance before a difficult task, comparison after seeing someone else's progress, defensiveness in a conversation, craving under stress, or a sudden need for reassurance.",
-    why:
-      "The useful move is to notice your Inner Caveman close to the moment it appears. A short note makes the reaction easier to recognise, and over time those notes reveal what tends to wake it up.",
-    unlock:
-      "Use it when you want a private record of your recurring loops: what triggered the response, what it was protecting, and what you might try next time.",
+    number: "01",
+    label: "Notice what happened",
+    title: "Spots",
+    question: "What actually happened in my life?",
+    text: "Capture one concrete situation, what you did next, and what the response gave you immediately. Repeated spots turn a vague pattern into evidence you can recognise earlier.",
+    useWhen: "Use this after a moment you want to understand—not only after you handled it well.",
     href: "/tools/spots",
-    cta: "Explore spots",
+    cta: "Record or review a spot",
+    icon: NotebookPen,
   },
   {
-    eyebrow: "Daily experiment",
+    number: "02",
+    label: "Try something small",
     title: "Microchallenges",
-    icon: ClipboardList,
-    description:
-      "Microchallenges are small behavior experiments designed for real life. Instead of trying to overhaul a habit, you choose one tiny action that gives your nervous system evidence that a different response is possible.",
-    why:
-      "The challenge is intentionally modest because intensity is usually where old resistance shows up. Repetition matters more than drama: one small action, logged consistently, becomes proof.",
-    unlock:
-      "Use it when you want structure: pick a challenge, log daily progress, remove what is not working, and keep a history of experiments you have completed.",
+    question: "What small experiment can I try?",
+    text: "Choose one modest change to a cue, environment, or action. The purpose is to learn what changes the response in real conditions, not to prove perfect discipline.",
+    useWhen: "Use this when you can name the pattern and want to test a different setup.",
     href: "/tools/microchallenges",
-    cta: "Explore challenges",
+    cta: "Choose a microchallenge",
+    icon: FlaskConical,
   },
 ];
 
-const ToolsPage = () => {
-  const [spots, setSpots] = useState<Spot[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showAuth, setShowAuth] = useState(false);
-
+export default function ToolsPage() {
   const { user } = useAuth();
+  const [spots, setSpots] = useState<Spot[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [spotLoadFailed, setSpotLoadFailed] = useState(false);
 
-  const streak = { current: 7, longest: 15 };
   useEffect(() => {
-    const fetchSpots = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
+    if (!user) {
+      setSpots([]);
+      setSpotLoadFailed(false);
+      return;
+    }
 
-      try {
-        const res = await fetch("/api/spots/", {
-          method: "GET",
-          credentials: "include",
-        });
+    const controller = new AbortController();
+    setLoading(true);
+    setSpotLoadFailed(false);
 
-        if (!res.ok) {
-          throw new Error(`Failed to fetch spots: ${res.statusText}`);
-        }
+    fetch("/api/spots/", { credentials: "include", signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error(`Failed to fetch spots: ${response.status}`);
+        return response.json() as Promise<Spot[]>;
+      })
+      .then(setSpots)
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        console.error("Error loading spots:", error);
+        setSpotLoadFailed(true);
+      })
+      .finally(() => setLoading(false));
 
-        const data = await res.json();
-        setSpots(data);
-      } catch (err) {
-        console.error("Error loading spots:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSpots();
+    return () => controller.abort();
   }, [user]);
 
-  const spotCount = spots.length;
-  const latestSpot =
-    spotCount > 0
-      ? [...spots].sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-        )[spotCount - 1]
-      : null;
+  const latestSpot = [...spots].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  )[0];
 
   return (
-    <main className="bg-white font-serif text-brand-dark">
-      <section className="mx-auto w-full max-w-6xl px-6 py-12 md:py-16">
-        <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
-          <div>
-            <SectionLabel>Tools</SectionLabel>
-            <h1 className="text-[clamp(2.6rem,4.8vw,5rem)] font-bold leading-[0.98] tracking-[-0.03em] text-brand-dark">
-              Practice the
-              <br />
-              <span className="italic text-brand-accent">new response.</span>
-            </h1>
-            <p className="mt-6 max-w-xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark">
-              A working space for meeting your Inner Caveman in real moments,
-              trying micro-experiments, and building awareness through repetition.
-            </p>
-          </div>
-
-          {user ? <StreakBar current={streak.current} longest={streak.longest} /> : null}
+    <main className="surface-page tools-page">
+      <section className="surface-hero tools-hero">
+        <div>
+          <p className="surface-eyebrow">Use it in real life</p>
+          <h1 className="surface-title">
+            Notice the pattern.
+            <span>Change one condition.</span>
+          </h1>
+          <p className="surface-lede">
+            These tools bring understanding back into ordinary life: first by
+            recording what happened, then by trying a small experiment in the
+            conditions that shaped it.
+          </p>
         </div>
+        <aside className="tools-loop" aria-label="The tools loop">
+          <span>One practical loop</span>
+          <ol>
+            <li><strong>Spot</strong><small>Name the real moment.</small></li>
+            <li><strong>Try</strong><small>Change one thing.</small></li>
+            <li><strong>Notice again</strong><small>Keep the evidence, not a streak.</small></li>
+          </ol>
+        </aside>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-6 pb-14 md:pb-20">
-        <div className="grid gap-5 lg:grid-cols-2">
-          {tools.map((tool) => {
+      <section className="surface-section tools-section">
+        <header className="surface-section-heading">
+          <p className="surface-eyebrow">Choose what you need now</p>
+          <h2>Evidence first. Experiment second.</h2>
+        </header>
+        <div className="tools-grid">
+          {toolPaths.map((tool) => {
             const Icon = tool.icon;
-            const stat =
-              tool.href === "/tools/spots"
-                ? loading
-                  ? "Loading spots..."
-                  : user
-                    ? `${spotCount} ${spotCount === 1 ? "spot" : "spots"} logged`
-                    : null
-                : user
-                  ? "Open your challenges to see active and completed work."
-                  : null;
-
+            const isSpots = tool.href === "/tools/spots";
             return (
-              <ToolCard
-                key={tool.href}
-                eyebrow={tool.eyebrow}
-                title={tool.title}
-                icon={<Icon className="h-5 w-5" />}
-                description={tool.description}
-                why={tool.why}
-                unlock={tool.unlock}
-                href={tool.href}
-                cta={tool.cta}
-                stat={stat}
-              >
-                {user && tool.href === "/tools/spots" && latestSpot ? (
-                  <p className="mt-4 border-l-4 border-brand-secondary pl-4 font-sans text-sm leading-7 text-brand-dark/72">
-                    Latest: "{latestSpot.description}"
-                  </p>
+              <Link key={tool.href} href={tool.href} className="tool-path-card">
+                <div className="tool-path-top"><span>{tool.number}</span><Icon aria-hidden="true" /></div>
+                <p>{tool.label}</p>
+                <h2>{tool.title}</h2>
+                <h3>{tool.question}</h3>
+                <span className="tool-path-copy">{tool.text}</span>
+                <blockquote>{tool.useWhen}</blockquote>
+                {user && isSpots ? (
+                  <div className="tool-personal-state">
+                    <small>Your evidence</small>
+                    <strong>
+                      {loading
+                        ? "Loading…"
+                        : spotLoadFailed
+                          ? "Could not load your spots"
+                          : `${spots.length} ${spots.length === 1 ? "spot" : "spots"} recorded`}
+                    </strong>
+                    {latestSpot ? <span>Latest: “{latestSpot.description}”</span> : null}
+                  </div>
                 ) : null}
-              </ToolCard>
+                <strong className="tool-path-link">{tool.cta} <ArrowRight aria-hidden="true" /></strong>
+              </Link>
             );
           })}
         </div>
       </section>
-
-      <section className="bg-brand-dark px-6 py-14 text-white md:py-16">
-        <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[0.78fr_1.22fr] md:items-start">
-          <div>
-            <SectionLabel tone="dark">How this works</SectionLabel>
-            <h2 className="text-3xl font-bold leading-tight tracking-[-0.02em] md:text-4xl">
-              Small logs.
-              <br />
-              A Caveman you can recognise.
-            </h2>
-          </div>
-          <div className="grid gap-5 font-sans text-base leading-8 text-white/72 md:grid-cols-3">
-            <p>Name the moment instead of judging it.</p>
-            <p>Run one small experiment instead of forcing a total reset.</p>
-            <p>Use repetition to make the useful response easier to reach.</p>
-          </div>
-        </div>
-      </section>
-
-      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
     </main>
   );
-};
-
-const ToolCard = ({
-  eyebrow,
-  title,
-  icon,
-  description,
-  why,
-  unlock,
-  href,
-  cta,
-  stat,
-  children,
-}: {
-  eyebrow: string;
-  title: string;
-  icon: React.ReactNode;
-  description: string;
-  why: string;
-  unlock: string;
-  href: string;
-  cta: string;
-  stat: string | null;
-  children?: React.ReactNode;
-}) => {
-  const content = (
-    <>
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
-            {eyebrow}
-          </p>
-          <h2 className="mt-3 text-3xl font-bold leading-tight text-brand-dark">
-            {title}
-          </h2>
-        </div>
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
-          {icon}
-        </span>
-      </div>
-
-      <p className="mt-4 font-sans text-sm leading-7 text-brand-dark/72">
-        {description}
-      </p>
-      <div className="mt-5 grid gap-4 border-t border-brand-dark/12 pt-5 font-sans text-sm leading-7 text-brand-dark/72">
-        <p>
-          <strong className="text-brand-dark">Why it helps:</strong> {why}
-        </p>
-        <p>
-          <strong className="text-brand-dark">After login:</strong> {unlock}
-        </p>
-      </div>
-      {stat ? (
-        <p className="mt-5 font-sans text-xs font-semibold uppercase tracking-[0.14em] text-brand-primary">
-          {stat}
-        </p>
-      ) : null}
-      {children}
-      <span className="mt-6 inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-accent">
-        {cta}
-        <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-      </span>
-    </>
-  );
-
-  return (
-    <Link
-      href={href}
-      className="group block cursor-pointer rounded-lg border border-brand-dark/10 bg-white p-6 shadow-sm transition hover:border-brand-teal/60 hover:shadow-md md:p-7"
-    >
-      {content}
-    </Link>
-  );
-};
-
-const SectionLabel = ({
-  children,
-  tone = "light",
-}: {
-  children: React.ReactNode;
-  tone?: "light" | "dark";
-}) => (
-  <div
-    className={`mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] ${
-      tone === "dark" ? "text-brand-secondary" : "text-brand-teal"
-    }`}
-  >
-    <span>{children}</span>
-    <span
-      className={`h-px flex-1 ${
-        tone === "dark" ? "bg-white/20" : "bg-brand-dark/15"
-      }`}
-    />
-  </div>
-);
-
-export default ToolsPage;
+}

@@ -72,7 +72,7 @@ export default function AllInsightsPage() {
 
         <div className="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
           <div>
-            <h1 className="text-[clamp(2.8rem,5.4vw,5.6rem)] font-bold leading-[0.94] tracking-[-0.03em] text-brand-dark">
+            <h1 className="page-title text-brand-dark">
               The full
               <br />
               <span className="italic text-brand-accent">field guide.</span>
@@ -80,9 +80,9 @@ export default function AllInsightsPage() {
           </div>
           <div>
             <p className="max-w-2xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark md:text-lg">
-              Browse every Neurocient essay on the ancient wiring behind modern
-              behavior: worry, comparison, avoidance, belonging, status, and the
-              patterns that keep repeating.
+              Browse every Neurocient explanation of modern behavior: worry,
+              comparison, avoidance, belonging, status, and the responses that
+              keep repeating.
             </p>
             <p className="mt-5 font-sans text-sm font-semibold uppercase tracking-[0.16em] text-brand-teal">
               {articles.length} articles across {tags.length} patterns
@@ -173,7 +173,7 @@ const ArticleRow = ({
 );
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <div className="mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">
+  <div className="page-eyebrow mb-7 flex items-center gap-3 text-brand-teal">
     <span>{children}</span>
     <span className="h-px flex-1 bg-brand-dark/15" />
   </div>

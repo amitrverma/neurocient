@@ -1,147 +1,97 @@
 import Link from "next/link";
 import { ArrowRight, BriefcaseBusiness, ScanLine } from "lucide-react";
-import type { ReactNode } from "react";
 
 const diagnostics = [
   {
+    number: "01",
+    audience: "For me",
     title: "Inner Caveman Scan",
-    label: "Personal insight",
-    duration: "12 lived moments",
-    text: "Recognise the protective movements beneath waiting, scrolling, comparison, pressure, worry, guilt, and unrest.",
+    measure: "12 lived moments",
+    question: "Why do I keep responding this way?",
+    text: "Choose what you would actually do in ordinary moments involving delay, comparison, uncertainty, conflict, and pressure. Your result connects those answers to the automatic responses that may be shaping them.",
     href: "/diagnostics/caveman-scan",
-    cta: "Start the scan",
+    cta: "Start the personal scan",
     icon: ScanLine,
-    featured: true,
   },
   {
+    number: "02",
+    audience: "For my team",
     title: "CIC Diagnostic",
-    label: "Workplace insight",
-    duration: "10 minutes",
-    text: "Uncover the instincts shaping workplace dynamics, from status reactions and conflict avoidance to alignment breakdowns and decision loops.",
+    measure: "Workplace situations",
+    question: "What may be shaping this team?",
+    text: "Examine how rank, disagreement, uncertainty, immediate consequences, and familiar defaults may be influencing decisions, ownership, feedback, and follow-through.",
     href: "/diagnostics/cic",
-    cta: "Start CIC diagnostic",
+    cta: "Start the workplace diagnostic",
     icon: BriefcaseBusiness,
   },
 ];
 
 export default function DiagnosticsPage() {
   return (
-    <main className="bg-white font-serif text-brand-dark">
-      <section className="mx-auto w-full max-w-6xl px-6 py-14 md:py-20">
-        <SectionLabel>Diagnostics</SectionLabel>
+    <main className="surface-page diagnostics-page">
+      <section className="surface-hero diagnostics-hero">
+        <div>
+          <p className="surface-eyebrow">Recognise what happens first</p>
+          <h1 className="surface-title">
+            Begin with a situation,
+            <span>not a label.</span>
+          </h1>
+          <p className="surface-lede">
+            A diagnostic should help you see a response more clearly—not turn
+            it into a personality type. Choose the path that matches what you
+            are trying to understand.
+          </p>
+        </div>
+        <aside className="diagnostics-principle">
+          <span>One rule</span>
+          <strong>Answer from recognition, not aspiration.</strong>
+          <p>
+            The useful choice is what tends to happen next in real life, even
+            when another answer sounds wiser.
+          </p>
+        </aside>
+      </section>
 
-        <div className="grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
-          <div>
-            <h1 className="text-[clamp(2.6rem,5vw,5.35rem)] font-bold leading-[0.98] tracking-[-0.03em] text-brand-dark">
-              See what reacts first
-              <br />
-              <span className="italic text-brand-accent">while it is happening.</span>
-            </h1>
-            <p className="mt-6 max-w-xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark">
-              Safety, status, and belonging still shape how you think, feel, and
-              act. These diagnostics help you see those instincts more clearly.
-            </p>
-          </div>
+      <section className="surface-section diagnostics-choice">
+        <header className="surface-section-heading">
+          <p className="surface-eyebrow">Choose your context</p>
+          <h2>Personal patterns and workplace patterns need different questions.</h2>
+        </header>
 
-          <div className="border-y border-brand-dark/12">
-            {diagnostics.map((item) => {
-              const Icon = item.icon;
-
-              return (
-                <Link
-                  key={item.title}
-                  href={item.href}
-                  className={`group grid cursor-pointer gap-5 border-b border-brand-dark/12 py-7 transition last:border-b-0 md:grid-cols-[0.62fr_1fr_auto] md:items-center ${
-                    item.featured ? "md:py-8" : ""
-                  }`}
-                >
-                  <div className="flex gap-4">
-                    <span
-                      className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border ${
-                        item.featured
-                          ? "border-brand-secondary bg-brand-dark text-brand-secondary"
-                          : "border-brand-teal/35 text-brand-accent"
-                      }`}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </span>
-                    <div>
-                      <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
-                        {item.label}
-                      </p>
-                      <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark md:text-3xl">
-                        {item.title}
-                      </h2>
-                      <p className="mt-2 font-sans text-xs font-semibold uppercase tracking-[0.14em] text-brand-dark/45">
-                        {item.duration}
-                      </p>
-                    </div>
-                  </div>
-
-                  <p className="font-sans text-sm leading-7 text-brand-dark/72">
-                    {item.text}
-                  </p>
-
-                  <span className="inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-accent">
-                    <span className="hidden xl:inline">{item.cta}</span>
-                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
+        <div className="diagnostics-grid">
+          {diagnostics.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link key={item.href} href={item.href} className="diagnostic-card">
+                <div className="diagnostic-card-top">
+                  <span>{item.number}</span>
+                  <Icon aria-hidden="true" />
+                </div>
+                <p>{item.audience}</p>
+                <h2>{item.title}</h2>
+                <small>{item.measure}</small>
+                <h3>{item.question}</h3>
+                <span className="diagnostic-card-copy">{item.text}</span>
+                <strong>
+                  {item.cta} <ArrowRight aria-hidden="true" />
+                </strong>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
-      <section className="bg-brand-dark px-6 py-14 text-white md:py-16">
-        <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[0.78fr_1.22fr] md:items-start">
-          <div>
-            <SectionLabel tone="dark">How to use them</SectionLabel>
-            <h2 className="text-3xl font-bold leading-tight tracking-[-0.02em] md:text-4xl">
-              Not a label.
-              <br />
-              A clearer read.
-            </h2>
-          </div>
-
-          <div className="grid gap-5 font-sans text-base leading-8 text-white/72 md:grid-cols-3">
-            <p>
-              Answer from instinct. The useful signal is the response you would
-              actually have, not the one you think sounds best.
-            </p>
-            <p>
-              Read the reflection. Each result names what the response may be
-              trying to protect, seek, or avoid.
-            </p>
-            <p>
-              Use it as awareness. Diagnostics are a starting point for
-              recognising automatic reactions earlier, not a fixed identity.
-            </p>
-          </div>
-        </div>
+      <section className="surface-section surface-dark diagnostics-use">
+        <header className="surface-section-heading">
+          <p className="surface-eyebrow surface-eyebrow-light">How to use a result</p>
+          <h2>As a starting point, not a verdict.</h2>
+        </header>
+        <ol>
+          <li><span>01</span><strong>Recognise</strong><p>Connect the result to situations you have actually lived.</p></li>
+          <li><span>02</span><strong>Understand</strong><p>Look for the immediate payoff and the later cost.</p></li>
+          <li><span>03</span><strong>Continue</strong><p>Use the result to choose one relevant explanation or next practice.</p></li>
+        </ol>
       </section>
-
     </main>
   );
 }
-
-const SectionLabel = ({
-  children,
-  tone = "light",
-}: {
-  children: ReactNode;
-  tone?: "light" | "dark";
-}) => (
-  <div
-    className={`mb-7 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] ${
-      tone === "dark" ? "text-brand-secondary" : "text-brand-teal"
-    }`}
-  >
-    <span>{children}</span>
-    <span
-      className={`h-px flex-1 ${
-        tone === "dark" ? "bg-white/20" : "bg-brand-dark/15"
-      }`}
-    />
-  </div>
-);

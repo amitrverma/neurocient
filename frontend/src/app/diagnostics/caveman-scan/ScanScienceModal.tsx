@@ -44,7 +44,7 @@ const ScanScienceModal = ({ open, content, onClose }: Props) => {
           className="relative flex max-h-[84vh] w-full max-w-3xl flex-col overflow-hidden rounded-lg border border-brand-dark/10 bg-white shadow-[0_28px_90px_rgba(4,42,43,0.28)]"
         >
           <div className="border-b border-brand-dark/10 px-6 py-5 md:px-8 md:py-6">
-            <div className="mb-4 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">
+            <div className="page-eyebrow mb-4 flex items-center gap-3 text-brand-teal">
               <span>Science note</span>
               <span className="h-px flex-1 bg-brand-dark/15" />
               <button

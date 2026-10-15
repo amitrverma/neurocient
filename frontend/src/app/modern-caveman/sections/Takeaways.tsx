@@ -42,14 +42,15 @@ const takeaways: TakeawayItem[] = [
 // ===========================
 const Takeaways: React.FC = () => {
   return (
-    <section className="w-full px-6 py-20 bg-white font-serif">
-      <div className="max-w-6xl mx-auto space-y-12">
+    <section className="mc-section mc-takeaways">
+      <div className="mc-wide">
 
         {/* ===========================
             Top: Text Section
         ============================ */}
-        <div className="max-w-3xl space-y-8">
-          <h2 className="text-2xl md:text-4xl font-bold text-brand-dark leading-snug">
+        <div className="mc-section-heading">
+          <span className="mc-kicker">What stays with you</span>
+          <h2>
             What Will You Walk Away With?
           </h2>
 
@@ -72,11 +73,11 @@ const Takeaways: React.FC = () => {
         {/* ===========================
             Bottom: Cards Grid
         ============================ */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="mc-outcome-grid">
           {takeaways.map((item: TakeawayItem, index: number) => (
             <div
               key={index}
-              className="bg-white border border-brand-teal/40 shadow-sm rounded-2xl p-6 hover:shadow-md transition-all duration-300"
+              className="mc-outcome-item"
             >
               <div className="text-3xl mb-4">{item.icon}</div>
 

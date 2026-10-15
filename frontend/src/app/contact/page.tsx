@@ -48,13 +48,13 @@ export default function ContactPage() {
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
           <div>
             <SectionLabel>Contact</SectionLabel>
-            <h1 className="mt-6 text-[clamp(2.55rem,5vw,5.2rem)] font-bold leading-[0.98] tracking-[-0.03em]">
+            <h1 className="page-title mt-6">
               Tell me what
               <br />
               <span className="italic text-brand-accent">you are building.</span>
             </h1>
           </div>
-          <p className="max-w-2xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark/72 md:text-lg">
+          <p className="page-lede max-w-2xl border-l-4 border-brand-secondary pl-5 text-brand-dark/72">
             For programs, leadership sessions, workplace diagnostics,
             collaborations, or questions about Neurocient Labs.
           </p>
@@ -130,7 +130,7 @@ export default function ContactPage() {
 }
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-teal">
+  <div className="page-eyebrow flex items-center gap-3 text-brand-teal">
     <span>{children}</span>
     <span className="h-px flex-1 bg-brand-dark/15" />
   </div>

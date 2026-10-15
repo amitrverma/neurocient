@@ -15,7 +15,9 @@ const Pricing: React.FC = () => {
       script.id = "razorpay-embed-btn-js";
       document.body.appendChild(script);
     } else {
-      const rzp = (window as any).__rzp__;
+      const rzp = (
+        window as Window & { __rzp__?: { init?: () => void } }
+      ).__rzp__;
       if (rzp && rzp.init) rzp.init();
     }
   }, []);
@@ -23,15 +25,16 @@ const Pricing: React.FC = () => {
   return (
     <section
       id="pricing"
-      className="w-full px-6 py-20 bg-white font-serif flex justify-center"
+      className="mc-section mc-pricing"
     >
-      <div className="max-w-5xl w-full space-y-16">
+      <div className="mc-pricing-inner">
 
         {/* ===========================
             Intro Section
         ============================ */}
-        <div className="space-y-6">
-          <h2 className="text-2xl md:text-4xl font-bold text-brand-dark leading-snug">
+        <div className="mc-section-heading">
+          <span className="mc-kicker">The investment</span>
+          <h2>
             What’s the Price of Staying Stuck?
           </h2>
 
@@ -48,16 +51,12 @@ const Pricing: React.FC = () => {
         {/* ===========================
             Pricing Box
         ============================ */}
-        <div className="bg-brand-secondary/10 border border-brand-secondary p-6 md:p-10 rounded-2xl shadow-sm flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="mc-price-box">
 
           {/* Price Details */}
           <div className="flex-1 space-y-3">
-            <h3 className="text-lg md:text-xl font-semibold text-brand-dark flex flex-wrap items-center gap-2">
-              🟢 Your Investment:
-              <span className=" text-brand-primary font-medium">
-                ₹21,000
-              </span>
-            </h3>
+            <p className="mc-price-label">Your Investment</p>
+            <h3>₹21,000</h3>
 
             <p className="text-brand-dark/70 leading-relaxed text-base max-w-md">
               Four weeks of structure, live sessions, nudges, tools,  
@@ -80,7 +79,7 @@ const Pricing: React.FC = () => {
         {/* ===========================
             Emotional Close
         ============================ */}
-        <div className="space-y-8 text-lg leading-relaxed text-brand-dark/80">
+        <div className="mc-pricing-close">
 
           <p>
             You’re not just buying a course.  

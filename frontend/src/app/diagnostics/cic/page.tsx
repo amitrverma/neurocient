@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { LoaderCircle } from "lucide-react";
 import DiagnosticIntro from "./DiagnosticIntro";
 import DiagnosticQuestion from "./DiagnosticQuestion";
 import AuthModal from "@/app/components/AuthModal";
@@ -87,7 +88,16 @@ export default function CICDiagnosticPage() {
     );
   }, [hasRestored, responses, showResultAuth, stage]);
 
-  if (!hasRestored) return null;
+  if (!hasRestored) {
+    return (
+      <main className="journey-loading">
+        <div>
+          <LoaderCircle className="animate-spin" aria-hidden="true" />
+          <p>Preparing the workplace situations</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">

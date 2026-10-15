@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(req: Request) {
   try {
     const { name, email, message } = await req.json();
@@ -14,6 +12,19 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    const apiKey = process.env.RESEND_API_KEY;
+    const fromEmail = process.env.RESEND_FROM_EMAIL;
+
+    if (!apiKey || !fromEmail) {
+      console.error("Contact email configuration is missing");
+      return NextResponse.json(
+        { error: "Contact service is unavailable" },
+        { status: 503 }
+      );
+    }
+
+    const resend = new Resend(apiKey);
 
     const htmlBody = `
       <div style="font-family: sans-serif; font-size: 15px; line-height: 1.6;">
@@ -32,7 +43,7 @@ export async function POST(req: Request) {
     `;
 
     const result = await resend.emails.send({
-      from: `Neurocient <${process.env.RESEND_FROM_EMAIL}>`,
+      from: `Neurocient <${fromEmail}>`,
       to: ["hello@neurocient.com"],
       replyTo: email,
       subject: "New Neurocient Contact Submission",

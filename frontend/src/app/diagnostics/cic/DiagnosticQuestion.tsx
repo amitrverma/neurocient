@@ -70,7 +70,7 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
   };
 
   return (
-    <main className="min-h-screen bg-white px-6 py-10 font-serif text-brand-dark md:py-14">
+    <main className="surface-page min-h-[calc(100svh-4rem)] px-6 py-10 md:py-14">
       <section className="mx-auto w-full max-w-6xl">
         <div className="mb-8">
           <div className="mb-3 flex items-center justify-between gap-4 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark">
@@ -88,7 +88,7 @@ const DiagnosticQuestion = ({ onComplete }: Props) => {
           </div>
         </div>
 
-        <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
+        <p className="page-eyebrow text-brand-primary">
           {question.title}
         </p>
         <h1 className="mt-3 w-full text-2xl font-bold leading-tight tracking-[-0.015em] text-brand-dark md:text-4xl">

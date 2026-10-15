@@ -76,7 +76,7 @@ export default function ResultApproach({ onContinue, signedIn, ready }: {
         </div>
       </section>
 
-      <section className="bg-[#f8f6f0] px-5 py-14 sm:px-7 sm:py-18 lg:py-20">
+      <section className="bg-[var(--surface-paper)] px-5 py-14 sm:px-7 sm:py-18 lg:py-20">
         <div className="mx-auto max-w-5xl">
           <SectionLabel>Knowing and doing</SectionLabel>
           <h2 className="max-w-3xl text-[1.85rem] font-bold leading-[1.16] tracking-[-0.02em] sm:text-[2.2rem] lg:text-[2.55rem]">An explanation is a beginning.</h2>

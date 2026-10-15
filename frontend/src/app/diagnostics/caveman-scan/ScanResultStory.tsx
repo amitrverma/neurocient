@@ -17,18 +17,18 @@ export default function ScanResultStory({ responses, onUnlock, signedIn = false,
   const cavemanAppeared = result.automaticCount > 0;
 
   return (
-    <div className="caveman-scan-page min-h-screen overflow-hidden bg-[#f8f6f0] font-serif text-brand-dark">
+    <main className="surface-page caveman-scan-page min-h-[calc(100svh-4rem)]">
       <section className="relative px-5 pb-12 pt-10 sm:px-7 sm:pb-16 sm:pt-14 lg:pb-20">
         <div className="pointer-events-none absolute -right-32 -top-40 h-96 w-96 rounded-full bg-brand-secondary/15 blur-3xl" />
         <div className="relative mx-auto max-w-5xl">
-          <div className="mb-7 flex flex-wrap items-center gap-2 font-sans text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-brand-teal sm:text-xs">
+          <div className="page-eyebrow mb-7 flex flex-wrap items-center gap-2 text-brand-teal">
             <Check className="h-4 w-4" aria-hidden="true" /> Scan complete
             <span className="mx-1 text-brand-dark/30" aria-hidden="true">/</span> Your result
           </div>
 
           {cavemanAppeared ? (
             <>
-              <h1 className="max-w-[12ch] text-[clamp(2.8rem,11vw,5.1rem)] font-bold leading-[0.94] tracking-[-0.035em]">
+              <h1 className="page-title max-w-[12ch]">
                 You saw your Inner Caveman in everyday life.
               </h1>
               <div className="mt-7 max-w-2xl font-sans text-base leading-8 text-brand-dark/72 sm:text-lg sm:leading-9">
@@ -56,7 +56,7 @@ export default function ScanResultStory({ responses, onUnlock, signedIn = false,
             </>
           ) : (
             <>
-              <h1 className="max-w-[12ch] text-[clamp(2.8rem,11vw,5.1rem)] font-bold leading-[0.94] tracking-[-0.035em]">
+              <h1 className="page-title max-w-[12ch]">
                 Your answers stayed with deliberate choice.
               </h1>
               <div className="mt-8 max-w-3xl space-y-5 font-sans text-base leading-8 text-brand-dark/82 md:text-lg md:leading-9">
@@ -119,6 +119,6 @@ export default function ScanResultStory({ responses, onUnlock, signedIn = false,
       )}
 
       <ResultApproach onContinue={onUnlock} signedIn={signedIn} ready={ready} />
-    </div>
+    </main>
   );
 }

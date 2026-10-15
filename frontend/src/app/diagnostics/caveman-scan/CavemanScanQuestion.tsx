@@ -46,9 +46,9 @@ const CavemanScanQuestion = ({
     <main
       ref={scenarioRef}
       tabIndex={-1}
-      className="caveman-scan-page min-h-screen bg-[#f8f6f0] font-serif text-brand-dark outline-none"
+      className="surface-page caveman-scan-page min-h-[calc(100svh-4rem)] outline-none"
     >
-      <header className="sticky top-16 z-20 border-b border-brand-dark/8 bg-[#f8f6f0]/95 px-5 py-4 backdrop-blur sm:px-6">
+      <header className="scan-progress-header sticky top-16 z-20 border-b border-brand-dark/8 px-5 py-4 backdrop-blur sm:px-6">
         <div className="mx-auto flex w-full max-w-5xl items-center gap-4">
           <button
             type="button"
@@ -75,7 +75,7 @@ const CavemanScanQuestion = ({
       </header>
 
       <section className="mx-auto w-full max-w-5xl px-5 pb-8 pt-4 sm:px-6 sm:pb-12 sm:pt-6 lg:pb-14 lg:pt-7">
-        <article className="mx-auto max-w-3xl rounded-2xl border border-brand-dark/10 bg-[#fffefa] p-5 shadow-[0_14px_36px_rgba(4,42,43,0.055)] sm:p-6 lg:p-7">
+        <article className="mx-auto max-w-3xl rounded-lg border border-brand-dark/10 bg-[var(--surface-white)] p-5 shadow-[0_14px_36px_rgba(4,42,43,0.055)] sm:p-6 lg:p-7">
           {question.scene && question.prompt ? (
             <div>
               <div className="space-y-3 sm:space-y-3.5">
@@ -85,7 +85,7 @@ const CavemanScanQuestion = ({
                       className={
                         question.visual
                           ? index === question.calloutIndex
-                            ? "mt-3 max-w-[42rem] border-l-2 border-[#c97a20] bg-white/55 py-2 pl-4 pr-3 font-sans text-[0.92rem] leading-7 text-brand-dark/72 sm:text-[0.96rem]"
+                            ? "mt-3 max-w-[42rem] border-l-2 border-brand-secondary bg-white/55 py-2 pl-4 pr-3 font-sans text-[0.92rem] leading-7 text-brand-dark/72 sm:text-[0.96rem]"
                             : index === 0
                               ? "max-w-[42rem] text-[1.12rem] font-normal leading-[1.5] sm:text-[1.24rem]"
                               : index === 1 && question.timeLabel
@@ -113,9 +113,9 @@ const CavemanScanQuestion = ({
               </div>
             </div>
           ) : (
-            <h1 className="max-w-4xl text-2xl font-bold leading-tight tracking-[-0.015em] md:text-4xl">
+            <h2 className="max-w-4xl text-2xl font-bold leading-tight tracking-[-0.015em] md:text-4xl">
               {question.text}
-            </h1>
+            </h2>
           )}
         </article>
 
@@ -135,7 +135,7 @@ const CavemanScanQuestion = ({
                     setFeedbackOpen(true);
                   }}
                   aria-pressed={isSelected}
-                  className={`group grid min-h-12 w-full cursor-pointer grid-cols-[1.5rem_1fr] items-start gap-2.5 rounded-xl border px-4 py-3 text-left font-sans text-[0.9rem] leading-6 shadow-sm transition sm:px-4 sm:py-3.5 sm:text-[0.95rem] ${
+                  className={`group grid min-h-12 w-full cursor-pointer grid-cols-[1.5rem_1fr] items-start gap-2.5 rounded-lg border px-4 py-3 text-left font-sans text-[0.9rem] leading-6 shadow-sm transition sm:px-4 sm:py-3.5 sm:text-[0.95rem] ${
                     isSelected
                       ? "border-brand-primary bg-brand-secondary/16 shadow-[0_10px_28px_rgba(4,42,43,0.07)]"
                       : "border-brand-dark/10 bg-white/80 hover:border-brand-teal/55 hover:bg-white"

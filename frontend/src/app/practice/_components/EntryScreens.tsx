@@ -20,16 +20,21 @@ export const WelcomeScreen = ({
   onStart: () => void;
   onSkip: () => void;
 }) => (
-  <Screen
-    label="Practice · Procrastination"
-    title="Work with one loop, not your whole life."
-    body="Begin with a recent moment when a task kept getting heavier. Understand what happened, then leave with one move you can actually see yourself doing."
-  >
-    <div className="flex flex-col gap-3 sm:flex-row">
+  <div className="practice-intro">
+    <p className="surface-eyebrow">Practice · Procrastination</p>
+    <h1 className="surface-title">
+      Work with one loop,
+      <span>not your whole life.</span>
+    </h1>
+    <p className="surface-lede">
+      Begin with a recent moment when a task kept getting heavier. Understand
+      what happened, then leave with one move you can actually see yourself doing.
+    </p>
+    <div className="mt-8 flex flex-col gap-3 sm:flex-row">
       <PrimaryButton onClick={onStart}>Start</PrimaryButton>
       <GhostButton onClick={onSkip}>I already know my loop</GhostButton>
     </div>
-  </Screen>
+  </div>
 );
 
 export const RecognitionScreen = ({

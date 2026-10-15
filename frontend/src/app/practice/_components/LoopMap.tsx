@@ -24,8 +24,8 @@ export const LoopMap = ({
     "Not answered yet";
 
   return (
-    <aside className="rounded-lg border border-brand-dark/12 bg-white/45 p-4">
-      <div className="flex items-center gap-2 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
+    <aside className="practice-summary-panel">
+      <div className="flex items-center gap-2 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-accent">
         <Sparkles className="h-4 w-4" aria-hidden="true" />
         Loop map
       </div>

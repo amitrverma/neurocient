@@ -58,7 +58,7 @@ const CavemanScanFeedback = ({ open, reflection, science, onClose, onContinue }:
             animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
             exit={{ opacity: 0, x: 24, y: 48, scale: 0.98 }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-x-0 bottom-0 z-50 flex max-h-[88svh] flex-col overflow-hidden rounded-t-[1.5rem] border border-brand-dark/10 bg-[#fffefa] text-brand-dark shadow-[0_28px_90px_rgba(4,42,43,0.28)] md:bottom-6 md:left-auto md:right-6 md:w-[min(34rem,calc(100vw-3rem))] md:rounded-[1.5rem]"
+            className="fixed inset-x-0 bottom-0 z-50 flex max-h-[88svh] flex-col overflow-hidden rounded-t-[1.5rem] border border-brand-dark/10 bg-[var(--surface-white)] text-brand-dark shadow-[0_28px_90px_rgba(4,42,43,0.28)] md:bottom-6 md:left-auto md:right-6 md:w-[min(34rem,calc(100vw-3rem))] md:rounded-[1.5rem]"
           >
             <header className="flex items-center justify-between gap-4 border-b border-brand-dark/10 px-5 py-4 sm:px-6">
               <p className="page-eyebrow text-brand-primary">

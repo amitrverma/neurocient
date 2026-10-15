@@ -43,22 +43,20 @@ export default function ContactPage() {
   }
 
   return (
-    <main className="bg-white font-serif text-brand-dark">
-      <section className="px-6 py-14 md:py-20">
-        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
-          <div>
-            <SectionLabel>Contact</SectionLabel>
-            <h1 className="page-title mt-6">
-              Tell me what
-              <br />
-              <span className="italic text-brand-accent">you are building.</span>
-            </h1>
-          </div>
-          <p className="page-lede max-w-2xl border-l-4 border-brand-secondary pl-5 text-brand-dark/72">
-            For programs, leadership sessions, workplace diagnostics,
-            collaborations, or questions about Neurocient Labs.
-          </p>
+    <main className="surface-page">
+      <section className="surface-hero utility-hero">
+        <div>
+          <p className="surface-eyebrow">Contact</p>
+          <h1 className="surface-title">
+            Tell me what
+            <span>you are building.</span>
+          </h1>
         </div>
+        <aside className="utility-hero-card">
+          <p>Start a conversation</p>
+          <strong>Tell me what you have in mind.</strong>
+          <span>For programs, leadership sessions, workplace diagnostics, collaborations, or questions about Neurocient Labs.</span>
+        </aside>
       </section>
 
       <section className="px-6 pb-16 md:pb-20">
@@ -128,13 +126,6 @@ export default function ContactPage() {
     </main>
   );
 }
-
-const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <div className="page-eyebrow flex items-center gap-3 text-brand-teal">
-    <span>{children}</span>
-    <span className="h-px flex-1 bg-brand-dark/15" />
-  </div>
-);
 
 const ContactCard = ({
   icon,

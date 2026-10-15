@@ -97,7 +97,7 @@ export default function SpotMyCavemanPage() {
 
   if (!ready || !user || !portrait || !spotCountReady) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f8f6f0] px-6 font-sans text-brand-dark/65">
+      <main className="journey-loading">
         <p>Opening the cue from your scan...</p>
       </main>
     );
@@ -139,12 +139,12 @@ export default function SpotMyCavemanPage() {
   if (saved) {
     const readyForExperiment = patternSpotCount >= 2;
     return (
-      <main className="flex min-h-screen items-center bg-brand-dark px-6 py-14 font-serif text-white">
+      <main className="surface-page journey-dark-page flex min-h-[calc(100svh-4rem)] items-center px-6 py-14">
         <div className="mx-auto w-full max-w-3xl">
-          <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-secondary">
+          <p className="page-eyebrow text-brand-secondary">
             You caught it
           </p>
-          <h1 className="mt-5 text-[clamp(2.5rem,7vw,5rem)] font-bold leading-[1] tracking-[-0.03em]">
+          <h1 className="page-title mt-5 max-w-3xl text-white">
             You caught an automatic response while life was happening.
           </h1>
           <p className="mt-7 max-w-2xl font-sans text-base leading-8 text-white/72">
@@ -187,15 +187,15 @@ export default function SpotMyCavemanPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f8f6f0] px-6 py-10 font-serif text-brand-dark md:py-16">
+    <main className="surface-page caveman-scan-page min-h-[calc(100svh-4rem)] px-6 py-10 md:py-16">
       <div className="mx-auto max-w-3xl">
         <div className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
           <Eye className="h-5 w-5" />
         </div>
-        <p className="mt-6 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-primary">
+        <p className="page-eyebrow mt-6 text-brand-primary">
           Record a real-life Spot
         </p>
-        <h1 className="mt-4 text-[clamp(2.35rem,7vw,4.6rem)] font-bold leading-[1] tracking-[-0.03em]">
+        <h1 className="page-title mt-4 max-w-3xl">
           Bring one real moment into view.
         </h1>
         <div className="mt-8 border-l-4 border-brand-secondary pl-5">

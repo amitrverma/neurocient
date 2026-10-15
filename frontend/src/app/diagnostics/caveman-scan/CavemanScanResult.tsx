@@ -134,7 +134,7 @@ export const buildPersonalizedForward = (pattern: ScanPortraitPattern) => {
 
 const CavemanScanResult = ({ onUnlock }: Props) => {
   return (
-    <main className="min-h-screen bg-[#f8f6f0] font-serif text-brand-dark">
+    <main className="surface-page caveman-scan-page min-h-[calc(100svh-4rem)]">
       <LockedPortrait onUnlock={onUnlock} />
     </main>
   );
@@ -191,13 +191,13 @@ export const CavemanScanDetailedResult = ({
         };
 
   return (
-    <main className="min-h-screen bg-[#f8f6f0] font-serif text-brand-dark">
+    <main className="surface-page caveman-scan-page min-h-[calc(100svh-4rem)]">
       <section className="px-6 pb-14 pt-10 md:pb-20 md:pt-16">
         <div className="mx-auto max-w-4xl">
-          <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-brand-primary">
+          <p className="page-eyebrow text-brand-primary">
             Your result is saved
           </p>
-          <h1 className="mt-5 max-w-3xl text-[clamp(2.5rem,7vw,5.4rem)] font-bold leading-[0.98] tracking-[-0.035em]">
+          <h1 className="page-title mt-5 max-w-3xl">
             {challengeHeadline}
           </h1>
           <p className="mt-7 max-w-2xl font-sans text-base leading-8 text-brand-dark/70 md:text-lg md:leading-9">

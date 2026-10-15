@@ -87,6 +87,11 @@ body {
   text-transform: uppercase;
 }
 
+:is(a, button, input, textarea, select, summary):focus-visible {
+  outline: 2px solid var(--color-brand-teal);
+  outline-offset: 3px;
+}
+
 /* Landing-page editorial experiment: expressive real italics and a softer UI voice. */
 .landing-page {
   --font-serif: var(--font-landing-serif);

@@ -97,7 +97,7 @@ export default function MyCavemanPage() {
 
   if (!ready || (user && !responses && !missing)) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f8f6f0] px-6 font-sans text-brand-dark/65">
+      <main className="journey-loading">
         <p>Opening your portrait…</p>
       </main>
     );
@@ -107,9 +107,9 @@ export default function MyCavemanPage() {
 
   if (missing || !responses) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f8f6f0] px-6 text-brand-dark">
+      <main className="surface-page caveman-scan-page flex min-h-[calc(100svh-4rem)] items-center justify-center px-6">
         <div className="max-w-lg text-center">
-          <h1 className="font-serif text-4xl font-bold">No completed portrait yet.</h1>
+          <h1 className="page-title">No completed portrait yet.</h1>
           <p className="mt-5 font-sans leading-7 text-brand-dark/68">
             Complete the twelve lived moments first. Your deeper portrait will
             be created from the Caveman moves that repeat across them.

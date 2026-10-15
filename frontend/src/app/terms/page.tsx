@@ -25,7 +25,7 @@ const terms = [
 
 export default function TermsPage() {
   return (
-    <main className="bg-white px-6 py-14 font-serif text-brand-dark md:py-20">
+    <main className="surface-page px-6 py-14 md:py-20">
       <article className="mx-auto max-w-3xl">
         <p className="page-eyebrow text-brand-teal">
           Legal

@@ -75,7 +75,7 @@ export default function CICDiagnosticResultPage() {
 }
 
 const ResultLoader = () => (
-  <main className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-white px-6 font-serif text-brand-dark">
+  <main className="journey-loading">
     <div className="w-full max-w-md rounded-lg border border-brand-dark/12 bg-white p-7 text-center shadow-[0_20px_60px_rgba(4,42,43,0.06)]">
       <LoaderCircle className="mx-auto h-8 w-8 animate-spin text-brand-accent" />
       <p className="mt-5 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">

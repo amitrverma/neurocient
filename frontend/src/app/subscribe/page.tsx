@@ -11,21 +11,17 @@ export default function SubscribePage() {
   }, []);
 
   return (
-    <main className="bg-white px-6 py-14 font-serif text-brand-dark md:py-20">
-      <section className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
+    <main className="surface-page">
+      <section className="surface-hero utility-hero">
         <div>
-          <div className="page-eyebrow flex items-center gap-3 text-brand-teal">
-            <span>Subscribe</span>
-            <span className="h-px flex-1 bg-brand-dark/15" />
-          </div>
-          <h1 className="page-title mt-6">
+          <p className="surface-eyebrow">Subscribe</p>
+          <h1 className="surface-title">
             Membership
-            <br />
-            <span className="italic text-brand-accent">is coming soon.</span>
+            <span>is coming soon.</span>
           </h1>
         </div>
 
-        <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-[0_20px_60px_rgba(4,42,43,0.06)] md:p-8">
+        <aside className="utility-hero-card">
           <Mail className="h-7 w-7 text-brand-accent" />
           <p className="mt-5 font-sans text-base leading-8 text-brand-dark/72">
             Paid subscriptions are not open yet. For now, use the free guides,
@@ -47,7 +43,7 @@ export default function SubscribePage() {
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-        </div>
+        </aside>
       </section>
     </main>
   );

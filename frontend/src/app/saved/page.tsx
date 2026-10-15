@@ -55,34 +55,20 @@ export default function SavedArticlesPage() {
 
   return (
     <main className="surface-page">
-      <section className="px-6 pb-10 pt-14 md:pb-12 md:pt-20">
-        <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
-          <div>
-            <SectionLabel>Reading shelf</SectionLabel>
-            <h1 className="page-title mt-6">
-              Saved
-              <br />
-              <span className="italic text-brand-accent">insights.</span>
-            </h1>
-          </div>
-
-          <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-[0_20px_60px_rgba(4,42,43,0.06)] md:p-8">
-            <div className="flex items-start gap-4">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
-                <Bookmark className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-                  {loadFailed ? "Shelf unavailable" : user ? `${articles.length} saved` : "Account required"}
-                </p>
-                <p className="mt-3 font-sans text-base leading-8 text-brand-dark/72">
-                  Keep the essays you want to return to when a pattern shows up
-                  in work, relationships, stress, or decision making.
-                </p>
-              </div>
-            </div>
-          </div>
+      <section className="surface-hero utility-hero">
+        <div>
+          <p className="surface-eyebrow">Reading shelf</p>
+          <h1 className="surface-title">
+            Saved
+            <span>insights.</span>
+          </h1>
         </div>
+
+        <aside className="utility-hero-card">
+          <p>{loadFailed ? "Shelf unavailable" : user ? `${articles.length} saved` : "Account required"}</p>
+          <strong>Return to what mattered.</strong>
+          <span>Keep the essays you want to revisit when a pattern shows up in work, relationships, stress, or decision making.</span>
+        </aside>
       </section>
 
       <section className="px-6 pb-16 md:pb-20">
@@ -156,13 +142,6 @@ export default function SavedArticlesPage() {
     </main>
   );
 }
-
-const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <div className="page-eyebrow flex items-center gap-3 text-brand-teal">
-    <span>{children}</span>
-    <span className="h-px flex-1 bg-brand-dark/15" />
-  </div>
-);
 
 const StatePanel = ({
   icon,

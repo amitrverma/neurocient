@@ -48,7 +48,7 @@ export default function CavemanScanResultPage() {
 
   if (!responses) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-white px-6 font-sans text-brand-dark/65">
+      <main className="journey-loading">
         <p>Opening your result…</p>
       </main>
     );

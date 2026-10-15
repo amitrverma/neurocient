@@ -31,7 +31,7 @@ const plans = [
 
 export default function MembershipPage() {
   return (
-    <main className="bg-brand-dark px-6 py-16 font-serif text-white md:py-24">
+    <main className="surface-page membership-page px-6 py-16 md:py-24">
       <div className="mx-auto max-w-6xl">
         <div className="page-eyebrow mb-7 flex items-center gap-3 text-brand-secondary">
           <span>Membership</span>

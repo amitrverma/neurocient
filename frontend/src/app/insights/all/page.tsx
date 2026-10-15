@@ -66,7 +66,7 @@ export default function AllInsightsPage() {
   const tags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
 
   return (
-    <main className="bg-white font-serif text-brand-dark">
+    <main className="surface-page">
       <section className="mx-auto w-full max-w-6xl px-6 pt-14 pb-10 md:pt-16 md:pb-12">
         <SectionLabel>All insights</SectionLabel>
 

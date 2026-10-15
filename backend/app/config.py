@@ -24,6 +24,10 @@ class Settings:
     POSTHOG_HOST = os.getenv("POSTHOG_HOST")
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
     ADMIN_API_KEY = os.getenv("ADMIN_API_KEY")
+    ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "hello@neurocient.com").strip().lower()
+    RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
+    RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
+    RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET")
     ENABLE_SCHEDULER = _env_bool("ENABLE_SCHEDULER", default=False)
 
     def validate_for_startup(self) -> None:

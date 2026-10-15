@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type React from "react";
-import { Bookmark, LogOut, Menu, UserRound, X } from "lucide-react";
+import { Bookmark, LogOut, Menu, ShieldCheck, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -95,6 +95,15 @@ const Navbar = () => {
                     >
                       Profile
                     </AccountLink>
+                    {user.roles?.includes("admin") ? (
+                      <AccountLink
+                        href="/admin"
+                        icon={<ShieldCheck className="h-4 w-4" />}
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        Admin
+                      </AccountLink>
+                    ) : null}
                     <button
                       onClick={() => {
                         setShowDropdown(false);
@@ -154,6 +163,11 @@ const Navbar = () => {
                 <Link href="/profile" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
                   Profile
                 </Link>
+                {user.roles?.includes("admin") ? (
+                  <Link href="/admin" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
+                    Admin
+                  </Link>
+                ) : null}
                 <button
                   onClick={() => {
                     closeMobile();

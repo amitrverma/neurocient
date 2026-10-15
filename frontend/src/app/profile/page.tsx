@@ -6,9 +6,11 @@ import {
   ArrowRight,
   Bell,
   BookOpen,
+  CalendarDays,
   Check,
   Eye,
   FlaskConical,
+  Layers3,
   LoaderCircle,
   LogOut,
   NotebookPen,
@@ -32,7 +34,7 @@ const tabs: {
   label: string;
   icon: typeof BookOpen;
 }[] = [
-  { id: "evidence", label: "My evidence", icon: Eye },
+  { id: "evidence", label: "My work", icon: Layers3 },
   { id: "reflections", label: "Reflections", icon: BookOpen },
   { id: "settings", label: "Account", icon: Settings },
   { id: "preferences", label: "Preferences", icon: SlidersHorizontal },
@@ -42,6 +44,10 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState<ProfileTab>("evidence");
   const [showAuth, setShowAuth] = useState(false);
   const { user, logout, ready } = useAuth();
+  const [cohortEnrollment, setCohortEnrollment] = useState<{
+    status: string;
+    cohort: { title: string; starts_at: string; timezone: string };
+  } | null>(null);
 
   const { subscribe, unsubscribe } = usePushNotifications(VAPID_PUBLIC_KEY);
   const { notify } = useNotification();
@@ -105,6 +111,14 @@ const ProfilePage = () => {
 
     loadPreferences();
   }, [ready, user, prefsReloadKey]);
+
+  useEffect(() => {
+    if (!ready || !user) return;
+    fetch("/api/cohorts/my", { credentials: "include", cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : { enrollments: [] }))
+      .then((data) => setCohortEnrollment(data.enrollments?.[0] || null))
+      .catch(() => setCohortEnrollment(null));
+  }, [ready, user]);
 
   const savePrefs = async (updates: object) => {
     const response = await fetch("/api/user/preferences", {
@@ -254,14 +268,29 @@ const ProfilePage = () => {
                 {activeTab === "evidence" && (
                   <Panel>
                     <SectionKicker icon={<Eye className="h-5 w-5" />}>
-                      My evidence
+                      Your work
                     </SectionKicker>
                     <p className="mt-5 max-w-2xl font-sans text-sm leading-7 text-brand-dark/70">
-                      These are different views of the same work: what the Scan
-                      suggested, what happened in real life, and what you tried
-                      next.
+                      Continue from where you left off, then return to the
+                      evidence you have built across the platform.
                     </p>
+                    <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                      <InfoTile
+                        label="Membership"
+                        value={user.membership?.is_active ? "Active" : "Free access"}
+                      />
+                      <InfoTile
+                        label="Modern Caveman"
+                        value={cohortEnrollment ? `${cohortEnrollment.cohort.title} · ${cohortEnrollment.status}` : "No cohort joined"}
+                      />
+                    </div>
                     <div className="mt-7 grid gap-3">
+                      <EvidenceLink
+                        href="/practice"
+                        icon={<Layers3 className="h-5 w-5" />}
+                        label="Practice"
+                        text="Continue working through a behavior loop."
+                      />
                       <EvidenceLink
                         href="/my-caveman"
                         icon={<Eye className="h-5 w-5" />}
@@ -280,6 +309,21 @@ const ProfilePage = () => {
                         label="Microchallenges"
                         text="Continue or review your small experiments."
                       />
+                      {cohortEnrollment ? (
+                        <EvidenceLink
+                          href="/modern-caveman"
+                          icon={<CalendarDays className="h-5 w-5" />}
+                          label={cohortEnrollment.cohort.title}
+                          text={`Your cohort status is ${cohortEnrollment.status}.`}
+                        />
+                      ) : (
+                        <EvidenceLink
+                          href="/membership"
+                          icon={<CalendarDays className="h-5 w-5" />}
+                          label="Membership and programs"
+                          text="Compare ongoing membership with facilitated cohorts."
+                        />
+                      )}
                     </div>
                   </Panel>
                 )}

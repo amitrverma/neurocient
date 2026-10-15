@@ -1350,3 +1350,32 @@ Evidence ownership, verification, review cadence, and removal rules for public
 claims will be designed holistically. Existing article narratives remain in
 place until that workstream begins; individual claims should not be migrated
 piecemeal in the meantime.
+
+## 2026-10-15: Admin operates cohort-specific Modern Caveman commerce
+
+Neurocient will introduce a private admin surface. The initial administrator is
+`hello@neurocient.com`, using the existing email/password authentication flow
+and an authoritative backend admin role. Email comparison in the frontend does
+not grant access.
+
+The first operational responsibility is Modern Caveman cohorts: their public
+details, schedules, hard capacity, enrolment window, price, Razorpay checkout,
+participants, waitlist, payment reconciliation, and lifecycle state. Account
+creation or login is required before payment. Once capacity is reached,
+checkout closes and the cohort-specific waitlist opens.
+
+A verified Razorpay webhook, not the browser return path, confirms payment and
+paid enrolment. Admin changes to cohorts, payments, enrolments, and manual
+Membership entitlements require audit history. The detailed approved contract
+is `frontend/docs/ADMIN_COHORTS_IMPLEMENTATION_CONTRACT.md`.
+
+## 2026-10-15: Profile will become the signed-in continuity surface
+
+The signed-in redesign will make Profile the place to continue current work and
+see saved continuity: Practice, active Microchallenge, Scan and Spot evidence,
+saved reading, cohort enrolment, Membership state, and account preferences.
+Saved remains a separate reading utility. `/my-caveman` remains the detailed
+Scan portrait, subordinate to Profile, while its Spot continuation will be
+reconciled with the general Spots surface.
+
+Landing-page refinement remains a separate workstream.

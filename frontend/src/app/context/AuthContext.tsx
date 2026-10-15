@@ -7,6 +7,7 @@ interface User {
   id?: string;
   email?: string;
   name?: string;
+  roles?: string[];
   membership?: {
     status?: string;
     is_active?: boolean;

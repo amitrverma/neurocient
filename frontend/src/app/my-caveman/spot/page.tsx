@@ -151,8 +151,8 @@ export default function SpotMyCavemanPage() {
   if (saved) {
     const readyForExperiment = patternSpotCount >= 2;
     return (
-      <main className="surface-page journey-dark-page flex min-h-[calc(100svh-4rem)] items-center px-6 py-14">
-        <div className="mx-auto w-full max-w-3xl">
+      <main className="surface-page journey-dark-page min-h-[calc(100svh-4rem)]">
+          <div className="mx-auto w-full max-w-3xl px-6 py-14">
           <p className="page-eyebrow text-brand-secondary">
             You caught it
           </p>
@@ -193,14 +193,14 @@ export default function SpotMyCavemanPage() {
               </Link>
             </div>
           )}
-        </div>
+          </div>
       </main>
     );
   }
 
   return (
-    <main className="surface-page caveman-scan-page min-h-[calc(100svh-4rem)] px-6 py-10 md:py-16">
-      <div className="mx-auto max-w-3xl">
+    <main className="surface-page caveman-scan-page min-h-[calc(100svh-4rem)]">
+        <div className="mx-auto max-w-3xl px-6 py-10 md:py-16">
         <div className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
           <Eye className="h-5 w-5" />
         </div>
@@ -254,7 +254,7 @@ export default function SpotMyCavemanPage() {
           isOpen={showMembership}
           onClose={() => setShowMembership(false)}
         />
-      </div>
+        </div>
     </main>
   );
 }

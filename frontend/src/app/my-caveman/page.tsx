@@ -108,33 +108,33 @@ export default function MyCavemanPage() {
   if (missing || !responses) {
     return (
       <main className="surface-page caveman-scan-page flex min-h-[calc(100svh-4rem)] items-center justify-center px-6">
-        <div className="max-w-lg text-center">
-          <h1 className="page-title">No completed portrait yet.</h1>
-          <p className="mt-5 font-sans leading-7 text-brand-dark/68">
-            Complete the twelve lived moments first. Your deeper portrait will
-            be created from the Caveman moves that repeat across them.
-          </p>
-          <Link
-            href="/diagnostics/caveman-scan"
-            className="mt-7 inline-flex rounded-full bg-brand-primary px-6 py-3 font-sans text-sm font-semibold text-white"
-          >
-            Take the scan
-          </Link>
-        </div>
+          <div className="max-w-lg text-center">
+            <h1 className="page-title">No completed portrait yet.</h1>
+            <p className="mt-5 font-sans leading-7 text-brand-dark/68">
+              Complete the twelve lived situations first. Your portrait will
+              be built from the automatic responses that repeat across them.
+            </p>
+            <Link
+              href="/diagnostics/caveman-scan"
+              className="mt-7 inline-flex rounded-full bg-brand-primary px-6 py-3 font-sans text-sm font-semibold text-white"
+            >
+              Take the scan
+            </Link>
+          </div>
       </main>
     );
   }
 
   return (
     <CavemanScanDetailedResult
-      responses={responses}
-      spots={spots}
-      spotsUnavailable={spotsUnavailable}
-      onRetake={() => {
-        window.localStorage.removeItem(CAVEMAN_SCAN_STORAGE_KEY);
-        clearSavedPortraitMarker();
-        router.push("/diagnostics/caveman-scan");
-      }}
+        responses={responses}
+        spots={spots}
+        spotsUnavailable={spotsUnavailable}
+        onRetake={() => {
+          window.localStorage.removeItem(CAVEMAN_SCAN_STORAGE_KEY);
+          clearSavedPortraitMarker();
+          router.push("/diagnostics/caveman-scan");
+        }}
     />
   );
 }

@@ -1379,3 +1379,75 @@ Scan portrait, subordinate to Profile, while its Spot continuation will be
 reconciled with the general Spots surface.
 
 Landing-page refinement remains a separate workstream.
+
+## 2026-10-15: Signed-in work has one orientation layer (partly superseded)
+
+Profile is the account overview and chooses a single continuation from live
+account state: an active Practice first, then an active Microchallenge, then a
+Spot when a Scan portrait exists, otherwise the Scan. It does not replace the
+deeper task surfaces.
+
+Profile, Saved, My Caveman, Spots, Microchallenges, and the signed-in Practice
+entry share a compact `Your work` navigation. Its responsive placement is
+defined by the later left-navigation decision below.
+
+The shared `Your work` navigation was subsequently removed. The continuity and
+truthful state requirements below remain authoritative.
+
+Unavailable account data must never be presented as an empty history. Summary
+requests therefore distinguish loading, unavailable, empty, and populated
+states. Saved remains the reading shelf; My Caveman remains the detailed Scan
+portrait; the portrait-specific Spot route remains a guided entry into the
+canonical Spots and Microchallenge journey.
+
+## 2026-10-15: Legal copy follows the implemented data journey
+
+Privacy and Terms now describe public reading, private account work, analytics,
+AI-generated reflections, reminders, Membership, Razorpay-ready payments,
+cohort enrolment, hard capacity, and waitlists. Accounts and paid offerings are
+treated as intended for people aged 18 or older because the product does not
+implement parental-consent verification.
+
+Claims governance remains deferred and is not resolved by these legal pages.
+The legal copy is a product-accurate implementation draft and should receive
+qualified Indian legal review before production launch.
+
+## 2026-10-15: The signed-in workspace uses one left navigation (superseded)
+
+The signed-in orientation layer is a persistent left rail on desktop. It owns
+both continuation destinations and Profile-level account destinations, so
+Profile must not introduce a second local sidebar. Signed-in content occupies
+the remaining viewport column and keeps its own readable maximum width within
+that column.
+
+On smaller screens the same hierarchy becomes one compact expandable menu
+above the content. It must not become a horizontally scrolling top navigation,
+because that obscures the relationship between the current destination and the
+rest of the signed-in workspace.
+
+This decision was superseded after evaluating the assembled experience. The
+rail gave equal weight to utilities and behavior-change work, duplicated the
+public navigation, and made returning to Neurocient feel like entering an
+account console.
+
+## 2026-10-15: The signed-in home begins with reflection, not navigation
+
+`/profile` is the personal home after sign-in. It begins with one contextual
+reflection question derived from the person's current Practice, active
+Microchallenge, latest Spot, or most recently saved idea. It then shows the
+developing thread and one next useful step. Scan and My Caveman are optional
+sources of evidence, not prerequisites or primary signed-in destinations.
+
+There is no second signed-in top bar or persistent left rail. The public global
+navigation remains stable; the avatar menu holds account utilities such as
+Membership, saved ideas, preferences, and sign-out. This keeps navigation from
+competing with the reason the person returned.
+
+Saved articles are described as ideas the person chose to keep. The newest one
+is resurfaced on the personal home and can prompt a reflection, while `/saved`
+remains available for the full collection. Neurocient must not imply that an
+article is relevant because of an algorithm when the only signal is the
+person's own save.
+
+Loading, unavailable, empty, and populated account states remain distinct. A
+failed request must not be rendered as an empty personal history.

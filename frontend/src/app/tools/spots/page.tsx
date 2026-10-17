@@ -94,7 +94,7 @@ const SpotsPage = () => {
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
-  return (
+  const content = (
     <main className="surface-page tool-detail-page">
       <section className="tool-detail-hero">
         <div>
@@ -282,6 +282,8 @@ const SpotsPage = () => {
       />
     </main>
   );
+
+  return content;
 };
 
 const LoadingBlock = ({ label }: { label: string }) => (

@@ -149,6 +149,13 @@ export default function Pricing() {
 
         <div className="mc-pricing-close">
           <p>Four weeks of structure, live sessions, nudges, tools, and a framework you can keep using after the cohort ends.</p>
+          <div>
+            <p>
+              Attend the first session. If the program does not feel right for
+              you, email <a href="mailto:support@neurocient.com" className="font-semibold underline underline-offset-4">support@neurocient.com</a> within
+              48 hours of that session for a full refund.
+            </p>
+          </div>
           <div><p>Your place is confirmed only after payment is verified. If a cohort reaches capacity, enrollment closes and the waitlist opens.</p></div>
         </div>
       </div>

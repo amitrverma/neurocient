@@ -53,21 +53,21 @@ export default function SavedArticlesPage() {
     fetchSaved();
   }, [ready, user, reloadKey]);
 
-  return (
+  const content = (
     <main className="surface-page">
       <section className="surface-hero utility-hero">
         <div>
-          <p className="surface-eyebrow">Reading shelf</p>
+          <p className="surface-eyebrow">Ideas you kept</p>
           <h1 className="surface-title">
-            Saved
-            <span>insights.</span>
+            Return to
+            <span>what mattered.</span>
           </h1>
         </div>
 
         <aside className="utility-hero-card">
           <p>{loadFailed ? "Shelf unavailable" : user ? `${articles.length} saved` : "Account required"}</p>
-          <strong>Return to what mattered.</strong>
-          <span>Keep the essays you want to revisit when a pattern shows up in work, relationships, stress, or decision making.</span>
+          <strong>Reading becomes useful when it meets real life.</strong>
+          <span>Revisit an idea, connect it to what is happening now, or carry it into your next reflection.</span>
         </aside>
       </section>
 
@@ -141,6 +141,8 @@ export default function SavedArticlesPage() {
       <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
     </main>
   );
+
+  return content;
 }
 
 const StatePanel = ({
@@ -189,6 +191,12 @@ const SavedArticleRow = ({ article }: { article: SavedArticle }) => (
     >
       Read article
       <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+    </Link>
+    <Link
+      href={`/profile?reflect=${encodeURIComponent(article.slug)}`}
+      className="ml-6 mt-5 inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-dark/65 underline decoration-brand-dark/20 underline-offset-4"
+    >
+      Bring this into reflection
     </Link>
   </article>
 );

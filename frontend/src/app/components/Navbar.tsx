@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type React from "react";
-import { Bookmark, LogOut, Menu, ShieldCheck, UserRound, X } from "lucide-react";
+import { Bookmark, CreditCard, LogOut, Menu, Settings, ShieldCheck, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -82,18 +82,32 @@ const Navbar = () => {
                 {showDropdown && (
                   <div className="absolute right-0 mt-3 w-52 rounded-lg border border-brand-dark/12 bg-white p-2 text-sm shadow-[0_20px_60px_rgba(4,42,43,0.14)]">
                     <AccountLink
-                      href="/saved"
-                      icon={<Bookmark className="h-4 w-4" />}
-                      onClick={() => setShowDropdown(false)}
-                    >
-                      Saved
-                    </AccountLink>
-                    <AccountLink
                       href="/profile"
                       icon={<UserRound className="h-4 w-4" />}
                       onClick={() => setShowDropdown(false)}
                     >
-                      Profile
+                      My home
+                    </AccountLink>
+                    <AccountLink
+                      href="/saved"
+                      icon={<Bookmark className="h-4 w-4" />}
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      Saved ideas
+                    </AccountLink>
+                    <AccountLink
+                      href="/membership"
+                      icon={<CreditCard className="h-4 w-4" />}
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      Membership
+                    </AccountLink>
+                    <AccountLink
+                      href="/profile#account"
+                      icon={<Settings className="h-4 w-4" />}
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      Account settings
                     </AccountLink>
                     {user.roles?.includes("admin") ? (
                       <AccountLink
@@ -157,11 +171,17 @@ const Navbar = () => {
             ))}
             {user ? (
               <>
-                <Link href="/saved" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
-                  Saved
-                </Link>
                 <Link href="/profile" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
-                  Profile
+                  My home
+                </Link>
+                <Link href="/saved" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
+                  Saved ideas
+                </Link>
+                <Link href="/membership" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
+                  Membership
+                </Link>
+                <Link href="/profile#account" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
+                  Account settings
                 </Link>
                 {user.roles?.includes("admin") ? (
                   <Link href="/admin" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">

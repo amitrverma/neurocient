@@ -327,7 +327,7 @@ const MicrochallengesPage = () => {
     }
   };
 
-  return (
+  const content = (
     <main className="surface-page tool-detail-page">
       <section className="tool-detail-hero">
         <div>
@@ -470,6 +470,8 @@ const MicrochallengesPage = () => {
       <ConfettiCelebration trigger={showConfetti} />
     </main>
   );
+
+  return content;
 };
 
 const ChallengeRow = ({

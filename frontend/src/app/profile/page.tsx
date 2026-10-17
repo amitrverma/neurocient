@@ -1,21 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import {
   ArrowRight,
   Bell,
-  BookOpen,
-  CalendarDays,
   Check,
-  Eye,
-  FlaskConical,
-  Layers3,
   LoaderCircle,
   LogOut,
-  NotebookPen,
   Settings,
-  SlidersHorizontal,
   UserRound,
 } from "lucide-react";
 import WeeklyReflections from "../components/tools/WeeklyReflections";
@@ -24,33 +16,48 @@ import AuthModal from "../components/AuthModal";
 import { useAuth } from "@/app/context/AuthContext";
 import usePushNotifications from "../hooks/usePushNotifications";
 import { useNotification } from "../components/NotificationProvider";
+import { type WorkOverview } from "./accountOverview";
+import { profileViewFromHash, type ProfileView } from "./profileViews";
+import PersonalHome from "./PersonalHome";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
 
-type ProfileTab = "evidence" | "reflections" | "settings" | "preferences";
-
-const tabs: {
-  id: ProfileTab;
-  label: string;
-  icon: typeof BookOpen;
-}[] = [
-  { id: "evidence", label: "My work", icon: Layers3 },
-  { id: "reflections", label: "Reflections", icon: BookOpen },
-  { id: "settings", label: "Account", icon: Settings },
-  { id: "preferences", label: "Preferences", icon: SlidersHorizontal },
-];
-
 const ProfilePage = () => {
-  const [activeTab, setActiveTab] = useState<ProfileTab>("evidence");
+  const [activeTab, setActiveTab] = useState<ProfileView>("evidence");
+  const [preferredSavedSlug, setPreferredSavedSlug] = useState<string | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const { user, logout, ready } = useAuth();
   const [cohortEnrollment, setCohortEnrollment] = useState<{
     status: string;
     cohort: { title: string; starts_at: string; timezone: string };
+    next_session?: { title: string; starts_at: string; ends_at: string } | null;
   } | null>(null);
+  const [workOverview, setWorkOverview] = useState<WorkOverview>({
+    status: "loading",
+    savedCount: 0,
+    spotCount: 0,
+    challengeCount: 0,
+    activeChallenge: false,
+    hasPractice: false,
+    hasPortrait: false,
+    savedArticles: [],
+    latestSpot: null,
+    activeChallengeTitle: null,
+    activeChallengeLoggedToday: false,
+    practice: null,
+    latestReflection: null,
+  });
 
   const { subscribe, unsubscribe } = usePushNotifications(VAPID_PUBLIC_KEY);
   const { notify } = useNotification();
+
+  useEffect(() => {
+    const syncView = () => setActiveTab(profileViewFromHash(window.location.hash));
+    syncView();
+    setPreferredSavedSlug(new URLSearchParams(window.location.search).get("reflect"));
+    window.addEventListener("hashchange", syncView);
+    return () => window.removeEventListener("hashchange", syncView);
+  }, []);
 
   const [nudgeEnabled, setNudgeEnabled] = useState(true);
   const [challengeEnabled, setChallengeEnabled] = useState(true);
@@ -118,6 +125,63 @@ const ProfilePage = () => {
       .then((response) => (response.ok ? response.json() : { enrollments: [] }))
       .then((data) => setCohortEnrollment(data.enrollments?.[0] || null))
       .catch(() => setCohortEnrollment(null));
+  }, [ready, user]);
+
+  useEffect(() => {
+    if (!ready || !user) return;
+    let active = true;
+
+    const readJson = async (url: string) => {
+      const response = await fetch(url, { credentials: "include", cache: "no-store" });
+      if (response.status === 404) return null;
+      if (!response.ok) throw new Error(`${url}: ${response.status}`);
+      return response.json();
+    };
+
+    const loadOverview = async () => {
+      setWorkOverview((current) => ({ ...current, status: "loading" }));
+      const results = await Promise.allSettled([
+        readJson("/api/articles/saved"),
+        readJson("/api/spots"),
+        readJson("/api/challenges/my"),
+        readJson("/api/practice/loops"),
+        readJson("/api/caveman-scan/sessions/latest"),
+        readJson("/api/weekly-reflection/latest"),
+      ]);
+      if (!active) return;
+      if (results.some((result) => result.status === "rejected")) {
+        setWorkOverview((current) => ({ ...current, status: "unavailable" }));
+        return;
+      }
+
+      const [saved, spots, challenges, practice, portrait, reflection] = results.map((result) =>
+        result.status === "fulfilled" ? result.value : null,
+      );
+      const assigned = Array.isArray(challenges) ? challenges : [];
+      const savedArticles = Array.isArray(saved?.saved) ? saved.saved : [];
+      const spotEntries = Array.isArray(spots) ? spots : [];
+      const activeChallenge = assigned.find((challenge) => challenge.status === "active");
+      setWorkOverview({
+        status: "ready",
+        savedCount: savedArticles.length,
+        spotCount: spotEntries.length,
+        challengeCount: assigned.length,
+        activeChallenge: Boolean(activeChallenge),
+        hasPractice: Boolean(practice?.id),
+        hasPortrait: Boolean(portrait),
+        savedArticles,
+        latestSpot: spotEntries[0] ?? null,
+        activeChallengeTitle: activeChallenge?.title ?? null,
+        activeChallengeLoggedToday: Boolean(activeChallenge?.logged_today ?? activeChallenge?.loggedToday),
+        practice: practice?.id ? practice : null,
+        latestReflection: typeof reflection?.content === "string" ? reflection.content : null,
+      });
+    };
+
+    void loadOverview();
+    return () => {
+      active = false;
+    };
   }, [ready, user]);
 
   const savePrefs = async (updates: object) => {
@@ -188,13 +252,30 @@ const ProfilePage = () => {
     }
   };
 
-  return (
+  const openProfileView = (view: ProfileView) => {
+    setActiveTab(view);
+    const hash = view === "evidence" ? "" : view === "settings" ? "#account" : `#${view}`;
+    window.history.replaceState(null, "", `/profile${hash}`);
+  };
+
+  const firstName = String(user?.name || "there").trim().split(/\s+/)[0];
+  const pageTitle = activeTab === "evidence"
+    ? user ? `Welcome back, ${firstName}.` : "Your work, kept together."
+    : activeTab === "reflections"
+      ? "Your reflections"
+      : activeTab === "preferences"
+        ? "Delivery preferences"
+        : "Your account";
+
+  const content = (
     <main className="surface-page">
       <section className="border-b border-brand-dark/10 bg-white px-6 py-8 md:py-10">
         <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-5">
           <div>
-            <p className="page-eyebrow text-brand-teal">Account space</p>
-            <h1 className="page-section-title mt-2">Your profile</h1>
+            <p className="page-eyebrow text-brand-teal">
+              {activeTab === "evidence" ? "Your Neurocient" : "Account space"}
+            </p>
+            <h1 className="page-section-title mt-2">{pageTitle}</h1>
           </div>
           {!user && ready ? (
             <button
@@ -232,100 +313,17 @@ const ProfilePage = () => {
               </p>
             </Panel>
           ) : (
-            <div className="grid gap-8 lg:grid-cols-[0.3fr_1fr] lg:items-start">
-              <aside className="rounded-lg border border-brand-dark/12 bg-white p-2 shadow-sm lg:p-3">
-                <div className="hidden border-b border-brand-dark/10 p-4 lg:block">
-                  <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
-                    Signed in as
-                  </p>
-                  <p className="mt-2 break-words font-sans text-sm font-semibold text-brand-dark">
-                    {String(user.name || user.email || "Member")}
-                  </p>
-                </div>
-                <div className="flex gap-1 overflow-x-auto p-1 lg:block lg:space-y-1 lg:p-2">
-                  {tabs.map((tab) => {
-                    const Icon = tab.icon;
-                    const isActive = activeTab === tab.id;
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`flex shrink-0 cursor-pointer items-center gap-2 rounded-md px-3 py-3 text-left font-sans text-sm font-semibold transition lg:w-full lg:gap-3 lg:px-4 ${
-                          isActive
-                            ? "bg-brand-dark text-white"
-                            : "text-brand-dark hover:bg-brand-dark/5"
-                        }`}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {tab.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </aside>
-
-              <div>
+            <div className="mx-auto max-w-5xl">
                 {activeTab === "evidence" && (
-                  <Panel>
-                    <SectionKicker icon={<Eye className="h-5 w-5" />}>
-                      Your work
-                    </SectionKicker>
-                    <p className="mt-5 max-w-2xl font-sans text-sm leading-7 text-brand-dark/70">
-                      Continue from where you left off, then return to the
-                      evidence you have built across the platform.
-                    </p>
-                    <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                      <InfoTile
-                        label="Membership"
-                        value={user.membership?.is_active ? "Active" : "Free access"}
-                      />
-                      <InfoTile
-                        label="Modern Caveman"
-                        value={cohortEnrollment ? `${cohortEnrollment.cohort.title} · ${cohortEnrollment.status}` : "No cohort joined"}
-                      />
-                    </div>
-                    <div className="mt-7 grid gap-3">
-                      <EvidenceLink
-                        href="/practice"
-                        icon={<Layers3 className="h-5 w-5" />}
-                        label="Practice"
-                        text="Continue working through a behavior loop."
-                      />
-                      <EvidenceLink
-                        href="/my-caveman"
-                        icon={<Eye className="h-5 w-5" />}
-                        label="Scan portrait"
-                        text="Return to the result built from your answers."
-                      />
-                      <EvidenceLink
-                        href="/tools/spots"
-                        icon={<NotebookPen className="h-5 w-5" />}
-                        label="Spots"
-                        text="Review the concrete situations you recorded."
-                      />
-                      <EvidenceLink
-                        href="/tools/microchallenges"
-                        icon={<FlaskConical className="h-5 w-5" />}
-                        label="Microchallenges"
-                        text="Continue or review your small experiments."
-                      />
-                      {cohortEnrollment ? (
-                        <EvidenceLink
-                          href="/modern-caveman"
-                          icon={<CalendarDays className="h-5 w-5" />}
-                          label={cohortEnrollment.cohort.title}
-                          text={`Your cohort status is ${cohortEnrollment.status}.`}
-                        />
-                      ) : (
-                        <EvidenceLink
-                          href="/membership"
-                          icon={<CalendarDays className="h-5 w-5" />}
-                          label="Membership and programs"
-                          text="Compare ongoing membership with facilitated cohorts."
-                        />
-                      )}
-                    </div>
-                  </Panel>
+                  <PersonalHome
+                    overview={workOverview}
+                    membershipActive={Boolean(user.membership?.is_active)}
+                    cohortLabel={cohortEnrollment
+                      ? `${cohortEnrollment.cohort.title} · ${cohortEnrollment.status}`
+                      : null}
+                    preferredSavedSlug={preferredSavedSlug}
+                    onOpenProfileView={openProfileView}
+                  />
                 )}
 
                 {activeTab === "reflections" && (
@@ -445,7 +443,6 @@ const ProfilePage = () => {
                     )}
                   </Panel>
                 )}
-              </div>
             </div>
           )}
         </div>
@@ -454,6 +451,8 @@ const ProfilePage = () => {
       <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
     </main>
   );
+
+  return content;
 };
 
 const Panel = ({ children }: { children: React.ReactNode }) => (
@@ -477,32 +476,6 @@ const SectionKicker = ({
       {children}
     </p>
   </div>
-);
-
-const EvidenceLink = ({
-  href,
-  icon,
-  label,
-  text,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-  text: string;
-}) => (
-  <Link
-    href={href}
-    className="group grid grid-cols-[2.5rem_1fr_auto] items-center gap-4 border-y border-brand-dark/12 bg-white px-1 py-4 font-sans first:border-b-0 last:border-t-0"
-  >
-    <span className="flex h-10 w-10 items-center justify-center border border-brand-teal/35 text-brand-accent">
-      {icon}
-    </span>
-    <span>
-      <strong className="block text-sm text-brand-dark">{label}</strong>
-      <span className="mt-1 block text-sm leading-6 text-brand-dark/62">{text}</span>
-    </span>
-    <ArrowRight className="h-4 w-4 text-brand-accent transition group-hover:translate-x-0.5" />
-  </Link>
 );
 
 const InfoTile = ({ label, value }: { label: string; value: string }) => (

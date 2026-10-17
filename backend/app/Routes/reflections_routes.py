@@ -4,6 +4,7 @@ from sqlalchemy import select
 from datetime import datetime, timedelta, date
 import uuid
 import openai
+from pydantic import BaseModel, Field
 
 from app.database import get_db
 from app.models import (
@@ -13,6 +14,39 @@ from app.models import (
 from app.utils.auth import get_current_user
 
 router = APIRouter()
+
+
+class ReflectionEntryRequest(BaseModel):
+    content: str = Field(min_length=1, max_length=4000)
+
+
+@router.post("/weekly-reflection")
+async def save_reflection(
+    request: ReflectionEntryRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    content = request.content.strip()
+    if not content:
+        raise HTTPException(status_code=422, detail="Reflection cannot be empty")
+
+    today = datetime.utcnow().date()
+    week_start = today - timedelta(days=today.weekday())
+    reflection = WeeklyReflection(
+        user_id=current_user.id,
+        content=content,
+        week_start=week_start,
+        week_end=week_start + timedelta(days=6),
+    )
+    db.add(reflection)
+    await db.commit()
+    await db.refresh(reflection)
+    return {
+        "id": str(reflection.id),
+        "content": reflection.content,
+        "week_start": reflection.week_start.isoformat(),
+        "week_end": reflection.week_end.isoformat(),
+    }
 
 @router.post("/weekly-reflection/generate")
 async def generate_weekly_reflection(

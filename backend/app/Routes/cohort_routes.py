@@ -140,10 +140,33 @@ async def my_cohorts(current_user: User = Depends(get_current_user), db: AsyncSe
         .where(CohortEnrollment.user_id == current_user.id)
         .order_by(Cohort.starts_at.desc())
     )
-    return {"enrollments": [{
-        "id": str(enrollment.id), "status": enrollment.status,
-        "cohort": {"id": str(cohort.id), "title": cohort.title, "starts_at": cohort.starts_at.isoformat(), "timezone": cohort.timezone},
-    } for enrollment, cohort in result.all()]}
+    enrollments = []
+    for enrollment, cohort in result.all():
+        session_result = await db.execute(
+            select(CohortSession)
+            .where(
+                CohortSession.cohort_id == cohort.id,
+                CohortSession.ends_at >= datetime.utcnow(),
+            )
+            .order_by(CohortSession.starts_at.asc())
+        )
+        next_session = session_result.scalars().first()
+        enrollments.append({
+            "id": str(enrollment.id),
+            "status": enrollment.status,
+            "cohort": {
+                "id": str(cohort.id),
+                "title": cohort.title,
+                "starts_at": cohort.starts_at.isoformat(),
+                "timezone": cohort.timezone,
+            },
+            "next_session": {
+                "title": next_session.title,
+                "starts_at": next_session.starts_at.isoformat(),
+                "ends_at": next_session.ends_at.isoformat(),
+            } if next_session else None,
+        })
+    return {"enrollments": enrollments}
 
 
 @router.post("/cohorts/{cohort_id}/waitlist")

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AuthModal from "@/app/components/AuthModal";
+import MembershipModal from "@/app/components/MembershipModal";
 import { useAuth } from "@/app/context/AuthContext";
 import {
   AdviceScreen,
@@ -28,6 +29,7 @@ import {
   clearPendingPracticeDraft,
   fetchCurrentPractice,
   keepPendingPracticeDraft,
+  MembershipRequiredError,
   readPendingPracticeDraft,
   savePracticeDraft,
   type PracticeDraft,
@@ -44,11 +46,12 @@ export default function PracticeFlow() {
   const [selectedAdvice, setSelectedAdvice] = useState<AdviceId[]>([]);
   const [effect, setEffect] = useState<EffectId | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
+  const [membershipOpen, setMembershipOpen] = useState(false);
   const [pendingDraft, setPendingDraft] = useState<PracticeDraft | null>(null);
   const [saveStatus, setSaveStatus] = useState<PracticeSaveStatus>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
   const [savedPractice, setSavedPractice] = useState<SavedPractice | null>(null);
-  const [savedPracticeLoading, setSavedPracticeLoading] = useState(false);
+  const [savedPracticeLoading, setSavedPracticeLoading] = useState(true);
 
   const selectedScene = useMemo(
     () =>
@@ -62,7 +65,7 @@ export default function PracticeFlow() {
   const loadSavedPractice = useCallback(async () => {
     if (!ready || !user) {
       setSavedPractice(null);
-      setSavedPracticeLoading(false);
+      setSavedPracticeLoading(true);
       return;
     }
 
@@ -89,6 +92,9 @@ export default function PracticeFlow() {
       await loadSavedPractice();
     } catch (error) {
       setSaveStatus("error");
+      if (error instanceof MembershipRequiredError) {
+        setMembershipOpen(true);
+      }
       setSaveError(
         error instanceof Error
           ? error.message
@@ -204,51 +210,70 @@ export default function PracticeFlow() {
     setSaveError(null);
   };
 
+  const savedPracticeAside = user && (savedPracticeLoading || savedPractice) ? (
+    <CurrentPracticePanel
+      practice={savedPractice}
+      loading={savedPracticeLoading}
+    />
+  ) : null;
+
+  const practiceAside = savedPracticeAside ?? (ready ? (
+    <LoopMap
+      scene={selectedScene}
+      hasScene={Boolean(selectedSceneId)}
+      advice={selectedAdvice}
+      effect={effect}
+    />
+  ) : null);
+
   return (
-    <main className="practice-shell">
-      <section className="practice-shell-inner">
-        <PracticeHeader progress={getProgress(step)} step={step} onBack={goBack} />
-
-        <div className="practice-shell-grid">
-          <div className="min-w-0">
-            <PracticeStep
-              step={step}
-              selectedSceneId={selectedSceneId}
-              selectedAdvice={selectedAdvice}
-              effect={effect}
-              selectedScene={selectedScene}
-              userEmail={user?.email}
-              saveStatus={saveStatus}
-              saveError={saveError}
-              setStep={setStep}
-              setSelectedSceneId={selectScene}
-              setEffect={setEffect}
-              selectAdvice={selectAdvice}
-              continueFromAdvice={continueFromAdvice}
-              continueFromEffect={continueFromEffect}
-              openReinforcement={openReinforcement}
-              reset={reset}
-              openAuth={() => setAuthOpen(true)}
-              retrySave={retrySave}
+    <>
+      {step === "welcome" ? (
+        <main className="surface-page practice-page">
+          <section className={`surface-hero practice-hero ${savedPracticeAside ? "" : "practice-hero--single"}`}>
+            <WelcomeScreen
+              onStart={() => setStep("recognition")}
+              onSkip={() => setStep("reinforcement")}
             />
-          </div>
+            {savedPracticeAside}
+          </section>
+        </main>
+      ) : (
+        <main className="surface-page practice-shell">
+          <section className="practice-shell-inner">
+            <PracticeHeader progress={getProgress(step)} step={step} onBack={goBack} />
 
-          <div className="grid gap-4 lg:sticky lg:top-8 lg:self-start">
-            <LoopMap
-              scene={selectedScene}
-              hasScene={Boolean(selectedSceneId)}
-              advice={selectedAdvice}
-              effect={effect}
-            />
-            {user ? (
-              <CurrentPracticePanel
-                practice={savedPractice}
-                loading={savedPracticeLoading}
-              />
-            ) : null}
-          </div>
-        </div>
-      </section>
+            <div className="practice-shell-grid">
+              <div className="min-w-0">
+                <PracticeStep
+                  step={step}
+                  selectedSceneId={selectedSceneId}
+                  selectedAdvice={selectedAdvice}
+                  effect={effect}
+                  selectedScene={selectedScene}
+                  userEmail={user?.email}
+                  saveStatus={saveStatus}
+                  saveError={saveError}
+                  setStep={setStep}
+                  setSelectedSceneId={selectScene}
+                  setEffect={setEffect}
+                  selectAdvice={selectAdvice}
+                  continueFromAdvice={continueFromAdvice}
+                  continueFromEffect={continueFromEffect}
+                  openReinforcement={openReinforcement}
+                  reset={reset}
+                  openAuth={() => setAuthOpen(true)}
+                  retrySave={retrySave}
+                />
+              </div>
+
+              <div className="lg:sticky lg:top-8 lg:self-start">
+                {practiceAside}
+              </div>
+            </div>
+          </section>
+        </main>
+      )}
 
       <AuthModal
         isOpen={authOpen}
@@ -256,7 +281,11 @@ export default function PracticeFlow() {
         context="remember this loop"
         onSuccess={completeAuthHandoff}
       />
-    </main>
+      <MembershipModal
+        isOpen={membershipOpen}
+        onClose={() => setMembershipOpen(false)}
+      />
+    </>
   );
 }
 
@@ -302,12 +331,7 @@ const PracticeStep = ({
   retrySave,
 }: PracticeStepProps) => {
   if (step === "welcome") {
-    return (
-      <WelcomeScreen
-        onStart={() => setStep("recognition")}
-        onSkip={() => setStep("reinforcement")}
-      />
-    );
+    return null;
   }
 
   if (step === "recognition") {

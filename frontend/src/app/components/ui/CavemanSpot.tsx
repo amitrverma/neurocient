@@ -6,7 +6,12 @@ import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "../AuthModal";
 import { useNotification } from "../NotificationProvider";
 import MembershipModal from "../MembershipModal";
-import { getUsage, incrementUsage, usageLimits } from "../../utils/usage";
+import {
+  getUsage,
+  hasActiveMembership,
+  incrementUsage,
+  usageLimits,
+} from "../../utils/usage";
 import { trackEvent } from "../../utils/analytics";
 
 interface CavemanSpotProps {
@@ -37,7 +42,10 @@ const CavemanSpot = ({
       return;
     }
 
-    if (getUsage("spots", true) >= (usageLimits.user.spots || 0)) {
+    if (
+      !hasActiveMembership(user) &&
+      getUsage("spots", true) >= (usageLimits.user.spots || 0)
+    ) {
       setShowMembership(true);
       return;
     }
@@ -55,14 +63,18 @@ const CavemanSpot = ({
       });
 
       if (res.ok) {
-        incrementUsage("spots", true);
+        if (!hasActiveMembership(user)) incrementUsage("spots", true);
         notify("Spot saved", "success");
         onAdded?.({ date: new Date().toISOString(), description: note });
         setNote("");
         trackEvent("Spot Added");
       } else {
         const data = await res.json();
-        notify(data.detail || "Failed to log spot", "error");
+        if (res.status === 402 || data?.detail?.code === "membership_required") {
+          setShowMembership(true);
+          return;
+        }
+        notify(data?.detail?.message || data.detail || "Failed to log spot", "error");
       }
     } catch (err) {
       console.error("Error saving spot:", err);
@@ -74,7 +86,7 @@ const CavemanSpot = ({
   <aside className="not-prose my-2 rounded-lg border border-brand-accent bg-white px-4 py-3 text-brand-dark">
     <div className="flex items-center">
       <h3 className="font-sans text-brand-accent">
-        Caveman Spot
+        Spot the Inner Caveman
       </h3>
     </div>
 

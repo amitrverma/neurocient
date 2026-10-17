@@ -3,10 +3,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.Routes import (
+    admin_data_routes,
     article_routes,
     auth_routes,
     caveman_scan_routes,
     challenge_routes,
+    cohort_routes,
     ikea_routes,
     newsletter_routes,
     notifications_routes,
@@ -73,3 +75,5 @@ app.include_router(spot_routes.router, prefix="/api", tags=["spots"])
 app.include_router(nudge_routes.router, prefix="/api", tags=["nudges"])
 app.include_router(preferences_route.router, prefix="/user", tags=["preferences"])
 app.include_router(caveman_scan_routes.router, prefix="/api", tags=["caveman-scan"])
+app.include_router(cohort_routes.router, prefix="/api", tags=["cohorts"])
+app.include_router(admin_data_routes.router, prefix="/api", tags=["admin"])

@@ -13,6 +13,9 @@
 }
 
 .surface-page *, .surface-page *::before, .surface-page *::after { box-sizing: border-box; }
+.caveman-scan-page { background: var(--surface-paper); }
+.membership-page, .journey-dark-page { background: var(--surface-ink); color: white; }
+.scan-progress-header { background: rgba(245,241,232,.95); }
 .surface-hero, .surface-section { padding: clamp(4.5rem, 9vw, 8rem) 1.25rem; }
 .surface-hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 3rem; align-items: center; min-height: min(50rem, calc(100svh - 4rem)); background: radial-gradient(circle at 86% 14%, rgba(246,218,98,.46), transparent 24rem), linear-gradient(145deg, var(--surface-white), var(--surface-paper)); }
 .surface-hero > *, .surface-section > *, .diagnostics-grid > *, .programs-grid > *, .tools-grid > *, .about-doorways > * { min-width: 0; }
@@ -27,6 +30,14 @@
 .surface-dark { width: 100%; max-width: none; background: var(--surface-ink); color: white; }
 .surface-dark .surface-section-heading { margin-inline: auto; }
 .surface-dark .surface-section-heading h2 { color: white; }
+
+/* Account and support destinations use the same hero hierarchy, with less height. */
+.surface-hero.utility-hero { min-height: 0; padding-block: clamp(2rem,4vw,3.5rem); }
+.utility-hero .surface-title { font-size: clamp(2.6rem,5vw,4.75rem); }
+.utility-hero-card { min-width: 0; padding: clamp(1.5rem,4vw,2.5rem); border: 1px solid var(--surface-line); background: rgba(255,254,250,.82); box-shadow: .75rem .75rem 0 var(--surface-yellow); }
+.utility-hero-card > p { margin-bottom: 1.2rem; color: var(--surface-red); font-family: var(--font-sans); font-size: .75rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+.utility-hero-card > strong { display: block; font-size: clamp(1.5rem,3vw,2.25rem); font-weight: 600; line-height: 1.2; }
+.utility-hero-card > span { display: block; margin-top: 1.3rem; color: rgba(8,47,48,.72); font-family: var(--font-sans); font-size: .95rem; line-height: 1.7; }
 
 /* Diagnostics */
 .diagnostics-principle, .programs-boundary, .tools-loop, .about-promise { padding: clamp(1.5rem,4vw,2.5rem); border: 1px solid var(--surface-line); background: rgba(255,254,250,.78); box-shadow: .75rem .75rem 0 var(--surface-yellow); }
@@ -97,11 +108,15 @@
 .about-socials svg { width: 1.1rem; }
 
 /* Practice shell */
-.practice-shell { --surface-ink:#082f30; --surface-paper:#f5f1e8; min-height: 100vh; overflow: hidden; background: radial-gradient(circle at 88% 12%, rgba(246,218,98,.38),transparent 22rem), var(--surface-paper); color: var(--surface-ink); font-family: var(--font-serif); }
-.practice-shell-inner { display: flex; min-height: 100vh; width: min(100%,72rem); flex-direction: column; margin-inline: auto; padding: 1.5rem 1.25rem 3rem; }
-.practice-shell-grid { display: grid; flex: 1; gap: 2.5rem; align-items: center; padding-block: 3rem; }
+.practice-shell { --surface-ink:#082f30; --surface-paper:#f5f1e8; min-height: calc(100svh - 4rem); overflow: hidden; background: radial-gradient(circle at 88% 12%, rgba(246,218,98,.38),transparent 22rem), var(--surface-paper); color: var(--surface-ink); font-family: var(--font-serif); }
+.practice-shell-inner { display: flex; min-height: calc(100svh - 4rem); width: min(100%,72rem); flex-direction: column; margin-inline: auto; padding: 1.5rem 1.25rem 3rem; }
+.practice-shell-grid { display: grid; flex: 1; gap: 2.5rem; align-items: start; padding-block: clamp(4.5rem,9vw,8rem); }
 .practice-shell .page-title { max-width: 13ch; font-size: clamp(2.8rem,7vw,5.6rem); letter-spacing: -.05em; line-height: .95; }
-.practice-shell aside { background: rgba(255,254,250,.72); backdrop-filter: blur(10px); }
+.practice-hero { align-items: start; }
+.surface-hero.practice-hero--single { grid-template-columns: minmax(0,1fr); }
+.practice-hero--single .practice-intro { max-width: 72rem; }
+.practice-intro { min-width: 0; }
+.practice-summary-panel { min-width: 0; padding: clamp(1.5rem,4vw,2.5rem); border: 1px solid var(--surface-line,rgba(8,47,48,.16)); background: rgba(255,254,250,.82); box-shadow: .75rem .75rem 0 var(--surface-yellow,#f6da62); }
 
 /* Linked journeys */
 .journey-intro { min-height: calc(100svh - 4rem); }

@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { ChevronDown } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, ChevronDown } from "lucide-react";
 
 export default function HeroSection() {
   return (
@@ -54,9 +55,9 @@ export default function HeroSection() {
               </span>
             </h1>
 
-            <div className="mt-10 max-w-4xl border-l-4 border-brand-secondary py-1 pl-5">
+            <div className="mt-8 max-w-4xl border-l-4 border-brand-secondary py-1 pl-5 md:mt-10">
               <p className="font-sans text-lg font-semibold leading-8 text-brand-dark md:text-2xl md:leading-9">
-                We help you understand what&apos;s been{" "}
+                Neurocient helps you understand what&apos;s been{" "}
                 <span className="box-decoration-clone bg-brand-secondary/55 px-1.5 py-0.5 text-brand-accent">
                   standing in your way
                 </span>.
@@ -64,6 +65,26 @@ export default function HeroSection() {
               <p className="mt-1 font-serif text-2xl font-bold italic leading-8 text-brand-dark md:text-3xl md:leading-10">
                 <span className="text-brand-primary">&amp;</span> work with it in real life.
               </p>
+            </div>
+
+            <p className="page-eyebrow mt-6 max-w-4xl text-brand-teal">
+              A behaviour-change platform to bridge the gap between knowing and doing
+            </p>
+
+            <div className="mt-7 flex flex-col gap-3 font-sans sm:flex-row sm:items-center">
+              <a
+                href="#how-neurocient-helps"
+                className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-brand-dark px-6 text-sm font-bold text-white transition hover:bg-brand-accent focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-teal"
+              >
+                See how Neurocient helps
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+              </a>
+              <Link
+                href="/diagnostics/caveman-scan"
+                className="inline-flex min-h-12 items-center justify-center rounded-full border border-brand-dark/20 px-6 text-sm font-bold text-brand-dark transition hover:border-brand-teal hover:text-brand-accent focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-teal"
+              >
+                Take the 5-minute Inner Caveman Scan
+              </Link>
             </div>
 
             <a

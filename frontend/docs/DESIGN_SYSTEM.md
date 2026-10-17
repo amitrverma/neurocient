@@ -57,6 +57,16 @@ or a specific information state requires it.
 - Keep one primary reading path on mobile.
 - Use the shared `max-w-6xl` product frame for top-level pages unless the task is a
   focused flow or long-form reading surface.
+- Internal destination pages inherit the actual hero hierarchy of the navigation
+  destinations: `.surface-hero` composition, a wider headline column, shared
+  eyebrow/title scale, and a compact supporting column. `.surface-page` alone
+  does not establish visual alignment. Account and support destinations may use
+  the shorter `.utility-hero` variant so their task content remains close.
+- Results, questionnaires, and long-form articles may use a narrower task or
+  reading composition without creating a separate visual system.
+- Account and other task-first screens put their usable controls and current
+  state near the top. They share typography and color with destination pages,
+  but must not spend the first viewport on a promotional hero.
 
 ## Information architecture
 

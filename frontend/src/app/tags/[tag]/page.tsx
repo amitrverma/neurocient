@@ -3,7 +3,7 @@ import path from "path";
 import matter from "gray-matter";
 import Link from "next/link";
 import type React from "react";
-import { ArrowRight, BookOpen, Hash } from "lucide-react";
+import { ArrowRight, BookOpen } from "lucide-react";
 import { slugifyTag, unslugifyTag } from "../../utils/slug";
 
 const insightsDir = path.join(process.cwd(), "src/content/insights");
@@ -85,42 +85,28 @@ export default async function TagPage({
   const articleLabel = articles.length === 1 ? "article" : "articles";
 
   return (
-    <main className="bg-white font-serif text-brand-dark">
-      <section className="px-6 pb-10 pt-14 md:pb-12 md:pt-20">
-        <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
-          <div>
-            <SectionLabel>Tagged insights</SectionLabel>
-            <h1 className="page-title mt-6">
-              {displayTag}
-              <br />
-              <span className="italic text-brand-accent">archive.</span>
-            </h1>
-          </div>
-
-          <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-[0_20px_60px_rgba(4,42,43,0.06)] md:p-8">
-            <div className="flex items-start gap-4">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
-                <Hash className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-                  {articles.length} {articleLabel}
-                </p>
-                <p className="mt-3 font-sans text-base leading-8 text-brand-dark/72">
-                  A focused reading list from Neurocient Labs, filtered to one
-                  idea stream so the pattern is easier to follow across essays.
-                </p>
-                <Link
-                  href="/insights"
-                  className="mt-5 inline-flex items-center gap-2 rounded-full border border-brand-dark/25 px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-primary hover:text-brand-primary"
-                >
-                  All insights
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-            </div>
-          </div>
+    <main className="surface-page">
+      <section className="surface-hero utility-hero">
+        <div>
+          <p className="surface-eyebrow">Tagged insights</p>
+          <h1 className="surface-title">
+            {displayTag}
+            <span>archive.</span>
+          </h1>
         </div>
+
+        <aside className="utility-hero-card">
+          <p>{articles.length} {articleLabel}</p>
+          <strong>Follow one idea across essays.</strong>
+          <span>A focused reading list from Neurocient Labs, filtered to one idea stream so the pattern is easier to follow.</span>
+          <Link
+            href="/insights"
+            className="mt-5 inline-flex items-center gap-2 rounded-full border border-brand-dark/25 px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-primary hover:text-brand-primary"
+          >
+            All insights
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </aside>
       </section>
 
       <section className="px-6 pb-16 md:pb-20">
@@ -155,13 +141,6 @@ export default async function TagPage({
     </main>
   );
 }
-
-const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <div className="page-eyebrow flex items-center gap-3 text-brand-teal">
-    <span>{children}</span>
-    <span className="h-px flex-1 bg-brand-dark/15" />
-  </div>
-);
 
 const ArticleRow = ({ article }: { article: ArticleMeta }) => (
   <article className="group grid gap-5 border-b border-brand-dark/12 py-7 last:border-b-0 md:grid-cols-[0.26fr_1fr] md:py-8">

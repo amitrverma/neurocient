@@ -22,7 +22,10 @@ import Newsletter from "./Newsletter";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "./AuthModal";
 import { useNotification } from "./NotificationProvider";
-import { incrementUsage, usageLimits } from "../utils/usage";
+import {
+  hasActiveMembership,
+  incrementUsage,
+} from "../utils/usage";
 import MembershipModal from "./MembershipModal";
 import { trackEvent } from "../utils/analytics";
 import { slugifyTag } from "../utils/slug";
@@ -169,10 +172,10 @@ const ArticleLayout = ({
         trackEvent("Article Read", { slug });
 
         if (user) {
-          const usage = JSON.parse(localStorage.getItem("usage_user") || "{}");
-          const articlesRead = usage.articles || 0;
-          const limit = usageLimits.user.articles;
-          if (articlesRead >= limit) setShowMembership(true);
+          if (!hasActiveMembership(user)) {
+            const { allowed } = incrementUsage("articles", true);
+            if (!allowed) setShowMembership(true);
+          }
         } else {
           const { allowed } = incrementUsage("articles", false);
           if (!allowed) {

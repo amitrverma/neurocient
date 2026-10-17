@@ -1,5 +1,78 @@
 # Practice Decisions
 
+## 2026-10-17: Scan personalisation stops at the person's selected answers
+
+The Scan brings the Inner Caveman into view; it does not map a drive, type,
+recurring movement, or inferred pattern to the person. Personalisation on the
+result comes only from scenarios in which the person's selected answer was
+authored as an Inner Caveman response.
+
+The public result shows a stable, varied sample of those exact answers. Each item
+contains the selected response, its direct reflection, the more deliberate
+contrast from the same scenario, and one question. The sample may vary with the
+completed answer set but does not change on refresh. If every selected answer was
+deliberate, the result says so without manufacturing a hidden problem.
+
+The full result remains available before authentication. **Save to My Inner
+Caveman** creates continuity rather than unlocking an analysis. `/my-caveman`
+uses the same narrative and UI foundation, exposes the fuller set of relevant
+Scan reflections, and leads into recording situations from real life. It is a
+developing record of what the person chose, noticed, understood, and tried—not a
+deeper diagnostic portrait.
+
+My Inner Caveman is available after login from the account menu and the My Home
+continuation area when a completed Scan exists. It uses the canonical
+`/tools/spots` surface for real-life capture; `/my-caveman/spot` is retained only
+as a compatibility redirect. This avoids creating a second Spots product.
+
+The signed-in `/my-caveman` surface does not repeat the long, full-width public
+result composition. It uses the same compact workspace grammar as My Home: a
+standard account header, one dark continuation panel, adjacent next actions,
+bordered work rows, and progressive disclosure for the full Scan history. The
+public result and saved workspace remain narratively continuous without being
+visually identical pages.
+
+New saved sessions retain selected option and reflection identities but no longer
+generate or persist a drive-based portrait. This decision supersedes prior Scan
+result decisions that called for recurring protective moves, supported drives,
+primary or secondary patterns, or a deeper authenticated diagnosis.
+
+## 2026-10-17: The landing page reaches the complete platform before its final decision
+
+The landing page follows one visible narrative: recognise the repeated difficulty,
+see why familiar outside fixes do not last, understand the role of automatic
+processing, meet the Inner Caveman model, and then see how Neurocient's Insights,
+Tools, Practice, Programs, and IKEA + Reinforcement work together.
+
+The Inner Caveman overview does not end with a competing Scan call to action. The
+recognise-understand-respond material remains in the main reading flow, while the
+research evidence cards are left to the full Inner Caveman explanation rather than
+interrupting the landing-page journey. The decisive Scan invitation remains at the
+end of the platform path, while the hero may continue to offer the Scan as a direct
+entry.
+
+Optional routes must not interrupt the main mobile reading order. The Insights
+side path therefore follows the transition into the usual-response argument in
+document order, even when both elements appear alongside one another on desktop.
+
+## 2026-10-17: Inner Caveman is the canonical product name
+
+User-facing product language always uses “Inner Caveman.” The awareness tool is
+“Spot the Inner Caveman” or, where the grammar is personal, “Spot Your Inner
+Caveman.” Shortened forms such as “Spot the Caveman,” “Caveman Spot,” and
+“Caveman Spotting” are not product labels. Existing route, API, component, and
+database identifiers may retain legacy names where changing them adds no user value.
+
+## 2026-10-17: Scan entry explains the experience before questions begin
+
+Landing-page Scan calls to action use “Take the 5-minute Inner Caveman Scan”
+and lead to the existing Scan introduction. Entering the route does not restore
+an unfinished session directly into a question. The introduction briefly explains
+the format and outcome; a separate action begins or resumes the situations.
+
+This preserves saved answers while giving every landing-page visitor a clear,
+low-pressure transition into the Scan.
+
 ## 2026-10-14: The product journey does not replace the navbar taxonomy yet
 
 The primary product model is recognition, understanding, application,
@@ -43,7 +116,7 @@ Correction after review: the opening is not a synthesis of recurring behaviours 
 
 The result remains visually continuous with the wider product. It uses the Scan's `caveman-scan-page` typography context and the product's full-width, background-separated sections. Content within those bands uses open layouts and simple rules; result sections are not placed inside invented rounded, bordered containers. Buttons and accents reuse existing product treatments.
 
-The remainder introduces a concrete IKEA example, optional sourced science, and the roles of Spot the Caveman, microchallenges, and Practice (in development). The product CTA uses the existing AuthModal and `/tools/spots`; authenticated users continue directly. Existing account portrait routes remain available but are not part of this handoff, and the result does not claim an account save. The current contract is in `../scan/RESULT_APPROACH.md` and supersedes the earlier result-pattern interpretation for this public screen.
+The remainder introduces a concrete IKEA example, optional sourced science, and the roles of Spot the Inner Caveman, microchallenges, and Practice (in development). The product CTA uses the existing AuthModal and `/tools/spots`; authenticated users continue directly. Existing account portrait routes remain available but are not part of this handoff, and the result does not claim an account save. The current contract is in `../scan/RESULT_APPROACH.md` and supersedes the earlier result-pattern interpretation for this public screen.
 
 ## 2026-09-19: Evolved automatic processing and the result's product role
 
@@ -51,7 +124,7 @@ The Inner Caveman is a system operating according to evolved tendencies without 
 
 Product copy must be concrete and direct. Avoid poetic or therapeutic framing around "attention", "protection", "flow", "moment", and similar abstractions. Describe the situation, behaviour, and automatic response. Use "automatic processing" without implying that all the behaviours discussed belong to the anatomical autonomic nervous system.
 
-The Scan result is the bridge between the landing page and the product: it connects the person's answers to an understanding of automatic behaviour and then explains Neurocient's approach and relevant tools. Do not classify the person by a dominant drive, force a problem onto their answers, or replace their result with a generic sales page. Explain IKEA and reinforcement in relation to behaviour change, distinguish the purposes of Spot the Caveman and microchallenges, and acknowledge that Practice is in development.
+The Scan result is the bridge between the landing page and the product: it connects the person's answers to an understanding of automatic behaviour and then explains Neurocient's approach and relevant tools. Do not classify the person by a dominant drive, force a problem onto their answers, or replace their result with a generic sales page. Explain IKEA and reinforcement in relation to behaviour change, distinguish the purposes of Spot the Inner Caveman and microchallenges, and acknowledge that Practice is in development.
 
 This clarification supersedes older protector framing and abstract copy examples. Existing evidence identifiers and historical decisions remain as implementation/history references, not copy guidance. Result sequencing, science presentation, and authentication placement remain open design questions; the preceding discussion was exploratory, not approval of a specific design.
 
@@ -419,7 +492,7 @@ The previous Practice MVP has been removed as an implementation target.
 Reason:
 
 - It was a standalone localStorage flow with challenge content in `frontend/src/content/challenges/**`.
-- The repo already has auth, subscription/membership, user progress, microchallenges, Spot the Caveman, insight access, user preferences, WhatsApp utilities, nudges, and an IKEA worksheet/tracker.
+- The repo already has auth, subscription/membership, user progress, microchallenges, Spot the Inner Caveman, insight access, user preferences, WhatsApp utilities, nudges, and an IKEA worksheet/tracker.
 - Rebuilding Practice as a parallel stack would duplicate product mechanisms that already exist.
 - The next Practice system needs to be adaptive and connected to authenticated reinforcement after the free first session.
 
@@ -1290,3 +1363,174 @@ Implication:
   than a browser-global flag.
 - Keep persistence and authorization decisions on existing backend boundaries;
   UI fallbacks must not invent state.
+
+## 2026-10-15: Free use leads to account use, then Membership
+
+The self-guided platform uses a three-stage access model: anonymous use up to
+the existing anonymous limit, authenticated free use up to the existing account
+limits, then paid Membership at USD 9 per month. A free account may save one
+Practice loop. Paid Membership removes the self-guided limits.
+
+Reason:
+
+- The product should demonstrate value before asking for identity or payment.
+- Login preserves continuity; Membership pays for continued self-guided use.
+- The previous coming-soon and manual-plan language contradicted active usage
+  gates and the stated price.
+
+Implication:
+
+- Preserve the current limits of 5 anonymous article reads and, for a free
+  account, 20 article reads, 15 Spots, 5 Microchallenges, and 1 Practice loop.
+- Represent paid access with a provider-neutral account entitlement. Manual
+  activation and a future gateway webhook update the same boundary.
+- `/membership` uses a hosted checkout when `MEMBERSHIP_CHECKOUT_URL` is
+  configured and assisted WhatsApp purchase otherwise. `/subscribe` redirects
+  to the canonical Membership page.
+- A browser redirect never grants access; verified entitlement state does.
+
+## 2026-10-15: A Microchallenge is a 21-day experiment with an 80% threshold
+
+A Microchallenge remains active through its twenty-first calendar day. After
+that day, 17 or more distinct daily logs is `success`; fewer is `failed`.
+Progress is completed days out of 21 and is capped at 100%.
+
+Reason:
+
+- The previous listing, logging, and progress endpoints completed at 21, 19,
+  and 17 logs respectively and used conflicting terminal statuses.
+- Seventeen days is approximately 80% of the experiment and permits imperfect
+  repetition without turning the experience into a streak.
+- Finalising only after day 21 keeps the final day available for logging.
+
+Implication:
+
+- Canonical statuses are `active`, `success`, `failed`, and `removed`.
+- One assignment accepts at most one log per calendar day.
+- Re-entry through listing, progress, or direct logging must converge on the
+  same outcome; logging after the experiment ends is rejected.
+
+## 2026-10-15: Facilitated programs remain separate from Membership
+
+The Modern Caveman remains a paid, cohort-based facilitated personal program.
+The Caveman in the Cubicle diagnostic remains a public self-serve assessment
+that leads to the facilitated CIC program. Neither offer is bundled into the
+$9 self-guided Membership by default.
+
+## 2026-10-15: Claims governance is deferred as one platform decision
+
+Evidence ownership, verification, review cadence, and removal rules for public
+claims will be designed holistically. Existing article narratives remain in
+place until that workstream begins; individual claims should not be migrated
+piecemeal in the meantime.
+
+## 2026-10-15: Admin operates cohort-specific Modern Caveman commerce
+
+Neurocient will introduce a private admin surface. The initial administrator is
+`hello@neurocient.com`, using the existing email/password authentication flow
+and an authoritative backend admin role. Email comparison in the frontend does
+not grant access.
+
+The first operational responsibility is Modern Caveman cohorts: their public
+details, schedules, hard capacity, enrolment window, price, Razorpay checkout,
+participants, waitlist, payment reconciliation, and lifecycle state. Account
+creation or login is required before payment. Once capacity is reached,
+checkout closes and the cohort-specific waitlist opens.
+
+A verified Razorpay webhook, not the browser return path, confirms payment and
+paid enrolment. Admin changes to cohorts, payments, enrolments, and manual
+Membership entitlements require audit history. The detailed approved contract
+is `frontend/docs/ADMIN_COHORTS_IMPLEMENTATION_CONTRACT.md`.
+
+## 2026-10-15: Profile will become the signed-in continuity surface
+
+The signed-in redesign will make Profile the place to continue current work and
+see saved continuity: Practice, active Microchallenge, Scan and Spot evidence,
+saved reading, cohort enrolment, Membership state, and account preferences.
+Saved remains a separate reading utility. `/my-caveman` remains the detailed
+Scan portrait, subordinate to Profile, while its Spot continuation will be
+reconciled with the general Spots surface.
+
+Landing-page refinement remains a separate workstream.
+
+## 2026-10-15: Signed-in work has one orientation layer (partly superseded)
+
+Profile is the account overview and chooses a single continuation from live
+account state: an active Practice first, then an active Microchallenge, then a
+Spot when a Scan portrait exists, otherwise the Scan. It does not replace the
+deeper task surfaces.
+
+Profile, Saved, My Caveman, Spots, Microchallenges, and the signed-in Practice
+entry share a compact `Your work` navigation. Its responsive placement is
+defined by the later left-navigation decision below.
+
+The shared `Your work` navigation was subsequently removed. The continuity and
+truthful state requirements below remain authoritative.
+
+Unavailable account data must never be presented as an empty history. Summary
+requests therefore distinguish loading, unavailable, empty, and populated
+states. Saved remains the reading shelf; My Caveman remains the detailed Scan
+portrait; the portrait-specific Spot route remains a guided entry into the
+canonical Spots and Microchallenge journey.
+
+## 2026-10-15: Legal copy follows the implemented data journey
+
+Privacy and Terms now describe public reading, private account work, analytics,
+AI-generated reflections, reminders, Membership, Razorpay-ready payments,
+cohort enrolment, hard capacity, and waitlists. Accounts and paid offerings are
+treated as intended for people aged 18 or older because the product does not
+implement parental-consent verification.
+
+Claims governance remains deferred and is not resolved by these legal pages.
+The legal copy is a product-accurate implementation draft and should receive
+qualified Indian legal review before production launch.
+
+## 2026-10-15: The signed-in workspace uses one left navigation (superseded)
+
+The signed-in orientation layer is a persistent left rail on desktop. It owns
+both continuation destinations and Profile-level account destinations, so
+Profile must not introduce a second local sidebar. Signed-in content occupies
+the remaining viewport column and keeps its own readable maximum width within
+that column.
+
+On smaller screens the same hierarchy becomes one compact expandable menu
+above the content. It must not become a horizontally scrolling top navigation,
+because that obscures the relationship between the current destination and the
+rest of the signed-in workspace.
+
+This decision was superseded after evaluating the assembled experience. The
+rail gave equal weight to utilities and behavior-change work, duplicated the
+public navigation, and made returning to Neurocient feel like entering an
+account console.
+
+## 2026-10-15: The signed-in home begins with reflection, not navigation
+
+`/profile` is the personal home after sign-in. It begins with one contextual
+reflection question derived from the person's current Practice, active
+Microchallenge, latest Spot, or most recently saved idea. It then shows the
+developing thread and one next useful step. Scan and My Caveman are optional
+sources of evidence, not prerequisites or primary signed-in destinations.
+
+There is no second signed-in top bar or persistent left rail. The public global
+navigation remains stable; the avatar menu holds account utilities such as
+Membership, saved ideas, preferences, and sign-out. This keeps navigation from
+competing with the reason the person returned.
+
+Saved articles are described as ideas the person chose to keep. The newest one
+is resurfaced on the personal home and can prompt a reflection, while `/saved`
+remains available for the full collection. Neurocient must not imply that an
+article is relevant because of an algorithm when the only signal is the
+person's own save.
+
+Loading, unavailable, empty, and populated account states remain distinct. A
+failed request must not be rendered as an empty personal history.
+
+## 2026-10-17: The signed-in Home organises existing account value
+
+This decision supersedes the 2026-10-15 signed-in Home direction that introduced a user-authored reflection.
+
+The signed-in Home begins with the existing Nudge of the Day and the latest AI-generated weekly reflection when one is available. It then presents the user's current Practice, active microchallenge, and Spots as one continuation area. Program participation appears only for an enrolled user, followed by a preview of saved insights when the user has any.
+
+Membership, settings, and delivery preferences remain account utilities in the account menu. Saved insights remain a reading and reference utility; they do not prompt or seed a user-written reflection. The accidental manual weekly-reflection entry point and API are removed.
+
+`/my-caveman` remains part of the Scan-to-login journey for now, but it is not included in the main signed-in Home information architecture. This change reorganises existing capability; it does not add a new product concept.

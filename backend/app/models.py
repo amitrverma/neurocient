@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, ForeignKey, Text, Date, JSON, UniqueConstraint, Integer, Boolean
+from sqlalchemy import Column, String, DateTime, ForeignKey, Text, Date, JSON, UniqueConstraint, Integer, Boolean, Index
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 import uuid
@@ -16,6 +16,148 @@ class User(Base):
     phone_number = Column(String, unique=True, index=True, nullable=True)
     whatsapp_opt_in = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class UserRole(Base):
+    __tablename__ = "user_roles"
+
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    role = Column(String, primary_key=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class Cohort(Base):
+    __tablename__ = "cohorts"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    program_key = Column(String, nullable=False, default="modern-caveman", index=True)
+    slug = Column(String, nullable=False, unique=True, index=True)
+    title = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    facilitator = Column(String, nullable=True)
+    timezone = Column(String, nullable=False, default="Asia/Kolkata")
+    starts_at = Column(DateTime, nullable=False)
+    ends_at = Column(DateTime, nullable=False)
+    enrollment_opens_at = Column(DateTime, nullable=True)
+    enrollment_closes_at = Column(DateTime, nullable=True)
+    capacity = Column(Integer, nullable=False)
+    price_minor = Column(Integer, nullable=False)
+    currency = Column(String, nullable=False, default="INR")
+    status = Column(String, nullable=False, default="draft", index=True)
+    published_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
+class CohortSession(Base):
+    __tablename__ = "cohort_sessions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    cohort_id = Column(UUID(as_uuid=True), ForeignKey("cohorts.id", ondelete="CASCADE"), nullable=False, index=True)
+    title = Column(String, nullable=False)
+    starts_at = Column(DateTime, nullable=False)
+    ends_at = Column(DateTime, nullable=False)
+    public_note = Column(Text, nullable=True)
+    meeting_url = Column(Text, nullable=True)
+    sort_order = Column(Integer, nullable=False, default=0)
+
+
+class CohortEnrollment(Base):
+    __tablename__ = "cohort_enrollments"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    cohort_id = Column(UUID(as_uuid=True), ForeignKey("cohorts.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    status = Column(String, nullable=False, default="pending_payment", index=True)
+    reservation_expires_at = Column(DateTime, nullable=True)
+    provider_order_id = Column(String, nullable=True, unique=True, index=True)
+    provider_payment_id = Column(String, nullable=True, unique=True, index=True)
+    amount_minor = Column(Integer, nullable=False)
+    currency = Column(String, nullable=False)
+    paid_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    __table_args__ = (UniqueConstraint("cohort_id", "user_id", name="uq_cohort_enrollment_user"),)
+
+
+class CohortWaitlistEntry(Base):
+    __tablename__ = "cohort_waitlist_entries"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    cohort_id = Column(UUID(as_uuid=True), ForeignKey("cohorts.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    status = Column(String, nullable=False, default="waiting")
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("cohort_id", "user_id", name="uq_cohort_waitlist_user"),
+        Index("ix_cohort_waitlist_order", "cohort_id", "created_at"),
+    )
+
+
+class PaymentRecord(Base):
+    __tablename__ = "payment_records"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    enrollment_id = Column(UUID(as_uuid=True), ForeignKey("cohort_enrollments.id", ondelete="CASCADE"), nullable=False, index=True)
+    provider = Column(String, nullable=False, default="razorpay")
+    provider_order_id = Column(String, nullable=False, index=True)
+    provider_payment_id = Column(String, nullable=True, unique=True, index=True)
+    status = Column(String, nullable=False)
+    amount_minor = Column(Integer, nullable=False)
+    currency = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
+class PaymentWebhookEvent(Base):
+    __tablename__ = "payment_webhook_events"
+
+    provider_event_id = Column(String, primary_key=True)
+    event_type = Column(String, nullable=False)
+    payload = Column(JSON, nullable=False)
+    status = Column(String, nullable=False, default="received")
+    processed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class AdminAuditEvent(Base):
+    __tablename__ = "admin_audit_events"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    actor_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    action = Column(String, nullable=False, index=True)
+    subject_type = Column(String, nullable=False)
+    subject_id = Column(String, nullable=True)
+    details = Column(JSON, nullable=False, default=dict)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+
+class MembershipEntitlement(Base):
+    """Provider-neutral paid access state for manual or gateway activation."""
+
+    __tablename__ = "membership_entitlements"
+
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    status = Column(String, nullable=False, default="inactive", index=True)
+    provider = Column(String, nullable=True)
+    provider_customer_id = Column(String, nullable=True, index=True)
+    provider_subscription_id = Column(String, nullable=True, unique=True)
+    current_period_end = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False,
+    )
+
+    user = relationship("User")
 
 class UserPreferences(Base):
     __tablename__ = "user_preferences"

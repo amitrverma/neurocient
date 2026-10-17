@@ -1,11 +1,8 @@
 import { questionsBank } from "./questionsBank";
-import { buildScanPortrait } from "./scanPortrait";
+import { buildScanReflections, scanResponseSignature } from "./scanReflections";
 import type { CavemanScanResponse } from "./scanStorage";
 
 const SAVED_SESSION_KEY = "neurocient:caveman-scan-saved-session";
-
-const responseSignature = (responses: CavemanScanResponse[]) =>
-  responses.map((response) => response.evidence?.optionId ?? response.label).join("|");
 
 export const saveCompletedPortrait = async (
   responses: CavemanScanResponse[],
@@ -13,7 +10,7 @@ export const saveCompletedPortrait = async (
 ) => {
   if (responses.length !== questionsBank.length) return;
 
-  const signature = `${accountKey}:${responseSignature(responses)}`;
+  const signature = `${accountKey}:${scanResponseSignature(responses)}`;
   const existing = window.localStorage.getItem(SAVED_SESSION_KEY);
   if (existing) {
     try {
@@ -28,29 +25,30 @@ export const saveCompletedPortrait = async (
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       scan_version: "recognition-1",
-      scoring_version: "protective-moves-1",
-      report_version: "two-level-portrait-1",
+      scoring_version: "selected-response-1",
+      report_version: "answer-reflections-1",
       scenario_ids: questionsBank.map((question) => String(question.id)),
     }),
   });
   if (!createResponse.ok) throw new Error("Could not create a saved Scan session.");
 
   const session = (await createResponse.json()) as { id: string; accessToken: string };
-  const allEvidence = responses.flatMap((response, index) => {
-    const hydrated =
-      response.evidence ??
-      questionsBank[index]?.options.find((option) => option.label === response.label)?.evidence;
-    return hydrated ? [hydrated] : [];
-  });
+  const storedResponses = responses.map(({ label, type, reflection, science }) => ({
+    label,
+    type,
+    reflection,
+    science,
+  }));
+  const reflectionOptionIds = buildScanReflections(responses).map(({ id }) => id);
   const completedResponse = await fetch(`/api/caveman-scan/sessions/${session.id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       accessToken: session.accessToken,
       status: "completed",
-      responses,
-      evidence: { selections: allEvidence },
-      portrait: buildScanPortrait(allEvidence),
+      responses: storedResponses,
+      evidence: { selectedOptionIds: scanResponseSignature(responses).split("|") },
+      portrait: { version: "answer-reflections-1", reflectionOptionIds },
     }),
   });
   if (!completedResponse.ok) throw new Error("Could not complete the saved Scan session.");

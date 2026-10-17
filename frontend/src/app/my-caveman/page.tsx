@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
-import { CavemanScanDetailedResult } from "@/app/diagnostics/caveman-scan/CavemanScanResult";
+import MyCavemanWorkspace from "./MyCavemanWorkspace";
+import { restoreResultResponses } from "@/app/diagnostics/caveman-scan/scanResultSummary";
 import {
   clearSavedPortraitMarker,
   loadLatestPortrait,
@@ -20,13 +21,6 @@ export default function MyCavemanPage() {
   const { user, ready } = useAuth();
   const [responses, setResponses] = useState<CavemanScanResponse[] | null>(null);
   const [missing, setMissing] = useState(false);
-  const [spots, setSpots] = useState<Array<{
-    id: string;
-    date: string;
-    description: string;
-    pattern?: string | null;
-  }>>([]);
-  const [spotsUnavailable, setSpotsUnavailable] = useState(false);
 
   useEffect(() => {
     if (!ready) return;
@@ -41,12 +35,9 @@ export default function MyCavemanPage() {
         const local = window.localStorage.getItem(CAVEMAN_SCAN_STORAGE_KEY);
         if (local) {
           const parsed = JSON.parse(local) as { stage?: unknown; responses?: unknown };
-          if (
-            parsed.stage === "result" &&
-            Array.isArray(parsed.responses) &&
-            parsed.responses.length > 0
-          ) {
-            if (!cancelled) setResponses(parsed.responses as CavemanScanResponse[]);
+          const restored = restoreResultResponses(parsed);
+          if (restored) {
+            if (!cancelled) setResponses(restored);
             return;
           }
         }
@@ -62,63 +53,32 @@ export default function MyCavemanPage() {
     };
 
     void load();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [ready, router, user]);
 
   useEffect(() => {
     if (!user || !responses) return;
-    void saveCompletedPortrait(
-      responses,
-      String(user.id ?? user.email ?? "account"),
-    ).catch((error) => {
-      console.error("Could not save Caveman Scan portrait", error);
+    void saveCompletedPortrait(responses, String(user.id ?? user.email ?? "account")).catch((error) => {
+      console.error("Could not save Inner Caveman Scan", error);
     });
   }, [responses, user]);
 
-  useEffect(() => {
-    if (!user) return;
-    void fetch("/api/spots", { credentials: "include" })
-      .then(async (response) => {
-        if (!response.ok) throw new Error();
-        return response.json();
-      })
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setSpots(data);
-          setSpotsUnavailable(false);
-        }
-      })
-      .catch(() => {
-        setSpotsUnavailable(true);
-      });
-  }, [user]);
-
   if (!ready || (user && !responses && !missing)) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f8f6f0] px-6 font-sans text-brand-dark/65">
-        <p>Opening your portrait…</p>
-      </main>
-    );
+    return <main className="journey-loading"><p>Opening My Inner Caveman…</p></main>;
   }
 
   if (!user) return null;
 
   if (missing || !responses) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f8f6f0] px-6 text-brand-dark">
+      <main className="surface-page caveman-scan-page flex min-h-[calc(100svh-4rem)] items-center justify-center px-6">
         <div className="max-w-lg text-center">
-          <h1 className="font-serif text-4xl font-bold">No completed portrait yet.</h1>
+          <h1 className="page-title">No completed Scan yet.</h1>
           <p className="mt-5 font-sans leading-7 text-brand-dark/68">
-            Complete the twelve lived moments first. Your deeper portrait will
-            be created from the Caveman moves that repeat across them.
+            Complete the twelve situations first. My Inner Caveman begins with the answers where you recognised an automatic response.
           </p>
-          <Link
-            href="/diagnostics/caveman-scan"
-            className="mt-7 inline-flex rounded-full bg-brand-primary px-6 py-3 font-sans text-sm font-semibold text-white"
-          >
-            Take the scan
+          <Link href="/diagnostics/caveman-scan" className="mt-7 inline-flex rounded-full bg-brand-primary px-6 py-3 font-sans text-sm font-semibold text-white">
+            Take the Scan
           </Link>
         </div>
       </main>
@@ -126,10 +86,8 @@ export default function MyCavemanPage() {
   }
 
   return (
-    <CavemanScanDetailedResult
+    <MyCavemanWorkspace
       responses={responses}
-      spots={spots}
-      spotsUnavailable={spotsUnavailable}
       onRetake={() => {
         window.localStorage.removeItem(CAVEMAN_SCAN_STORAGE_KEY);
         clearSavedPortraitMarker();

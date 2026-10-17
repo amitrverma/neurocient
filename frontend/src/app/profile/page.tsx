@@ -1,50 +1,47 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import {
   ArrowRight,
   Bell,
-  BookOpen,
   Check,
-  Eye,
-  FlaskConical,
   LoaderCircle,
   LogOut,
-  NotebookPen,
   Settings,
-  SlidersHorizontal,
   UserRound,
 } from "lucide-react";
-import WeeklyReflections from "../components/tools/WeeklyReflections";
-import NudgeOfTheDay from "../components/tools/NudgeOfTheDay";
 import AuthModal from "../components/AuthModal";
 import { useAuth } from "@/app/context/AuthContext";
 import usePushNotifications from "../hooks/usePushNotifications";
 import { useNotification } from "../components/NotificationProvider";
+import { profileViewFromHash, type ProfileView } from "./profileViews";
+import PersonalHome from "./PersonalHome";
+import useWorkOverview from "./useWorkOverview";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
 
-type ProfileTab = "evidence" | "reflections" | "settings" | "preferences";
-
-const tabs: {
-  id: ProfileTab;
-  label: string;
-  icon: typeof BookOpen;
-}[] = [
-  { id: "evidence", label: "My evidence", icon: Eye },
-  { id: "reflections", label: "Reflections", icon: BookOpen },
-  { id: "settings", label: "Account", icon: Settings },
-  { id: "preferences", label: "Preferences", icon: SlidersHorizontal },
-];
-
 const ProfilePage = () => {
-  const [activeTab, setActiveTab] = useState<ProfileTab>("evidence");
+  const [activeTab, setActiveTab] = useState<ProfileView>("evidence");
   const [showAuth, setShowAuth] = useState(false);
   const { user, logout, ready } = useAuth();
+  const [cohortEnrollment, setCohortEnrollment] = useState<{
+    status: string;
+    cohort: { title: string; starts_at: string; timezone: string };
+    next_session?: { title: string; starts_at: string; ends_at: string } | null;
+  } | null>(null);
+  const { overview: workOverview, retry: retryWorkOverview } = useWorkOverview(
+    ready && Boolean(user),
+  );
 
   const { subscribe, unsubscribe } = usePushNotifications(VAPID_PUBLIC_KEY);
   const { notify } = useNotification();
+
+  useEffect(() => {
+    const syncView = () => setActiveTab(profileViewFromHash(window.location.hash));
+    syncView();
+    window.addEventListener("hashchange", syncView);
+    return () => window.removeEventListener("hashchange", syncView);
+  }, []);
 
   const [nudgeEnabled, setNudgeEnabled] = useState(true);
   const [challengeEnabled, setChallengeEnabled] = useState(true);
@@ -105,6 +102,14 @@ const ProfilePage = () => {
 
     loadPreferences();
   }, [ready, user, prefsReloadKey]);
+
+  useEffect(() => {
+    if (!ready || !user) return;
+    fetch("/api/cohorts/my", { credentials: "include", cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : { enrollments: [] }))
+      .then((data) => setCohortEnrollment(data.enrollments?.[0] || null))
+      .catch(() => setCohortEnrollment(null));
+  }, [ready, user]);
 
   const savePrefs = async (updates: object) => {
     const response = await fetch("/api/user/preferences", {
@@ -174,48 +179,36 @@ const ProfilePage = () => {
     }
   };
 
-  return (
-    <main className="surface-page">
-      <section className="px-6 pb-10 pt-14 md:pb-12 md:pt-20">
-        <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
-          <div>
-            <SectionLabel>Account space</SectionLabel>
-            <h1 className="page-title mt-6">
-              Your
-              <br />
-              <span className="italic text-brand-accent">profile.</span>
-            </h1>
-          </div>
+  const firstName = String(user?.name || "").trim().split(/\s+/)[0] || "there";
+  const pageTitle = activeTab === "evidence"
+    ? user ? `Welcome back, ${firstName}.` : "Your work, kept together."
+    : activeTab === "preferences"
+        ? "Delivery preferences"
+        : "Your account";
 
-          <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-[0_20px_60px_rgba(4,42,43,0.06)] md:p-8">
-            <div className="flex items-start gap-4">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
-                <UserRound className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-                  {user ? "Signed in" : "Signed out"}
-                </p>
-                <p className="mt-3 font-sans text-base leading-8 text-brand-dark/72">
-                  Return to your Scan, lived evidence, experiments,
-                  reflections, and delivery preferences from one place.
-                </p>
-                {!user && ready && (
-                  <button
-                    onClick={() => setShowAuth(true)}
-                    className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-full bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:bg-brand-primary"
-                  >
-                    Log in
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            </div>
+  const content = (
+    <main className="surface-page">
+      <section className="border-b border-brand-dark/10 bg-white px-6 py-8 md:py-10">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-5">
+          <div>
+            <p className="page-eyebrow text-brand-teal">
+              {activeTab === "evidence" ? "Your Neurocient" : "Account space"}
+            </p>
+            <h1 className="page-section-title mt-2">{pageTitle}</h1>
           </div>
+          {!user && ready ? (
+            <button
+              onClick={() => setShowAuth(true)}
+              className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:bg-brand-primary"
+            >
+              Log in
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          ) : null}
         </div>
       </section>
 
-      <section className="px-6 pb-16 md:pb-20">
+      <section className="px-6 pb-16 pt-6 md:pb-20 md:pt-8">
         <div className="mx-auto max-w-6xl">
           {!ready ? (
             <Panel>
@@ -239,77 +232,13 @@ const ProfilePage = () => {
               </p>
             </Panel>
           ) : (
-            <div className="grid gap-8 lg:grid-cols-[0.3fr_1fr] lg:items-start">
-              <aside className="rounded-lg border border-brand-dark/12 bg-white p-3 shadow-sm">
-                <div className="border-b border-brand-dark/10 p-4">
-                  <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
-                    Signed in as
-                  </p>
-                  <p className="mt-2 break-words font-sans text-sm font-semibold text-brand-dark">
-                    {String(user.name || user.email || "Member")}
-                  </p>
-                </div>
-                <div className="space-y-1 p-2">
-                  {tabs.map((tab) => {
-                    const Icon = tab.icon;
-                    const isActive = activeTab === tab.id;
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`flex w-full cursor-pointer items-center gap-3 rounded-md px-4 py-3 text-left font-sans text-sm font-semibold transition ${
-                          isActive
-                            ? "bg-brand-dark text-white"
-                            : "text-brand-dark hover:bg-brand-dark/5"
-                        }`}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {tab.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </aside>
-
-              <div>
+            <div className="mx-auto max-w-5xl">
                 {activeTab === "evidence" && (
-                  <Panel>
-                    <SectionKicker icon={<Eye className="h-5 w-5" />}>
-                      My evidence
-                    </SectionKicker>
-                    <p className="mt-5 max-w-2xl font-sans text-sm leading-7 text-brand-dark/70">
-                      These are different views of the same work: what the Scan
-                      suggested, what happened in real life, and what you tried
-                      next.
-                    </p>
-                    <div className="mt-7 grid gap-3">
-                      <EvidenceLink
-                        href="/my-caveman"
-                        icon={<Eye className="h-5 w-5" />}
-                        label="Scan portrait"
-                        text="Return to the result built from your answers."
-                      />
-                      <EvidenceLink
-                        href="/tools/spots"
-                        icon={<NotebookPen className="h-5 w-5" />}
-                        label="Spots"
-                        text="Review the concrete situations you recorded."
-                      />
-                      <EvidenceLink
-                        href="/tools/microchallenges"
-                        icon={<FlaskConical className="h-5 w-5" />}
-                        label="Microchallenges"
-                        text="Continue or review your small experiments."
-                      />
-                    </div>
-                  </Panel>
-                )}
-
-                {activeTab === "reflections" && (
-                  <div className="grid gap-5">
-                    <NudgeOfTheDay />
-                    <WeeklyReflections />
-                  </div>
+                  <PersonalHome
+                    overview={workOverview}
+                    cohortEnrollment={cohortEnrollment}
+                    onRetry={retryWorkOverview}
+                  />
                 )}
 
                 {activeTab === "settings" && (
@@ -422,7 +351,6 @@ const ProfilePage = () => {
                     )}
                   </Panel>
                 )}
-              </div>
             </div>
           )}
         </div>
@@ -431,14 +359,9 @@ const ProfilePage = () => {
       <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
     </main>
   );
-};
 
-const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <div className="page-eyebrow flex items-center gap-3 text-brand-teal">
-    <span>{children}</span>
-    <span className="h-px flex-1 bg-brand-dark/15" />
-  </div>
-);
+  return content;
+};
 
 const Panel = ({ children }: { children: React.ReactNode }) => (
   <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-sm md:p-8">
@@ -461,32 +384,6 @@ const SectionKicker = ({
       {children}
     </p>
   </div>
-);
-
-const EvidenceLink = ({
-  href,
-  icon,
-  label,
-  text,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-  text: string;
-}) => (
-  <Link
-    href={href}
-    className="group grid grid-cols-[2.5rem_1fr_auto] items-center gap-4 border-y border-brand-dark/12 bg-white px-1 py-4 font-sans first:border-b-0 last:border-t-0"
-  >
-    <span className="flex h-10 w-10 items-center justify-center border border-brand-teal/35 text-brand-accent">
-      {icon}
-    </span>
-    <span>
-      <strong className="block text-sm text-brand-dark">{label}</strong>
-      <span className="mt-1 block text-sm leading-6 text-brand-dark/62">{text}</span>
-    </span>
-    <ArrowRight className="h-4 w-4 text-brand-accent transition group-hover:translate-x-0.5" />
-  </Link>
 );
 
 const InfoTile = ({ label, value }: { label: string; value: string }) => (

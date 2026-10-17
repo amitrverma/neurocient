@@ -1,28 +1,35 @@
-import { Check, MessageCircle } from "lucide-react";
+import { Check, CreditCard, MessageCircle } from "lucide-react";
 
 const whatsappUrl =
   "https://wa.me/918551915656?text=Hi%20Amit%2C%20I%20am%20interested%20in%20Neurocient%20membership.";
+
+const checkoutUrl = process.env.MEMBERSHIP_CHECKOUT_URL?.trim() || whatsappUrl;
+const hasGatewayCheckout = Boolean(process.env.MEMBERSHIP_CHECKOUT_URL?.trim());
 
 const plans = [
   {
     name: "Explorer",
     price: "$0",
-    desc: "Start seeing the pattern. Free resources to get oriented.",
+    desc: "Start seeing the pattern before deciding whether you need more.",
     features: [
       "Inner Caveman guide",
       "Caveman diagnostics",
+      "20 Insights articles",
       "Weekly newsletter",
-      "Sample micro-challenges",
+      "5 microchallenges",
+      "15 saved Spots",
+      "1 saved Practice loop",
     ],
   },
   {
     name: "Member",
     price: "$9",
-    desc: "Tools, challenges, and deeper guidance for everyday practice.",
+    desc: "Continue without free-account limits across the self-guided platform.",
     features: [
       "Everything in Explorer",
       "Unlimited articles",
-      "Unlimited tools",
+      "Unlimited Spots and microchallenges",
+      "Unlimited Practice loops",
       "Discounts for programs",
     ],
     featured: true,
@@ -31,7 +38,7 @@ const plans = [
 
 export default function MembershipPage() {
   return (
-    <main className="bg-brand-dark px-6 py-16 font-serif text-white md:py-24">
+    <main className="surface-page membership-page px-6 py-16 md:py-24">
       <div className="mx-auto max-w-6xl">
         <div className="page-eyebrow mb-7 flex items-center gap-3 text-brand-secondary">
           <span>Membership</span>
@@ -41,8 +48,9 @@ export default function MembershipPage() {
           Go deeper. Work with your wiring.
         </h1>
         <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-white/70">
-          Free resources get you started. Membership is being opened manually
-          while the subscription checkout is being prepared.
+          Begin free. When the free-account limits are reached, Membership
+          keeps Insights, Practice, Spots, and Microchallenges available for
+          $9 per month.
         </p>
         <div className="mt-10 grid gap-4 lg:grid-cols-2">
           {plans.map((plan) => (
@@ -76,18 +84,28 @@ export default function MembershipPage() {
               </ul>
               {plan.featured ? (
                 <a
-                  href={whatsappUrl}
+                  href={checkoutUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand-primary bg-white px-4 py-3 font-sans text-sm font-semibold text-brand-dark transition hover:text-brand-primary"
                 >
-                  <MessageCircle className="h-4 w-4" />
-                  Message on WhatsApp
+                  {hasGatewayCheckout ? (
+                    <CreditCard className="h-4 w-4" />
+                  ) : (
+                    <MessageCircle className="h-4 w-4" />
+                  )}
+                  {hasGatewayCheckout ? "Join for $9/month" : "Join via WhatsApp"}
                 </a>
               ) : null}
             </article>
           ))}
         </div>
+        {!hasGatewayCheckout && (
+          <p className="mx-auto mt-6 max-w-2xl text-center font-sans text-xs leading-6 text-white/55">
+            Membership is currently activated with personal assistance. Online
+            checkout will appear here when the payment gateway is connected.
+          </p>
+        )}
       </div>
     </main>
   );

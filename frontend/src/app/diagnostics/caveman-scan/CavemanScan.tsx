@@ -11,7 +11,6 @@ import CavemanScanQuestion from "./CavemanScanQuestion";
 import type { ScanOption } from "./questionsBank";
 import {
   CAVEMAN_SCAN_STORAGE_KEY,
-  isCavemanScanStage,
   type CavemanScanResponse,
   type CavemanScanStage,
   type CavemanScanState,
@@ -22,6 +21,7 @@ export default function CavemanScan() {
   const [stage, setStage] = useState<CavemanScanStage>("intro");
   const [current, setCurrent] = useState(0);
   const [hasRestored, setHasRestored] = useState(false);
+  const [hasProgress, setHasProgress] = useState(false);
 
   const total = questionsBank.length;
 
@@ -56,11 +56,18 @@ export default function CavemanScan() {
       if (typeof parsed.current === "number") {
         setCurrent(Math.min(Math.max(parsed.current, 0), total - 1));
       }
-      if (Array.isArray(parsed.responses)) {
-        setResponses(parsed.responses as CavemanScanResponse[]);
+      const restoredResponses = Array.isArray(parsed.responses)
+        ? parsed.responses as CavemanScanResponse[]
+        : [];
+      if (restoredResponses.length > 0) {
+        setResponses(restoredResponses);
       }
-      if (isCavemanScanStage(parsed.stage)) {
-        setStage(parsed.stage);
+      if (
+        parsed.stage === "questions" ||
+        restoredResponses.length > 0 ||
+        (typeof parsed.current === "number" && parsed.current > 0)
+      ) {
+        setHasProgress(true);
       }
     } catch {
       window.localStorage.removeItem(CAVEMAN_SCAN_STORAGE_KEY);
@@ -103,6 +110,11 @@ export default function CavemanScan() {
     setCurrent((c) => c - 1);
   };
 
+  const handleStart = () => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    setStage("questions");
+  };
+
   if (!hasRestored) {
     return (
       <main className="journey-loading">
@@ -115,9 +127,12 @@ export default function CavemanScan() {
   }
 
   return (
-    <main className="caveman-scan-page">
+    <div className="caveman-scan-page">
       {stage === "intro" && (
-        <CavemanScanIntro onStart={() => setStage("questions")} />
+        <CavemanScanIntro
+          hasProgress={hasProgress}
+          onStart={handleStart}
+        />
       )}
 
       {stage === "questions" && (
@@ -134,7 +149,7 @@ export default function CavemanScan() {
         </>
       )}
 
-    </main>
+    </div>
   );
 }
 

@@ -266,17 +266,15 @@ export default function InnerCavemanPage() {
   };
 
   return (
-    <main className="bg-white font-serif text-brand-dark">
-      <section className="border-b border-brand-dark/10 px-6 py-14 md:py-20">
-        <div className="mx-auto grid w-full max-w-6xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+    <main className="surface-page">
+      <section className="surface-hero utility-hero border-b border-brand-dark/10">
           <div>
-            <SectionLabel>Complete guide</SectionLabel>
-            <h1 className="page-title text-brand-dark">
+            <p className="surface-eyebrow">Complete guide</p>
+            <h1 className="surface-title">
               Meet your
-              <br />
-              <span className="italic text-brand-accent">Inner Caveman.</span>
+              <span>Inner Caveman.</span>
             </h1>
-            <p className="page-lede mt-7 max-w-2xl border-l-4 border-brand-secondary pl-5 text-brand-dark">
+            <p className="surface-lede">
               The brain system that reacts before you reason: fast,
               protective, and shaped for survival in a very different world.
             </p>
@@ -303,7 +301,6 @@ export default function InnerCavemanPage() {
               />
             </div>
           </figure>
-        </div>
       </section>
 
       <section className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-14 md:grid-cols-[0.78fr_1.22fr] md:items-start md:py-20">
@@ -340,7 +337,7 @@ export default function InnerCavemanPage() {
       <section className="border-y border-brand-dark/10 px-6 py-14 md:py-16">
         <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[0.78fr_1.22fr] md:items-start">
           <div>
-            <SectionLabel>The body's language</SectionLabel>
+            <SectionLabel>The body&apos;s language</SectionLabel>
             <h2 className="text-3xl font-bold leading-tight tracking-[-0.02em] text-brand-dark md:text-5xl">
               The caveman does not speak in arguments.
               <br />

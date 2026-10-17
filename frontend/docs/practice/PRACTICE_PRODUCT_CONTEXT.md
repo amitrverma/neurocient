@@ -23,9 +23,9 @@ Use concrete, direct language. Avoid "attention", "protection", "flow", "moment"
 
 The landing page introduces the problem and the Inner Caveman concept. The Scan lets the person recognise relevant behaviours in their own answers. The result must connect that recognition to an explanation of Neurocient's approach and the product available to them.
 
-The result has two linked responsibilities: explain what the answers support about automatic behaviour, and explain how Neurocient addresses behaviour change through IKEA and reinforcement. Introduce Spot the Caveman and microchallenges through their actual purpose; describe Practice honestly as in development. Avoid classifying the person by a dominant drive or forcing a difficulty onto answers that do not support one.
+The result has two linked responsibilities: explain what the answers support about automatic behaviour, and explain how Neurocient addresses behaviour change through IKEA and reinforcement. Introduce Spot the Inner Caveman and microchallenges through their actual purpose; describe Practice honestly as in development. Avoid classifying the person by a dominant drive or forcing a difficulty onto answers that do not support one.
 
-The first result attempt follows landing page -> Scan -> public result establishing the presence or absence of the Inner Caveman -> Neurocient approach -> login -> product. It does not repeat the Scan's scenarios or name a recurring behaviour as the user's result. The product continuation uses the existing Spot the Caveman tool. Reading remains available through existing guest limits before login is requested. Practice is previewed as in development. See `../scan/RESULT_APPROACH.md` for the current contract.
+The first result attempt follows landing page -> Scan -> public result establishing the presence or absence of the Inner Caveman -> Neurocient approach -> login -> product. It does not repeat the Scan's scenarios or name a recurring behaviour as the user's result. The product continuation uses the existing Spot the Inner Caveman tool. Reading remains available through existing guest limits before login is requested. Practice is previewed as in development. See `../scan/RESULT_APPROACH.md` for the current contract.
 
 ## Market Positioning
 The self-help and behavior-change app market is saturated. Practice should not compete by adding more advice, more content, more tracking, or more motivation.
@@ -116,7 +116,7 @@ Existing primitives include:
 - WhatsApp fields through `User.phone_number`, `User.whatsapp_opt_in`, and `UserPreferences.whatsapp_number`
 - WhatsApp webhook/send utilities in `backend/app/Routes/whatsapp_routes.py`
 - microchallenge assignment, logging, and progress through `/api/challenges/**`
-- "Spot the Caveman" logging through spots APIs and WhatsApp `spot:` messages
+- "Spot the Inner Caveman" logging through spots APIs and WhatsApp `spot:` messages
 - IKEA worksheet and tracker models through `IkeaWorksheet`, `IkeaTracker`, and `/ikea/**`
 - nudges, push notifications, and reminder utilities through existing notification routes
 - insight access, saved articles, and content gating through the current auth/content mechanisms

@@ -4,13 +4,6 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const cookie = req.headers.get("cookie") || "";
-    console.log(
-      "📨 [Proxy] Received token:",
-      body.idToken?.slice(0, 30),
-      "...",
-      body.idToken?.length
-    );
-
     const res = await fetch(`${process.env.API_BASE_URL}/auth/firebase-login`, {
       method: "POST",
       credentials: "include", // 👈 cookie exchange

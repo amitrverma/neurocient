@@ -18,9 +18,16 @@ import json
 import os
 from jose import jwt, JWTError
 
-from firebase_admin import auth as firebase_auth, credentials, initialize_app, exceptions
+from firebase_admin import auth as firebase_auth, credentials, initialize_app
 from app.analytics.posthog_client import track_event, identify_user
 from app.config import settings
+from app.services.membership import membership_summary
+from app.services.admin import (
+    admin_self_registration_allowed,
+    is_configured_admin_email,
+    provision_configured_admin,
+    roles_for_user,
+)
 
 # ---------------- Firebase init ----------------
 firebase_creds_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
@@ -57,6 +64,9 @@ ALGORITHM = "HS256"
 # ---------------- Signup ----------------
 @router.post("/signup")
 async def signup(req: AuthRequest, db: AsyncSession = Depends(get_db)):
+    is_admin_signup = is_configured_admin_email(req.email)
+    if is_admin_signup and not admin_self_registration_allowed():
+        raise HTTPException(status_code=403, detail="This address is reserved")
     result = await db.execute(select(User).where(User.email == req.email))
     existing = result.scalar_one_or_none()
     if existing:
@@ -72,9 +82,13 @@ async def signup(req: AuthRequest, db: AsyncSession = Depends(get_db)):
     db.add(prefs)
     await db.commit()
 
+    if is_admin_signup:
+        await provision_configured_admin(db, user)
+    roles = await roles_for_user(db, user.id)
+
     token = create_access_token({"sub": str(user.id)})
     response = JSONResponse(
-        content={"token": token, "user": {"id": str(user.id), "email": user.email}}
+        content={"token": token, "user": {"id": str(user.id), "email": user.email, "roles": roles}}
     )
     set_auth_cookies(response, str(user.id))
 
@@ -94,9 +108,12 @@ async def login(req: AuthRequest, db: AsyncSession = Depends(get_db)):
     if not verify_password(req.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
+    await provision_configured_admin(db, user)
+    roles = await roles_for_user(db, user.id)
+
     token = create_access_token({"sub": str(user.id)})
     response = JSONResponse(
-        content={"token": token, "user": {"id": str(user.id), "email": user.email}}
+        content={"token": token, "user": {"id": str(user.id), "email": user.email, "roles": roles}}
     )
     set_auth_cookies(response, str(user.id))
 
@@ -105,11 +122,17 @@ async def login(req: AuthRequest, db: AsyncSession = Depends(get_db)):
 
 # ---------------- Me ----------------
 @router.get("/me")
-async def get_me(current_user: User = Depends(get_current_user)):
+async def get_me(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    roles = await roles_for_user(db, current_user.id)
     return {
         "id": str(current_user.id),
         "email": current_user.email,
         "name": current_user.name,
+        "membership": await membership_summary(db, current_user.id),
+        "roles": roles,
     }
 
 # ---------------- Refresh ----------------
@@ -136,6 +159,7 @@ async def refresh(req: Request, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
 
     # ✅ Issue new cookies
+    roles = await roles_for_user(db, user.id)
     response = JSONResponse(
         content={
             "ok": True,
@@ -143,6 +167,8 @@ async def refresh(req: Request, db: AsyncSession = Depends(get_db)):
                 "id": str(user.id),
                 "name": user.name,
                 "email": user.email,
+                "membership": await membership_summary(db, user.id),
+                "roles": roles,
             },
         }
     )
@@ -168,10 +194,10 @@ async def firebase_login(request: Request, db: AsyncSession = Depends(get_db)):
 
         try:
             decoded_token = firebase_auth.verify_id_token(id_token, clock_skew_seconds=60)
-        except exceptions.InvalidIdTokenError:
-            raise HTTPException(status_code=401, detail="Invalid Firebase token")
-        except exceptions.ExpiredIdTokenError:
+        except firebase_auth.ExpiredIdTokenError:
             raise HTTPException(status_code=401, detail="Expired Firebase token")
+        except firebase_auth.InvalidIdTokenError:
+            raise HTTPException(status_code=401, detail="Invalid Firebase token")
         except Exception:
             raise HTTPException(status_code=401, detail="Firebase verification failed")
 

@@ -2,6 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import func
 from app.database import get_db
 from app.models import (
     MicrochallengeDefinition,
@@ -15,8 +16,17 @@ from app.utils.auth import get_current_user
 from pydantic import BaseModel
 from typing import Optional
 from app.analytics.posthog_client import track_event
+from app.services.membership import (
+    has_active_membership,
+    lock_account_access,
+    membership_required_detail,
+)
 
 router = APIRouter()
+
+CHALLENGE_DURATION_DAYS = 21
+CHALLENGE_SUCCESS_DAYS = 17
+FREE_MICROCHALLENGE_LIMIT = 5
 
 # ----------------------
 # Helpers
@@ -27,6 +37,20 @@ def serialize_datetime(dt):
 
 def serialize_date(d):
     return d.isoformat() if d else None
+
+
+def progress_percent(completed_days: int) -> float:
+    return min(
+        100.0,
+        round((completed_days / CHALLENGE_DURATION_DAYS) * 100, 1),
+    )
+
+
+def final_status(started_at: datetime, completed_days: int, today: date) -> str:
+    days_elapsed = (today - started_at.date()).days + 1
+    if days_elapsed <= CHALLENGE_DURATION_DAYS:
+        return "active"
+    return "success" if completed_days >= CHALLENGE_SUCCESS_DAYS else "failed"
 
 # ----------------------
 # Challenge Catalog
@@ -54,6 +78,22 @@ async def assign_microchallenge(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    await lock_account_access(db, current_user.id)
+    if not await has_active_membership(db, current_user.id):
+        count_result = await db.execute(
+            select(func.count(UserMicrochallenge.id)).where(
+                UserMicrochallenge.user_id == current_user.id,
+            )
+        )
+        if (count_result.scalar() or 0) >= FREE_MICROCHALLENGE_LIMIT:
+            raise HTTPException(
+                status_code=402,
+                detail=membership_required_detail(
+                    "microchallenges",
+                    FREE_MICROCHALLENGE_LIMIT,
+                ),
+            )
+
     # Ensure no other active challenge
     result = await db.execute(
         select(UserMicrochallenge).where(
@@ -167,20 +207,21 @@ async def my_microchallenges(
     rows = result.all()
     response = []
 
+    status_changed = False
     for um, mc in rows:
         # fetch logs for this assignment
         logs_result = await db.execute(
             select(MicrochallengeLog).where(MicrochallengeLog.assignment_id == um.id)
         )
         logs = logs_result.scalars().all()
-        progress = round((len(logs) / 21) * 100, 1)
+        progress = progress_percent(len(logs))
 
-        # ✅ auto-mark completed if criteria met
-        if len(logs) >= 21 and progress >= 80 and um.status != "completed":
-            um.status = "completed"
+        outcome = final_status(um.started_at, len(logs), date.today())
+        if um.status == "active" and outcome != "active":
+            um.status = outcome
             um.completed_at = datetime.utcnow()
             db.add(um)
-            await db.commit()
+            status_changed = True
 
         response.append({
             # assignment fields
@@ -202,6 +243,9 @@ async def my_microchallenges(
             "progress": progress,
             "logged_today": any(log.log_date == date.today() for log in logs),
         })
+
+    if status_changed:
+        await db.commit()
 
     return response
 
@@ -235,6 +279,27 @@ async def log_today(
     if not assignment:
         raise HTTPException(status_code=404, detail="Active assignment not found")
 
+    days_elapsed = (today - assignment.started_at.date()).days + 1
+    if days_elapsed > CHALLENGE_DURATION_DAYS:
+        logs_result = await db.execute(
+            select(MicrochallengeLog).where(
+                MicrochallengeLog.assignment_id == payload.assignment_id,
+            )
+        )
+        logs = logs_result.scalars().all()
+        assignment.status = final_status(assignment.started_at, len(logs), today)
+        assignment.completed_at = datetime.utcnow()
+        db.add(assignment)
+        await db.commit()
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "challenge_ended",
+                "message": "This 21-day experiment has ended.",
+                "status": assignment.status,
+            },
+        )
+
     # prevent duplicate log
     result = await db.execute(
         select(MicrochallengeLog).where(
@@ -248,7 +313,7 @@ async def log_today(
                 MicrochallengeLog.assignment_id == payload.assignment_id
             )
         )
-        progress = round((len(logs_result.scalars().all()) / 21) * 100, 1)
+        progress = progress_percent(len(logs_result.scalars().all()))
         return {
             "message": "Already logged today",
             "progress": progress,
@@ -271,14 +336,7 @@ async def log_today(
         select(MicrochallengeLog).where(MicrochallengeLog.assignment_id == payload.assignment_id)
     )
     logs = logs_result.scalars().all()
-    progress = round((len(logs) / 21) * 100, 1)
-
-    # ✅ mark as completed when progress ≥ 90%
-    if progress >= 90 and assignment.status != "success":
-        assignment.status = "success"
-        assignment.completed_at = datetime.utcnow()
-        db.add(assignment)
-        await db.commit()
+    progress = progress_percent(len(logs))
 
     track_event(str(current_user.id), "challenge_logged", {"assignment_id": str(payload.assignment_id)})
 
@@ -317,15 +375,16 @@ async def get_progress(
 
     completed_days = len(logs)
     days_elapsed = (date.today() - assignment.started_at.date()).days + 1
-    ratio = completed_days / 21 if days_elapsed >= 21 else completed_days / days_elapsed
+    ratio = (
+        completed_days / CHALLENGE_DURATION_DAYS
+        if days_elapsed > CHALLENGE_DURATION_DAYS
+        else completed_days / max(days_elapsed, 1)
+    )
 
     # Update status if challenge has ended
     status = assignment.status
-    if status == "active" and days_elapsed >= 21:
-        if completed_days >= 17:
-            status = "success"
-        else:
-            status = "failed"
+    if status == "active" and days_elapsed > CHALLENGE_DURATION_DAYS:
+        status = final_status(assignment.started_at, completed_days, date.today())
         assignment.status = status
         assignment.completed_at = datetime.utcnow()
         db.add(assignment)

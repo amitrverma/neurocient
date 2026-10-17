@@ -2,15 +2,22 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, Boolean
+from sqlalchemy import select, update, Boolean, func
 from uuid import uuid4, UUID
 from datetime import date, datetime
 from app.database import get_db
 from app.models import IkeaWorksheet, IkeaTracker, User
 from app.utils.auth import get_current_user
 from app.analytics.posthog_client import track_event
+from app.services.membership import (
+    has_active_membership,
+    lock_account_access,
+    membership_required_detail,
+)
 
 router = APIRouter()
+
+FREE_PRACTICE_LIMIT = 1
 
 # 1. Save new worksheet (installer submission)
 @router.post("/ikea/worksheet")
@@ -23,6 +30,20 @@ async def save_worksheet(
     environment: dict = Body(...),
     tinyAction: str = Body(...),
 ):
+    await lock_account_access(db, current_user.id)
+    if not await has_active_membership(db, current_user.id):
+        count_result = await db.execute(
+            select(func.count(IkeaWorksheet.id)).where(
+                IkeaWorksheet.user_id == current_user.id,
+                IkeaWorksheet.environment["source"].as_string() == "practice",
+            )
+        )
+        if (count_result.scalar() or 0) >= FREE_PRACTICE_LIMIT:
+            raise HTTPException(
+                status_code=402,
+                detail=membership_required_detail("practice", FREE_PRACTICE_LIMIT),
+            )
+
     await db.execute(
         update(IkeaWorksheet)
         .where(IkeaWorksheet.user_id == current_user.id, IkeaWorksheet.status == 'active')

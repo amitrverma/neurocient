@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "../../components/AuthModal";
+import MembershipModal from "../../components/MembershipModal";
 import { useNotification } from "../../components/NotificationProvider";
 import ConfettiCelebration from "../../components/ui/ConfettiCelebration";
 import type { ProtectiveMove } from "@/app/diagnostics/caveman-scan/scanEvidence";
@@ -77,6 +78,7 @@ const MicrochallengesPage = () => {
   const [openId, setOpenId] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const [showAuth, setShowAuth] = useState(false);
+  const [showMembership, setShowMembership] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
@@ -170,7 +172,26 @@ const MicrochallengesPage = () => {
 
       if (!res.ok) {
         const errData = await res.json();
-        notify(errData.detail || "Failed to log progress", "error");
+        if (
+          res.status === 409 &&
+          errData?.detail?.code === "challenge_ended"
+        ) {
+          setChallenges((prev) =>
+            prev.map((challenge) =>
+              challenge.assignment_id === assignment.assignment_id
+                ? { ...challenge, status: errData.detail.status }
+                : challenge,
+            ),
+          );
+          notify(errData.detail.message, "info");
+          return;
+        }
+        notify(
+          errData?.detail?.message ||
+            (typeof errData?.detail === "string" ? errData.detail : null) ||
+            "Failed to log progress",
+          "error",
+        );
         return;
       }
 
@@ -228,6 +249,13 @@ const MicrochallengesPage = () => {
 
       if (!res.ok) {
         const errData = await res.json();
+        if (
+          res.status === 402 ||
+          errData?.detail?.code === "membership_required"
+        ) {
+          setShowMembership(true);
+          return;
+        }
         if (errData.detail === "You already have an active challenge") {
           notify(
             "You already have an active challenge. Finish or remove it first.",
@@ -235,7 +263,12 @@ const MicrochallengesPage = () => {
           );
           return;
         }
-        notify(errData.detail || "Failed to start challenge", "error");
+        notify(
+          errData?.detail?.message ||
+            (typeof errData?.detail === "string" ? errData.detail : null) ||
+            "Failed to start challenge",
+          "error",
+        );
         return;
       }
 
@@ -294,7 +327,7 @@ const MicrochallengesPage = () => {
     }
   };
 
-  return (
+  const content = (
     <main className="surface-page tool-detail-page">
       <section className="tool-detail-hero">
         <div>
@@ -306,7 +339,7 @@ const MicrochallengesPage = () => {
           <p className="tool-detail-lede">
             {guidedEntry
               ? "You have recorded the response in real life. Now choose one small experiment that fits the pattern and changes one part of the situation."
-              : "Microchallenges are small behavior experiments. Change a cue, environment, or first action, then use repetition to learn what helps in real conditions."}
+              : "Microchallenges are 21-day behavior experiments. Log at least 17 days to complete the experiment, while using each repetition to learn what helps in real conditions."}
           </p>
         </div>
 
@@ -430,9 +463,15 @@ const MicrochallengesPage = () => {
         onClose={() => setShowAuth(false)}
         context="start microchallenges"
       />
+      <MembershipModal
+        isOpen={showMembership}
+        onClose={() => setShowMembership(false)}
+      />
       <ConfettiCelebration trigger={showConfetti} />
     </main>
   );
+
+  return content;
 };
 
 const ChallengeRow = ({

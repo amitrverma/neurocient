@@ -60,6 +60,7 @@ async def get_saved_articles(
         select(Article)
         .join(SavedArticle, SavedArticle.article_id == Article.id)
         .where(SavedArticle.user_id == current_user.id)
+        .order_by(SavedArticle.created_at.desc())
     )
     articles = result.scalars().all()
 

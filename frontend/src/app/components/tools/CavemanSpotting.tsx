@@ -16,11 +16,11 @@ const CavemanSpotting = ({
 
   return (
     <div className="bg-white border rounded-lg p-4 shadow-sm">
-      <h3 className="font-semibold text-[#042a2b] mb-4">Caveman Spotting</h3>
+      <h3 className="font-semibold text-[#042a2b] mb-4">Spot the Inner Caveman</h3>
 
       {/* ✅ Inline Add Spot form (reusing CavemanSpot in inline mode) */}
       <CavemanSpot
-        prompt="What’s one caveman instinct you spotted just now?"
+        prompt="What’s one Inner Caveman response you spotted just now?"
         onAdded={(spot) => setAllSpots((prev) => [spot, ...prev])}
       />
 

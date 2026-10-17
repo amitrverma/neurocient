@@ -1,52 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from datetime import datetime, timedelta, date
-import uuid
+from datetime import datetime, timedelta
+import logging
 import openai
-from pydantic import BaseModel, Field
 
 from app.database import get_db
 from app.models import (
     WeeklyReflection, User, IkeaWorksheet, IkeaTracker,
-    MicrochallengeLog, MicrochallengeDefinition, CavemanSpot
+    MicrochallengeLog, MicrochallengeDefinition, UserMicrochallenge, CavemanSpot
 )
 from app.utils.auth import get_current_user
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
-
-class ReflectionEntryRequest(BaseModel):
-    content: str = Field(min_length=1, max_length=4000)
-
-
-@router.post("/weekly-reflection")
-async def save_reflection(
-    request: ReflectionEntryRequest,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    content = request.content.strip()
-    if not content:
-        raise HTTPException(status_code=422, detail="Reflection cannot be empty")
-
-    today = datetime.utcnow().date()
-    week_start = today - timedelta(days=today.weekday())
-    reflection = WeeklyReflection(
-        user_id=current_user.id,
-        content=content,
-        week_start=week_start,
-        week_end=week_start + timedelta(days=6),
-    )
-    db.add(reflection)
-    await db.commit()
-    await db.refresh(reflection)
-    return {
-        "id": str(reflection.id),
-        "content": reflection.content,
-        "week_start": reflection.week_start.isoformat(),
-        "week_end": reflection.week_end.isoformat(),
-    }
 
 @router.post("/weekly-reflection/generate")
 async def generate_weekly_reflection(
@@ -76,9 +44,10 @@ async def generate_weekly_reflection(
 
     mc_log_result = await db.execute(
         select(MicrochallengeLog, MicrochallengeDefinition)
-        .join(MicrochallengeDefinition, MicrochallengeLog.challenge_id == MicrochallengeDefinition.id)
+        .join(UserMicrochallenge, MicrochallengeLog.assignment_id == UserMicrochallenge.id)
+        .join(MicrochallengeDefinition, UserMicrochallenge.challenge_id == MicrochallengeDefinition.id)
         .where(
-            MicrochallengeLog.user_id == current_user.id,
+            UserMicrochallenge.user_id == current_user.id,
             MicrochallengeLog.log_date >= week_start,
             MicrochallengeLog.log_date <= week_end
         )
@@ -95,7 +64,7 @@ async def generate_weekly_reflection(
     spots = spot_result.scalars().all()
 
     prompt = f"""
-You are a behavioral coach who understands evolutionary psychology. Based on the following logs, write a 4–6 sentence weekly reflection that validates the user's effort, connects their patterns to caveman wiring, and encourages consistency.
+Based only on the following logs, write a 4–6 sentence weekly reflection. Describe specific recurring situations, actions, and changes in direct, non-judgmental language. Explain automatic processing without giving it intention or agency. Do not diagnose the user or invent motives. If the evidence is limited, say so plainly.
 
 Identity: {worksheet.identity}
 Tiny Action: {worksheet.tiny_action}
@@ -126,8 +95,12 @@ Tracker Completions:
         )
         reflection_text = response.choices[0].message.content.strip()
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"OpenAI error: {str(e)}")
+    except Exception:
+        logger.exception("Weekly reflection generation failed")
+        raise HTTPException(
+            status_code=500,
+            detail="Could not generate this week's reflection",
+        )
 
     reflection = WeeklyReflection(
         user_id=current_user.id,

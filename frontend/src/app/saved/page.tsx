@@ -67,7 +67,7 @@ export default function SavedArticlesPage() {
         <aside className="utility-hero-card">
           <p>{loadFailed ? "Shelf unavailable" : user ? `${articles.length} saved` : "Account required"}</p>
           <strong>Reading becomes useful when it meets real life.</strong>
-          <span>Revisit an idea, connect it to what is happening now, or carry it into your next reflection.</span>
+          <span>Revisit an idea and connect it to what is happening now.</span>
         </aside>
       </section>
 
@@ -191,12 +191,6 @@ const SavedArticleRow = ({ article }: { article: SavedArticle }) => (
     >
       Read article
       <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-    </Link>
-    <Link
-      href={`/profile?reflect=${encodeURIComponent(article.slug)}`}
-      className="ml-6 mt-5 inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-dark/65 underline decoration-brand-dark/20 underline-offset-4"
-    >
-      Bring this into reflection
     </Link>
   </article>
 );

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildReturnQuestion, chooseAccountContinuation, type WorkOverview } from "./accountOverview";
+import { chooseAccountContinuation, type WorkOverview } from "./accountOverview";
 
 const overview = (updates: Partial<WorkOverview> = {}): WorkOverview => ({
   status: "ready",
@@ -8,29 +8,12 @@ const overview = (updates: Partial<WorkOverview> = {}): WorkOverview => ({
   challengeCount: 0,
   activeChallenge: false,
   hasPractice: false,
-  hasPortrait: false,
   savedArticles: [],
   latestSpot: null,
   activeChallengeTitle: null,
   activeChallengeLoggedToday: false,
   practice: null,
-  latestReflection: null,
   ...updates,
-});
-
-describe("buildReturnQuestion", () => {
-  it("grounds the question in an active experiment before other material", () => {
-    expect(buildReturnQuestion(overview({
-      activeChallengeTitle: "Begin before ready",
-      practice: { action: "Open the document" },
-    }))).toContain("Begin before ready");
-  });
-
-  it("brings a saved idea into reflection when no active work exists", () => {
-    expect(buildReturnQuestion(overview({
-      savedArticles: [{ slug: "starting", title: "Why starting feels difficult" }],
-    }))).toContain("Why starting feels difficult");
-  });
 });
 
 describe("chooseAccountContinuation", () => {
@@ -40,16 +23,16 @@ describe("chooseAccountContinuation", () => {
     );
   });
 
-  it("moves from a portrait into real-life Spots", () => {
-    expect(chooseAccountContinuation(overview({ hasPortrait: true })).href).toBe(
+  it("continues with Spots when the user already has evidence", () => {
+    expect(chooseAccountContinuation(overview({ spotCount: 2 })).href).toBe(
       "/tools/spots",
     );
   });
 
-  it("prioritises active work over the portrait", () => {
+  it("prioritises an active microchallenge over Spots", () => {
     expect(
       chooseAccountContinuation(
-        overview({ hasPortrait: true, activeChallenge: true }),
+        overview({ spotCount: 2, activeChallenge: true }),
       ).href,
     ).toBe("/tools/microchallenges");
   });
@@ -57,7 +40,7 @@ describe("chooseAccountContinuation", () => {
   it("prioritises an active Practice over every other continuation", () => {
     expect(
       chooseAccountContinuation(
-        overview({ hasPractice: true, activeChallenge: true, hasPortrait: true }),
+        overview({ hasPractice: true, activeChallenge: true, spotCount: 2 }),
       ).href,
     ).toBe("/practice");
   });

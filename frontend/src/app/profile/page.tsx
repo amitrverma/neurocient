@@ -10,21 +10,18 @@ import {
   Settings,
   UserRound,
 } from "lucide-react";
-import WeeklyReflections from "../components/tools/WeeklyReflections";
-import NudgeOfTheDay from "../components/tools/NudgeOfTheDay";
 import AuthModal from "../components/AuthModal";
 import { useAuth } from "@/app/context/AuthContext";
 import usePushNotifications from "../hooks/usePushNotifications";
 import { useNotification } from "../components/NotificationProvider";
-import { type WorkOverview } from "./accountOverview";
 import { profileViewFromHash, type ProfileView } from "./profileViews";
 import PersonalHome from "./PersonalHome";
+import useWorkOverview from "./useWorkOverview";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
 
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState<ProfileView>("evidence");
-  const [preferredSavedSlug, setPreferredSavedSlug] = useState<string | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const { user, logout, ready } = useAuth();
   const [cohortEnrollment, setCohortEnrollment] = useState<{
@@ -32,21 +29,9 @@ const ProfilePage = () => {
     cohort: { title: string; starts_at: string; timezone: string };
     next_session?: { title: string; starts_at: string; ends_at: string } | null;
   } | null>(null);
-  const [workOverview, setWorkOverview] = useState<WorkOverview>({
-    status: "loading",
-    savedCount: 0,
-    spotCount: 0,
-    challengeCount: 0,
-    activeChallenge: false,
-    hasPractice: false,
-    hasPortrait: false,
-    savedArticles: [],
-    latestSpot: null,
-    activeChallengeTitle: null,
-    activeChallengeLoggedToday: false,
-    practice: null,
-    latestReflection: null,
-  });
+  const { overview: workOverview, retry: retryWorkOverview } = useWorkOverview(
+    ready && Boolean(user),
+  );
 
   const { subscribe, unsubscribe } = usePushNotifications(VAPID_PUBLIC_KEY);
   const { notify } = useNotification();
@@ -54,7 +39,6 @@ const ProfilePage = () => {
   useEffect(() => {
     const syncView = () => setActiveTab(profileViewFromHash(window.location.hash));
     syncView();
-    setPreferredSavedSlug(new URLSearchParams(window.location.search).get("reflect"));
     window.addEventListener("hashchange", syncView);
     return () => window.removeEventListener("hashchange", syncView);
   }, []);
@@ -127,63 +111,6 @@ const ProfilePage = () => {
       .catch(() => setCohortEnrollment(null));
   }, [ready, user]);
 
-  useEffect(() => {
-    if (!ready || !user) return;
-    let active = true;
-
-    const readJson = async (url: string) => {
-      const response = await fetch(url, { credentials: "include", cache: "no-store" });
-      if (response.status === 404) return null;
-      if (!response.ok) throw new Error(`${url}: ${response.status}`);
-      return response.json();
-    };
-
-    const loadOverview = async () => {
-      setWorkOverview((current) => ({ ...current, status: "loading" }));
-      const results = await Promise.allSettled([
-        readJson("/api/articles/saved"),
-        readJson("/api/spots"),
-        readJson("/api/challenges/my"),
-        readJson("/api/practice/loops"),
-        readJson("/api/caveman-scan/sessions/latest"),
-        readJson("/api/weekly-reflection/latest"),
-      ]);
-      if (!active) return;
-      if (results.some((result) => result.status === "rejected")) {
-        setWorkOverview((current) => ({ ...current, status: "unavailable" }));
-        return;
-      }
-
-      const [saved, spots, challenges, practice, portrait, reflection] = results.map((result) =>
-        result.status === "fulfilled" ? result.value : null,
-      );
-      const assigned = Array.isArray(challenges) ? challenges : [];
-      const savedArticles = Array.isArray(saved?.saved) ? saved.saved : [];
-      const spotEntries = Array.isArray(spots) ? spots : [];
-      const activeChallenge = assigned.find((challenge) => challenge.status === "active");
-      setWorkOverview({
-        status: "ready",
-        savedCount: savedArticles.length,
-        spotCount: spotEntries.length,
-        challengeCount: assigned.length,
-        activeChallenge: Boolean(activeChallenge),
-        hasPractice: Boolean(practice?.id),
-        hasPortrait: Boolean(portrait),
-        savedArticles,
-        latestSpot: spotEntries[0] ?? null,
-        activeChallengeTitle: activeChallenge?.title ?? null,
-        activeChallengeLoggedToday: Boolean(activeChallenge?.logged_today ?? activeChallenge?.loggedToday),
-        practice: practice?.id ? practice : null,
-        latestReflection: typeof reflection?.content === "string" ? reflection.content : null,
-      });
-    };
-
-    void loadOverview();
-    return () => {
-      active = false;
-    };
-  }, [ready, user]);
-
   const savePrefs = async (updates: object) => {
     const response = await fetch("/api/user/preferences", {
       method: "PATCH",
@@ -252,18 +179,10 @@ const ProfilePage = () => {
     }
   };
 
-  const openProfileView = (view: ProfileView) => {
-    setActiveTab(view);
-    const hash = view === "evidence" ? "" : view === "settings" ? "#account" : `#${view}`;
-    window.history.replaceState(null, "", `/profile${hash}`);
-  };
-
-  const firstName = String(user?.name || "there").trim().split(/\s+/)[0];
+  const firstName = String(user?.name || "").trim().split(/\s+/)[0] || "there";
   const pageTitle = activeTab === "evidence"
     ? user ? `Welcome back, ${firstName}.` : "Your work, kept together."
-    : activeTab === "reflections"
-      ? "Your reflections"
-      : activeTab === "preferences"
+    : activeTab === "preferences"
         ? "Delivery preferences"
         : "Your account";
 
@@ -317,20 +236,9 @@ const ProfilePage = () => {
                 {activeTab === "evidence" && (
                   <PersonalHome
                     overview={workOverview}
-                    membershipActive={Boolean(user.membership?.is_active)}
-                    cohortLabel={cohortEnrollment
-                      ? `${cohortEnrollment.cohort.title} · ${cohortEnrollment.status}`
-                      : null}
-                    preferredSavedSlug={preferredSavedSlug}
-                    onOpenProfileView={openProfileView}
+                    cohortEnrollment={cohortEnrollment}
+                    onRetry={retryWorkOverview}
                   />
-                )}
-
-                {activeTab === "reflections" && (
-                  <div className="grid gap-5">
-                    <NudgeOfTheDay />
-                    <WeeklyReflections />
-                  </div>
                 )}
 
                 {activeTab === "settings" && (

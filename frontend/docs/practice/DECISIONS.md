@@ -1451,3 +1451,13 @@ person's own save.
 
 Loading, unavailable, empty, and populated account states remain distinct. A
 failed request must not be rendered as an empty personal history.
+
+## 2026-10-17: The signed-in Home organises existing account value
+
+This decision supersedes the 2026-10-15 signed-in Home direction that introduced a user-authored reflection.
+
+The signed-in Home begins with the existing Nudge of the Day and the latest AI-generated weekly reflection when one is available. It then presents the user's current Practice, active microchallenge, and Spots as one continuation area. Program participation appears only for an enrolled user, followed by a preview of saved insights when the user has any.
+
+Membership, settings, and delivery preferences remain account utilities in the account menu. Saved insights remain a reading and reference utility; they do not prompt or seed a user-written reflection. The accidental manual weekly-reflection entry point and API are removed.
+
+`/my-caveman` remains part of the Scan-to-login journey for now, but it is not included in the main signed-in Home information architecture. This change reorganises existing capability; it does not add a new product concept.

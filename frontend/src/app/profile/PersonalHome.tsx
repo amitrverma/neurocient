@@ -1,234 +1,322 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import {
   ArrowRight,
   Bookmark,
-  Check,
+  CalendarDays,
   FlaskConical,
   Layers3,
   LoaderCircle,
   NotebookPen,
   PencilLine,
 } from "lucide-react";
-import { useNotification } from "@/app/components/NotificationProvider";
+import NudgeOfTheDay from "@/app/components/tools/NudgeOfTheDay";
+import WeeklyReflections from "@/app/components/tools/WeeklyReflections";
 import {
-  buildReturnQuestion,
   chooseAccountContinuation,
+  type AccountContinuation,
   type WorkOverview,
 } from "./accountOverview";
-import type { ProfileView } from "./profileViews";
+
+type CohortEnrollment = {
+  status: string;
+  cohort: { title: string; starts_at: string; timezone: string };
+  next_session?: { title: string; starts_at: string; ends_at: string } | null;
+};
 
 export default function PersonalHome({
   overview,
-  membershipActive,
-  cohortLabel,
-  preferredSavedSlug,
-  onOpenProfileView,
+  cohortEnrollment,
+  onRetry,
 }: {
   overview: WorkOverview;
-  membershipActive: boolean;
-  cohortLabel?: string | null;
-  preferredSavedSlug?: string | null;
-  onOpenProfileView: (view: ProfileView) => void;
+  cohortEnrollment: CohortEnrollment | null;
+  onRetry: () => void;
 }) {
-  const [reflection, setReflection] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [savedReflection, setSavedReflection] = useState<string | null>(null);
-  const [questionOverride, setQuestionOverride] = useState<string | null>(null);
-  const { notify } = useNotification();
-  const preferredSavedIdea = useMemo(
-    () => overview.savedArticles.find((article) => article.slug === preferredSavedSlug),
-    [overview.savedArticles, preferredSavedSlug],
-  );
-  const contextualOverview = useMemo(() => {
-    if (!preferredSavedIdea) return overview;
-    return {
-      ...overview,
-      savedArticles: [preferredSavedIdea, ...overview.savedArticles.filter((article) => article.slug !== preferredSavedSlug)],
-    };
-  }, [overview, preferredSavedIdea, preferredSavedSlug]);
-  const question = useMemo(
-    () => questionOverride ?? (preferredSavedIdea
-      ? `What from “${preferredSavedIdea.title || preferredSavedIdea.slug}” feels connected to what you are dealing with now?`
-      : buildReturnQuestion(contextualOverview)),
-    [contextualOverview, preferredSavedIdea, questionOverride],
-  );
-
   if (overview.status === "loading") {
     return (
-      <StateBlock icon={<LoaderCircle className="animate-spin" />} title="Bringing your thread together" text="Reading your recent work and the ideas you chose to keep." />
+      <StateBlock
+        icon={<LoaderCircle className="animate-spin" />}
+        title="Bringing your account together"
+        text="Loading your current work and the ideas you chose to keep."
+      />
     );
   }
 
   if (overview.status === "unavailable") {
     return (
-      <StateBlock icon={<PencilLine />} title="Your personal thread is temporarily unavailable" text="Your work has not been treated as empty or replaced. Try again when the connection is available." />
+      <StateBlock
+        icon={<PencilLine />}
+        title="Your account overview is temporarily unavailable"
+        text="Your saved work has not been treated as empty or replaced."
+        action={
+          <button
+            type="button"
+            onClick={onRetry}
+            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark transition hover:bg-brand-dark hover:text-white"
+          >
+            Try again
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        }
+      />
     );
   }
 
-  const next = chooseAccountContinuation(overview);
-  const savedIdea = contextualOverview.savedArticles[0];
-
-  const saveReflection = async () => {
-    const content = reflection.trim();
-    if (!content) return;
-    setSaving(true);
-    try {
-      const response = await fetch("/api/weekly-reflection", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
-      });
-      if (!response.ok) throw new Error();
-      setSavedReflection(content);
-      setReflection("");
-      notify("Reflection kept.", "success");
-    } catch {
-      notify("Your reflection could not be kept. Please try again.", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
+  const continuation = chooseAccountContinuation(overview);
+  const workItems = buildWorkItems(overview).filter(
+    (item) => item.kind !== continuation.kind,
+  );
 
   return (
-    <div className="grid gap-8">
-      <section className="overflow-hidden rounded-xl bg-brand-dark text-white shadow-sm">
-        <div className="px-6 py-7 md:px-9 md:py-9">
-          <p className="font-sans text-xs font-semibold uppercase tracking-[0.18em] text-brand-secondary">
-            Before you continue
-          </p>
-          <h2 className="mt-4 max-w-3xl text-3xl font-bold leading-[1.16] md:text-4xl">
-            {question}
-          </h2>
-          {savedReflection ? (
-            <div className="mt-7 border-l-2 border-brand-secondary pl-5">
-              <p className="font-sans text-sm leading-7 text-white/75">{savedReflection}</p>
-              <p className="mt-3 inline-flex items-center gap-2 font-sans text-xs font-semibold uppercase tracking-[0.14em] text-brand-secondary">
-                <Check className="h-4 w-4" /> Kept in your thread
-              </p>
-            </div>
-          ) : (
-            <>
-              <label htmlFor="return-reflection" className="sr-only">Your reflection</label>
-              <textarea
-                id="return-reflection"
-                value={reflection}
-                onChange={(event) => setReflection(event.target.value)}
-                placeholder="Write what you noticed. A few honest lines are enough."
-                rows={4}
-                className="mt-7 w-full resize-y rounded-lg border border-white/18 bg-white/8 px-4 py-3 font-sans text-sm leading-7 text-white outline-none placeholder:text-white/42 focus:border-brand-secondary"
-              />
-              <button
-                type="button"
-                onClick={saveReflection}
-                disabled={!reflection.trim() || saving}
-                className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-full bg-brand-secondary px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark disabled:cursor-not-allowed disabled:opacity-45"
-              >
-                {saving ? "Keeping…" : "Keep this reflection"}
-                {saving ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-              </button>
-            </>
-          )}
+    <div className="grid gap-14 md:gap-16">
+      <section aria-labelledby="for-you-title">
+        <SectionHeading
+          eyebrow="For you"
+          id="for-you-title"
+        />
+        <div className="mt-7 grid gap-5 lg:grid-cols-2 lg:items-start">
+          <NudgeOfTheDay />
+          <WeeklyReflections />
         </div>
       </section>
 
-      <section className="grid gap-px overflow-hidden rounded-xl border border-brand-dark/12 bg-brand-dark/12 md:grid-cols-2">
-        <div className="bg-white p-6 md:p-8">
-          <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">Your developing thread</p>
-          <h2 className="mt-3 text-3xl font-bold leading-tight text-brand-dark">What you have been working with.</h2>
-          <div className="mt-6 grid gap-5">
-            {overview.practice ? (
-              <ThreadItem icon={<Layers3 />} label="In Practice" text={overview.practice.moment || overview.practice.action || "A behavior loop you chose to work through."} />
-            ) : null}
-            {overview.activeChallengeTitle ? (
-              <ThreadItem icon={<FlaskConical />} label="Experimenting with" text={overview.activeChallengeTitle} />
-            ) : null}
-            {overview.latestSpot ? (
-              <ThreadItem icon={<NotebookPen />} label="Recently noticed" text={overview.latestSpot.description} />
-            ) : null}
-            {!overview.practice && !overview.activeChallengeTitle && !overview.latestSpot ? (
-              <p className="font-sans text-sm leading-7 text-brand-dark/65">Your first reflection can become the beginning of this thread. Neurocient will bring it back when you return.</p>
-            ) : null}
+      <section aria-labelledby="current-work-title">
+        <SectionHeading
+          eyebrow="Continue your work"
+          title="Pick up from where you left off."
+          id="current-work-title"
+        />
+
+        <div className="mt-7 grid border-y border-brand-dark/12 lg:grid-cols-[1.05fr_0.95fr]">
+          <PrimaryContinuation continuation={continuation} />
+          <div className="border-t border-brand-dark/12 lg:border-l lg:border-t-0 lg:pl-8">
+            {workItems.map((item) => (
+              <WorkLink key={item.kind} item={item} />
+            ))}
           </div>
         </div>
-
-        <div className="bg-brand-secondary/18 p-6 md:p-8">
-          <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">One next step</p>
-          <h2 className="mt-3 text-3xl font-bold leading-tight text-brand-dark">{next.label}</h2>
-          <p className="mt-4 font-sans text-sm leading-7 text-brand-dark/70">{next.text}</p>
-          <Link href={next.href} className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white">
-            Continue
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
       </section>
 
-      {savedIdea ? (
-        <section className="rounded-xl border border-brand-dark/12 bg-white p-6 shadow-sm md:p-8">
-          <div className="grid gap-6 md:grid-cols-[auto_1fr_auto] md:items-start">
-            <span className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent"><Bookmark className="h-5 w-5" /></span>
-            <div>
-              <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">An idea you chose to keep</p>
-              <h2 className="mt-2 text-3xl font-bold leading-tight text-brand-dark">{savedIdea.title || savedIdea.slug}</h2>
-              {savedIdea.excerpt ? <p className="mt-3 max-w-2xl font-sans text-sm leading-7 text-brand-dark/68">{savedIdea.excerpt}</p> : null}
-              <div className="mt-5 flex flex-wrap gap-4 font-sans text-sm font-semibold">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setQuestionOverride(`What from “${savedIdea.title || savedIdea.slug}” feels connected to what you are dealing with now?`);
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }}
-                  className="cursor-pointer text-brand-primary underline decoration-brand-primary/30 underline-offset-4"
-                >
-                  Bring this into reflection
-                </button>
-                <Link href={`/insights/${savedIdea.slug}`} className="text-brand-dark/65 underline decoration-brand-dark/20 underline-offset-4">Read again</Link>
+      {cohortEnrollment ? (
+        <section aria-labelledby="program-title">
+          <SectionHeading
+            eyebrow="Your program"
+            title="Your facilitated work, in one place."
+            id="program-title"
+          />
+          <div className="mt-7 grid gap-5 border-y border-brand-dark/12 py-7 md:grid-cols-[1fr_auto] md:items-center md:py-8">
+            <div className="grid grid-cols-[2.75rem_1fr] gap-4">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
+                <CalendarDays className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="font-sans text-xs font-semibold uppercase tracking-[0.15em] text-brand-teal">
+                  {cohortEnrollment.status}
+                </p>
+                <h3 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
+                  {cohortEnrollment.cohort.title}
+                </h3>
+                {cohortEnrollment.next_session ? (
+                  <p className="mt-2 font-sans text-sm leading-7 text-brand-dark/68">
+                    Next: {cohortEnrollment.next_session.title} · {formatSessionDate(cohortEnrollment.next_session.starts_at)}
+                  </p>
+                ) : null}
               </div>
             </div>
-            <Link href="/saved" className="inline-flex items-center gap-2 font-sans text-sm font-semibold text-brand-accent">All saved ideas <ArrowRight className="h-4 w-4" /></Link>
+            <Link
+              href="/modern-caveman"
+              className="inline-flex min-h-11 items-center gap-2 font-sans text-sm font-semibold text-brand-accent transition hover:text-brand-primary"
+            >
+              Open your program
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </section>
       ) : null}
 
-      {overview.latestReflection ? (
-        <section className="border-l-4 border-brand-secondary px-5 py-2">
-          <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">From your previous reflection</p>
-          <p className="mt-3 max-w-3xl font-sans text-base leading-8 text-brand-dark/74">{overview.latestReflection}</p>
+      {overview.savedArticles.length > 0 ? (
+        <section aria-labelledby="saved-title">
+          <div className="flex flex-wrap items-end justify-between gap-5">
+            <SectionHeading
+              eyebrow="Saved for later"
+              title="Ideas you chose to keep."
+              id="saved-title"
+            />
+            <Link
+              href="/saved"
+              className="inline-flex min-h-11 items-center gap-2 font-sans text-sm font-semibold text-brand-accent transition hover:text-brand-primary"
+            >
+              All saved insights
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="mt-7 border-y border-brand-dark/12">
+            {overview.savedArticles.slice(0, 3).map((article) => (
+              <Link
+                key={article.slug}
+                href={`/insights/${article.slug}`}
+                className="group grid gap-3 border-b border-brand-dark/12 py-6 last:border-b-0 md:grid-cols-[2.75rem_1fr_auto] md:items-start md:gap-5"
+              >
+                <span className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
+                  <Bookmark className="h-5 w-5" />
+                </span>
+                <span>
+                  <strong className="block text-xl leading-tight text-brand-dark transition group-hover:text-brand-primary md:text-2xl">
+                    {article.title || article.slug}
+                  </strong>
+                  {article.excerpt ? (
+                    <span className="mt-2 block max-w-3xl font-sans text-sm leading-7 text-brand-dark/66">
+                      {article.excerpt}
+                    </span>
+                  ) : null}
+                </span>
+                <ArrowRight className="hidden h-4 w-4 text-brand-accent transition group-hover:translate-x-1 md:block" />
+              </Link>
+            ))}
+          </div>
         </section>
       ) : null}
-
-      <section className="flex flex-wrap items-center justify-between gap-5 border-t border-brand-dark/12 pt-6 font-sans text-sm">
-        <div className="text-brand-dark/62">
-          <span>{membershipActive ? "Membership active" : "Free access"}</span>
-          {cohortLabel ? <span> · {cohortLabel}</span> : null}
-        </div>
-        <div className="flex flex-wrap gap-4 font-semibold">
-          <button onClick={() => onOpenProfileView("reflections")} className="cursor-pointer text-brand-dark hover:text-brand-primary">Past reflections</button>
-          <button onClick={() => onOpenProfileView("preferences")} className="cursor-pointer text-brand-dark hover:text-brand-primary">Preferences</button>
-          <button onClick={() => onOpenProfileView("settings")} className="cursor-pointer text-brand-dark hover:text-brand-primary">Account</button>
-        </div>
-      </section>
     </div>
   );
 }
 
-const ThreadItem = ({ icon, label, text }: { icon: React.ReactNode; label: string; text: string }) => (
-  <div className="grid grid-cols-[2rem_1fr] gap-3 border-t border-brand-dark/10 pt-4 first:border-t-0 first:pt-0">
-    <span className="text-brand-accent [&>svg]:h-5 [&>svg]:w-5">{icon}</span>
-    <div>
-      <p className="font-sans text-xs font-semibold uppercase tracking-[0.13em] text-brand-teal">{label}</p>
-      <p className="mt-1 font-sans text-sm leading-6 text-brand-dark/72">{text}</p>
-    </div>
+type WorkItem = AccountContinuation & {
+  icon: ReactNode;
+  status: string;
+};
+
+const buildWorkItems = (overview: WorkOverview): WorkItem[] => [
+  {
+    kind: "practice",
+    href: "/practice",
+    label: overview.practice ? "Your current Practice" : "Practice",
+    status: overview.practice?.moment || overview.practice?.action || "No current Practice yet.",
+    text: "Understand one recurring behaviour and choose a response that fits it.",
+    icon: <Layers3 />,
+  },
+  {
+    kind: "microchallenge",
+    href: "/tools/microchallenges",
+    label: overview.activeChallengeTitle || "Microchallenges",
+    status: overview.activeChallengeTitle
+      ? overview.activeChallengeLoggedToday
+        ? "Today’s repetition is logged."
+        : "Your current experiment is ready to continue."
+      : overview.challengeCount > 0
+        ? `${overview.challengeCount} ${overview.challengeCount === 1 ? "experiment" : "experiments"} in your history.`
+        : "No active experiment.",
+    text: "Try a small behaviour repeatedly and see what changes.",
+    icon: <FlaskConical />,
+  },
+  {
+    kind: "spots",
+    href: "/tools/spots",
+    label: "Spots",
+    status: overview.latestSpot?.description || (
+      overview.spotCount > 0
+        ? `${overview.spotCount} ${overview.spotCount === 1 ? "spot" : "spots"} recorded.`
+        : "No spots recorded yet."
+    ),
+    text: "Keep a concrete record of situations and automatic responses.",
+    icon: <NotebookPen />,
+  },
+];
+
+const PrimaryContinuation = ({
+  continuation,
+}: {
+  continuation: AccountContinuation;
+}) => (
+  <div className="bg-brand-dark px-6 py-8 text-white md:px-8 md:py-10">
+    <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-secondary">
+      One next step
+    </p>
+    <h3 className="mt-4 text-3xl font-bold leading-tight md:text-4xl">
+      {continuation.label}
+    </h3>
+    <p className="mt-4 max-w-xl font-sans text-sm leading-7 text-white/72">
+      {continuation.text}
+    </p>
+    <Link
+      href={continuation.href}
+      className="mt-7 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand-secondary px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark transition hover:bg-white"
+    >
+      Continue
+      <ArrowRight className="h-4 w-4" />
+    </Link>
   </div>
 );
 
-const StateBlock = ({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) => (
-  <div className="rounded-xl border border-brand-dark/12 bg-white p-8">
+const WorkLink = ({ item }: { item: WorkItem }) => (
+  <Link
+    href={item.href}
+    className="group grid grid-cols-[2.5rem_1fr_auto] gap-4 border-b border-brand-dark/12 py-6 last:border-b-0"
+  >
+    <span className="text-brand-accent [&>svg]:h-5 [&>svg]:w-5">{item.icon}</span>
+    <span>
+      <strong className="block font-sans text-sm text-brand-dark transition group-hover:text-brand-primary">
+        {item.label}
+      </strong>
+      <span className="mt-1 block font-sans text-sm leading-6 text-brand-dark/68">
+        {item.status}
+      </span>
+    </span>
+    <ArrowRight className="h-4 w-4 text-brand-accent transition group-hover:translate-x-1" />
+  </Link>
+);
+
+const SectionHeading = ({
+  eyebrow,
+  title,
+  id,
+}: {
+  eyebrow: string;
+  title?: string;
+  id: string;
+}) => (
+  <div className="max-w-3xl">
+    {title ? (
+      <>
+        <p className="page-eyebrow text-brand-teal">{eyebrow}</p>
+        <h2 id={id} className="mt-3 text-3xl font-bold leading-[1.08] text-brand-dark md:text-4xl">
+          {title}
+        </h2>
+      </>
+    ) : (
+      <h2 id={id} className="page-eyebrow text-brand-teal">
+        {eyebrow}
+      </h2>
+    )}
+  </div>
+);
+
+const StateBlock = ({
+  icon,
+  title,
+  text,
+  action,
+}: {
+  icon: ReactNode;
+  title: string;
+  text: string;
+  action?: ReactNode;
+}) => (
+  <div className="border-y border-brand-dark/12 bg-white py-8" aria-live="polite">
     <span className="text-brand-accent [&>svg]:h-6 [&>svg]:w-6">{icon}</span>
     <h2 className="mt-4 text-3xl font-bold leading-tight">{title}</h2>
     <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/68">{text}</p>
+    {action ? <div className="mt-6">{action}</div> : null}
   </div>
 );
+
+const formatSessionDate = (value: string) =>
+  new Intl.DateTimeFormat("en-IN", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(value));

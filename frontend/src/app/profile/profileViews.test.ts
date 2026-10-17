@@ -4,7 +4,7 @@ import { profileViewFromHash } from "./profileViews";
 describe("profileViewFromHash", () => {
   it.each([
     ["", "evidence"],
-    ["#reflections", "reflections"],
+    ["#reflections", "evidence"],
     ["#preferences", "preferences"],
     ["#account", "settings"],
     ["#unknown", "evidence"],

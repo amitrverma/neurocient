@@ -42,7 +42,7 @@ Neurocient currently serves two related but different entry paths.
 
 ### Personal path
 
-Landing → Inner Caveman Scan → public result → Spot the Caveman → relevant
+Landing → Inner Caveman Scan → answer-based reflections → saved My Inner Caveman and Spot → relevant
 Practice or microchallenge → reinforcement and evidence in Profile
 
 Inner Caveman 101 and Insights support understanding at any point. They are not
@@ -64,8 +64,8 @@ journey.
 | --- | --- | --- | --- |
 | `/` | “Why do I keep doing this?” | Establish the lived problem, product promise, and Inner Caveman lens | Start the Scan |
 | `/diagnostics/caveman-scan` | “Can I see this in myself?” | Recognition through concrete situations; not a personality test | Public result |
-| `/diagnostics/caveman-scan/result` | “What do my answers mean, and what does Neurocient do differently?” | Fulfil the Scan promise, explain the approach, and offer a real product entry | Spot the Caveman |
-| `/my-caveman` | “What did my Scan show?” | Existing deeper Scan portrait route; subordinate to the signed-in Profile rather than a separate product stage | Profile or one relevant next move |
+| `/diagnostics/caveman-scan/result` | “Where did my Inner Caveman show up?” | Reflect selected answers without inferring a type or pattern | Save and continue to My Inner Caveman |
+| `/my-caveman` | “What have I noticed in the Scan and real life?” | Saved answer reflections and lived evidence; not a diagnostic portrait | Record a real-life situation or take one relevant next step |
 | `/inner-caveman` | “What is the Inner Caveman?” | Shared orientation and usable mental model | Scan, relevant insight, or Practice |
 | `/insights` | “Why might this behaviour keep happening?” | Find explanations through lived questions; not primarily a publication feed | Relevant article, then a matched next step |
 | `/insights/[slug]` | “Help me understand this one behaviour.” | A focused explanation that reduces self-blame without inventing agency | Spot, Practice, or related explanation |
@@ -138,8 +138,6 @@ concepts whose exposure must be earned by the experience.
 
 ### Critical product coherence
 
-- The Scan result describes Practice as in development although `/practice` is
-  already a working guided experience.
 - Article limits are incremented consistently for anonymous and signed-in users,
   but remain browser-local rather than authoritative account usage. They should
   move to persisted account enforcement with the payment integration.

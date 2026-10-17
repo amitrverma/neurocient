@@ -1,5 +1,78 @@
 # Practice Decisions
 
+## 2026-10-17: Scan personalisation stops at the person's selected answers
+
+The Scan brings the Inner Caveman into view; it does not map a drive, type,
+recurring movement, or inferred pattern to the person. Personalisation on the
+result comes only from scenarios in which the person's selected answer was
+authored as an Inner Caveman response.
+
+The public result shows a stable, varied sample of those exact answers. Each item
+contains the selected response, its direct reflection, the more deliberate
+contrast from the same scenario, and one question. The sample may vary with the
+completed answer set but does not change on refresh. If every selected answer was
+deliberate, the result says so without manufacturing a hidden problem.
+
+The full result remains available before authentication. **Save to My Inner
+Caveman** creates continuity rather than unlocking an analysis. `/my-caveman`
+uses the same narrative and UI foundation, exposes the fuller set of relevant
+Scan reflections, and leads into recording situations from real life. It is a
+developing record of what the person chose, noticed, understood, and tried—not a
+deeper diagnostic portrait.
+
+My Inner Caveman is available after login from the account menu and the My Home
+continuation area when a completed Scan exists. It uses the canonical
+`/tools/spots` surface for real-life capture; `/my-caveman/spot` is retained only
+as a compatibility redirect. This avoids creating a second Spots product.
+
+The signed-in `/my-caveman` surface does not repeat the long, full-width public
+result composition. It uses the same compact workspace grammar as My Home: a
+standard account header, one dark continuation panel, adjacent next actions,
+bordered work rows, and progressive disclosure for the full Scan history. The
+public result and saved workspace remain narratively continuous without being
+visually identical pages.
+
+New saved sessions retain selected option and reflection identities but no longer
+generate or persist a drive-based portrait. This decision supersedes prior Scan
+result decisions that called for recurring protective moves, supported drives,
+primary or secondary patterns, or a deeper authenticated diagnosis.
+
+## 2026-10-17: The landing page reaches the complete platform before its final decision
+
+The landing page follows one visible narrative: recognise the repeated difficulty,
+see why familiar outside fixes do not last, understand the role of automatic
+processing, meet the Inner Caveman model, and then see how Neurocient's Insights,
+Tools, Practice, Programs, and IKEA + Reinforcement work together.
+
+The Inner Caveman overview does not end with a competing Scan call to action. The
+recognise-understand-respond material remains in the main reading flow, while the
+research evidence cards are left to the full Inner Caveman explanation rather than
+interrupting the landing-page journey. The decisive Scan invitation remains at the
+end of the platform path, while the hero may continue to offer the Scan as a direct
+entry.
+
+Optional routes must not interrupt the main mobile reading order. The Insights
+side path therefore follows the transition into the usual-response argument in
+document order, even when both elements appear alongside one another on desktop.
+
+## 2026-10-17: Inner Caveman is the canonical product name
+
+User-facing product language always uses “Inner Caveman.” The awareness tool is
+“Spot the Inner Caveman” or, where the grammar is personal, “Spot Your Inner
+Caveman.” Shortened forms such as “Spot the Caveman,” “Caveman Spot,” and
+“Caveman Spotting” are not product labels. Existing route, API, component, and
+database identifiers may retain legacy names where changing them adds no user value.
+
+## 2026-10-17: Scan entry explains the experience before questions begin
+
+Landing-page Scan calls to action use “Take the 5-minute Inner Caveman Scan”
+and lead to the existing Scan introduction. Entering the route does not restore
+an unfinished session directly into a question. The introduction briefly explains
+the format and outcome; a separate action begins or resumes the situations.
+
+This preserves saved answers while giving every landing-page visitor a clear,
+low-pressure transition into the Scan.
+
 ## 2026-10-14: The product journey does not replace the navbar taxonomy yet
 
 The primary product model is recognition, understanding, application,
@@ -43,7 +116,7 @@ Correction after review: the opening is not a synthesis of recurring behaviours 
 
 The result remains visually continuous with the wider product. It uses the Scan's `caveman-scan-page` typography context and the product's full-width, background-separated sections. Content within those bands uses open layouts and simple rules; result sections are not placed inside invented rounded, bordered containers. Buttons and accents reuse existing product treatments.
 
-The remainder introduces a concrete IKEA example, optional sourced science, and the roles of Spot the Caveman, microchallenges, and Practice (in development). The product CTA uses the existing AuthModal and `/tools/spots`; authenticated users continue directly. Existing account portrait routes remain available but are not part of this handoff, and the result does not claim an account save. The current contract is in `../scan/RESULT_APPROACH.md` and supersedes the earlier result-pattern interpretation for this public screen.
+The remainder introduces a concrete IKEA example, optional sourced science, and the roles of Spot the Inner Caveman, microchallenges, and Practice (in development). The product CTA uses the existing AuthModal and `/tools/spots`; authenticated users continue directly. Existing account portrait routes remain available but are not part of this handoff, and the result does not claim an account save. The current contract is in `../scan/RESULT_APPROACH.md` and supersedes the earlier result-pattern interpretation for this public screen.
 
 ## 2026-09-19: Evolved automatic processing and the result's product role
 
@@ -51,7 +124,7 @@ The Inner Caveman is a system operating according to evolved tendencies without 
 
 Product copy must be concrete and direct. Avoid poetic or therapeutic framing around "attention", "protection", "flow", "moment", and similar abstractions. Describe the situation, behaviour, and automatic response. Use "automatic processing" without implying that all the behaviours discussed belong to the anatomical autonomic nervous system.
 
-The Scan result is the bridge between the landing page and the product: it connects the person's answers to an understanding of automatic behaviour and then explains Neurocient's approach and relevant tools. Do not classify the person by a dominant drive, force a problem onto their answers, or replace their result with a generic sales page. Explain IKEA and reinforcement in relation to behaviour change, distinguish the purposes of Spot the Caveman and microchallenges, and acknowledge that Practice is in development.
+The Scan result is the bridge between the landing page and the product: it connects the person's answers to an understanding of automatic behaviour and then explains Neurocient's approach and relevant tools. Do not classify the person by a dominant drive, force a problem onto their answers, or replace their result with a generic sales page. Explain IKEA and reinforcement in relation to behaviour change, distinguish the purposes of Spot the Inner Caveman and microchallenges, and acknowledge that Practice is in development.
 
 This clarification supersedes older protector framing and abstract copy examples. Existing evidence identifiers and historical decisions remain as implementation/history references, not copy guidance. Result sequencing, science presentation, and authentication placement remain open design questions; the preceding discussion was exploratory, not approval of a specific design.
 
@@ -419,7 +492,7 @@ The previous Practice MVP has been removed as an implementation target.
 Reason:
 
 - It was a standalone localStorage flow with challenge content in `frontend/src/content/challenges/**`.
-- The repo already has auth, subscription/membership, user progress, microchallenges, Spot the Caveman, insight access, user preferences, WhatsApp utilities, nudges, and an IKEA worksheet/tracker.
+- The repo already has auth, subscription/membership, user progress, microchallenges, Spot the Inner Caveman, insight access, user preferences, WhatsApp utilities, nudges, and an IKEA worksheet/tracker.
 - Rebuilding Practice as a parallel stack would duplicate product mechanisms that already exist.
 - The next Practice system needs to be adaptive and connected to authenticated reinforcement after the free first session.
 

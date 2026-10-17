@@ -7,6 +7,7 @@ import {
   Bookmark,
   CalendarDays,
   FlaskConical,
+  Eye,
   Layers3,
   LoaderCircle,
   NotebookPen,
@@ -189,6 +190,14 @@ type WorkItem = AccountContinuation & {
 };
 
 const buildWorkItems = (overview: WorkOverview): WorkItem[] => [
+  ...(overview.hasScan ? [{
+    kind: "caveman" as const,
+    href: "/my-caveman",
+    label: "My Inner Caveman",
+    status: "Your completed Scan and answer-based reflections.",
+    text: "Return to where your Inner Caveman appeared and add evidence from real life.",
+    icon: <Eye />,
+  }] : []),
   {
     kind: "practice",
     href: "/practice",

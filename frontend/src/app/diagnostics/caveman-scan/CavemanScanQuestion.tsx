@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import type { ScanQuestion, ScanOption } from "./questionsBank";
 import CavemanScanFeedback from "./CavemanScanFeedback";
@@ -35,10 +35,10 @@ const CavemanScanQuestion = ({
     setFeedbackOpen(false);
   }, [question.id]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (feedbackOpen) return;
-    scenarioRef.current?.focus({ preventScroll: true });
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    scenarioRef.current?.focus({ preventScroll: true });
   }, [feedbackOpen, question.id]);
 
   return (
@@ -74,8 +74,11 @@ const CavemanScanQuestion = ({
         </div>
       </header>
 
-      <section className="mx-auto w-full max-w-5xl px-5 pb-8 pt-4 sm:px-6 sm:pb-12 sm:pt-6 lg:pb-14 lg:pt-7">
-        <article className="mx-auto max-w-3xl rounded-lg border border-brand-dark/10 bg-[var(--surface-white)] p-5 shadow-[0_14px_36px_rgba(4,42,43,0.055)] sm:p-6 lg:p-7">
+      <section className="mx-auto w-full max-w-5xl px-5 pb-8 pt-8 sm:px-6 sm:pb-12 sm:pt-10 lg:pb-14 lg:pt-12">
+        <article className="relative mx-auto max-w-3xl rounded-lg border border-brand-dark/10 bg-[var(--surface-white)] p-5 shadow-[0_14px_36px_rgba(4,42,43,0.055)] sm:p-6 lg:p-7">
+          <span className="absolute left-5 top-0 -translate-y-1/2 bg-[var(--surface-paper)] px-2 font-sans text-[0.65rem] font-bold uppercase tracking-[0.16em] text-brand-teal sm:left-6">
+            Situation {String(progress).padStart(2, "0")}
+          </span>
           {question.scene && question.prompt ? (
             <div>
               <div className="space-y-3 sm:space-y-3.5">

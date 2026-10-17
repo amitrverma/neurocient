@@ -1,28 +1,60 @@
-# Scan result: first implementation
+# Scan result and My Inner Caveman
 
-## Contract (2026-09-19)
+## Contract (2026-10-17)
 
-The approved sequence is landing page -> Scan -> public result -> Neurocient approach -> login -> product. Reading remains available through existing guest limits and authentication gates. This remains a reviewable first design.
+The Scan exists to bring the Inner Caveman into view through situations the
+person recognises. Its result must not infer a drive, type, trait, recurring
+movement, or person-level pattern from the answer set.
 
-The opening result acknowledges what the person has already seen throughout the Scan: the Inner Caveman in ordinary life. It continues that recognition instead of announcing it as a new finding. It is not a behaviour-pattern report.
+Personalisation comes only from the person's selected answers:
 
-- If any selected answer reflects an automatic response, acknowledge that the person saw the Inner Caveman in everyday life.
-- If every selected answer reflects deliberate choice, say so clearly, acknowledge the good result, and offer a comfortable exit.
-- Explain the Inner Caveman as evolved automatic processing operating alongside deliberate reasoning.
-- Do not select a dominant drive, infer a personality, rank responses, show a rationality score, or turn planning, organisation, discipline, or another meaningful behaviour into the problem.
-- Do not repeat the selected scenarios or manufacture a connection between them. The Scan already presented and interpreted those situations.
-- After establishing the result, explain why correct advice may remain incomplete, then introduce IKEA, reinforcement, and the existing product.
-- Introduce Spot the Caveman and microchallenges as available tools and Practice as in development.
-- The product CTA uses the existing AuthModal and continues to `/tools/spots`. Already authenticated users continue directly. Dismissing login keeps the result. Reading links retain existing limits.
+> completed Scan -> selected Inner Caveman answers -> answer-specific
+> reflections -> contrast with the more deliberate response -> save and
+> continue in My Inner Caveman
 
-## Interpretation boundary
+## Public result
 
-Canonical option IDs determine whether a response is automatic or deliberate. Positional label lookup exists only for legacy answers without IDs. Stored interpretation fields are not trusted. Incomplete, unknown, or duplicate-scenario answer sets are rejected rather than interpreted.
+- Identify scenarios in which the selected option is authored as an Inner
+  Caveman response.
+- Select a small, varied sample of those exact answers for reflection.
+- Keep the sample stable for the completed Scan; it may vary between answer
+  sets but must not change merely because the page refreshed.
+- For each reflection, show the situation, the answer selected, its direct
+  mirror statement, the authored deliberate contrast, and one question.
+- Do not connect one selected answer to another or claim a shared cause.
+- Do not calculate a score, rank, dominant drive, profile, or prediction.
+- If no Inner Caveman response was selected, say so honestly and do not invent
+  reflection material.
 
-The result uses the minimum distinction necessary for the product promise: Inner Caveman present or not found in these situations. Internal counts are not shown. A single automatic answer is enough to establish presence; this does not make it a dominant tendency or describe the person as a type.
+The complete public result remains visible before authentication. Authentication
+creates continuity; it does not unlock the meaning of the result.
+
+## My Inner Caveman
+
+`/my-caveman` is the logged-in continuation of the same experience, not a deeper
+diagnostic report. It shows the fuller set of relevant Scan answers and can grow
+through situations the person records from real life.
+
+The conceptual sequence is:
+
+> what I chose in the Scan -> what I notice in real life -> what I understand ->
+> what I try
+
+The main public action is **Save to My Inner Caveman**. After authentication the
+completed Scan is saved and the user continues to `/my-caveman` with the same
+visual and narrative foundation. From there, **Record a real-life situation**
+continues to the canonical Spots tool at `/tools/spots`.
+
+## Persistence
+
+New saved sessions use `selected-response-1` and `answer-reflections-1`. The
+stored interpretation contains canonical selected option IDs and the stable
+reflection IDs only. It does not persist a generated drive or person-level
+portrait. Existing database field names remain a compatibility detail.
 
 ## Verification
 
-Focused tests cover presence and absence, a single automatic response among deliberate responses, duplicate answers, stale labels, unknown IDs, result copy, CTA behaviour, login dismissal, signed-in continuation, retake, malformed state recovery, and preservation of an unfinished Scan. Targeted lint and the production build are required.
-
-Browser validation remains pending because the implementation session exposed no connected browser. Component and route tests use a mocked authentication boundary and do not certify real login, backend persistence, or responsive appearance.
+Focused tests must prove that reflections come only from selected Inner Caveman
+answers, the public sample remains stable, deliberate-only answers do not create
+a false result, the saved view exposes the fuller set, login dismissal preserves
+the public result, and authenticated continuation reaches `/my-caveman`.

@@ -10,6 +10,7 @@ const initialOverview: WorkOverview = {
   challengeCount: 0,
   activeChallenge: false,
   hasPractice: false,
+  hasScan: false,
   savedArticles: [],
   latestSpot: null,
   activeChallengeTitle: null,
@@ -42,6 +43,7 @@ export default function useWorkOverview(active: boolean) {
         readJson("/api/spots"),
         readJson("/api/challenges/my"),
         readJson("/api/practice/loops"),
+        readJson("/api/caveman-scan/sessions/latest"),
       ]);
       if (!mounted) return;
       if (results.some((result) => result.status === "rejected")) {
@@ -49,7 +51,7 @@ export default function useWorkOverview(active: boolean) {
         return;
       }
 
-      const [saved, spots, challenges, practice] = results.map(
+      const [saved, spots, challenges, practice, scan] = results.map(
         (result) => result.status === "fulfilled" ? result.value : null,
       );
       const assigned = Array.isArray(challenges) ? challenges : [];
@@ -64,6 +66,7 @@ export default function useWorkOverview(active: boolean) {
         challengeCount: assigned.length,
         activeChallenge: Boolean(activeChallenge),
         hasPractice: Boolean(practice?.id),
+        hasScan: Boolean(scan?.id || scan?.responses?.length),
         savedArticles,
         latestSpot: spotEntries[0] ?? null,
         activeChallengeTitle: activeChallenge?.title ?? null,

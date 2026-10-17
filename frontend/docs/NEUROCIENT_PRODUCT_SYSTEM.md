@@ -207,7 +207,25 @@ The existing repository capabilities should be understood as parts of one journe
 
 The repeating product loop is:
 
-Modern moment → protective meaning → recognition → understanding → environmental or identity shift → tiny action → reinforcement → real-life evidence
+Modern moment → automatic weighting → recognition → understanding → environmental or identity shift → tiny action → reinforcement → real-life evidence
+
+## Public Landing Page Entry (2026-10-17)
+
+The landing page should preserve Neurocient's emotional narrative—wanting more from life, knowing what would help, struggling to do it, and beginning to blame oneself—without making visitors complete a long conceptual lesson before they can understand the product.
+
+Neurocient should be identifiable from the first screen as a behaviour-change platform for the gap between knowing and doing. Recognition should be followed quickly by a useful platform entry rather than treated as an end in itself.
+
+The public entry model is:
+
+1. **Emotional promise:** You want more from your one life.
+2. **Recognition:** Familiar situations show the knowing-doing gap without shame.
+3. **Explanation:** Evolved automatic processing can give modern signals disproportionate weight.
+4. **Personal starting point:** The Inner Caveman Scan reflects how this may show up in the visitor's own life.
+5. **Connected product:** Insights, Tools, Practice, Reinforcement, and Programs provide different ways to understand and work with what the visitor notices.
+
+The Scan is the recommended starting point for someone who is unsure where to begin, but it is not a compulsory gate. A visitor may enter through an Insight, a Tool, Practice, or a Program when that route already matches the need they recognise.
+
+The landing page introduces the Inner Caveman briefly and links to the complete guide for optional depth. It presents IKEA + Reinforcement as the method inside guided Practice rather than requiring visitors to learn the framework before they understand the product. Access and account conditions are disclosed on the relevant product surface, not explained as part of the landing-page narrative.
 
 ## Role Of Existing Systems
 

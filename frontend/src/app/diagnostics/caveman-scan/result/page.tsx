@@ -62,7 +62,7 @@ export default function CavemanScanResultPage() {
         ready={ready}
         onUnlock={() => {
           if (!ready) return;
-          if (user) router.push("/tools/spots");
+          if (user) router.push("/my-caveman");
           else setShowAuth(true);
         }}
       />
@@ -71,9 +71,9 @@ export default function CavemanScanResultPage() {
         onClose={() => setShowAuth(false)}
         onSuccess={() => {
           setShowAuth(false);
-          router.push("/tools/spots");
+          router.push("/my-caveman");
         }}
-        context="start recording real-life evidence"
+        context="save your Inner Caveman portrait"
       />
     </>
   );

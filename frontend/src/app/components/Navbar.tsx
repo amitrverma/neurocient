@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type React from "react";
-import { Bell, Bookmark, CreditCard, LogOut, Menu, Settings, ShieldCheck, UserRound, X } from "lucide-react";
+import { Bell, Bookmark, CreditCard, Eye, LogOut, Menu, Settings, ShieldCheck, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -145,6 +145,13 @@ const Navbar = () => {
                         Saved ideas
                       </AccountLink>
                       <AccountLink
+                        href="/my-caveman"
+                        icon={<Eye className="h-4 w-4" />}
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        My Inner Caveman
+                      </AccountLink>
+                      <AccountLink
                         href="/membership"
                         icon={<CreditCard className="h-4 w-4" />}
                         onClick={() => setShowDropdown(false)}
@@ -248,6 +255,9 @@ const Navbar = () => {
                 </Link>
                 <Link href="/saved" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
                   Saved ideas
+                </Link>
+                <Link href="/my-caveman" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
+                  My Inner Caveman
                 </Link>
                 <Link href="/membership" onClick={closeMobile} className="rounded-md px-3 py-3 hover:bg-brand-dark/5">
                   Membership

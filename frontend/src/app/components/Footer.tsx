@@ -24,7 +24,7 @@ const footerGroups = [
     title: "Practice",
     links: [
       { href: "/practice", label: "Guided Practice" },
-      { href: "/tools/spots", label: "Spot the Caveman" },
+      { href: "/tools/spots", label: "Spot the Inner Caveman" },
       { href: "/tools/microchallenges", label: "Microchallenges" },
     ],
   },

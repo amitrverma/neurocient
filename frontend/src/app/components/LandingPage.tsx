@@ -3,7 +3,7 @@ import StrugglesSection from "./landing/StrugglesSection";
 import ModernFixesSection from "./landing/ModernFixesSection";
 import PerspectiveSection from "./landing/PerspectiveSection";
 import InnerCavemanSection from "./landing/InnerCavemanSection";
-import CavemanScanSection from "./landing/CavemanScanSection";
+import NeurocientSystemSection from "./landing/NeurocientSystemSection";
 
 export default function LandingPage() {
   return (
@@ -13,7 +13,7 @@ export default function LandingPage() {
       <ModernFixesSection />
       <PerspectiveSection />
       <InnerCavemanSection />
-      <CavemanScanSection />
+      <NeurocientSystemSection />
     </main>
   );
 }

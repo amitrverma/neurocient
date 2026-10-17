@@ -86,7 +86,7 @@ const CavemanSpot = ({
   <aside className="not-prose my-2 rounded-lg border border-brand-accent bg-white px-4 py-3 text-brand-dark">
     <div className="flex items-center">
       <h3 className="font-sans text-brand-accent">
-        Caveman Spot
+        Spot the Inner Caveman
       </h3>
     </div>
 

@@ -38,22 +38,22 @@ describe("result route handoff", () => {
   it("keeps a guest result after dismissing login and enters the product after success", async () => {
     saveResult();
     render(<ResultPage />);
-    fireEvent.click(await screen.findByRole("button", { name: "Log in to get started" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Save to My Inner Caveman" }));
     expect(screen.getByRole("dialog")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Dismiss login" }));
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(window.localStorage.getItem(CAVEMAN_SCAN_STORAGE_KEY)).not.toBeNull();
     expect(session.push).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Log in to get started" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save to My Inner Caveman" }));
     fireEvent.click(screen.getByRole("button", { name: "Complete test login" }));
-    expect(session.push).toHaveBeenCalledWith("/tools/spots");
+    expect(session.push).toHaveBeenCalledWith("/my-caveman");
   });
 
   it("sends an authenticated reader directly to the same product destination", async () => {
     saveResult(); session.user = { id: "test-user" };
     render(<ResultPage />);
-    fireEvent.click(await screen.findByRole("button", { name: "Open Spot the Caveman" }));
-    expect(session.push).toHaveBeenCalledWith("/tools/spots");
+    fireEvent.click(await screen.findByRole("button", { name: "Continue to My Inner Caveman" }));
+    expect(session.push).toHaveBeenCalledWith("/my-caveman");
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 

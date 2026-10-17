@@ -16,7 +16,7 @@ const weeks = [
       "Begin mapping the friction between how you want to show up and how you actually do",
     ],
     tools: [
-      "“Spot Your Caveman” worksheet",
+      "“Spot Your Inner Caveman” worksheet",
       "Physical + mental behavior scans",
       "Daily nudges begin after the session",
     ],

@@ -68,13 +68,13 @@ Avoid "attention", "protection", "flow", "moment", and similar poetic or therape
 
 "Automatic processing" is the product term for operation without deliberate choice. Do not turn the description of an autonomic system into a claim that these behaviours are all functions of the anatomical autonomic nervous system.
 
-Older terms below such as "protective move" and Watchtower, and existing identifiers such as `ProtectiveMove`, describe the legacy evidence model. They do not establish a protective purpose or prescribe user-facing language. They are not used to generate the public result headline; any schema migration is separate implementation work.
+Older terms below such as "protective move" and Watchtower, and existing identifiers such as `ProtectiveMove`, describe the legacy evidence model. They do not establish a protective purpose or prescribe user-facing language. Any schema migration is separate implementation work.
 
 ## Result As The Bridge To The Product
 
-The result must complete the landing page's argument: establish whether the Inner Caveman appeared in the answers, explain automatic processing alongside deliberate reasoning, and then connect that understanding to IKEA, reinforcement, and the available tools. It must not classify the person by a dominant drive or manufacture a problem to justify a product recommendation.
+The result must complete the landing page's argument by returning the person to the exact situations where their answers brought the Inner Caveman into view, then connecting that recognition to the available platform. It must not infer a drive, recurring response, or person-level pattern from the answer set.
 
-Explain Spot the Caveman and microchallenges by what they let the person do. Describe Practice as in development. The first result implementation is defined in `RESULT_APPROACH.md`: public recognition and product explanation, then login to use the product. Content remains accessible within the existing guest reading limits before login is requested.
+The current result implementation is defined in `RESULT_APPROACH.md`: answer-based reflections and a practical product explanation come before login. Practice is live; do not describe it as in development. Content remains accessible within the existing guest reading limits before login is requested.
 
 ## Experience Model
 
@@ -177,13 +177,13 @@ Never add unnatural answer choices so one scenario can cover all five Watchtower
 
 Each option may store a primary evidence target, evidence strength, an optional secondary target only when both concerns are genuinely present, and a short internal rationale.
 
-One answer is evidence, not a conclusion. The portrait must emerge from protective moves repeated across the 12 moments and represent mixed or weak evidence honestly.
+One answer is a concrete reflection point, not evidence for a person-level conclusion. Do not aggregate answers into a drive or portrait.
 
 Watchtower names and mappings remain internal unless a public experience deliberately teaches and earns the metaphor.
 
-## Legacy Portrait Evidence Model
+## Legacy Evidence Metadata
 
-The evidence model below remains available to older authenticated portrait surfaces. It does not define the public result narrative. The current public result uses only whether an answer reflects automatic processing or deliberate choice; see `RESULT_APPROACH.md`.
+The metadata below remains attached to authored options for compatibility with older stored sessions. The current result and My Inner Caveman experiences do not aggregate it into a portrait, drive, or person-level interpretation. New product behavior may use only the canonical option identity and direct mirror statement.
 
 The result must not present a Caveman answer count, Caveman-versus-Modern percentage, or rationality score. Internal editorial rules for selecting an appropriate result are documented in `RESULT_APPROACH.md`; they do not establish psychological categories. A selected option records several distinct layers:
 
@@ -208,7 +208,7 @@ The current protective-move vocabulary is:
 
 Do not treat a flexible response as proof that the Caveman or a Watchtower is absent. It describes what happened in one moment.
 
-A portrait should normally require the same protective move to recur across at least two meaningfully different scenarios. Scenario order must never determine which move is called primary. Watchtower absence must not be interpreted when the scenario set did not adequately sample that concern.
+Do not use recurrence across scenarios to name a primary move, supported drive, or absent drive. Watchtower and protective-move fields are legacy authoring metadata, not current result logic.
 
 The canonical option-level map lives in `frontend/src/app/diagnostics/caveman-scan/scanEvidence.ts`. Update it whenever scenario options change. The scan validates that every active option has a corresponding evidence entry.
 
@@ -216,18 +216,18 @@ The canonical option-level map lives in `frontend/src/app/diagnostics/caveman-sc
 
 The result must deliver meaningful recognition before authentication.
 
-The public result states whether the Inner Caveman appeared and introduces Neurocient through IKEA, reinforcement, and the existing tools. It does not repeat selected situations, name a recurring behaviour, or invent a connection between answers. If every answer reflects deliberate choice, the user receives a positive result and a comfortable exit. The result must fulfil the Scan promise before asking for login.
+The public result selects a stable sample only from scenarios where the chosen option is an Inner Caveman response. It reflects the chosen answer, its direct mirror, the deliberate contrast from the same scenario, and one question. It does not connect answers or infer what response is "best supported." If every answer reflects deliberate choice, say so without inventing a hidden problem. The result must fulfil the Scan promise before asking for login.
 
-The product CTA opens the existing authentication modal, then continues to Spot the Caveman at `/tools/spots`. Authenticated users continue directly. Dismissing login preserves the public result. Do not claim the result has been saved to an account when no save has occurred.
+The product CTA opens the existing authentication modal, then continues to `/my-caveman`, whose persistence flow saves the completed answers and stable reflection identities. Authenticated users continue directly. Dismissing login preserves the public result. Do not claim the result has been saved before that persistence flow runs.
 
 Route responsibilities:
 
-- `/diagnostics/caveman-scan` contains the Scan itself;
-- `/diagnostics/caveman-scan/result` contains the public result, the Neurocient approach, and the transition to authentication;
-- `/tools/spots` is the first product destination from this result; and
-- `/my-caveman` contains the authenticated deeper portrait as an ongoing personal product surface.
+- `/diagnostics/caveman-scan` always opens with a short explanation of the Scan before the person starts or resumes the questions;
+- `/diagnostics/caveman-scan/result` contains a stable sample of answer-based reflections, the Neurocient approach, and the transition to saved continuity;
+- `/my-caveman` continues the same experience with the fuller relevant answer set; and
+- `/tools/spots` remains the single tool for real-life evidence capture. The legacy `/my-caveman/spot` URL redirects there.
 
-Do not expand the result inline beneath the Scan. The public result reads and validates the completed local answers using canonical option identities. `/my-caveman` remains an existing account surface, but is not the destination of this first result design. Its older presentation is separate follow-up work. Reading links continue through existing guest limits and login gates; no new entitlement rules are introduced here.
+Do not expand the result inline beneath the Scan. The public result reads and validates the completed local answers using canonical option identities. Reading links continue through existing guest limits and login gates; no new entitlement rules are introduced here.
 
 Never ask a person to create an account merely to discover whether the Scan found anything.
 
@@ -235,14 +235,14 @@ Never ask a person to create an account merely to discover whether the Scan foun
 
 The result must complete the same argument begun on the landing page. Use this order:
 
-1. state whether the Inner Caveman appeared in the selected answers;
-2. explain that deliberate reasoning and evolved automatic processing can both influence behaviour;
-3. clarify that the result does not make planning, organisation, discipline, or rational thought unimportant;
-4. explain why correct advice may remain incomplete when it addresses only what to do;
-5. introduce Neurocient's IKEA and reinforcement approach; and
-6. describe the existing product before asking for login.
+1. state that the Scan brought the Inner Caveman into view without assigning a type;
+2. show a stable sample of the person's exact Inner Caveman answers;
+3. contrast each with the authored deliberate response from the same scenario;
+4. attach one reflection question to each selected situation;
+5. explain how Neurocient carries recognition into real life; and
+6. offer saved continuity only after the complete public result is visible.
 
-Do not replay the selected scenarios or create a personalised headline from an inferred recurring behaviour. The Scan already supplied recognition and alternative readings. The result moves the user from that experience into the shared Inner Caveman explanation and then the product.
+Do not replay full scenarios. Use short mirror statements tied to canonical selected answers. Do not create a personalised headline from a synthesis of the answers.
 
 ## Immediate Reflection
 
@@ -337,6 +337,6 @@ Before approving a scenario, verify:
 9. Does the Inner Caveman contrast add a genuinely new perspective?
 10. Does it reduce shame without excusing or romanticising the behaviour?
 11. Is the science cautious and verifiable?
-12. Will the insight help the user spot the Caveman a little earlier next time?
+12. Will the insight help the user spot the Inner Caveman a little earlier next time?
 
 If any answer is no, revise the scenario before publishing it.

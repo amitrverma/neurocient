@@ -8,6 +8,7 @@ const overview = (updates: Partial<WorkOverview> = {}): WorkOverview => ({
   challengeCount: 0,
   activeChallenge: false,
   hasPractice: false,
+  hasScan: false,
   savedArticles: [],
   latestSpot: null,
   activeChallengeTitle: null,

@@ -5,6 +5,7 @@ export type WorkOverview = {
   challengeCount: number;
   activeChallenge: boolean;
   hasPractice: boolean;
+  hasScan: boolean;
   savedArticles: Array<{ slug: string; title?: string; excerpt?: string }>;
   latestSpot: { date: string; description: string } | null;
   activeChallengeTitle: string | null;
@@ -18,7 +19,7 @@ export type WorkOverview = {
 };
 
 export type AccountContinuation = {
-  kind: "practice" | "microchallenge" | "spots";
+  kind: "practice" | "microchallenge" | "spots" | "caveman";
   href: string;
   label: string;
   text: string;

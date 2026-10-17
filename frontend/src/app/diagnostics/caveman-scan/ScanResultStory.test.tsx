@@ -3,68 +3,70 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import ScanResultStory from "./ScanResultStory";
 import { questionsBank } from "./questionsBank";
+import { buildScanReflections, publicScanReflections } from "./scanReflections";
 
 afterEach(cleanup);
-const answers = (flexible = false) => questionsBank.map((question) => {
-  const option = question.options.find((item) => item.evidence?.optionId === `${question.id}-${flexible ? 5 : 1}`)!;
+const answers = (type: "caveman" | "modern") => questionsBank.map((question) => {
+  const option = question.options.find((item) => item.type === type)!;
   return { ...option, science: option.science ?? null };
 });
 
 describe("Scan result experience", () => {
-  it("establishes the presence of the Inner Caveman before explaining Neurocient", () => {
+  it("reflects a stable sample of the user's actual Inner Caveman answers", () => {
+    const responses = answers("caveman");
+    const sample = publicScanReflections(responses);
     const onUnlock = vi.fn();
-    render(<ScanResultStory responses={answers()} onUnlock={onUnlock} />);
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("You saw your Inner Caveman in everyday life.");
-    expect(screen.getByText(/evolved automatic processing/)).toBeTruthy();
-    expect(screen.queryByText(/changed the angle|look irrational/i)).toBeNull();
-    expect(screen.getByText("Immediate reward")).toBeTruthy();
-    expect(screen.getByText("Low energy and built-up stress")).toBeTruthy();
-    expect(screen.queryByText(answers()[0].label)).toBeNull();
-    expect(screen.getByRole("heading", { name: "Identity" })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "Knowledge" })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "Environment" })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "Action" })).toBeTruthy();
-    expect(screen.getByText("In development")).toBeTruthy();
-    expect(onUnlock).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Log in to get started" }));
+    render(<ScanResultStory responses={responses} onUnlock={onUnlock} />);
+
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("You brought your Inner Caveman into view.");
+    sample.forEach(({ selectedAnswer, question }) => {
+      expect(screen.getByText(selectedAnswer)).toBeTruthy();
+      expect(screen.getByText(question)).toBeTruthy();
+    });
+    expect(screen.getAllByText(/Reflection 0/)).toHaveLength(3);
+    expect(screen.getByText(/not combined them into a diagnosis/i)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Save to My Inner Caveman" }));
     expect(onUnlock).toHaveBeenCalledOnce();
   });
 
-  it("does not turn the answer mix into a dominant-drive or recurring-pattern result", () => {
-    render(<ScanResultStory responses={answers()} onUnlock={vi.fn()} />);
-    expect(screen.queryByText(/Planning and organising/)).toBeNull();
-    expect(screen.queryByText(/primary|dominant/i)).toBeNull();
-    expect(screen.queryByText(/does not rank|does not say which drive|are unimportant/i)).toBeNull();
+  it("does not present a drive, score, type, or person-level synthesis", () => {
+    render(<ScanResultStory responses={answers("caveman")} onUnlock={vi.fn()} />);
+    expect(screen.queryByText(/dominant drive|primary response|your type|your score/i)).toBeNull();
+    expect(screen.getByText(/not a score, a type, or a hidden pattern/i)).toBeTruthy();
   });
 
-  it("offers a comfortable exit when no Inner Caveman response appears", () => {
-    render(<ScanResultStory responses={answers(true)} onUnlock={vi.fn()} />);
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toContain("deliberate choice");
-    expect(screen.getByRole("link", { name: "Finish" }).getAttribute("href")).toBe("/");
-    expect(screen.queryByText("What the Scan found")).toBeNull();
+  it("does not manufacture an Inner Caveman result from deliberate answers", () => {
+    render(<ScanResultStory responses={answers("modern")} onUnlock={vi.fn()} />);
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toContain("more deliberate response");
+    expect(screen.getByText(/We will not invent one/i)).toBeTruthy();
+    expect(screen.queryByText("A few answers to return to")).toBeNull();
   });
 
-  it("shows the Inner Caveman when one selected answer contains an automatic response", () => {
-    const responses = answers(true);
-    responses[0] = answers()[0];
-    render(<ScanResultStory responses={responses} onUnlock={vi.fn()} />);
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("You saw your Inner Caveman in everyday life.");
+  it("shows every relevant Scan answer in the saved My Inner Caveman experience", () => {
+    const responses = answers("caveman");
+    render(<ScanResultStory responses={responses} mode="saved" signedIn onUnlock={vi.fn()} />);
+    expect(screen.getAllByText(/Reflection \d+/)).toHaveLength(buildScanReflections(responses).length);
+    expect(screen.queryByText(/stable selection from your completed Scan/i)).toBeNull();
+    expect(screen.getByRole("button", { name: "Record a real-life situation" })).toBeTruthy();
   });
 
-  it("waits for account readiness and then offers the product to signed-in users", () => {
+  it("waits for account readiness and then continues into My Inner Caveman", () => {
     const onUnlock = vi.fn();
-    const { rerender } = render(<ScanResultStory responses={answers()} ready={false} onUnlock={onUnlock} />);
+    const { rerender } = render(<ScanResultStory responses={answers("caveman")} ready={false} onUnlock={onUnlock} />);
     const pending = screen.getByRole("button", { name: "Checking your account…" }) as HTMLButtonElement;
     expect(pending.disabled).toBe(true);
-    rerender(<ScanResultStory responses={answers()} signedIn onUnlock={onUnlock} />);
-    fireEvent.click(screen.getByRole("button", { name: "Open Spot the Caveman" }));
+    rerender(<ScanResultStory responses={answers("caveman")} signedIn onUnlock={onUnlock} />);
+    fireEvent.click(screen.getByRole("button", { name: "Continue to My Inner Caveman" }));
     expect(onUnlock).toHaveBeenCalledOnce();
   });
 
-  it("keeps scientific detail optional", () => {
-    render(<ScanResultStory responses={answers()} onUnlock={vi.fn()} />);
-    expect(screen.getByText(/The science: habits/).closest("details")?.open).toBe(false);
-    expect(screen.queryByText("Back to Neurocient")).toBeNull();
-    expect(screen.queryByText("Retake the Scan")).toBeNull();
+  it("keeps the platform transition and a comfortable exit available", () => {
+    render(<ScanResultStory responses={answers("caveman")} onUnlock={vi.fn()} />);
+    expect(screen.getByRole("heading", { name: /Knowing the more rational response/i })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Insights" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Tools" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Practice" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Programs" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Return to Neurocient" }).getAttribute("href")).toBe("/");
   });
 });

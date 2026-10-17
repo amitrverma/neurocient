@@ -25,14 +25,17 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
   return (
     <main className="min-h-screen bg-[#f6f5f0] text-brand-dark">
-      <header className="border-b border-brand-dark/10 bg-white px-5 py-4">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-          <Link href="/admin" className="font-sans text-sm font-bold">Neurocient admin</Link>
-          <nav className="flex gap-4 font-sans text-sm font-semibold">
-            <Link href="/admin/cohorts">Cohorts</Link>
-            <Link href="/admin/payments">Payments</Link>
-            <Link href="/admin/audit">Audit</Link>
-            <Link href="/profile">My profile</Link>
+      <header className="border-b border-brand-dark/10 bg-white">
+        <div className="mx-auto max-w-6xl px-5 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <Link href="/admin" className="font-sans text-sm font-bold">Neurocient admin</Link>
+            <Link href="/profile" className="font-sans text-xs font-semibold text-brand-dark/60 hover:text-brand-primary">My profile</Link>
+          </div>
+          <nav aria-label="Admin" className="-mx-2 mt-4 flex gap-1 overflow-x-auto px-2 pb-1 font-sans text-sm font-semibold">
+            {adminLinks.map((link) => {
+              const active = link.href === "/admin" ? pathname === link.href : pathname.startsWith(link.href);
+              return <Link key={link.href} href={link.href} aria-current={active ? "page" : undefined} className={`shrink-0 rounded-full px-3 py-2 transition ${active ? "bg-brand-dark text-white" : "text-brand-dark/68 hover:bg-brand-dark/5 hover:text-brand-dark"}`}>{link.label}</Link>;
+            })}
           </nav>
         </div>
       </header>
@@ -40,3 +43,14 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     </main>
   );
 }
+
+const adminLinks = [
+  { href: "/admin", label: "Overview" },
+  { href: "/admin/users", label: "Accounts" },
+  { href: "/admin/newsletter", label: "Communications" },
+  { href: "/admin/memberships", label: "Memberships" },
+  { href: "/admin/content", label: "Content" },
+  { href: "/admin/cohorts", label: "Cohorts" },
+  { href: "/admin/payments", label: "Payments" },
+  { href: "/admin/audit", label: "Audit" },
+];

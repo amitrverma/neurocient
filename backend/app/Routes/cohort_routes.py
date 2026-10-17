@@ -3,7 +3,7 @@ import json
 import uuid
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -377,36 +377,7 @@ async def admin_cohort_detail(cohort_id: uuid.UUID, _: User = Depends(require_ad
     data["sessions"] = [{
         "id": str(item.id), "title": item.title, "starts_at": item.starts_at.isoformat(),
         "ends_at": item.ends_at.isoformat(), "public_note": item.public_note,
-    } for item in sessions_result.scalars().all()]
-    data["enrollments"] = [{
-        "id": str(item.id), "status": item.status, "email": user.email, "name": user.name,
-        "paid_at": item.paid_at.isoformat() if item.paid_at else None,
-    } for item, user in enrollments_result.all()]
-    data["waitlist"] = [{
-        "id": str(item.id), "status": item.status, "email": user.email, "name": user.name,
-        "joined_at": item.created_at.isoformat(),
-    } for item, user in waitlist_result.all()]
-    return data
-
-
-@router.get("/admin/cohorts/{cohort_id}")
-async def admin_cohort_detail(cohort_id: uuid.UUID, _: User = Depends(require_admin), db: AsyncSession = Depends(get_db)):
-    cohort = await db.get(Cohort, cohort_id)
-    if not cohort:
-        raise HTTPException(status_code=404, detail="Cohort not found")
-    sessions_result = await db.execute(select(CohortSession).where(CohortSession.cohort_id == cohort_id).order_by(CohortSession.sort_order))
-    enrollments_result = await db.execute(
-        select(CohortEnrollment, User).join(User, User.id == CohortEnrollment.user_id)
-        .where(CohortEnrollment.cohort_id == cohort_id).order_by(CohortEnrollment.created_at)
-    )
-    waitlist_result = await db.execute(
-        select(CohortWaitlistEntry, User).join(User, User.id == CohortWaitlistEntry.user_id)
-        .where(CohortWaitlistEntry.cohort_id == cohort_id).order_by(CohortWaitlistEntry.created_at)
-    )
-    data = cohort_payload(cohort, await occupied_seats(db, cohort.id), include_private=True)
-    data["sessions"] = [{
-        "id": str(item.id), "title": item.title, "starts_at": item.starts_at.isoformat(),
-        "ends_at": item.ends_at.isoformat(), "public_note": item.public_note,
+        "meeting_url": item.meeting_url,
     } for item in sessions_result.scalars().all()]
     data["enrollments"] = [{
         "id": str(item.id), "status": item.status, "email": user.email, "name": user.name,
@@ -473,43 +444,70 @@ async def update_cohort(cohort_id: uuid.UUID, data: CohortUpdate, admin: User = 
 
 
 @router.get("/admin/audit")
-async def admin_audit(_: User = Depends(require_admin), db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(AdminAuditEvent).order_by(AdminAuditEvent.created_at.desc()).limit(100))
+async def admin_audit(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=100),
+    _: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    total = (await db.execute(select(func.count(AdminAuditEvent.id)))).scalar_one()
+    result = await db.execute(select(AdminAuditEvent).order_by(AdminAuditEvent.created_at.desc()).offset((page - 1) * page_size).limit(page_size))
     return {"events": [{
         "id": str(event.id), "action": event.action, "subject_type": event.subject_type,
         "subject_id": event.subject_id, "details": event.details, "created_at": event.created_at.isoformat(),
-    } for event in result.scalars().all()]}
+    } for event in result.scalars().all()], "total": total, "page": page, "page_size": page_size}
+
+
 
 
 @router.get("/admin/payments")
-async def admin_payments(_: User = Depends(require_admin), db: AsyncSession = Depends(get_db)):
+async def admin_payments(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=100),
+    _: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    total = (await db.execute(select(func.count(PaymentRecord.id)))).scalar_one()
     result = await db.execute(
         select(PaymentRecord, Cohort, User)
         .join(CohortEnrollment, CohortEnrollment.id == PaymentRecord.enrollment_id)
         .join(Cohort, Cohort.id == CohortEnrollment.cohort_id)
         .join(User, User.id == CohortEnrollment.user_id)
-        .order_by(PaymentRecord.created_at.desc()).limit(200)
+        .order_by(PaymentRecord.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
     )
     return {"payments": [{
         "id": str(payment.id), "status": payment.status, "amount_minor": payment.amount_minor,
         "currency": payment.currency, "provider_order_id": payment.provider_order_id,
         "provider_payment_id": payment.provider_payment_id, "email": user.email,
         "cohort_title": cohort.title, "created_at": payment.created_at.isoformat(),
-    } for payment, cohort, user in result.all()]}
+    } for payment, cohort, user in result.all()], "total": total, "page": page, "page_size": page_size}
 
 
-@router.get("/admin/payments")
-async def admin_payments(_: User = Depends(require_admin), db: AsyncSession = Depends(get_db)):
+@router.get("/admin/payment-events")
+async def admin_payment_events(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=100),
+    _: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    total = (await db.execute(select(func.count(PaymentWebhookEvent.provider_event_id)))).scalar_one()
     result = await db.execute(
-        select(PaymentRecord, Cohort, User)
-        .join(CohortEnrollment, CohortEnrollment.id == PaymentRecord.enrollment_id)
-        .join(Cohort, Cohort.id == CohortEnrollment.cohort_id)
-        .join(User, User.id == CohortEnrollment.user_id)
-        .order_by(PaymentRecord.created_at.desc()).limit(200)
+        select(PaymentWebhookEvent)
+        .order_by(PaymentWebhookEvent.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
     )
-    return {"payments": [{
-        "id": str(payment.id), "status": payment.status, "amount_minor": payment.amount_minor,
-        "currency": payment.currency, "provider_order_id": payment.provider_order_id,
-        "provider_payment_id": payment.provider_payment_id, "email": user.email,
-        "cohort_title": cohort.title, "created_at": payment.created_at.isoformat(),
-    } for payment, cohort, user in result.all()]}
+    return {
+        "events": [{
+            "id": event.provider_event_id,
+            "event_type": event.event_type,
+            "status": event.status,
+            "payment_id": event.payload.get("payment_id"),
+            "order_id": event.payload.get("order_id"),
+            "processed_at": event.processed_at.isoformat() if event.processed_at else None,
+            "created_at": event.created_at.isoformat(),
+        } for event in result.scalars().all()],
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+    }

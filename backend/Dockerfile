@@ -22,6 +22,8 @@ WORKDIR /app
 
 COPY --from=builder /opt/venv /opt/venv
 COPY app ./app
+COPY alembic.ini ./alembic.ini
+COPY migrations ./migrations
 
 RUN groupadd --system app \
     && useradd --system --gid app --home-dir /app app \

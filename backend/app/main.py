@@ -20,7 +20,6 @@ from app.Routes import (
     whatsapp_routes,
 )
 from app.config import settings
-from app.database import Base, engine
 from app.utils.scheduler import start_scheduler, stop_scheduler
 
 openai.api_key = settings.OPENAI_API_KEY
@@ -50,8 +49,6 @@ app.add_middleware(
 @app.on_event("startup")
 async def on_startup():
     settings.validate_for_startup()
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
     if settings.ENABLE_SCHEDULER:
         start_scheduler()
 

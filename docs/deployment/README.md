@@ -2,6 +2,8 @@
 
 Status: the first monorepo backend image was deployed manually on 2026-09-20. The existing Vercel project still needs its Root Directory changed to `frontend` before the merged monorepo `main` is pushed.
 
+Release readiness is tracked in [GO_LIVE_CHECKLIST.md](GO_LIVE_CHECKLIST.md). A deployment is not approved merely because its build and smoke checks pass; the applicable checklist blockers and evidence requirements must also be closed for the intended launch boundary.
+
 ## Deployment contract
 
 - The Next.js app in `frontend/` is deployed to Vercel.
@@ -83,6 +85,12 @@ Vercel's current monorepo guidance requires selecting the application directory 
 ## Manual Azure Container Apps deployment
 
 Run these commands from the repository root in PowerShell. The clean-tree check ensures the image tag identifies its exact source.
+
+The existing Supabase database adopted the Alembic baseline on 2026-10-31 after
+an encrypted full-data backup, isolated restore rehearsal, guarded hosted
+reconciliation, zero-drift comparison, and deliberate stamp. Future reviewed
+migrations can use `alembic upgrade head`; do not rerun the one-time baseline
+reconciliation. See `SUPABASE_ALEMBIC_ADOPTION.md` for evidence and recovery.
 
 ```powershell
 git switch main
@@ -166,11 +174,11 @@ Production-shaped smoke checks must not send real notifications:
 
 - Azure: direct traffic back to the previous healthy Container App revision. Because images are tagged by commit SHA, confirm the image before changing traffic.
 - Vercel: promote the previously verified deployment or move the domain back to the prior project.
-- Database: the application still uses SQLAlchemy `create_all()` and has no migration/rollback system. Do not ship destructive schema changes in this release path.
+- Database: Alembic owns schema evolution. Run the reviewed migration step before moving traffic to an application revision that requires it. Prefer forward repair after a migration reaches a shared environment; a destructive downgrade requires an explicit backup and restore decision.
 
 ## Known residual risks before broad production traffic
 
-- Database schema evolution is not managed by Alembic; `create_all()` only creates missing tables and cannot safely evolve existing columns or constraints.
+- The Alembic baseline is proven locally and adopted on hosted Supabase with zero managed drift. Durable off-machine backup retention and organizational recovery ownership remain open operational risks.
 - The Twilio webhook does not yet verify Twilio request signatures.
 - Direct Python dependencies are pinned, but transitive dependencies do not yet have a hash-locked requirements file.
 - The backend has no production-shaped integration suite using a real PostgreSQL database or provider sandboxes.

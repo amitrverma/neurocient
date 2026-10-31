@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:17.4-alpine
+    container_name: neurocient-postgres
+    environment:
+      POSTGRES_DB: neurocient
+      POSTGRES_USER: neurocient
+      POSTGRES_PASSWORD: neurocient_local
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - neurocient_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U neurocient -d neurocient"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+volumes:
+  neurocient_postgres_data:

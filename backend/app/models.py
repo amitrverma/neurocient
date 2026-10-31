@@ -13,9 +13,14 @@ class User(Base):
     password_hash = Column(String, nullable=True) 
     google_id = Column(String, unique=True, nullable=True)
     name = Column(String, nullable=True)
-    phone_number = Column(String, unique=True, index=True, nullable=True)
+    phone_number = Column(String, nullable=True)
     whatsapp_opt_in = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        UniqueConstraint("phone_number", name="uq_users_phone_number"),
+        Index("idx_users_phone_number", "phone_number"),
+    )
 
 
 class UserRole(Base):
@@ -188,7 +193,7 @@ class Waitlist(Base):
     __tablename__ = "waitlist"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=lambda: str(uuid.uuid4()))
-    email = Column(String, unique=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
     name = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -237,7 +242,15 @@ class MicrochallengeLog(Base):
     __tablename__ = "microchallenge_logs"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    assignment_id = Column(UUID(as_uuid=True), ForeignKey("user_microchallenges.id"), nullable=False)
+    assignment_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "user_microchallenges.id",
+            name="microchallenge_logs_assignment_fk",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+    )
     log_date = Column(Date, nullable=False)
     note = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)

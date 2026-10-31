@@ -19,6 +19,23 @@ router = APIRouter()
 
 FREE_PRACTICE_LIMIT = 1
 
+
+async def get_owned_worksheet(
+    worksheet_id: UUID,
+    current_user: User,
+    db: AsyncSession,
+) -> IkeaWorksheet:
+    result = await db.execute(
+        select(IkeaWorksheet).where(
+            IkeaWorksheet.id == worksheet_id,
+            IkeaWorksheet.user_id == current_user.id,
+        )
+    )
+    worksheet = result.scalar_one_or_none()
+    if not worksheet:
+        raise HTTPException(status_code=404, detail="Worksheet not found")
+    return worksheet
+
 # 1. Save new worksheet (installer submission)
 @router.post("/ikea/worksheet")
 async def save_worksheet(
@@ -94,8 +111,11 @@ async def get_active_worksheet(
 async def toggle_tracker(
     worksheet_id: UUID,
     body: dict = Body(...),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
+    await get_owned_worksheet(worksheet_id, current_user, db)
+
     date_str = body.get("date")
     if not date_str:
         raise HTTPException(status_code=400, detail="Date is required")
@@ -130,7 +150,13 @@ async def toggle_tracker(
 
 # 4. Get tracker streak or history (optional)
 @router.get("/ikea/tracker/{worksheet_id}/history")
-async def get_tracker_history(worksheet_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_tracker_history(
+    worksheet_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    await get_owned_worksheet(worksheet_id, current_user, db)
+
     result = await db.execute(
         select(IkeaTracker).where(IkeaTracker.worksheet_id == worksheet_id).order_by(IkeaTracker.date)
     )
@@ -145,7 +171,14 @@ async def get_tracker_history(worksheet_id: UUID, db: AsyncSession = Depends(get
 
 # 5. Add/edit tracker note for a date (optional)
 @router.post("/ikea/tracker/{worksheet_id}/note")
-async def add_note(worksheet_id: UUID, body: dict = Body(...), db: AsyncSession = Depends(get_db)):
+async def add_note(
+    worksheet_id: UUID,
+    body: dict = Body(...),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    await get_owned_worksheet(worksheet_id, current_user, db)
+
     date_str = body.get("date")
     note = body.get("note")
     if not date_str or note is None:

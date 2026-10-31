@@ -22,7 +22,7 @@ async def test_article_access_is_authoritative_idempotent_and_concurrency_safe()
     from app.Routes import article_routes
     from app.database import AsyncSessionLocal, engine
     from app.models import ArticleAccessGrant, MembershipEntitlement, User
-    from app.utils.auth import create_access_token, create_refresh_token
+    from app.utils.auth import create_access_token, create_refresh_token, issue_session
 
     user_id = uuid4()
     guest_id = uuid4()
@@ -53,6 +53,7 @@ async def test_article_access_is_authoritative_idempotent_and_concurrency_safe()
             )
         )
         await session.commit()
+        account_tokens = await issue_session(session, user_id)
 
     try:
         async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
@@ -100,7 +101,7 @@ async def test_article_access_is_authoritative_idempotent_and_concurrency_safe()
 
             account_headers = {
                 **access_header,
-                "Authorization": f"Bearer {create_access_token({'sub': str(user_id)})}"
+                "Authorization": f"Bearer {account_tokens.access}"
             }
             canceled = await client.post(
                 "/articles/account-new/access",

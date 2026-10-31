@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Dialog } from "@headlessui/react";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../firebase";
@@ -141,7 +142,14 @@ const AuthModal = ({
               onChange={(e) => setPassword(e.target.value)}
               className="rounded-lg border border-brand-dark/40 px-4 py-3 text-sm text-brand-dark outline-none transition placeholder:text-brand-dark/45 focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
               required
+              minLength={mode === "signup" ? 12 : undefined}
+              maxLength={128}
             />
+            {mode === "signup" && (
+              <p className="text-xs leading-5 text-brand-dark/60">
+                Use 12–128 characters. A long, memorable passphrase works well.
+              </p>
+            )}
             <button
               type="submit"
               className="w-full cursor-pointer rounded-lg border border-brand-secondary bg-brand-secondary px-5 py-3 text-sm font-semibold text-brand-dark transition hover:border-brand-dark hover:bg-brand-dark hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
@@ -154,6 +162,18 @@ const AuthModal = ({
                   : "Sign up"}
             </button>
           </form>
+
+          {mode === "login" && (
+            <div className="mt-3 text-right">
+              <Link
+                href="/forgot-password"
+                onClick={onClose}
+                className="text-sm font-semibold text-brand-primary hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
+          )}
 
           <div className="my-5 flex items-center gap-3">
             <span className="h-px flex-1 bg-brand-dark/12" />

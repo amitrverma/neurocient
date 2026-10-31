@@ -7,7 +7,11 @@ export async function POST(req: Request) {
     const res = await fetch(`${process.env.API_BASE_URL}/auth/firebase-login`, {
       method: "POST",
       credentials: "include", // 👈 cookie exchange
-      headers: { "Content-Type": "application/json", Cookie: cookie },
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: cookie,
+        "X-Neurocient-Auth-Request": "browser-bff",
+      },
       body: JSON.stringify(body),
     });
 
@@ -17,9 +21,11 @@ export async function POST(req: Request) {
     const nextRes = NextResponse.json(data, { status: res.status });
 
     // Forward ALL Set-Cookie headers
+    const extendedHeaders = res.headers as Headers & {
+      getSetCookie?: () => string[];
+    };
     const setCookies: string[] =
-      (res.headers as any).getSetCookie?.() ??
-      (res.headers as any).raw?.()["set-cookie"] ??
+      extendedHeaders.getSetCookie?.() ??
       (res.headers.get("set-cookie") ? [res.headers.get("set-cookie") as string] : []);
 
     if (setCookies && setCookies.length > 0) {

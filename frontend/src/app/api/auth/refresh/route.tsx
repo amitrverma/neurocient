@@ -10,6 +10,7 @@ export async function POST(req: Request) {
     credentials: "include",   // allow cookie exchange
     headers: {
       "Content-Type": "application/json",
+      "X-Neurocient-Auth-Request": "browser-bff",
       cookie: cookieHeader,   // 👈 crucial: send refresh_token to FastAPI
     },
   });
@@ -20,9 +21,11 @@ export async function POST(req: Request) {
   const nextRes = NextResponse.json(data, { status: r.status });
 
   // Forward ALL Set-Cookie headers from FastAPI
+  const extendedHeaders = r.headers as Headers & {
+    getSetCookie?: () => string[];
+  };
   const setCookies: string[] =
-    (r.headers as any).getSetCookie?.() ??
-    (r.headers as any).raw?.()["set-cookie"] ??
+    extendedHeaders.getSetCookie?.() ??
     (r.headers.get("set-cookie") ? [r.headers.get("set-cookie") as string] : []);
 
   if (setCookies && setCookies.length > 0) {

@@ -8,16 +8,26 @@ export async function POST(req: Request) {
 
     const res = await fetch(`${API_BASE_URL}/auth/logout`, {
       method: "POST",
-      headers: { Cookie: cookie },
+      headers: {
+        Cookie: cookie,
+        "X-Neurocient-Auth-Request": "browser-bff",
+      },
     });
 
     const data = await res.json();
 
     // Build JSON response and forward Set-Cookie headers (clear tokens)
     const response = NextResponse.json(data, { status: res.status });
-    const setCookie = res.headers.get("set-cookie");
-    if (setCookie) {
-      response.headers.set("set-cookie", setCookie);
+    const setCookies = (res.headers as Headers & {
+      getSetCookie?: () => string[];
+    }).getSetCookie?.() ?? [];
+    if (setCookies.length > 0) {
+      for (const value of setCookies) {
+        response.headers.append("set-cookie", value);
+      }
+    } else {
+      const setCookie = res.headers.get("set-cookie");
+      if (setCookie) response.headers.set("set-cookie", setCookie);
     }
 
     // Optional redirect mode

@@ -2,14 +2,14 @@ from datetime import datetime
 from typing import Any, Literal, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.database import get_db
 from app.models import CavemanScanSession, User
-from app.utils.auth import decode_token, get_token_from_cookies
+from app.utils.auth import get_optional_user
 
 
 router = APIRouter(prefix="/caveman-scan")
@@ -32,18 +32,6 @@ class UpdateScanSession(BaseModel):
 
 class LinkScanSession(BaseModel):
     access_token: UUID = Field(alias="accessToken")
-
-
-async def optional_current_user(request: Request, db: AsyncSession) -> Optional[User]:
-    token = get_token_from_cookies(request)
-    if not token:
-        return None
-    payload = decode_token(token)
-    user_id = payload.get("sub") if payload else None
-    if not user_id:
-        return None
-    result = await db.execute(select(User).where(User.id == user_id))
-    return result.scalar_one_or_none()
 
 
 def serialize_session(session: CavemanScanSession, include_deep_result: bool) -> dict[str, Any]:
@@ -69,7 +57,7 @@ def serialize_session(session: CavemanScanSession, include_deep_result: bool) ->
 async def get_owned_session(
     session_id: UUID,
     access_token: UUID,
-    request: Request,
+    user: Optional[User],
     db: AsyncSession,
 ) -> tuple[CavemanScanSession, Optional[User]]:
     result = await db.execute(select(CavemanScanSession).where(CavemanScanSession.id == session_id))
@@ -77,7 +65,6 @@ async def get_owned_session(
     if not session or session.access_token != access_token:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scan session not found")
 
-    user = await optional_current_user(request, db)
     if session.user_id and (not user or session.user_id != user.id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scan session not found")
     return session, user
@@ -86,13 +73,12 @@ async def get_owned_session(
 @router.post("/sessions", status_code=status.HTTP_201_CREATED)
 async def create_session(
     payload: CreateScanSession,
-    request: Request,
+    user: Optional[User] = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
 ):
     if len(set(payload.scenario_ids)) != len(payload.scenario_ids):
         raise HTTPException(status_code=422, detail="Scenario IDs must be unique")
 
-    user = await optional_current_user(request, db)
     session = CavemanScanSession(
         user_id=user.id if user else None,
         scan_version=payload.scan_version,
@@ -108,10 +94,9 @@ async def create_session(
 
 @router.get("/sessions/latest")
 async def get_latest_session(
-    request: Request,
+    user: Optional[User] = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
 ):
-    user = await optional_current_user(request, db)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
 
@@ -133,11 +118,11 @@ async def get_latest_session(
 @router.put("/sessions/{session_id}")
 async def update_session(
     session_id: UUID,
-    request: Request,
     payload: UpdateScanSession,
+    user: Optional[User] = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
 ):
-    session, user = await get_owned_session(session_id, payload.access_token, request, db)
+    session, user = await get_owned_session(session_id, payload.access_token, user, db)
     if len(payload.responses) > len(session.scenario_ids):
         raise HTTPException(status_code=422, detail="Too many responses for this scan")
 
@@ -156,11 +141,11 @@ async def update_session(
 @router.post("/sessions/{session_id}/link")
 async def link_session(
     session_id: UUID,
-    request: Request,
     payload: LinkScanSession,
+    user: Optional[User] = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
 ):
-    session, user = await get_owned_session(session_id, payload.access_token, request, db)
+    session, user = await get_owned_session(session_id, payload.access_token, user, db)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Sign in to keep this portrait")
     if session.user_id and session.user_id != user.id:
@@ -177,8 +162,8 @@ async def link_session(
 async def get_session(
     session_id: UUID,
     access_token: UUID,
-    request: Request,
+    user: Optional[User] = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
 ):
-    session, user = await get_owned_session(session_id, access_token, request, db)
+    session, user = await get_owned_session(session_id, access_token, user, db)
     return serialize_session(session, include_deep_result=user is not None)

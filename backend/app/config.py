@@ -28,6 +28,9 @@ class Settings:
     RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
     RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
     RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET")
+    RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+    RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL")
+    PASSWORD_RESET_BASE_URL = os.getenv("PASSWORD_RESET_BASE_URL")
     ENABLE_SCHEDULER = _env_bool("ENABLE_SCHEDULER", default=False)
 
     def validate_for_startup(self) -> None:

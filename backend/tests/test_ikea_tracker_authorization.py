@@ -292,7 +292,7 @@ def test_owner_can_add_note_to_untracked_date():
 
 
 class AuthSession(TrackerSession):
-    def __init__(self, *, user, worksheet, tracker_result, worksheet_id):
+    def __init__(self, *, user, session_id, worksheet, tracker_result, worksheet_id):
         super().__init__(
             worksheet=worksheet,
             tracker_result=tracker_result,
@@ -300,6 +300,7 @@ class AuthSession(TrackerSession):
             expected_user_id=user.id,
         )
         self.user = user
+        self.session_id = session_id
         self.auth_resolved = False
 
     async def execute(self, statement):
@@ -307,23 +308,27 @@ class AuthSession(TrackerSession):
             self.auth_resolved = True
             sql = str(statement)
             assert "FROM users" in sql
-            assert self.user.id in set(statement.compile().params.values())
+            params = set(statement.compile().params.values())
+            assert self.user.id in params
+            assert self.session_id in params
             return ScalarResult(self.user)
         return await super().execute(statement)
 
 
 def test_owner_bearer_token_is_resolved_through_real_auth_dependency():
     owner = SimpleNamespace(id=uuid4())
+    session_id = uuid4()
     worksheet_id = uuid4()
     worksheet = SimpleNamespace(id=worksheet_id, user_id=owner.id)
     db = AuthSession(
         user=owner,
+        session_id=session_id,
         worksheet=worksheet,
         tracker_result=ScalarsResult([]),
         worksheet_id=worksheet_id,
     )
     client = client_for(db)
-    token = create_access_token({"sub": str(owner.id)})
+    token = create_access_token({"sub": str(owner.id)}, session_id=session_id)
 
     response = client.get(
         f"/api/ikea/tracker/{worksheet_id}/history",

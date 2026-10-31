@@ -21,7 +21,7 @@ async def test_tracker_authorization_and_persistence_on_postgres(monkeypatch):
     from app.Routes import ikea_routes
     from app.database import AsyncSessionLocal, engine
     from app.models import IkeaTracker, IkeaWorksheet, User
-    from app.utils.auth import create_access_token
+    from app.utils.auth import issue_session
 
     owner_id = uuid4()
     other_owner_id = uuid4()
@@ -60,9 +60,10 @@ async def test_tracker_authorization_and_persistence_on_postgres(monkeypatch):
             ]
         )
         await session.commit()
+        owner_tokens = await issue_session(session, owner_id)
 
     owner_headers = {
-        "Authorization": f"Bearer {create_access_token({'sub': str(owner_id)})}"
+        "Authorization": f"Bearer {owner_tokens.access}"
     }
     transport = httpx.ASGITransport(app=app)
 

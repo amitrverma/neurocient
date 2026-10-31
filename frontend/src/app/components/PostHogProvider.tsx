@@ -10,13 +10,14 @@ export default function PostHogProvider({ children }: { children: React.ReactNod
 
   // 🔹 Initialize PostHog once on mount
   useEffect(() => {
-    if (typeof window !== "undefined" && !posthog.__loaded) {
+    const posthogWithLoadFlag = posthog as typeof posthog & { __loaded?: boolean };
+    if (typeof window !== "undefined" && !posthogWithLoadFlag.__loaded) {
       posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
         api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://app.posthog.com",
         persistence: "localStorage+cookie",
         person_profiles: "identified_only",
       });
-      (posthog as any).__loaded = true; // avoid re-init on hot reload
+      posthogWithLoadFlag.__loaded = true; // avoid re-init on hot reload
     }
   }, []);
 

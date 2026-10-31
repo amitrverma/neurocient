@@ -1,5 +1,10 @@
+import logging
+
 from posthog import Posthog
 from app.config import settings
+
+
+logger = logging.getLogger(__name__)
 
 API_KEY = settings.POSTHOG_API_KEY
 HOST = settings.POSTHOG_HOST or "https://app.posthog.com"
@@ -26,11 +31,14 @@ def track_event(user_id: str | None, event: str, properties: dict | None = None)
         print(f"[DEV] Event skipped: {event}, props={properties}")
         return
 
-    _client.capture(
-        distinct_id=user_id or "anonymous",
-        event=event,
-        properties=properties or {},
-    )
+    try:
+        _client.capture(
+            distinct_id=user_id or "anonymous",
+            event=event,
+            properties=properties or {},
+        )
+    except Exception:
+        logger.exception("PostHog event capture failed")
 
 
 def identify_user(user_id: str, traits: dict | None = None):
@@ -41,7 +49,11 @@ def identify_user(user_id: str, traits: dict | None = None):
         print(f"[DEV] Identify skipped: {user_id}, traits={traits}")
         return
 
-    _client.identify(
-        distinct_id=user_id,
-        properties=traits or {},
-    )
+    try:
+        _client.capture(
+            distinct_id=user_id,
+            event="user_identified",
+            properties={"$set": traits or {}},
+        )
+    except Exception:
+        logger.exception("PostHog person update failed")

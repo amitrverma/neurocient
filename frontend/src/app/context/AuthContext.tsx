@@ -30,32 +30,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
 
-  // On mount → try refresh first, then fallback to /me
+  // Use the short-lived access cookie first; rotate only after it expires.
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // 1) Attempt silent refresh (rotates tokens if valid)
-        const refreshRes = await fetch("/api/auth/refresh", {
-          method: "POST",
-          credentials: "include",
-        });
+        let meRes = await fetch("/api/auth/me", { credentials: "include" });
 
-        if (refreshRes.ok) {
-          const data = await refreshRes.json();
-          if (data?.user) {
-            setUser(data.user);
-            if (data.user.id) {
-              posthog.identify(data.user.id, {
-                email: data.user.email,
-                name: data.user.name,
-              });
+        if (meRes.status === 401) {
+          const refreshRes = await fetch("/api/auth/refresh", {
+            method: "POST",
+            credentials: "include",
+          });
+
+          if (refreshRes.ok) {
+            const data = await refreshRes.json();
+            if (data?.user) {
+              setUser(data.user);
+              if (data.user.id) {
+                posthog.identify(data.user.id, {
+                  email: data.user.email,
+                  name: data.user.name,
+                });
+              }
+              return;
             }
-            return;
+          }
+
+          if (refreshRes.status === 409) {
+            for (const delay of [100, 200, 400, 800, 1600]) {
+              await new Promise((resolve) => window.setTimeout(resolve, delay));
+              meRes = await fetch("/api/auth/me", { credentials: "include" });
+              if (meRes.status !== 401) break;
+            }
           }
         }
-
-        // 2) Fallback to /me if refresh didn’t work
-        const meRes = await fetch("/api/auth/me", { credentials: "include" });
         if (meRes.ok) {
           const u = await meRes.json();
           setUser(u);

@@ -2,14 +2,17 @@ from datetime import datetime
 from typing import Any, Literal, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from pydantic import BaseModel, Field, field_validator, model_validator
+import json
+import math
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.database import get_db
 from app.models import CavemanScanSession, User
 from app.utils.auth import get_optional_user
+from app.services.rate_limits import enforce, enforce_ip
 
 
 router = APIRouter(prefix="/caveman-scan")
@@ -21,6 +24,13 @@ class CreateScanSession(BaseModel):
     report_version: str = Field(min_length=1, max_length=50)
     scenario_ids: list[str] = Field(min_length=1, max_length=20)
 
+    @field_validator("scenario_ids")
+    @classmethod
+    def bounded_scenario_ids(cls, value: list[str]) -> list[str]:
+        if any(not item or len(item) > 100 for item in value):
+            raise ValueError("Scenario IDs must contain 1 to 100 characters")
+        return value
+
 
 class UpdateScanSession(BaseModel):
     access_token: UUID = Field(alias="accessToken")
@@ -28,6 +38,38 @@ class UpdateScanSession(BaseModel):
     responses: list[dict[str, Any]] = Field(default_factory=list, max_length=20)
     evidence: Optional[dict[str, Any]] = None
     portrait: Optional[dict[str, Any]] = None
+
+    @model_validator(mode="after")
+    def bounded_structures(self):
+        bounds = (("responses", self.responses, 32_768), ("evidence", self.evidence, 65_536), ("portrait", self.portrait, 65_536))
+        for name, value, maximum in bounds:
+            _validate_scan_structure(value)
+            if len(json.dumps(value, ensure_ascii=False).encode("utf-8")) > maximum:
+                raise ValueError(f"{name} is too large")
+        return self
+
+
+def _validate_scan_structure(value: Any, depth: int = 0) -> None:
+    if depth > 8:
+        raise ValueError("Scan data is too deeply nested")
+    if isinstance(value, str):
+        if len(value) > 4096:
+            raise ValueError("Scan text is too long")
+        return
+    if isinstance(value, float) and not math.isfinite(value):
+        raise ValueError("Scan numbers must be finite")
+    if isinstance(value, list):
+        if len(value) > 100:
+            raise ValueError("Scan lists are too long")
+        for item in value:
+            _validate_scan_structure(item, depth + 1)
+    elif isinstance(value, dict):
+        if len(value) > 100:
+            raise ValueError("Scan objects have too many fields")
+        for key, item in value.items():
+            if len(str(key)) > 100:
+                raise ValueError("Scan field names are too long")
+            _validate_scan_structure(item, depth + 1)
 
 
 class LinkScanSession(BaseModel):
@@ -70,12 +112,22 @@ async def get_owned_session(
     return session, user
 
 
-@router.post("/sessions", status_code=status.HTTP_201_CREATED)
+async def enforce_scan_creation_ip(request: Request) -> None:
+    await enforce_ip(request, "scan_ip")
+
+
+@router.post(
+    "/sessions",
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(enforce_scan_creation_ip)],
+)
 async def create_session(
     payload: CreateScanSession,
     user: Optional[User] = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
 ):
+    if user:
+        await enforce(db, [("scan_user", str(user.id))])
     if len(set(payload.scenario_ids)) != len(payload.scenario_ids):
         raise HTTPException(status_code=422, detail="Scenario IDs must be unique")
 

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.database import get_db
@@ -6,6 +6,7 @@ from app.models import NewsletterSubscriber
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from app.analytics.posthog_client import track_event
+from app.services.rate_limits import enforce, normalize_email, request_rules
 
 router = APIRouter()
 
@@ -13,10 +14,15 @@ class SubscribeRequest(BaseModel):
     email: EmailStr
 
 @router.post("/subscribe")
-async def subscribe(request: SubscribeRequest, db: AsyncSession = Depends(get_db)):
+async def subscribe(payload: SubscribeRequest, request: Request, db: AsyncSession = Depends(get_db)):
+    email = normalize_email(str(payload.email))
+    await enforce(
+        db,
+        request_rules(request, ("newsletter_email", email), ip_policy="newsletter_ip"),
+    )
     # Check if already subscribed
     result = await db.execute(
-        select(NewsletterSubscriber).where(NewsletterSubscriber.email == request.email)
+        select(NewsletterSubscriber).where(NewsletterSubscriber.email == email)
     )
     existing = result.scalar_one_or_none()
 
@@ -24,8 +30,8 @@ async def subscribe(request: SubscribeRequest, db: AsyncSession = Depends(get_db
         return {"status": "already_subscribed"}
 
     # Add new subscriber
-    subscriber = NewsletterSubscriber(email=request.email, created_at=datetime.utcnow())
+    subscriber = NewsletterSubscriber(email=email, created_at=datetime.utcnow())
     db.add(subscriber)
     await db.commit()
-    track_event(request.email, "newsletter_subscribed")
+    track_event(email, "newsletter_subscribed")
     return {"status": "subscribed"}

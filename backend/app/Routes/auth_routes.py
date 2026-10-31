@@ -35,6 +35,11 @@ from app.analytics.posthog_client import track_event, identify_user
 from app.services.membership import membership_summary
 from app.services.auth_security import digest_secret, normalize_email, validate_password
 from app.services.password_reset_email import send_password_reset_email
+from app.services.rate_limits import (
+    credential_digest,
+    enforce,
+    request_rules,
+)
 from app.services.admin import (
     admin_self_registration_allowed,
     is_configured_admin_email,
@@ -133,6 +138,10 @@ async def signup(
 ):
     require_auth_request(request)
     email = normalize_email(str(req.email))
+    await enforce(
+        db,
+        request_rules(request, ("signup_email", email), ip_policy="signup_ip"),
+    )
     password = _validated_password(req.password)
     is_admin_signup = is_configured_admin_email(email)
     if is_admin_signup and not admin_self_registration_allowed():
@@ -177,6 +186,10 @@ async def login(
 ):
     require_auth_request(request)
     email = normalize_email(str(req.email))
+    await enforce(
+        db,
+        request_rules(request, ("login_email", email), ip_policy="login_ip"),
+    )
     result = await db.execute(select(User).where(func.lower(User.email) == email))
     user = result.scalar_one_or_none()
 
@@ -218,6 +231,10 @@ async def get_me(
 async def refresh(req: Request, db: AsyncSession = Depends(get_db)):
     require_auth_request(req)
     rt = req.cookies.get("refresh_token")
+    rules = request_rules(req, ip_policy="refresh_ip")
+    if rt:
+        rules.append(("refresh_token", credential_digest(rt)))
+    await enforce(db, rules)
     if not rt:
         raise HTTPException(status_code=401, detail="No refresh token")
 
@@ -281,6 +298,14 @@ async def request_password_reset(
 ):
     require_auth_request(request)
     email = normalize_email(str(payload.email))
+    await enforce(
+        db,
+        request_rules(
+            request,
+            ("reset_request_email", email),
+            ip_policy="reset_request_ip",
+        ),
+    )
     user = await db.scalar(
         select(User).where(
             func.lower(User.email) == email,
@@ -332,6 +357,14 @@ async def confirm_password_reset(
     db: AsyncSession = Depends(get_db),
 ):
     require_auth_request(request)
+    await enforce(
+        db,
+        request_rules(
+            request,
+            ("reset_confirm_token", credential_digest(payload.token)),
+            ip_policy="reset_confirm_ip",
+        ),
+    )
     password = _validated_password(payload.password)
     now = _now()
     reset_token = await db.scalar(
@@ -368,8 +401,18 @@ async def firebase_login(request: Request, db: AsyncSession = Depends(get_db)):
     try:
         body = await request.json()
         id_token = body.get("idToken")
-        if not id_token:
+        if not isinstance(id_token, str) or not id_token:
             raise HTTPException(status_code=400, detail="Missing idToken")
+        if len(id_token) > 4096:
+            raise HTTPException(status_code=422, detail="idToken is too long")
+        await enforce(
+            db,
+            request_rules(
+                request,
+                ("firebase_token", credential_digest(id_token)),
+                ip_policy="firebase_ip",
+            ),
+        )
 
         try:
             decoded_token = firebase_auth.verify_id_token(id_token, clock_skew_seconds=60)

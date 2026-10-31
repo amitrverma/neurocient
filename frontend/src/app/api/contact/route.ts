@@ -1,66 +1,18 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
+import { abuseProxyHeaders, backendResponseInit } from "@/lib/abuseProxy";
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
+  const path = "/api/contact";
   try {
-    const { name, email, message } = await req.json();
-
-    // Basic validation (simple & clean)
-    if (!name || !email || !message) {
-      return NextResponse.json(
-        { error: "All fields are required" },
-        { status: 400 }
-      );
-    }
-
-    const apiKey = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.RESEND_FROM_EMAIL;
-
-    if (!apiKey || !fromEmail) {
-      console.error("Contact email configuration is missing");
-      return NextResponse.json(
-        { error: "Contact service is unavailable" },
-        { status: 503 }
-      );
-    }
-
-    const resend = new Resend(apiKey);
-
-    const htmlBody = `
-      <div style="font-family: sans-serif; font-size: 15px; line-height: 1.6;">
-        <h2>New Neurocient Contact Submission</h2>
-
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-
-        <h3 style="margin-top: 16px;">Message:</h3>
-        <p style="white-space: pre-line;">${message}</p>
-
-        <br />
-        <hr />
-        <p style="font-size: 12px; color: #555;">Sent via Neurocient.com</p>
-      </div>
-    `;
-
-    const result = await resend.emails.send({
-      from: `Neurocient <${fromEmail}>`,
-      to: ["hello@neurocient.com"],
-      replyTo: email,
-      subject: "New Neurocient Contact Submission",
-      html: htmlBody,
+    const response = await fetch(`${process.env.API_BASE_URL}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...abuseProxyHeaders(request, path) },
+      body: JSON.stringify(await request.json()),
+      cache: "no-store",
     });
-
-    if (result.error) {
-      console.error("Resend error:", result.error);
-      return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error("Contact API error:", err);
-    return NextResponse.json(
-      { error: "Server error" },
-      { status: 500 }
-    );
+    const data = await response.json().catch(() => ({}));
+    return NextResponse.json(data, backendResponseInit(response));
+  } catch {
+    return NextResponse.json({ error: "Contact service is unavailable" }, { status: 503 });
   }
 }

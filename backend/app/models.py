@@ -377,6 +377,25 @@ class WeeklyReflection(Base):
     week_end = Column(Date, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+    __table_args__ = (
+        UniqueConstraint("user_id", "week_start", name="uq_weekly_reflection_user_week"),
+    )
+
+
+class AbuseRateLimitBucket(Base):
+    __tablename__ = "abuse_rate_limit_buckets"
+
+    policy = Column(String(length=64), primary_key=True)
+    identity_hash = Column(String(length=64), primary_key=True)
+    window_started_at = Column(DateTime, nullable=False)
+    request_count = Column(Integer, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("request_count >= 1", name="ck_abuse_rate_limit_count_positive"),
+        Index("ix_abuse_rate_limit_buckets_updated_at", "updated_at"),
+    )
+
 
 class NewsletterSubscriber(Base):
     __tablename__ = "newsletter_subscribers"

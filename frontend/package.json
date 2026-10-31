@@ -29,8 +29,7 @@
     "react-confetti": "^6.4.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.6.0",
-    "react-use": "^17.6.0",
-    "resend": "^6.5.2"
+    "react-use": "^17.6.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

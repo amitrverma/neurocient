@@ -46,17 +46,19 @@ describe("password reset API boundary", () => {
   });
 
   it("forwards cookie clearing after a successful reset", async () => {
+    const headers = new Headers();
+    Object.assign(headers, {
+      getSetCookie: () => [
+        "access_token=; Path=/; Max-Age=0; HttpOnly",
+        "refresh_token=; Path=/; Max-Age=0; HttpOnly",
+      ],
+    });
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
         status: 200,
         json: async () => ({ ok: true }),
-        headers: {
-          getSetCookie: () => [
-            "access_token=; Path=/; Max-Age=0; HttpOnly",
-            "refresh_token=; Path=/; Max-Age=0; HttpOnly",
-          ],
-        },
+        headers,
       }),
     );
 

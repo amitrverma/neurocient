@@ -9,6 +9,7 @@ from app.Routes import (
     caveman_scan_routes,
     challenge_routes,
     cohort_routes,
+    contact_routes,
     ikea_routes,
     newsletter_routes,
     notifications_routes,
@@ -21,10 +22,12 @@ from app.Routes import (
 )
 from app.config import settings
 from app.utils.scheduler import start_scheduler, stop_scheduler
+from app.middleware import MutationBodyLimitMiddleware
 
 openai.api_key = settings.OPENAI_API_KEY
 
 app = FastAPI()
+app.add_middleware(MutationBodyLimitMiddleware)
 
 
 @app.get("/healthz", include_in_schema=False)
@@ -73,4 +76,5 @@ app.include_router(nudge_routes.router, prefix="/api", tags=["nudges"])
 app.include_router(preferences_route.router, prefix="/user", tags=["preferences"])
 app.include_router(caveman_scan_routes.router, prefix="/api", tags=["caveman-scan"])
 app.include_router(cohort_routes.router, prefix="/api", tags=["cohorts"])
+app.include_router(contact_routes.router, prefix="/api", tags=["contact"])
 app.include_router(admin_data_routes.router, prefix="/api", tags=["admin"])

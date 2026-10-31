@@ -23,6 +23,7 @@ from app.models import (
 from app.services.admin import require_admin
 from app.services.cohorts import PUBLIC_STATUSES, captured_payment_has_seat, enrollment_is_open, occupied_seats, validate_cohort_values
 from app.services.razorpay import create_order, razorpay_ready, verify_webhook_signature
+from app.services.rate_limits import enforce, enforce_ip
 from app.utils.auth import get_current_user
 
 router = APIRouter()
@@ -197,8 +198,19 @@ async def join_waitlist(cohort_id: uuid.UUID, current_user: User = Depends(get_c
     return {"status": entry.status, "position": int(position_result.scalar_one())}
 
 
-@router.post("/cohorts/{cohort_id}/checkout")
+async def enforce_checkout_ip(request: Request) -> None:
+    await enforce_ip(request, "checkout_ip")
+
+
+@router.post(
+    "/cohorts/{cohort_id}/checkout",
+    dependencies=[Depends(enforce_checkout_ip)],
+)
 async def begin_checkout(cohort_id: uuid.UUID, current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    await enforce(
+        db,
+        [("checkout_user", str(current_user.id))],
+    )
     if not razorpay_ready():
         raise HTTPException(status_code=503, detail="Checkout is not configured")
     result = await db.execute(select(Cohort).where(Cohort.id == cohort_id).with_for_update())

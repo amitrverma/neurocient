@@ -50,6 +50,9 @@ class Settings:
     RESEND_API_KEY = os.getenv("RESEND_API_KEY")
     RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL")
     PASSWORD_RESET_BASE_URL = os.getenv("PASSWORD_RESET_BASE_URL")
+    RATE_LIMIT_ENABLED = _env_bool("RATE_LIMIT_ENABLED", default=False)
+    RATE_LIMIT_KEY_SECRET = os.getenv("RATE_LIMIT_KEY_SECRET")
+    ABUSE_PROXY_SECRET = os.getenv("ABUSE_PROXY_SECRET")
     ENABLE_SCHEDULER = _env_bool("ENABLE_SCHEDULER", default=False)
 
     def validate_for_startup(self) -> None:
@@ -61,6 +64,24 @@ class Settings:
             for name in ("JWT_SECRET", "OPENAI_API_KEY"):
                 if not getattr(self, name):
                     missing.append(name)
+
+            if not self.RATE_LIMIT_ENABLED:
+                missing.append("RATE_LIMIT_ENABLED=true")
+            for name in ("RATE_LIMIT_KEY_SECRET", "ABUSE_PROXY_SECRET"):
+                value = getattr(self, name)
+                if not value:
+                    missing.append(name)
+                elif len(value) < 32:
+                    raise RuntimeError(
+                        f"Invalid runtime configuration: {name} must be at least 32 characters"
+                    )
+            if (
+                self.RATE_LIMIT_KEY_SECRET
+                and self.RATE_LIMIT_KEY_SECRET == self.ABUSE_PROXY_SECRET
+            ):
+                raise RuntimeError(
+                    "Invalid runtime configuration: abuse-control secrets must be independent"
+                )
 
         twilio_names = (
             "TWILIO_ACCOUNT_SID",

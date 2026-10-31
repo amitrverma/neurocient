@@ -1,108 +1,66 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { resendConstructor, sendEmail } = vi.hoisted(() => {
-  const sendEmail = vi.fn();
-
-  return {
-    sendEmail,
-    resendConstructor: vi.fn(function MockResend() {
-      return { emails: { send: sendEmail } };
-    }),
-  };
-});
-
-vi.mock("resend", () => ({ Resend: resendConstructor }));
-
 import { POST } from "./route";
 
-describe("contact route configuration", () => {
-  const originalApiKey = process.env.RESEND_API_KEY;
-  const originalFromEmail = process.env.RESEND_FROM_EMAIL;
+describe("contact backend proxy", () => {
+  const originalFetch = global.fetch;
+  const originalApi = process.env.API_BASE_URL;
+  const originalSecret = process.env.ABUSE_PROXY_SECRET;
 
   beforeEach(() => {
-    delete process.env.RESEND_API_KEY;
-    delete process.env.RESEND_FROM_EMAIL;
-    resendConstructor.mockClear();
-    sendEmail.mockClear();
+    process.env.API_BASE_URL = "https://backend.example";
+    process.env.ABUSE_PROXY_SECRET = "a".repeat(32);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ ok: true }), { status: 202 }),
+    ));
   });
 
   afterEach(() => {
-    if (originalApiKey === undefined) {
-      delete process.env.RESEND_API_KEY;
-    } else {
-      process.env.RESEND_API_KEY = originalApiKey;
-    }
-
-    if (originalFromEmail === undefined) {
-      delete process.env.RESEND_FROM_EMAIL;
-    } else {
-      process.env.RESEND_FROM_EMAIL = originalFromEmail;
-    }
+    vi.stubGlobal("fetch", originalFetch);
+    if (originalApi === undefined) delete process.env.API_BASE_URL;
+    else process.env.API_BASE_URL = originalApi;
+    if (originalSecret === undefined) delete process.env.ABUSE_PROXY_SECRET;
+    else process.env.ABUSE_PROXY_SECRET = originalSecret;
   });
 
-  it.each([
-    {
-      missingValue: "API key",
-      apiKey: undefined,
-      fromEmail: "hello@example.com",
-    },
-    {
-      missingValue: "from address",
-      apiKey: "re_test_key",
-      fromEmail: undefined,
-    },
-  ])(
-    "returns an unavailable response without attempting delivery when the $missingValue is missing",
-    async ({ apiKey, fromEmail }) => {
-      if (apiKey) process.env.RESEND_API_KEY = apiKey;
-      if (fromEmail) process.env.RESEND_FROM_EMAIL = fromEmail;
+  it("forwards contact to FastAPI with a signed client identity", async () => {
+    const response = await POST(new Request("https://neurocient.test/api/contact", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-vercel-forwarded-for": "203.0.113.7",
+      },
+      body: JSON.stringify({ name: "Amit", email: "amit@example.com", message: "Hello" }),
+    }));
 
-      const response = await POST(
-        new Request("http://localhost/api/contact", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            name: "Amit",
-            email: "amit@example.com",
-            message: "Hello",
-          }),
-        }),
-      );
-
-      expect(response.status).toBe(503);
-      await expect(response.json()).resolves.toEqual({
-        error: "Contact service is unavailable",
-      });
-      expect(resendConstructor).not.toHaveBeenCalled();
-      expect(sendEmail).not.toHaveBeenCalled();
-    },
-  );
-
-  it("creates the client and sends email when runtime configuration is present", async () => {
-    process.env.RESEND_API_KEY = "re_test_key";
-    process.env.RESEND_FROM_EMAIL = "hello@example.com";
-    sendEmail.mockResolvedValue({ data: { id: "email-id" }, error: null });
-
-    const response = await POST(
-      new Request("http://localhost/api/contact", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          name: "Amit",
-          email: "amit@example.com",
-          message: "Hello",
-        }),
-      }),
-    );
-
-    expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({ success: true });
-    expect(resendConstructor).toHaveBeenCalledWith("re_test_key");
-    expect(sendEmail).toHaveBeenCalledWith(
+    expect(response.status).toBe(202);
+    expect(global.fetch).toHaveBeenCalledWith(
+      "https://backend.example/api/contact",
       expect.objectContaining({
-        from: "Neurocient <hello@example.com>",
-        replyTo: "amit@example.com",
+        method: "POST",
+        headers: expect.objectContaining({
+          "X-Neurocient-Client-IP": "203.0.113.7",
+          "X-Neurocient-Proxy-Signature": expect.stringMatching(/^[a-f0-9]{64}$/),
+        }),
       }),
     );
+  });
+
+  it("preserves the stable rate-limit body and recovery headers", async () => {
+    vi.mocked(global.fetch).mockResolvedValueOnce(new Response(
+      JSON.stringify({ detail: { code: "rate_limited", retry_after: 42 } }),
+      { status: 429, headers: { "Retry-After": "42", "Cache-Control": "no-store" } },
+    ));
+    const response = await POST(new Request("https://neurocient.test/api/contact", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-vercel-forwarded-for": "203.0.113.7" },
+      body: JSON.stringify({ name: "Amit", email: "amit@example.com", message: "Hello" }),
+    }));
+    expect(response.status).toBe(429);
+    expect(response.headers.get("retry-after")).toBe("42");
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    await expect(response.json()).resolves.toEqual({
+      detail: { code: "rate_limited", retry_after: 42 },
+    });
   });
 });

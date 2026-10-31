@@ -40,7 +40,7 @@ export default function usePushNotifications(vapidPublicKey: string) {
 
     const subJson = sub.toJSON();
 
-    await fetch("/api/register-webpush", {
+    const response = await fetch("/api/register-webpush", {
       method: "POST",
       credentials: "include", // ✅ forward cookies
       headers: { "Content-Type": "application/json" },
@@ -49,8 +49,10 @@ export default function usePushNotifications(vapidPublicKey: string) {
         keys: subJson.keys,
       }),
     });
-
-    console.log("📩 Push subscription saved:", subJson);
+    if (!response.ok) {
+      await sub.unsubscribe();
+      throw new Error("Push subscription could not be saved");
+    }
   };
 
   // Unsubscribe (remove from DB + subs table)
@@ -60,18 +62,13 @@ export default function usePushNotifications(vapidPublicKey: string) {
 
     const reg = await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.getSubscription();
-    if (sub) {
-      await sub.unsubscribe();
-      console.log("🗑️ Push unsubscribed in browser");
-    }
-
-    await fetch("/api/unregister-webpush", {
+    const response = await fetch("/api/unregister-webpush", {
       method: "POST",
       credentials: "include", // ✅ forward cookies
       headers: { "Content-Type": "application/json" },
     });
-
-    console.log("🗑️ Push subscription removed from DB");
+    if (!response.ok) throw new Error("Push subscription could not be removed");
+    if (sub) await sub.unsubscribe();
   };
 
   return { permission, subscribe, unsubscribe };

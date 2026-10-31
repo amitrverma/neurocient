@@ -59,6 +59,11 @@ POLICIES = {
     "reflection_provider": Policy("reflection_provider", 1, 8 * 24 * 60 * 60),
     "checkout_ip": Policy("checkout_ip", 20, 60 * 60),
     "checkout_user": Policy("checkout_user", 10, 60 * 60),
+    "whatsapp_verify_request_ip": Policy("whatsapp_verify_request_ip", 10, 60 * 60),
+    "whatsapp_verify_request_user": Policy("whatsapp_verify_request_user", 5, 60 * 60),
+    "whatsapp_verify_request_number": Policy("whatsapp_verify_request_number", 3, 60 * 60),
+    "whatsapp_verify_confirm_ip": Policy("whatsapp_verify_confirm_ip", 30, 60 * 60),
+    "whatsapp_verify_confirm_user": Policy("whatsapp_verify_confirm_user", 10, 60 * 60),
 }
 
 

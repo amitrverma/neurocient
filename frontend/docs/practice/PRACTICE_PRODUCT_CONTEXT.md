@@ -113,7 +113,9 @@ Existing primitives include:
 - auth through `AuthContext`, `AuthModal`, and `/api/auth/**`
 - membership/subscription gating through existing membership UI and usage limits
 - user preferences through `/api/user/preferences`
-- WhatsApp fields through `User.phone_number`, `User.whatsapp_opt_in`, and `UserPreferences.whatsapp_number`
+- authoritative optional-notification consent, verified WhatsApp ownership, and
+  channel details through `UserPreferences`; legacy `User.phone_number` and
+  `User.whatsapp_opt_in` do not authorize reinforcement delivery
 - WhatsApp webhook/send utilities in `backend/app/Routes/whatsapp_routes.py`
 - microchallenge assignment, logging, and progress through `/api/challenges/**`
 - "Spot the Inner Caveman" logging through spots APIs and WhatsApp `spot:` messages

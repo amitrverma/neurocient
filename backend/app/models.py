@@ -14,7 +14,9 @@ class User(Base):
     google_id = Column(String, unique=True, nullable=True)
     name = Column(String, nullable=True)
     phone_number = Column(String, nullable=True)
-    whatsapp_opt_in = Column(Boolean, default=True)
+    # Legacy compatibility only. Optional delivery authority lives in
+    # UserPreferences and no sender may consult this field.
+    whatsapp_opt_in = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     __table_args__ = (
@@ -222,16 +224,39 @@ class UserPreferences(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), unique=True)
 
-    nudge_enabled = Column(Boolean, default=True)
-    microchallenge_enabled = Column(Boolean, default=True)
-    notif_channel = Column(String, default="push")   # push | whatsapp | both
-    whatsapp_number = Column(String, nullable=True)
-    whatsapp_verified = Column(Boolean, default=False)
+    # Optional reinforcement is always opt-in. These columns are the only
+    # authority used by outbound reminder delivery.
+    nudge_enabled = Column(Boolean, default=False, nullable=False)
+    spot_reminder_enabled = Column(Boolean, default=False, nullable=False)
+    microchallenge_enabled = Column(Boolean, default=False, nullable=False)
+    push_enabled = Column(Boolean, default=False, nullable=False)
+    whatsapp_enabled = Column(Boolean, default=False, nullable=False)
+    whatsapp_number = Column(String, nullable=True, unique=True)
+    whatsapp_verified = Column(Boolean, default=False, nullable=False)
+    whatsapp_pending_number = Column(String, nullable=True)
+    whatsapp_verification_code_hash = Column(String, nullable=True)
+    whatsapp_verification_expires_at = Column(DateTime, nullable=True)
+    whatsapp_verification_attempts = Column(Integer, default=0, nullable=False)
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     user = relationship("User", backref="preferences")
+
+    __table_args__ = (
+        CheckConstraint(
+            "NOT whatsapp_verified OR whatsapp_number IS NOT NULL",
+            name="ck_user_preferences_verified_number",
+        ),
+        CheckConstraint(
+            "NOT whatsapp_enabled OR whatsapp_verified",
+            name="ck_user_preferences_enabled_verified",
+        ),
+        CheckConstraint(
+            "whatsapp_verification_attempts BETWEEN 0 AND 5",
+            name="ck_user_preferences_verification_attempts",
+        ),
+    )
 
 class CavemanSpot(Base):
     __tablename__ = "spots"

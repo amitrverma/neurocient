@@ -17,8 +17,24 @@ import { useNotification } from "../components/NotificationProvider";
 import { profileViewFromHash, type ProfileView } from "./profileViews";
 import PersonalHome from "./PersonalHome";
 import useWorkOverview from "./useWorkOverview";
+import {
+  PreferenceToggle,
+  WhatsAppVerificationControls,
+} from "./DeliveryPreferenceControls";
+import { InfoTile, Panel, SectionKicker } from "./ProfilePrimitives";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
+
+const responseMessage = async (response: Response) => {
+  try {
+    const payload = await response.json();
+    return typeof payload.detail === "string"
+      ? payload.detail
+      : "The request could not be completed.";
+  } catch {
+    return "The request could not be completed.";
+  }
+};
 
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState<ProfileView>("evidence");
@@ -43,10 +59,17 @@ const ProfilePage = () => {
     return () => window.removeEventListener("hashchange", syncView);
   }, []);
 
-  const [nudgeEnabled, setNudgeEnabled] = useState(true);
-  const [challengeEnabled, setChallengeEnabled] = useState(true);
+  const [nudgeEnabled, setNudgeEnabled] = useState(false);
+  const [spotReminderEnabled, setSpotReminderEnabled] = useState(false);
+  const [challengeEnabled, setChallengeEnabled] = useState(false);
   const [whatsAppEnabled, setWhatsAppEnabled] = useState(false);
+  const [showWhatsAppSetup, setShowWhatsAppSetup] = useState(false);
   const [whatsAppNumber, setWhatsAppNumber] = useState("");
+  const [verifiedWhatsAppNumber, setVerifiedWhatsAppNumber] = useState("");
+  const [whatsAppVerified, setWhatsAppVerified] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [verificationCodeSent, setVerificationCodeSent] = useState(false);
+  const [verifyingWhatsApp, setVerifyingWhatsApp] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
   const [prefsLoading, setPrefsLoading] = useState(true);
   const [prefsError, setPrefsError] = useState(false);
@@ -54,6 +77,7 @@ const ProfilePage = () => {
   const [savingPrefs, setSavingPrefs] = useState(false);
   const [initialPrefs, setInitialPrefs] = useState<{
     nudgeEnabled: boolean;
+    spotReminderEnabled: boolean;
     challengeEnabled: boolean;
     pushEnabled: boolean;
     whatsAppEnabled: boolean;
@@ -78,18 +102,25 @@ const ProfilePage = () => {
         if (!res.ok) throw new Error(`Failed to load preferences: ${res.status}`);
         const data = await res.json();
         if (data) {
+          const pendingWhatsAppNumber = data.whatsapp_pending_number || "";
           const prefs = {
             nudgeEnabled: data.nudge_enabled,
+            spotReminderEnabled: data.spot_reminder_enabled,
             challengeEnabled: data.microchallenge_enabled,
-            whatsAppEnabled: !!data.whatsapp_number,
-            whatsAppNumber: data.whatsapp_number || "",
-            pushEnabled: data.notif_channel === "push",
+            whatsAppEnabled: data.whatsapp_enabled,
+            whatsAppNumber: pendingWhatsAppNumber || data.whatsapp_number || "",
+            pushEnabled: data.push_enabled,
           };
           setNudgeEnabled(prefs.nudgeEnabled);
+          setSpotReminderEnabled(prefs.spotReminderEnabled);
           setChallengeEnabled(prefs.challengeEnabled);
           setWhatsAppEnabled(prefs.whatsAppEnabled);
           setWhatsAppNumber(prefs.whatsAppNumber);
+          setShowWhatsAppSetup(Boolean(pendingWhatsAppNumber));
           setPushEnabled(prefs.pushEnabled);
+          setWhatsAppVerified(data.whatsapp_verified);
+          setVerifiedWhatsAppNumber(data.whatsapp_number || "");
+          setVerificationCodeSent(Boolean(pendingWhatsAppNumber));
           setInitialPrefs(prefs);
         }
       } catch (err) {
@@ -118,15 +149,15 @@ const ProfilePage = () => {
       credentials: "include",
       body: JSON.stringify(updates),
     });
-    if (!response.ok) throw new Error(`Failed to save preferences: ${response.status}`);
+    if (!response.ok) throw new Error(await responseMessage(response));
   };
 
   const hasChanges = initialPrefs
     ? nudgeEnabled !== initialPrefs.nudgeEnabled ||
+      spotReminderEnabled !== initialPrefs.spotReminderEnabled ||
       challengeEnabled !== initialPrefs.challengeEnabled ||
       pushEnabled !== initialPrefs.pushEnabled ||
-      whatsAppEnabled !== initialPrefs.whatsAppEnabled ||
-      (whatsAppEnabled && whatsAppNumber !== initialPrefs.whatsAppNumber)
+      whatsAppEnabled !== initialPrefs.whatsAppEnabled
     : false;
 
   const handleSave = async () => {
@@ -134,10 +165,16 @@ const ProfilePage = () => {
 
     const updates = {
       nudge_enabled: nudgeEnabled,
+      spot_reminder_enabled: spotReminderEnabled,
       microchallenge_enabled: challengeEnabled,
-      notif_channel: pushEnabled ? "push" : null,
-      whatsapp_number: whatsAppEnabled ? whatsAppNumber : null,
+      push_enabled: pushEnabled,
+      whatsapp_enabled: whatsAppEnabled,
     };
+
+    if (whatsAppEnabled && !whatsAppVerified) {
+      notify("Verify this WhatsApp number before enabling the channel.", "error");
+      return;
+    }
 
     setSavingPrefs(true);
     try {
@@ -165,6 +202,7 @@ const ProfilePage = () => {
       await savePrefs(updates);
       setInitialPrefs({
         nudgeEnabled,
+        spotReminderEnabled,
         challengeEnabled,
         pushEnabled,
         whatsAppEnabled,
@@ -176,6 +214,73 @@ const ProfilePage = () => {
       notify("Failed to save preferences.", "error");
     } finally {
       setSavingPrefs(false);
+    }
+  };
+
+  const requestWhatsAppCode = async () => {
+    setWhatsAppEnabled(false);
+    setVerifyingWhatsApp(true);
+    try {
+      const response = await fetch(
+        "/api/user/preferences/whatsapp-verification",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ number: whatsAppNumber.trim() }),
+        },
+      );
+      if (!response.ok) throw new Error(await responseMessage(response));
+      setWhatsAppVerified(false);
+      setVerifiedWhatsAppNumber("");
+      setVerificationCode("");
+      setVerificationCodeSent(true);
+      setWhatsAppEnabled(false);
+      setShowWhatsAppSetup(true);
+      setInitialPrefs((current) => current ? {
+        ...current,
+        whatsAppEnabled: false,
+        whatsAppNumber: whatsAppNumber.trim(),
+      } : current);
+      notify("Verification code sent on WhatsApp.", "success");
+    } catch (error) {
+      notify(error instanceof Error ? error.message : "Code could not be sent.", "error");
+    } finally {
+      setVerifyingWhatsApp(false);
+    }
+  };
+
+  const confirmWhatsAppCode = async () => {
+    setVerifyingWhatsApp(true);
+    try {
+      const response = await fetch(
+        "/api/user/preferences/whatsapp-verification/confirm",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ code: verificationCode.trim() }),
+        },
+      );
+      if (!response.ok) throw new Error(await responseMessage(response));
+      const data = await response.json();
+      const verifiedNumber = data.whatsapp_number || whatsAppNumber.trim();
+      setWhatsAppNumber(verifiedNumber);
+      setVerifiedWhatsAppNumber(verifiedNumber);
+      setWhatsAppVerified(true);
+      setWhatsAppEnabled(Boolean(data.whatsapp_enabled));
+      setVerificationCodeSent(false);
+      setVerificationCode("");
+      setInitialPrefs((current) => current ? {
+        ...current,
+        whatsAppEnabled: Boolean(data.whatsapp_enabled),
+        whatsAppNumber: verifiedNumber,
+      } : current);
+      notify("WhatsApp number verified. Turn on the channel and save when you are ready.", "success");
+    } catch (error) {
+      notify(error instanceof Error ? error.message : "Code could not be confirmed.", "error");
+    } finally {
+      setVerifyingWhatsApp(false);
     }
   };
 
@@ -300,6 +405,12 @@ const ProfilePage = () => {
                             onChange={setNudgeEnabled}
                           />
                           <PreferenceToggle
+                            title="Spot reminders"
+                            text="A short check-in that helps you notice automatic responses in daily life."
+                            checked={spotReminderEnabled}
+                            onChange={setSpotReminderEnabled}
+                          />
+                          <PreferenceToggle
                             title="Microchallenge reminders"
                             text="Reminders for practical behavior experiments."
                             checked={challengeEnabled}
@@ -316,18 +427,35 @@ const ProfilePage = () => {
                               title="WhatsApp notifications"
                               text="Use WhatsApp as an additional delivery channel."
                               checked={whatsAppEnabled}
-                              onChange={setWhatsAppEnabled}
+                              onChange={(enabled) => {
+                                if (enabled && !whatsAppVerified) {
+                                  setShowWhatsAppSetup(true);
+                                  return;
+                                }
+                                setWhatsAppEnabled(enabled);
+                              }}
                               compact
                             />
-                            {whatsAppEnabled && (
-                              <input
-                                type="tel"
-                                placeholder="+91 98765 43210"
-                                value={whatsAppNumber}
-                                onChange={(e) =>
-                                  setWhatsAppNumber(e.target.value)
-                                }
-                                className="mt-4 w-full rounded-lg border border-brand-dark/15 px-4 py-3 font-sans text-sm text-brand-dark outline-none transition placeholder:text-brand-dark/40 focus:border-brand-teal"
+                            {(showWhatsAppSetup || verificationCodeSent || whatsAppVerified) && (
+                              <WhatsAppVerificationControls
+                                number={whatsAppNumber}
+                                verifiedNumber={verifiedWhatsAppNumber}
+                                verified={whatsAppVerified}
+                                code={verificationCode}
+                                codeSent={verificationCodeSent}
+                                busy={verifyingWhatsApp}
+                                onNumberChange={(value) => {
+                                  setWhatsAppNumber(value);
+                                  setShowWhatsAppSetup(true);
+                                  if (value !== verifiedWhatsAppNumber) {
+                                    setWhatsAppEnabled(false);
+                                    setWhatsAppVerified(false);
+                                    setVerificationCodeSent(false);
+                                  }
+                                }}
+                                onCodeChange={setVerificationCode}
+                                onRequestCode={requestWhatsAppCode}
+                                onConfirmCode={confirmWhatsAppCode}
                               />
                             )}
                           </div>
@@ -362,74 +490,5 @@ const ProfilePage = () => {
 
   return content;
 };
-
-const Panel = ({ children }: { children: React.ReactNode }) => (
-  <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-sm md:p-8">
-    {children}
-  </div>
-);
-
-const SectionKicker = ({
-  icon,
-  children,
-}: {
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) => (
-  <div className="flex items-center gap-3">
-    <span className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
-      {icon}
-    </span>
-    <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-      {children}
-    </p>
-  </div>
-);
-
-const InfoTile = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-lg border border-brand-dark/12 p-4">
-    <p className="font-sans text-xs font-semibold uppercase tracking-[0.14em] text-brand-teal">
-      {label}
-    </p>
-    <p className="mt-2 break-words font-sans text-sm font-semibold text-brand-dark">
-      {value}
-    </p>
-  </div>
-);
-
-const PreferenceToggle = ({
-  title,
-  text,
-  checked,
-  onChange,
-  compact = false,
-}: {
-  title: string;
-  text: string;
-  checked: boolean;
-  onChange: (value: boolean) => void;
-  compact?: boolean;
-}) => (
-  <label
-    className={`flex cursor-pointer items-center justify-between gap-5 ${
-      compact ? "" : "py-5"
-    }`}
-  >
-    <span>
-      <span className="block font-sans text-sm font-semibold text-brand-dark">
-        {title}
-      </span>
-      <span className="mt-1 block max-w-xl font-sans text-sm leading-6 text-brand-dark/64">
-        {text}
-      </span>
-    </span>
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={(e) => onChange(e.target.checked)}
-      className="h-5 w-5 shrink-0 accent-brand-accent"
-    />
-  </label>
-);
 
 export default ProfilePage;

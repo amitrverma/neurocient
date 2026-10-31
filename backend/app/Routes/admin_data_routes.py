@@ -153,7 +153,7 @@ async def admin_users(
             activity={key: counts.get(user.id, 0) for key, counts in activity_maps.items()},
             delivery={
                 "push_devices": push_devices.get(user.id, 0),
-                "whatsapp_enabled": bool(preference and preference.whatsapp_number),
+                "whatsapp_enabled": bool(preference and preference.whatsapp_enabled),
                 "whatsapp_verified": bool(preference and preference.whatsapp_verified),
             },
         ))

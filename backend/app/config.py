@@ -87,6 +87,7 @@ class Settings:
     TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
     TWILIO_WHATSAPP_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER")
     TWILIO_WHATSAPP_WEBHOOK_URL = os.getenv("TWILIO_WHATSAPP_WEBHOOK_URL")
+    CONSENT_VERIFICATION_SECRET = os.getenv("CONSENT_VERIFICATION_SECRET")
     RESEND_API_KEY = os.getenv("RESEND_API_KEY")
     RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL")
     PASSWORD_RESET_BASE_URL = os.getenv("PASSWORD_RESET_BASE_URL")
@@ -110,7 +111,11 @@ class Settings:
 
             if not self.RATE_LIMIT_ENABLED:
                 missing.append("RATE_LIMIT_ENABLED=true")
-            for name in ("RATE_LIMIT_KEY_SECRET", "ABUSE_PROXY_SECRET"):
+            for name in (
+                "RATE_LIMIT_KEY_SECRET",
+                "ABUSE_PROXY_SECRET",
+                "CONSENT_VERIFICATION_SECRET",
+            ):
                 value = getattr(self, name)
                 if not value:
                     missing.append(name)

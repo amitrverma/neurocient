@@ -42,8 +42,13 @@ async def run_safe(task_func, name: str):
     for attempt in range(3):
         try:
             async with AsyncSessionLocal() as db:
-                await task_func(db)
-            logger.info(f"✅ Job '{name}' succeeded on attempt {attempt+1}")
+                result = await task_func(db)
+            logger.info(
+                "Job '%s' completed on attempt %s result=%s",
+                name,
+                attempt + 1,
+                result,
+            )
             break
         except OperationalError as e:
             logger.warning(f"⚠️ Job '{name}' DB error on attempt {attempt+1}: {e}")

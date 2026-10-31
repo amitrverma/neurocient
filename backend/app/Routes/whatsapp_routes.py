@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.database import get_db
-from app.models import CavemanSpot, User, WhatsAppWebhookEvent
+from app.models import CavemanSpot, UserPreferences, WhatsAppWebhookEvent
 from app.services.twilio_webhook import (
     twilio_webhook_ready,
     validate_twilio_request,
@@ -148,7 +148,10 @@ async def whatsapp_webhook(
 
         if description:
             result = await db.execute(
-                select(User.id).where(User.phone_number == from_number)
+                select(UserPreferences.user_id).where(
+                    UserPreferences.whatsapp_number == from_number,
+                    UserPreferences.whatsapp_verified.is_(True),
+                )
             )
             user_id = result.scalar_one_or_none()
             if user_id is not None:

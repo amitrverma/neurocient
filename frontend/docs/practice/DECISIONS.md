@@ -1534,3 +1534,23 @@ The signed-in Home begins with the existing Nudge of the Day and the latest AI-g
 Membership, settings, and delivery preferences remain account utilities in the account menu. Saved insights remain a reading and reference utility; they do not prompt or seed a user-written reflection. The accidental manual weekly-reflection entry point and API are removed.
 
 `/my-caveman` remains part of the Scan-to-login journey for now, but it is not included in the main signed-in Home information architecture. This change reorganises existing capability; it does not add a new product concept.
+
+## 2026-10-31: Optional reinforcement uses one consent authority
+
+`UserPreferences` is the sole authority for optional reinforcement purposes,
+push delivery, and WhatsApp delivery. Every optional purpose and channel starts
+off. A browser subscription is a delivery capability, not permission by itself,
+and an entered WhatsApp number is not usable until the user confirms a short-
+lived code delivered to that number.
+
+Daily nudges, Spot reminders, and Microchallenge reminders remain independent
+purposes. Every scheduled or manually triggered sender re-reads the relevant
+purpose and channel before provider dispatch. Legacy contact fields on `User`
+do not authorize sends. Password recovery, a reply to an inbound WhatsApp Spot,
+contact-form forwarding, and an independently submitted newsletter subscription
+retain their separate user-initiated or service-message contracts.
+
+This preserves WhatsApp and push as lightweight reinforcement channels rather
+than generic engagement machinery. Reminder content still has to return the
+person to useful recognition or an active experiment; consent does not make a
+generic notification product-appropriate.

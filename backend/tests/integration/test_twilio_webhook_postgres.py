@@ -39,7 +39,7 @@ async def test_signed_whatsapp_boundary_is_private_and_replay_safe(
     from app.Routes import whatsapp_routes
     from app.config import settings
     from app.database import AsyncSessionLocal, engine
-    from app.models import CavemanSpot, User, WhatsAppWebhookEvent
+    from app.models import CavemanSpot, User, UserPreferences, WhatsAppWebhookEvent
 
     canary_phone = "+919" + str(uuid4().int)[:9]
     unknown_phone = "+918" + str(uuid4().int)[:9]
@@ -64,13 +64,18 @@ async def test_signed_whatsapp_boundary_is_private_and_replay_safe(
     transport = httpx.ASGITransport(app=app)
 
     async with AsyncSessionLocal() as db:
-        db.add(
-            User(
+        db.add_all(
+            [User(
                 id=user_id,
                 email=f"twilio-{uuid4()}@example.com",
                 name="Webhook Test",
                 phone_number=canary_phone,
-            )
+            ), UserPreferences(
+                user_id=user_id,
+                whatsapp_number=canary_phone,
+                whatsapp_verified=True,
+                whatsapp_enabled=False,
+            )]
         )
         await db.commit()
 
@@ -246,6 +251,9 @@ async def test_signed_whatsapp_boundary_is_private_and_replay_safe(
                     WhatsAppWebhookEvent.provider_message_sid.in_(event_sids)
                 )
             )
+            await db.execute(
+                delete(UserPreferences).where(UserPreferences.user_id == user_id)
+            )
             await db.execute(delete(User).where(User.id == user_id))
             await db.commit()
         await engine.dispose()
@@ -257,7 +265,7 @@ async def test_failed_transaction_releases_claim_and_ack_failure_is_not_retried(
     from app.Routes import whatsapp_routes
     from app.config import settings
     from app.database import AsyncSessionLocal, engine, get_db
-    from app.models import CavemanSpot, User, WhatsAppWebhookEvent
+    from app.models import CavemanSpot, User, UserPreferences, WhatsAppWebhookEvent
 
     phone = "+917" + str(uuid4().int)[:9]
     user_id = uuid4()
@@ -270,12 +278,17 @@ async def test_failed_transaction_releases_claim_and_ack_failure_is_not_retried(
     monkeypatch.setattr(settings, "TWILIO_WHATSAPP_WEBHOOK_URL", WEBHOOK_URL)
 
     async with AsyncSessionLocal() as db:
-        db.add(
-            User(
+        db.add_all(
+            [User(
                 id=user_id,
                 email=f"twilio-rollback-{uuid4()}@example.com",
                 phone_number=phone,
-            )
+            ), UserPreferences(
+                user_id=user_id,
+                whatsapp_number=phone,
+                whatsapp_verified=True,
+                whatsapp_enabled=False,
+            )]
         )
         await db.commit()
 
@@ -382,6 +395,9 @@ async def test_failed_transaction_releases_claim_and_ack_failure_is_not_retried(
                 delete(WhatsAppWebhookEvent).where(
                     WhatsAppWebhookEvent.provider_message_sid == message_sid
                 )
+            )
+            await db.execute(
+                delete(UserPreferences).where(UserPreferences.user_id == user_id)
             )
             await db.execute(delete(User).where(User.id == user_id))
             await db.commit()

@@ -27,6 +27,7 @@ def test_production_configuration_rejects_missing_secrets(monkeypatch):
     assert "DATABASE_URL" in message
     assert "JWT_SECRET" in message
     assert "OPENAI_API_KEY" in message
+    assert "CONSENT_VERIFICATION_SECRET" in message
 
 
 def test_development_configuration_only_requires_database(monkeypatch):

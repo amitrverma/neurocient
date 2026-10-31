@@ -28,11 +28,11 @@ async def send_daily_nudge(db: AsyncSession = Depends(get_db)):
 
 @router.post("/push-spot", dependencies=[Depends(require_admin_key)])
 async def trigger_spot_pushes(db: AsyncSession = Depends(get_db)):
-    await send_spot_pushes(db)
-    return {"status": "spot nudges sent"}
+    result = await send_spot_pushes(db)
+    return {"status": "ok", **result}
 
 
 @router.post("/push-challenge", dependencies=[Depends(require_admin_key)])
 async def trigger_challenge_pushes(db: AsyncSession = Depends(get_db)):
-    await send_microchallenge_pushes(db)
-    return {"status": "microchallenge nudges sent"}
+    result = await send_microchallenge_pushes(db)
+    return {"status": "ok", **result}

@@ -1,4 +1,5 @@
 import os
+from urllib.parse import urlsplit
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -9,6 +10,20 @@ def _env_bool(name: str, default: bool = False) -> bool:
     if value is None:
         return default
     return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def valid_twilio_webhook_url(value: str | None) -> bool:
+    if not value:
+        return False
+    parsed = urlsplit(value)
+    return bool(
+        parsed.scheme == "https"
+        and parsed.hostname
+        and parsed.username is None
+        and parsed.password is None
+        and not parsed.fragment
+        and parsed.path == "/wa/webhook/whatsapp"
+    )
 
 
 class Settings:
@@ -28,6 +43,10 @@ class Settings:
     RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
     RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
     RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET")
+    TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+    TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+    TWILIO_WHATSAPP_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER")
+    TWILIO_WHATSAPP_WEBHOOK_URL = os.getenv("TWILIO_WHATSAPP_WEBHOOK_URL")
     RESEND_API_KEY = os.getenv("RESEND_API_KEY")
     RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL")
     PASSWORD_RESET_BASE_URL = os.getenv("PASSWORD_RESET_BASE_URL")
@@ -43,9 +62,28 @@ class Settings:
                 if not getattr(self, name):
                     missing.append(name)
 
+        twilio_names = (
+            "TWILIO_ACCOUNT_SID",
+            "TWILIO_AUTH_TOKEN",
+            "TWILIO_WHATSAPP_NUMBER",
+            "TWILIO_WHATSAPP_WEBHOOK_URL",
+        )
+        if self.ENV == "prod" or any(getattr(self, name) for name in twilio_names):
+            for name in twilio_names:
+                if not getattr(self, name):
+                    missing.append(name)
+
         if missing:
             raise RuntimeError(
                 "Missing required runtime configuration: " + ", ".join(sorted(missing))
+            )
+
+        if self.TWILIO_WHATSAPP_WEBHOOK_URL and not valid_twilio_webhook_url(
+            self.TWILIO_WHATSAPP_WEBHOOK_URL
+        ):
+            raise RuntimeError(
+                "Invalid runtime configuration: "
+                "TWILIO_WHATSAPP_WEBHOOK_URL must be the exact HTTPS webhook route"
             )
 
 settings = Settings()

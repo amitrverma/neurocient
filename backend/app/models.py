@@ -168,6 +168,17 @@ class PaymentWebhookEvent(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
+class WhatsAppWebhookEvent(Base):
+    """Minimal durable replay record for an inbound Twilio message."""
+
+    __tablename__ = "whatsapp_webhook_events"
+
+    provider_message_sid = Column(String(34), primary_key=True)
+    status = Column(String, nullable=False, default="received")
+    processed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
 class AdminAuditEvent(Base):
     __tablename__ = "admin_audit_events"
 

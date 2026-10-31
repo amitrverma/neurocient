@@ -26,6 +26,46 @@ def valid_twilio_webhook_url(value: str | None) -> bool:
     )
 
 
+def parse_csrf_trusted_origins(value: str | None, env: str) -> tuple[str, ...]:
+    if not value:
+        if env == "prod":
+            return ()
+        return ("http://localhost:3000", "http://localhost:3001")
+
+    origins: list[str] = []
+    for raw in value.split(","):
+        candidate = raw.strip()
+        if not candidate:
+            raise RuntimeError("CSRF_TRUSTED_ORIGINS contains an empty origin")
+        parsed = urlsplit(candidate)
+        try:
+            port = parsed.port
+        except ValueError as exc:
+            raise RuntimeError("CSRF_TRUSTED_ORIGINS contains an invalid port") from exc
+        if (
+            parsed.scheme not in {"http", "https"}
+            or not parsed.hostname
+            or parsed.username is not None
+            or parsed.password is not None
+            or parsed.path
+            or parsed.query
+            or parsed.fragment
+        ):
+            raise RuntimeError(f"Invalid CSRF trusted origin: {candidate}")
+        if parsed.scheme == "http" and not (
+            env != "prod" and parsed.hostname in {"localhost", "127.0.0.1", "::1"}
+        ):
+            raise RuntimeError(f"CSRF trusted origin must use HTTPS: {candidate}")
+        host = f"[{parsed.hostname}]" if ":" in parsed.hostname else parsed.hostname
+        normalized = f"{parsed.scheme}://{host.lower()}"
+        if port is not None:
+            normalized += f":{port}"
+        if normalized in origins:
+            raise RuntimeError(f"Duplicate CSRF trusted origin: {normalized}")
+        origins.append(normalized)
+    return tuple(origins)
+
+
 class Settings:
     DATABASE_URL = os.getenv("DATABASE_URL")
     ENV = os.getenv("ENV", "dev").strip().lower()
@@ -53,6 +93,9 @@ class Settings:
     RATE_LIMIT_ENABLED = _env_bool("RATE_LIMIT_ENABLED", default=False)
     RATE_LIMIT_KEY_SECRET = os.getenv("RATE_LIMIT_KEY_SECRET")
     ABUSE_PROXY_SECRET = os.getenv("ABUSE_PROXY_SECRET")
+    CSRF_TRUSTED_ORIGINS = parse_csrf_trusted_origins(
+        os.getenv("CSRF_TRUSTED_ORIGINS"), ENV
+    )
     ENABLE_SCHEDULER = _env_bool("ENABLE_SCHEDULER", default=False)
 
     def validate_for_startup(self) -> None:
@@ -82,6 +125,13 @@ class Settings:
                 raise RuntimeError(
                     "Invalid runtime configuration: abuse-control secrets must be independent"
                 )
+            if not self.CSRF_TRUSTED_ORIGINS:
+                missing.append("CSRF_TRUSTED_ORIGINS")
+            elif any(
+                not origin.startswith("https://")
+                for origin in self.CSRF_TRUSTED_ORIGINS
+            ):
+                missing.append("CSRF_TRUSTED_ORIGINS (HTTPS only)")
 
         twilio_names = (
             "TWILIO_ACCOUNT_SID",

@@ -1,6 +1,6 @@
 import pytest
 
-from app.config import Settings
+from app.config import Settings, parse_csrf_trusted_origins
 
 
 def _disable_twilio(monkeypatch):
@@ -105,4 +105,45 @@ def test_twilio_webhook_url_rejects_ambiguous_variants(monkeypatch, url):
     monkeypatch.setattr(Settings, "TWILIO_WHATSAPP_WEBHOOK_URL", url)
 
     with pytest.raises(RuntimeError):
+        Settings().validate_for_startup()
+
+
+def test_csrf_origins_are_normalized_and_development_has_local_defaults():
+    assert parse_csrf_trusted_origins(None, "dev") == (
+        "http://localhost:3000",
+        "http://localhost:3001",
+    )
+    assert parse_csrf_trusted_origins(
+        "https://WWW.Neurocient.com,https://neurocient.com:444", "prod"
+    ) == ("https://www.neurocient.com", "https://neurocient.com:444")
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "http://neurocient.com",
+        "https://neurocient.com/",
+        "https://user:secret@neurocient.com",
+        "https://neurocient.com?next=evil",
+        "https://neurocient.com,https://NEUROCIENT.com",
+        "https://neurocient.com,",
+    ],
+)
+def test_production_csrf_origins_reject_unsafe_or_ambiguous_values(value):
+    with pytest.raises(RuntimeError):
+        parse_csrf_trusted_origins(value, "prod")
+
+
+def test_production_requires_explicit_csrf_origins(monkeypatch):
+    _disable_twilio(monkeypatch)
+    monkeypatch.setattr(Settings, "ENV", "prod")
+    monkeypatch.setattr(Settings, "DATABASE_URL", "postgresql://example")
+    monkeypatch.setattr(Settings, "JWT_SECRET", "jwt")
+    monkeypatch.setattr(Settings, "OPENAI_API_KEY", "openai")
+    monkeypatch.setattr(Settings, "RATE_LIMIT_ENABLED", True)
+    monkeypatch.setattr(Settings, "RATE_LIMIT_KEY_SECRET", "r" * 32)
+    monkeypatch.setattr(Settings, "ABUSE_PROXY_SECRET", "a" * 32)
+    monkeypatch.setattr(Settings, "CSRF_TRUSTED_ORIGINS", ())
+
+    with pytest.raises(RuntimeError, match="CSRF_TRUSTED_ORIGINS"):
         Settings().validate_for_startup()

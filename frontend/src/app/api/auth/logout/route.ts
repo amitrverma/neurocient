@@ -1,16 +1,19 @@
 import { NextResponse } from "next/server";
+import { mutationProxyHeaders } from "@/lib/abuseProxy";
 
 const API_BASE_URL = process.env.API_BASE_URL;
 
 export async function POST(req: Request) {
   try {
     const cookie = req.headers.get("cookie") || "";
+    const backendPath = "/auth/logout";
 
-    const res = await fetch(`${API_BASE_URL}/auth/logout`, {
+    const res = await fetch(`${API_BASE_URL}${backendPath}`, {
       method: "POST",
       headers: {
         Cookie: cookie,
         "X-Neurocient-Auth-Request": "browser-bff",
+        ...mutationProxyHeaders(req, backendPath),
       },
     });
 

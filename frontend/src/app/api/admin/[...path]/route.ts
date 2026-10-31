@@ -1,15 +1,18 @@
 import { NextResponse } from "next/server";
+import { mutationProxyHeaders } from "@/lib/abuseProxy";
 
 async function proxy(req: Request, context: { params: Promise<{ path: string[] }> }) {
   try {
     const { path } = await context.params;
     const body = req.method === "GET" ? undefined : await req.text();
     const search = new URL(req.url).search;
-    const res = await fetch(`${process.env.API_BASE_URL}/api/admin/${path.join("/")}${search}`, {
+    const backendPath = `/api/admin/${path.join("/")}`;
+    const res = await fetch(`${process.env.API_BASE_URL}${backendPath}${search}`, {
       method: req.method,
       headers: {
         Cookie: req.headers.get("cookie") || "",
         ...(body ? { "Content-Type": req.headers.get("content-type") || "application/json" } : {}),
+        ...(req.method === "GET" ? {} : mutationProxyHeaders(req, backendPath)),
       },
       body,
       cache: "no-store",

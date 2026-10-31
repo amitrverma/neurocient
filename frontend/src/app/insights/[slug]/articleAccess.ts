@@ -1,4 +1,5 @@
 import { cookies, headers } from "next/headers";
+import { mutationProxyHeaders } from "@/lib/abuseProxy";
 
 export type ArticleAccessResult =
   | { granted: true }
@@ -25,11 +26,9 @@ export async function requestArticleAccess(
     const isPrefetch =
       requestHeaders.has("next-router-prefetch") ||
       requestHeaders.get("purpose")?.toLowerCase() === "prefetch";
-    const isCrossSiteSubresource =
-      requestHeaders.get("sec-fetch-site") === "cross-site" &&
-      (requestHeaders.get("sec-fetch-mode") !== "navigate" ||
-        requestHeaders.get("sec-fetch-dest") !== "document");
-    if (isPrefetch || isCrossSiteSubresource) {
+    const fetchSite = requestHeaders.get("sec-fetch-site");
+    const isTrustedNavigation = fetchSite === "same-origin" || fetchSite === "none";
+    if (isPrefetch || !isTrustedNavigation) {
       return {
         granted: false,
         reason: "unavailable",
@@ -39,14 +38,29 @@ export async function requestArticleAccess(
 
     const cookieHeader = (await cookies()).toString();
     const authorization = requestHeaders.get("authorization");
+    const backendPath = `/articles/${encodeURIComponent(slug)}/access`;
+    const host =
+      requestHeaders.get("x-forwarded-host") ||
+      requestHeaders.get("host") ||
+      "localhost:3000";
+    const protocol =
+      requestHeaders.get("x-forwarded-proto") ||
+      (host.startsWith("localhost") || host.startsWith("127.0.0.1")
+        ? "http"
+        : "https");
+    const signingRequest = new Request(`${protocol}://${host}/insights/${encodeURIComponent(slug)}`, {
+      method: "GET",
+      headers: requestHeaders,
+    });
     const backendHeaders: Record<string, string> = {
       Cookie: cookieHeader,
       "X-Neurocient-Access-Request": "insight-page",
+      ...mutationProxyHeaders(signingRequest, backendPath, "POST"),
     };
     if (authorization) backendHeaders.Authorization = authorization;
 
     const response = await fetch(
-      `${apiBaseUrl}/articles/${encodeURIComponent(slug)}/access`,
+      `${apiBaseUrl}${backendPath}`,
       {
         method: "POST",
         headers: backendHeaders,

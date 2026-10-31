@@ -39,7 +39,7 @@ COOKIE_DOMAIN = None if raw_domain in (None, "None", "localhost") else raw_domai
 # Cookie flags
 if ENV == "prod":
     COOKIE_SECURE = True
-    COOKIE_SAMESITE = "None"
+    COOKIE_SAMESITE = "Lax"
 else:  # local dev
     COOKIE_SECURE = False
     COOKIE_SAMESITE = "Lax"

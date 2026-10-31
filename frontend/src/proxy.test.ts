@@ -43,3 +43,63 @@ describe("Insight guest identity proxy", () => {
     expect(request.cookies.get(GUEST_ACCESS_COOKIE)?.value).not.toBe("invalid");
   });
 });
+
+describe("API mutation origin protection", () => {
+  it.each(["POST", "PUT", "PATCH", "DELETE"])(
+    "accepts a same-origin %s request",
+    (method) => {
+      const request = new NextRequest("https://www.neurocient.com/api/private", {
+        method,
+        headers: { Origin: "https://www.neurocient.com" },
+      });
+      expect(proxy(request).status).toBe(200);
+    },
+  );
+
+  it("accepts an exact-origin Referer fallback", () => {
+    const request = new NextRequest("https://www.neurocient.com/api/private", {
+      method: "POST",
+      headers: { Referer: "https://www.neurocient.com/profile?tab=privacy" },
+    });
+    expect(proxy(request).status).toBe(200);
+  });
+
+  it.each([
+    {},
+    { Origin: "null" },
+    { Origin: "not a url" },
+    { Origin: "https://evil.example" },
+    { Origin: "http://www.neurocient.com" },
+    { Origin: "https://www.neurocient.com:444" },
+    { Origin: "https://www.neurocient.com.evil.example" },
+    { Referer: "https://www.neurocient.com.evil.example/profile" },
+  ])("rejects a JSON mutation with untrusted evidence %#", async (headers) => {
+    const request = new NextRequest("https://www.neurocient.com/api/private", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ private: true }),
+    });
+    const response = proxy(request);
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toEqual({
+      detail: { code: "csrf_failed" },
+    });
+    expect(response.headers.get("cache-control")).toBe("no-store");
+  });
+
+  it("rejects a cross-origin no-body mutation", () => {
+    const request = new NextRequest("https://www.neurocient.com/api/logout", {
+      method: "POST",
+      headers: { Origin: "https://evil.example" },
+    });
+    expect(proxy(request).status).toBe(403);
+  });
+
+  it.each(["GET", "HEAD", "OPTIONS"])("does not block safe %s", (method) => {
+    const request = new NextRequest("https://www.neurocient.com/api/public", {
+      method,
+      headers: { Origin: "https://evil.example" },
+    });
+    expect(proxy(request).status).toBe(200);
+  });
+});

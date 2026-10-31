@@ -7,13 +7,17 @@ import { requestArticleAccess } from "./articleAccess";
 
 describe("server-side Insight access", () => {
   const originalApiBaseUrl = process.env.API_BASE_URL;
+  const originalProxySecret = process.env.ABUSE_PROXY_SECRET;
 
   beforeEach(() => {
     process.env.API_BASE_URL = "https://backend.example";
+    process.env.ABUSE_PROXY_SECRET = "test-secret-that-is-at-least-32-characters";
     vi.mocked(cookies).mockResolvedValue({
       toString: () => "guest_access_id=guest; access_token=token",
     } as never);
-    vi.mocked(headers).mockResolvedValue(new Headers() as never);
+    vi.mocked(headers).mockResolvedValue(
+      new Headers({ "sec-fetch-site": "same-origin" }) as never,
+    );
   });
 
   afterEach(() => {
@@ -21,6 +25,8 @@ describe("server-side Insight access", () => {
     vi.clearAllMocks();
     if (originalApiBaseUrl === undefined) delete process.env.API_BASE_URL;
     else process.env.API_BASE_URL = originalApiBaseUrl;
+    if (originalProxySecret === undefined) delete process.env.ABUSE_PROXY_SECRET;
+    else process.env.ABUSE_PROXY_SECRET = originalProxySecret;
   });
 
   it("forwards identity cookies to the authoritative backend", async () => {
@@ -39,10 +45,11 @@ describe("server-side Insight access", () => {
       "https://backend.example/articles/doomscrolling/access",
       expect.objectContaining({
         method: "POST",
-        headers: {
+        headers: expect.objectContaining({
           Cookie: "guest_access_id=guest; access_token=token",
           "X-Neurocient-Access-Request": "insight-page",
-        },
+          "X-Neurocient-Proxy-Signature": expect.stringMatching(/^[a-f0-9]{64}$/),
+        }),
         cache: "no-store",
         redirect: "manual",
       }),
@@ -51,7 +58,10 @@ describe("server-side Insight access", () => {
 
   it("forwards an incoming Authorization header", async () => {
     vi.mocked(headers).mockResolvedValue(
-      new Headers({ Authorization: "Bearer account-token" }) as never,
+      new Headers({
+        Authorization: "Bearer account-token",
+        "sec-fetch-site": "same-origin",
+      }) as never,
     );
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ granted: true }), {
@@ -220,5 +230,67 @@ describe("server-side Insight access", () => {
       reason: "unavailable",
     });
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("does not consume account or guest quota on cross-site top-level navigation", async () => {
+    vi.mocked(headers).mockResolvedValue(
+      new Headers({
+        "sec-fetch-site": "cross-site",
+        "sec-fetch-mode": "navigate",
+        "sec-fetch-dest": "document",
+      }) as never,
+    );
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(requestArticleAccess("doomscrolling")).resolves.toMatchObject({
+      granted: false,
+      reason: "unavailable",
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("does not consume quota when navigation provenance is missing", async () => {
+    vi.mocked(headers).mockResolvedValue(new Headers() as never);
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(requestArticleAccess("doomscrolling")).resolves.toMatchObject({
+      granted: false,
+      reason: "unavailable",
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("does not consume quota on a sibling-origin same-site navigation", async () => {
+    vi.mocked(headers).mockResolvedValue(
+      new Headers({ "sec-fetch-site": "same-site" }) as never,
+    );
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(requestArticleAccess("doomscrolling")).resolves.toMatchObject({
+      granted: false,
+      reason: "unavailable",
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("accepts a direct address-bar navigation with Sec-Fetch-Site none", async () => {
+    vi.mocked(headers).mockResolvedValue(
+      new Headers({ "sec-fetch-site": "none" }) as never,
+    );
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ granted: true }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(requestArticleAccess("doomscrolling")).resolves.toEqual({
+      granted: true,
+    });
+    expect(fetchMock).toHaveBeenCalledOnce();
   });
 });

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { mutationProxyHeaders } from "@/lib/abuseProxy";
 
 type SaveBody = Record<string, unknown>;
 
@@ -17,11 +18,13 @@ export async function POST(
   }
 
   try {
-    const res = await fetch(`${process.env.API_BASE_URL}/articles/save/${slug}`, {
+    const backendPath = `/articles/save/${slug}`;
+    const res = await fetch(`${process.env.API_BASE_URL}${backendPath}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Cookie: cookie,
+        ...mutationProxyHeaders(req, backendPath),
       },
       credentials: "include",
       body: JSON.stringify(body),
@@ -43,11 +46,13 @@ export async function DELETE(
   const cookie = req.headers.get("cookie") || "";
 
   try {
-    const res = await fetch(`${process.env.API_BASE_URL}/articles/save/${slug}`, {
+    const backendPath = `/articles/save/${slug}`;
+    const res = await fetch(`${process.env.API_BASE_URL}${backendPath}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
         Cookie: cookie,
+        ...mutationProxyHeaders(req, backendPath),
       },
       credentials: "include",
     });

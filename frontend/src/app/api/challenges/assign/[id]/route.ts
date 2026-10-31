@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { mutationProxyHeaders } from "@/lib/abuseProxy";
 
 const API_BASE_URL = process.env.API_BASE_URL;
 
@@ -6,10 +7,11 @@ export async function POST(req: NextRequest) {
   const cookie = req.headers.get("cookie") || "";
 
   const id = req.nextUrl.pathname.split("/").pop();
+  const backendPath = `/challenges/assign/${id}`;
 
-  const res = await fetch(`${API_BASE_URL}/challenges/assign/${id}`, {
+  const res = await fetch(`${API_BASE_URL}${backendPath}`, {
     method: "POST",
-    headers: { Cookie: cookie },
+    headers: { Cookie: cookie, ...mutationProxyHeaders(req, backendPath) },
     credentials: "include",
   });
 

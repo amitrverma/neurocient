@@ -22,12 +22,13 @@ from app.Routes import (
 )
 from app.config import settings
 from app.utils.scheduler import start_scheduler, stop_scheduler
-from app.middleware import MutationBodyLimitMiddleware
+from app.middleware import CsrfProtectionMiddleware, MutationBodyLimitMiddleware
 
 openai.api_key = settings.OPENAI_API_KEY
 
 app = FastAPI()
 app.add_middleware(MutationBodyLimitMiddleware)
+app.add_middleware(CsrfProtectionMiddleware)
 
 
 @app.get("/healthz", include_in_schema=False)
@@ -37,12 +38,7 @@ async def healthcheck():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://www.neurocient.com",
-        "https://neurocient.com",
-        "http://localhost:3000",
-        "http://localhost:3001",
-    ],
+    allow_origins=list(settings.CSRF_TRUSTED_ORIGINS),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { mutationProxyHeaders } from "@/lib/abuseProxy";
 
 export async function POST(
   req: Request,
@@ -7,12 +8,13 @@ export async function POST(
   try {
     const { slug } = await context.params; // ✅ await params
     const cookie = req.headers.get("cookie") || "";
+    const backendPath = `/articles/${slug}/read`;
 
     const res = await fetch(
-      `${process.env.API_BASE_URL}/articles/${slug}/read`,
+      `${process.env.API_BASE_URL}${backendPath}`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json", Cookie: cookie },
+        headers: { "Content-Type": "application/json", Cookie: cookie, ...mutationProxyHeaders(req, backendPath) },
         credentials: "include",
       }
     );

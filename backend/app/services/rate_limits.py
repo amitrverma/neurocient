@@ -85,7 +85,9 @@ def proxy_signature(secret: str, timestamp: int, method: str, path: str, ip: str
     return hmac.new(secret.encode("utf-8"), payload, hashlib.sha256).hexdigest()
 
 
-def client_ip(request: Request, *, now_seconds: int | None = None) -> str:
+def verified_proxy_client_ip(
+    request: Request, *, now_seconds: int | None = None
+) -> str | None:
     claimed_raw = (request.headers.get(PROXY_IP_HEADER) or "").strip()
     claimed_ip = _valid_ip(claimed_raw)
     timestamp_value = request.headers.get(PROXY_TIMESTAMP_HEADER)
@@ -103,6 +105,20 @@ def client_ip(request: Request, *, now_seconds: int | None = None) -> str:
             )
             if hmac.compare_digest(expected, signature):
                 return claimed_ip
+
+    return None
+
+
+def has_valid_proxy_signature(
+    request: Request, *, now_seconds: int | None = None
+) -> bool:
+    return verified_proxy_client_ip(request, now_seconds=now_seconds) is not None
+
+
+def client_ip(request: Request, *, now_seconds: int | None = None) -> str:
+    verified = verified_proxy_client_ip(request, now_seconds=now_seconds)
+    if verified:
+        return verified
 
     # Azure appends its trusted peer address to the right-hand side.
     forwarded = request.headers.get("x-forwarded-for", "")

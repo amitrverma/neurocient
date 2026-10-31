@@ -134,9 +134,17 @@ $fqdn = az containerapp show `
 Invoke-RestMethod "https://$fqdn/healthz"
 ```
 
-Configure the application values from `backend/.env.example` as Container App secrets/environment variables. At minimum, production startup requires `ENV=prod`, `DATABASE_URL`, `JWT_SECRET`, `OPENAI_API_KEY`, `RATE_LIMIT_ENABLED=true`, independent 32-or-more-character `RATE_LIMIT_KEY_SECRET` and `ABUSE_PROXY_SECRET` values, and valid Firebase credentials. Configure the identical `ABUSE_PROXY_SECRET` as a server-only Vercel variable; it must never use a `NEXT_PUBLIC_` prefix. Provider features additionally require their corresponding VAPID, PostHog, Resend, Azure Storage, or Twilio settings.
+Configure the application values from `backend/.env.example` as Container App secrets/environment variables. At minimum, production startup requires `ENV=prod`, `DATABASE_URL`, `JWT_SECRET`, `OPENAI_API_KEY`, `RATE_LIMIT_ENABLED=true`, independent 32-or-more-character `RATE_LIMIT_KEY_SECRET` and `ABUSE_PROXY_SECRET` values, `CSRF_TRUSTED_ORIGINS=https://www.neurocient.com,https://neurocient.com`, and valid Firebase credentials. Configure the identical `ABUSE_PROXY_SECRET` as a server-only Vercel variable; it must never use a `NEXT_PUBLIC_` prefix. Provider features additionally require their corresponding VAPID, PostHog, Resend, Azure Storage, or Twilio settings.
 
 For the abuse-control rollout, migrate PostgreSQL first, deploy the signed Vercel proxies while the old backend still ignores their additional headers, verify signature coverage, and only then deploy the backend with enforcement enabled. Reversing that order can temporarily combine unrelated visitors in a shared Vercel-egress IP bucket. See `../implementation/ABUSE_AND_COST_CONTROLS.md` for preflight, observation, rollback, and secret-rotation details.
+
+For CSRF rollout, deploy the Next.js origin gate and signed mutation proxies
+before the FastAPI cookie-mutation guard. Verify that login, refresh, logout,
+password reset, profile changes, Practice, Scan, saved Insights, and Insight page
+access work on the preview deployment, then deploy the backend guard. Production
+and preview intentionally fail closed when `ABUSE_PROXY_SECRET` is missing.
+Cross-site Insight navigation must show the closed access state and must not
+consume an account or guest grant. See `../implementation/CSRF_PROTECTION.md`.
 
 The live app currently has twelve settings stored as literal environment values, including database, JWT, OpenAI, Firebase, and Twilio credentials. Before broadening deployment access, move every sensitive value to an Azure Container App secret and make the corresponding environment entry a `secretref:`. Do not copy the values into GitHub variables or workflow YAML. Image-only manual deployments preserve those references after the migration.
 
@@ -170,6 +178,9 @@ Production-shaped smoke checks must not send real notifications:
 - Container startup logs show successful database initialization and no missing configuration.
 - The Vercel deployment can reach the backend through `API_BASE_URL`.
 - Login creates cookies on the Vercel hostname and `/api/auth/me` recognizes them.
+- Auth cookies are `Secure`, `HttpOnly`, and `SameSite=Lax`; a foreign-origin
+  JSON request and a foreign-origin no-body request both receive `403 csrf_failed`
+  through Next and against the backend directly.
 - A synthetic account can complete one representative database-backed journey.
 
 ## Rollback

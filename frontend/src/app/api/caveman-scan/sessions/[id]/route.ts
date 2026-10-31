@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { mutationProxyHeaders } from "@/lib/abuseProxy";
 
 const API_BASE_URL = process.env.API_BASE_URL;
 type Context = { params: Promise<{ id: string }> };
@@ -6,9 +7,10 @@ type Context = { params: Promise<{ id: string }> };
 const proxy = async (request: Request, id: string, method: "GET" | "PUT") => {
   const url = new URL(request.url);
   const suffix = method === "GET" ? `?${url.searchParams}` : "";
-  const response = await fetch(`${API_BASE_URL}/api/caveman-scan/sessions/${id}${suffix}`, {
+  const backendPath = `/api/caveman-scan/sessions/${id}`;
+  const response = await fetch(`${API_BASE_URL}${backendPath}${suffix}`, {
     method,
-    headers: { "Content-Type": "application/json", Cookie: request.headers.get("cookie") || "" },
+    headers: { "Content-Type": "application/json", Cookie: request.headers.get("cookie") || "", ...(method === "PUT" ? mutationProxyHeaders(request, backendPath) : {}) },
     body: method === "PUT" ? JSON.stringify(await request.json()) : undefined,
   });
   return NextResponse.json(await response.json().catch(() => ({})), { status: response.status });

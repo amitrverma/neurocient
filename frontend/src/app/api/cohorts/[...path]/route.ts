@@ -10,7 +10,7 @@ async function proxy(req: Request, context: { params: Promise<{ path: string[] }
     headers: {
       Cookie: req.headers.get("cookie") || "",
       ...(body ? { "Content-Type": req.headers.get("content-type") || "application/json" } : {}),
-      ...(req.method === "POST" && backendPath.endsWith("/checkout") ? abuseProxyHeaders(req, backendPath) : {}),
+      ...(req.method === "GET" ? {} : abuseProxyHeaders(req, backendPath)),
     },
     body,
     cache: "no-store",

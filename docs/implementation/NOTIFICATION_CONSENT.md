@@ -1,6 +1,6 @@
 # Notification consent implementation contract
 
-Status: approved for implementation
+Status: implemented locally; genuine-provider staging pending
 
 Owner: Amit
 
@@ -41,6 +41,8 @@ delivery, including when the preference changes after a job was scheduled.
   bounded-attempt code sent to that number. Only the server may set verification
   state. Changing the number invalidates prior verification and does not silently
   enable WhatsApp.
+- Confirmation proves number ownership only. It preserves the current channel
+  consent state; enabling WhatsApp is a separate explicit preference mutation.
 - Preference mutation accepts an explicit schema only. Unknown and server-owned
   fields are rejected; clients cannot set verification state or verification
   secrets.
@@ -105,6 +107,34 @@ delivery, including when the preference changes after a job was scheduled.
 - Independent two-stage review because this change governs external side effects,
   personal contact data, and every notification entry point.
 - Twilio and web-push staging delivery remain required before `Verified` status.
+
+## Implementation and local evidence
+
+Implementation revision: `fc5ac86` on `dev`.
+
+- Alembic revision `20261031_0006` creates safe, non-null consent defaults,
+  backfills missing preference rows, and clears ambiguous legacy authorization.
+- The real PostgreSQL consent journey covers defaults, strict/atomic PATCH
+  validation, WhatsApp expiry/replay/attempt limits, duplicate ownership,
+  opt-out precedence, out-of-order provider failure, and push ownership/removal.
+- Reminder adapter tests cover all three purposes across both channels and all
+  enabled/disabled channel states, including a preference change immediately
+  before dispatch.
+- Final local suites passed: 170 backend tests (10 provider/database tests skipped
+  by default), 122 frontend tests, frontend lint with zero errors, and the
+  production frontend build. The consent PostgreSQL integration passed against
+  local PostgreSQL; the wider PostgreSQL integrations also passed in isolated
+  processes during this implementation session.
+- Migration upgrade, downgrade/re-upgrade, current, and drift checks passed.
+- The final Python 3.12 backend image built successfully as
+  `neurocient-backend:consent01-final` (manifest
+  `sha256:5fffb972c07adfcf56403eb7225fe7cb48d7ed41861bfafd1814a54fc6e0586e`).
+- Independent two-stage review reproduced and drove fixes for two concurrency
+  races, null validation, and pending/replacement UI states, then reported no
+  remaining material CONSENT-01 code finding.
+
+Do not promote this item to `Verified` or enable scheduled delivery until genuine
+Twilio and Web Push staging delivery has passed on the exact release candidate.
 
 ## Rollout and recovery
 

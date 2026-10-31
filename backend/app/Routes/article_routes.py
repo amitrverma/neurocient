@@ -1,15 +1,126 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import delete
+from sqlalchemy import delete, func, text
 from app.database import get_db
-from app.models import Article, SavedArticle, User
-from app.utils.auth import get_current_user
+from app.models import Article, ArticleAccessGrant, SavedArticle, User
+from app.utils.auth import get_current_user, get_optional_user
 import uuid
 from datetime import datetime
 from app.analytics.posthog_client import track_event
+from app.services.membership import (
+    decide_article_access,
+    has_active_membership,
+    lock_account_access,
+    membership_required_detail,
+)
 
 router = APIRouter()
+
+GUEST_ACCESS_COOKIE = "guest_access_id"
+GUEST_ARTICLE_LIMIT = 5
+ACCOUNT_ARTICLE_LIMIT = 20
+ARTICLE_ACCESS_REQUEST_HEADER = "x-neurocient-access-request"
+
+
+def guest_identity_required_detail() -> dict:
+    return {
+        "code": "guest_identity_required",
+        "message": "A valid guest identity is required to open this Insight.",
+    }
+
+
+@router.post("/{slug}/access")
+async def grant_article_access(
+    slug: str,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User | None = Depends(get_optional_user),
+):
+    """Grant access before the frontend compiles or returns full MDX."""
+
+    if request.headers.get(ARTICLE_ACCESS_REQUEST_HEADER) != "insight-page":
+        raise HTTPException(status_code=403, detail="Access request not permitted")
+
+    normalized_slug = slug.strip().lower()
+    if not normalized_slug or len(normalized_slug) > 200:
+        raise HTTPException(status_code=404, detail="Insight not found")
+
+    user_id = current_user.id if current_user else None
+    guest_id = None
+    if user_id:
+        await lock_account_access(db, user_id)
+        membership_active = await has_active_membership(db, user_id)
+        limit = ACCOUNT_ARTICLE_LIMIT
+        identity_filter = ArticleAccessGrant.user_id == user_id
+    else:
+        try:
+            guest_id = uuid.UUID(request.cookies.get(GUEST_ACCESS_COOKIE, ""))
+        except (ValueError, AttributeError):
+            raise HTTPException(
+                status_code=400,
+                detail=guest_identity_required_detail(),
+            )
+        await db.execute(
+            text(
+                "select pg_advisory_xact_lock("
+                "hashtextextended(:guest_identity, 0))"
+            ),
+            {"guest_identity": f"article-access:{guest_id}"},
+        )
+        membership_active = False
+        limit = GUEST_ARTICLE_LIMIT
+        identity_filter = ArticleAccessGrant.guest_id == guest_id
+
+    existing = await db.scalar(
+        select(ArticleAccessGrant.id).where(
+            identity_filter,
+            ArticleAccessGrant.article_slug == normalized_slug,
+        )
+    )
+    used = await db.scalar(
+        select(func.count(ArticleAccessGrant.id)).where(identity_filter)
+    )
+    decision = decide_article_access(
+        membership_active=membership_active,
+        already_granted=existing is not None,
+        used=used or 0,
+        limit=limit,
+    )
+
+    if not decision.granted:
+        detail = membership_required_detail("articles", limit)
+        detail["remaining"] = 0
+        if current_user is None:
+            detail.update(
+                {
+                    "code": "account_required",
+                    "next_action": "sign_in",
+                    "message": (
+                        "You have read five free Insights. Sign in to continue "
+                        "with a free account."
+                    ),
+                }
+            )
+        else:
+            detail["next_action"] = "membership"
+        raise HTTPException(status_code=402, detail=detail)
+
+    if decision.consume:
+        db.add(
+            ArticleAccessGrant(
+                article_slug=normalized_slug,
+                user_id=user_id,
+                guest_id=guest_id,
+            )
+        )
+        await db.commit()
+
+    return {
+        "granted": True,
+        "membership_active": membership_active,
+        "remaining": decision.remaining,
+    }
 
 # ✅ Save article
 @router.post("/save/{slug}")

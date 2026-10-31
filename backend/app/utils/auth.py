@@ -10,6 +10,7 @@ from app.models import User
 from app.config import settings
 import os
 from typing import Optional
+from uuid import UUID
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -116,46 +117,70 @@ def get_token_from_cookies(req: Request) -> Optional[str]:
 # ------------------------
 security = HTTPBearer(auto_error=False)
 
-async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-    req: Request = None,
-    db: AsyncSession = Depends(get_db),
-) -> User:
-    """
-    Extract the current user either from Bearer token OR HttpOnly cookie.
-    """
-
-    token = None
-
-    # 1) Prefer Authorization header
-    if credentials:
-        token = credentials.credentials
-    # 2) Fallback to HttpOnly cookie
-    elif req:
-        token = get_token_from_cookies(req)
-
-    if not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
-        )
-
+async def _resolve_access_token_user(token: str, db: AsyncSession) -> User:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: str = payload.get("sub")
+        user_id = payload.get("sub")
 
-        if not user_id:
+        if not user_id or payload.get("typ") != "access":
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
-        # Fetch user from DB
-        result = await db.execute(select(User).where(User.id == user_id))
+        try:
+            normalized_user_id = UUID(str(user_id))
+        except (ValueError, TypeError, AttributeError):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token",
+            )
+
+        result = await db.execute(select(User).where(User.id == normalized_user_id))
         user = result.scalar_one_or_none()
         if not user:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
 
         return user
-
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
-    except Exception:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed")
+
+
+def _request_access_token(
+    credentials: HTTPAuthorizationCredentials | None,
+    req: Request,
+) -> str | None:
+    if credentials:
+        return credentials.credentials
+    return get_token_from_cookies(req)
+
+
+async def get_optional_user(
+    req: Request,
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
+    db: AsyncSession = Depends(get_db),
+) -> User | None:
+    """Resolve an account when present; reject invalid presented credentials."""
+
+    token = _request_access_token(credentials, req)
+    if not token:
+        if req.cookies.get("refresh_token") or req.cookies.get("session_present"):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Session refresh required",
+            )
+        return None
+    return await _resolve_access_token_user(token, db)
+
+
+async def get_current_user(
+    req: Request,
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
+    db: AsyncSession = Depends(get_db),
+) -> User:
+    """Extract the current user from a Bearer token or HttpOnly cookie."""
+
+    user = await get_optional_user(req, credentials, db)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+        )
+    return user

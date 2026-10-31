@@ -307,7 +307,7 @@ class AuthSession(TrackerSession):
             self.auth_resolved = True
             sql = str(statement)
             assert "FROM users" in sql
-            assert str(self.user.id) in set(statement.compile().params.values())
+            assert self.user.id in set(statement.compile().params.values())
             return ScalarResult(self.user)
         return await super().execute(statement)
 

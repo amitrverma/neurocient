@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, ForeignKey, Text, Date, JSON, UniqueConstraint, Integer, Boolean, Index
+from sqlalchemy import Column, String, DateTime, ForeignKey, Text, Date, JSON, UniqueConstraint, Integer, Boolean, CheckConstraint, Index
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 import uuid
@@ -347,6 +347,42 @@ class Article(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class ArticleAccessGrant(Base):
+    """A durable, idempotent free-access grant for one actor and Insight."""
+
+    __tablename__ = "article_access_grants"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    article_slug = Column(String, nullable=False)
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=True,
+    )
+    guest_id = Column(UUID(as_uuid=True), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "(user_id IS NOT NULL AND guest_id IS NULL) OR "
+            "(user_id IS NULL AND guest_id IS NOT NULL)",
+            name="ck_article_access_actor",
+        ),
+        UniqueConstraint(
+            "user_id",
+            "article_slug",
+            name="uq_article_access_user_slug",
+        ),
+        UniqueConstraint(
+            "guest_id",
+            "article_slug",
+            name="uq_article_access_guest_slug",
+        ),
+        Index("ix_article_access_user_id", "user_id"),
+        Index("ix_article_access_guest_id", "guest_id"),
+    )
     
 class SavedArticle(Base):
     __tablename__ = "saved_articles"

@@ -138,9 +138,10 @@ concepts whose exposure must be earned by the experience.
 
 ### Critical product coherence
 
-- Article limits are incremented consistently for anonymous and signed-in users,
-  but remain browser-local rather than authoritative account usage. They should
-  move to persisted account enforcement with the payment integration.
+- Insight limits are now enforced through the server-authoritative membership
+  entitlement and PostgreSQL access ledger. Anonymous enforcement remains tied
+  to one HttpOnly browser cookie; durable cross-device identity still requires
+  sign-in.
 
 ### Information architecture
 

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from uuid import UUID
 
@@ -8,6 +9,37 @@ from app.models import MembershipEntitlement, User
 
 
 ACTIVE_MEMBERSHIP_STATUSES = {"active", "trialing"}
+
+
+@dataclass(frozen=True)
+class ArticleAccessDecision:
+    granted: bool
+    consume: bool
+    remaining: int | None
+
+
+def decide_article_access(
+    *,
+    membership_active: bool,
+    already_granted: bool,
+    used: int,
+    limit: int,
+) -> ArticleAccessDecision:
+    """Decide access without mutating state.
+
+    Existing grants remain usable after an allowance is exhausted. Paid access
+    never consumes the free ledger.
+    """
+
+    if membership_active:
+        return ArticleAccessDecision(True, False, None)
+
+    remaining = max(0, limit - used)
+    if already_granted:
+        return ArticleAccessDecision(True, False, remaining)
+    if used >= limit:
+        return ArticleAccessDecision(False, False, 0)
+    return ArticleAccessDecision(True, True, max(0, remaining - 1))
 
 
 async def lock_account_access(db: AsyncSession, user_id: UUID) -> None:

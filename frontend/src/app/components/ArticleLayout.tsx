@@ -22,11 +22,6 @@ import Newsletter from "./Newsletter";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "./AuthModal";
 import { useNotification } from "./NotificationProvider";
-import {
-  hasActiveMembership,
-  incrementUsage,
-} from "../utils/usage";
-import MembershipModal from "./MembershipModal";
 import { trackEvent } from "../utils/analytics";
 import { slugifyTag } from "../utils/slug";
 import CavemanSpot from "./ui/CavemanSpot";
@@ -118,7 +113,6 @@ const ArticleLayout = ({
   const [isSaved, setIsSaved] = useState(false);
   const [savedStateUnavailable, setSavedStateUnavailable] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const [showMembership, setShowMembership] = useState(false);
   const [authContext, setAuthContext] = useState<string | null>(null);
   const [authCallback, setAuthCallback] = useState<(() => void) | null>(null);
   const nextRef = useRef<HTMLDivElement | null>(null);
@@ -171,18 +165,6 @@ const ArticleLayout = ({
         });
         trackEvent("Article Read", { slug });
 
-        if (user) {
-          if (!hasActiveMembership(user)) {
-            const { allowed } = incrementUsage("articles", true);
-            if (!allowed) setShowMembership(true);
-          }
-        } else {
-          const { allowed } = incrementUsage("articles", false);
-          if (!allowed) {
-            setAuthContext("continue reading");
-            setShowAuth(true);
-          }
-        }
       } catch (err) {
         console.error("❌ Error incrementing read count:", err);
       }
@@ -438,7 +420,7 @@ const ArticleLayout = ({
         )}
       </article>
 
-      {/* Auth / Membership */}
+      {/* Auth */}
       <AuthModal
         isOpen={showAuth}
         onClose={() => setShowAuth(false)}
@@ -454,12 +436,6 @@ const ArticleLayout = ({
         }}
         disableEscape
       />
-      <MembershipModal
-        isOpen={showMembership}
-        onClose={() => setShowMembership(false)}
-        disableEscape
-      />
-
       {/* JSON-LD */}
       <Script
         id="article-jsonld"

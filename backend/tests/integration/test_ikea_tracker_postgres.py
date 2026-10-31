@@ -19,7 +19,7 @@ pytestmark = [
 
 async def test_tracker_authorization_and_persistence_on_postgres(monkeypatch):
     from app.Routes import ikea_routes
-    from app.database import AsyncSessionLocal
+    from app.database import AsyncSessionLocal, engine
     from app.models import IkeaTracker, IkeaWorksheet, User
     from app.utils.auth import create_access_token
 
@@ -174,3 +174,4 @@ async def test_tracker_authorization_and_persistence_on_postgres(monkeypatch):
                 delete(User).where(User.id.in_([owner_id, other_owner_id]))
             )
             await session.commit()
+        await engine.dispose()

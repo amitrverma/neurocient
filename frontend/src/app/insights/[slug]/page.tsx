@@ -13,6 +13,10 @@ import CavemanSpot from "../../components/ui/CavemanSpot";
 import ConversationVersion from "../../components/ConversationVersion";
 import InnerCavemanHighlighter from "../../components/InnerCavemanHighlighter";
 import { generateAudioSasUrl } from "@/lib/azureAudioSas";
+import InsightAccessGate from "./InsightAccessGate";
+import { requestArticleAccess } from "./articleAccess";
+
+export const dynamic = "force-dynamic";
 
 const insightsDir = path.join(process.cwd(), "src/content/insights");
 
@@ -186,6 +190,12 @@ export default async function InsightPage(
 
   const raw = fs.readFileSync(filePath, "utf-8");
   const { content, data } = matter(raw);
+  const displayTitle = (data.displayTitle as string) || (data.title as string) || slug;
+  const access = await requestArticleAccess(slug);
+  if (!access.granted) {
+    return <InsightAccessGate title={displayTitle} access={access} />;
+  }
+
   const typographyVariant = (data.typographyVariant as string | undefined) || "prologue";
   const usesStandardLongformVariant = typographyVariant === "prologue";
   const headings = getArticleHeadings(content);
@@ -218,7 +228,6 @@ export default async function InsightPage(
   });
 
   const readingTime = getReadingTime(content);
-  const displayTitle = (data.displayTitle as string) || (data.title as string) || slug;
   const articleProseClass = typographyVariant
     ? `prose prose-article prose-variant-${typographyVariant} max-w-none`
     : "prose prose-article max-w-none";

@@ -1,11 +1,12 @@
-import hashlib
 import json
+import logging
 import uuid
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
@@ -21,12 +22,57 @@ from app.models import (
     User,
 )
 from app.services.admin import require_admin
-from app.services.cohorts import PUBLIC_STATUSES, captured_payment_has_seat, enrollment_is_open, occupied_seats, validate_cohort_values
-from app.services.razorpay import create_order, razorpay_ready, verify_webhook_signature
+from app.services import cohort_welcome_email
+from app.services.cohorts import (
+    PUBLIC_STATUSES,
+    captured_payment_has_seat,
+    enrollment_is_open,
+    occupied_seats,
+    validate_cohort_timezone,
+    validate_cohort_values,
+    validate_modern_caveman_price,
+)
+from app.services.razorpay import (
+    ProviderOutcomeUnknown,
+    ProviderRejected,
+    create_order,
+    razorpay_ready,
+    verify_checkout_signature,
+    verify_webhook_signature,
+)
 from app.services.rate_limits import enforce, enforce_ip
 from app.utils.auth import get_current_user
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+
+
+async def _deliver_paid_enrollment_welcome(
+    db: AsyncSession,
+    enrollment_id: uuid.UUID,
+    event_id: str,
+) -> None:
+    try:
+        await cohort_welcome_email.deliver_welcome_email(db, enrollment_id)
+    except cohort_welcome_email.WelcomeEmailDeliveryError as error:
+        logger.error(
+            "cohort_payment_fulfilled_email_pending",
+            extra={
+                "event_id": event_id,
+                "enrollment_id": str(enrollment_id),
+                "reason_code": error.reason_code,
+            },
+        )
+        if not error.retryable:
+            logger.critical(
+                "cohort_welcome_email_reconciliation_required",
+                extra={"event_id": event_id, "enrollment_id": str(enrollment_id)},
+            )
+            return
+        raise HTTPException(
+            status_code=503,
+            detail={"code": "welcome_email_pending"},
+        ) from error
 
 ALLOWED_TRANSITIONS = {
     "draft": {"published", "cancelled"},
@@ -178,9 +224,6 @@ async def join_waitlist(cohort_id: uuid.UUID, current_user: User = Depends(get_c
     seats = await occupied_seats(db, cohort.id)
     if cohort.status != "full" and seats < cohort.capacity:
         raise HTTPException(status_code=409, detail="Waitlist opens when the cohort is full")
-    seats = await occupied_seats(db, cohort.id)
-    if cohort.status != "full" and seats < cohort.capacity:
-        raise HTTPException(status_code=409, detail="Waitlist opens when the cohort is full")
     existing = await db.execute(select(CohortWaitlistEntry).where(
         CohortWaitlistEntry.cohort_id == cohort_id, CohortWaitlistEntry.user_id == current_user.id
     ))
@@ -217,12 +260,26 @@ async def begin_checkout(cohort_id: uuid.UUID, current_user: User = Depends(get_
     cohort = result.scalar_one_or_none()
     if not cohort or cohort.status not in PUBLIC_STATUSES:
         raise HTTPException(status_code=404, detail="Cohort not found")
+    try:
+        validate_modern_caveman_price(
+            price_minor=cohort.price_minor, currency=cohort.currency
+        )
+    except ValueError:
+        raise HTTPException(
+            status_code=503,
+            detail={"code": "cohort_price_misconfigured"},
+        )
     existing_result = await db.execute(select(CohortEnrollment).where(
         CohortEnrollment.cohort_id == cohort_id, CohortEnrollment.user_id == current_user.id
     ))
     enrollment = existing_result.scalar_one_or_none()
     if enrollment and enrollment.status in ("paid", "active", "completed"):
         raise HTTPException(status_code=409, detail="You are already enrolled")
+    if enrollment and enrollment.status in ("checkout_creating", "checkout_unknown"):
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "checkout_reconciliation_required"},
+        )
     if (
         enrollment
         and enrollment.status == "pending_payment"
@@ -244,22 +301,53 @@ async def begin_checkout(cohort_id: uuid.UUID, current_user: User = Depends(get_
         cohort_id=cohort.id, user_id=current_user.id,
         amount_minor=cohort.price_minor, currency=cohort.currency,
     )
-    enrollment.status = "pending_payment"
+    enrollment.status = "checkout_creating"
     enrollment.reservation_expires_at = expires_at
     enrollment.amount_minor = cohort.price_minor
     enrollment.currency = cohort.currency
+    enrollment.provider_order_id = None
     db.add(enrollment)
-    await db.flush()
+    await db.commit()
+    enrollment_id = enrollment.id
     try:
         order = await create_order(
             amount_minor=cohort.price_minor,
             currency=cohort.currency,
-            receipt=str(enrollment.id),
-            notes={"cohort_id": str(cohort.id), "enrollment_id": str(enrollment.id), "user_id": str(current_user.id)},
+            receipt=str(enrollment_id),
+            notes={"cohort_id": str(cohort.id), "enrollment_id": str(enrollment_id), "user_id": str(current_user.id)},
         )
-    except Exception:
-        await db.rollback()
-        raise HTTPException(status_code=502, detail="Payment provider is unavailable")
+    except ProviderRejected:
+        result = await db.execute(
+            select(CohortEnrollment)
+            .where(CohortEnrollment.id == enrollment_id)
+            .with_for_update()
+        )
+        enrollment = result.scalar_one()
+        enrollment.status = "payment_failed"
+        enrollment.reservation_expires_at = None
+        await db.commit()
+        raise HTTPException(
+            status_code=502, detail={"code": "provider_rejected_order"}
+        )
+    except ProviderOutcomeUnknown:
+        result = await db.execute(
+            select(CohortEnrollment)
+            .where(CohortEnrollment.id == enrollment_id)
+            .with_for_update()
+        )
+        enrollment = result.scalar_one()
+        enrollment.status = "checkout_unknown"
+        await db.commit()
+        raise HTTPException(
+            status_code=502, detail={"code": "checkout_reconciliation_required"}
+        )
+    result = await db.execute(
+        select(CohortEnrollment)
+        .where(CohortEnrollment.id == enrollment_id)
+        .with_for_update()
+    )
+    enrollment = result.scalar_one()
+    enrollment.status = "pending_payment"
     enrollment.provider_order_id = order["id"]
     db.add(PaymentRecord(
         enrollment_id=enrollment.id, provider_order_id=order["id"], status="created",
@@ -274,17 +362,88 @@ async def begin_checkout(cohort_id: uuid.UUID, current_user: User = Depends(get_
     }
 
 
+def _checkout_callback_field(payload: dict, name: str, max_length: int = 255) -> str:
+    value = payload.get(name)
+    if not isinstance(value, str) or not value or len(value) > max_length:
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "invalid_checkout_callback"},
+        )
+    return value
+
+
+@router.post("/cohorts/{cohort_id}/checkout/verify")
+async def verify_checkout_callback(
+    cohort_id: uuid.UUID,
+    payload: dict,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Authenticate Checkout's callback; capture webhook remains fulfilment authority."""
+    await enforce(db, [("checkout_user", str(current_user.id))])
+    submitted_order_id = _checkout_callback_field(payload, "razorpay_order_id")
+    payment_id = _checkout_callback_field(payload, "razorpay_payment_id")
+    signature = _checkout_callback_field(payload, "razorpay_signature", max_length=128)
+
+    result = await db.execute(
+        select(CohortEnrollment)
+        .where(
+            CohortEnrollment.cohort_id == cohort_id,
+            CohortEnrollment.user_id == current_user.id,
+        )
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
+    enrollment = result.scalar_one_or_none()
+    if not enrollment or not enrollment.provider_order_id:
+        raise HTTPException(status_code=404, detail={"code": "checkout_not_found"})
+    server_order_id = enrollment.provider_order_id
+    if submitted_order_id != server_order_id or not verify_checkout_signature(
+        server_order_id,
+        payment_id,
+        signature,
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "invalid_payment_signature"},
+        )
+
+    payment_result = await db.execute(
+        select(PaymentRecord)
+        .where(
+            PaymentRecord.enrollment_id == enrollment.id,
+            PaymentRecord.provider_order_id == server_order_id,
+        )
+        .with_for_update()
+    )
+    payment = payment_result.scalar_one_or_none()
+    if not payment:
+        raise HTTPException(status_code=409, detail={"code": "payment_record_missing"})
+    if payment.provider_payment_id and payment.provider_payment_id != payment_id:
+        raise HTTPException(status_code=409, detail={"code": "payment_mismatch"})
+    payment.provider_payment_id = payment_id
+    if payment.status == "created":
+        payment.status = "signature_verified"
+    await db.commit()
+    return {
+        "verified": True,
+        "confirmed": enrollment.status in ("paid", "active", "completed"),
+    }
+
+
 @router.post("/payments/razorpay/webhook")
 async def razorpay_webhook(request: Request, x_razorpay_signature: str | None = Header(default=None), db: AsyncSession = Depends(get_db)):
     body = await request.body()
     if not verify_webhook_signature(body, x_razorpay_signature):
         raise HTTPException(status_code=401, detail="Invalid webhook signature")
-    payload = json.loads(body)
+    try:
+        payload = json.loads(body)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        raise HTTPException(status_code=400, detail={"code": "invalid_payload"})
     event_type = payload.get("event", "unknown")
-    event_id = request.headers.get("x-razorpay-event-id") or hashlib.sha256(body).hexdigest()
-    duplicate = await db.get(PaymentWebhookEvent, event_id)
-    if duplicate:
-        return {"ok": True, "duplicate": True}
+    event_id = request.headers.get("x-razorpay-event-id")
+    if not event_id:
+        raise HTTPException(status_code=400, detail={"code": "missing_event_id"})
     payment = payload.get("payload", {}).get("payment", {}).get("entity", {})
     webhook = PaymentWebhookEvent(
         provider_event_id=event_id,
@@ -298,12 +457,44 @@ async def razorpay_webhook(request: Request, x_razorpay_signature: str | None = 
         },
     )
     db.add(webhook)
+    try:
+        await db.flush()
+    except IntegrityError:
+        await db.rollback()
+        existing_event = await db.get(PaymentWebhookEvent, event_id)
+        if (
+            existing_event
+            and existing_event.event_type == "payment.captured"
+            and existing_event.status == "processed"
+        ):
+            existing_order_id = existing_event.payload.get("order_id")
+            enrollment = await db.scalar(
+                select(CohortEnrollment).where(
+                    CohortEnrollment.provider_order_id == existing_order_id
+                )
+            )
+            if enrollment and enrollment.status in ("paid", "active", "completed"):
+                await cohort_welcome_email.ensure_welcome_email_delivery(
+                    db, enrollment.id
+                )
+                await db.commit()
+                await _deliver_paid_enrollment_welcome(db, enrollment.id, event_id)
+        return {"ok": True, "duplicate": True}
     if event_type != "payment.captured":
         webhook.status = "ignored"
         webhook.processed_at = datetime.utcnow()
         await db.commit()
         return {"ok": True}
     order_id = payment.get("order_id")
+    if (
+        not payment.get("id")
+        or not order_id
+        or payment.get("status") != "captured"
+    ):
+        webhook.status = "rejected"
+        webhook.processed_at = datetime.utcnow()
+        await db.commit()
+        raise HTTPException(status_code=400, detail={"code": "invalid_payment"})
     result = await db.execute(select(CohortEnrollment).where(CohortEnrollment.provider_order_id == order_id).with_for_update())
     enrollment = result.scalar_one_or_none()
     if not enrollment or payment.get("amount") != enrollment.amount_minor or payment.get("currency") != enrollment.currency:
@@ -319,7 +510,9 @@ async def razorpay_webhook(request: Request, x_razorpay_signature: str | None = 
             raise HTTPException(status_code=409, detail="Enrollment already has a different payment")
         webhook.status = "processed"
         webhook.processed_at = datetime.utcnow()
+        await cohort_welcome_email.ensure_welcome_email_delivery(db, enrollment.id)
         await db.commit()
+        await _deliver_paid_enrollment_welcome(db, enrollment.id, event_id)
         return {"ok": True, "duplicate": True}
     cohort_result = await db.execute(select(Cohort).where(Cohort.id == enrollment.cohort_id).with_for_update())
     cohort = cohort_result.scalar_one()
@@ -358,7 +551,9 @@ async def razorpay_webhook(request: Request, x_razorpay_signature: str | None = 
     webhook.status = "processed"
     webhook.processed_at = datetime.utcnow()
     await audit(db, None, "payment.captured", "cohort_enrollment", enrollment.id, {"provider_order_id": order_id})
+    await cohort_welcome_email.ensure_welcome_email_delivery(db, enrollment.id)
     await db.commit()
+    await _deliver_paid_enrollment_welcome(db, enrollment.id, event_id)
     return {"ok": True}
 
 
@@ -406,6 +601,10 @@ async def admin_cohort_detail(cohort_id: uuid.UUID, _: User = Depends(require_ad
 async def create_cohort(data: CohortInput, admin: User = Depends(require_admin), db: AsyncSession = Depends(get_db)):
     try:
         validate_cohort_values(starts_at=data.starts_at, ends_at=data.ends_at, capacity=data.capacity, price_minor=data.price_minor)
+        validate_cohort_timezone(data.timezone)
+        validate_modern_caveman_price(
+            price_minor=data.price_minor, currency=data.currency
+        )
     except ValueError as error:
         raise HTTPException(status_code=422, detail=str(error))
     if data.status not in ("draft", "published", "open"):
@@ -439,8 +638,14 @@ async def update_cohort(cohort_id: uuid.UUID, data: CohortUpdate, admin: User = 
     ends_at = changes.get("ends_at", cohort.ends_at)
     capacity = changes.get("capacity", cohort.capacity)
     price_minor = changes.get("price_minor", cohort.price_minor)
+    currency = changes.get("currency", cohort.currency)
+    timezone = changes.get("timezone", cohort.timezone)
     try:
         validate_cohort_values(starts_at=starts_at, ends_at=ends_at, capacity=capacity, price_minor=price_minor)
+        validate_cohort_timezone(timezone)
+        validate_modern_caveman_price(
+            price_minor=price_minor, currency=currency
+        )
     except ValueError as error:
         raise HTTPException(status_code=422, detail=str(error))
     seats = await occupied_seats(db, cohort.id)

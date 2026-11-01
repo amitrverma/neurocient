@@ -12,6 +12,19 @@ def _env_bool(name: str, default: bool = False) -> bool:
     return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _env_positive_int(name: str) -> int | None:
+    value = os.getenv(name)
+    if value is None or not value.strip():
+        return None
+    try:
+        parsed = int(value)
+    except ValueError as exc:
+        raise RuntimeError(f"Invalid runtime configuration: {name} must be an integer") from exc
+    if parsed <= 0:
+        raise RuntimeError(f"Invalid runtime configuration: {name} must be positive")
+    return parsed
+
+
 def valid_twilio_webhook_url(value: str | None) -> bool:
     if not value:
         return False
@@ -83,6 +96,11 @@ class Settings:
     RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
     RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
     RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET")
+    RAZORPAY_MEMBERSHIP_PLAN_ID = os.getenv("RAZORPAY_MEMBERSHIP_PLAN_ID")
+    RAZORPAY_MEMBERSHIP_AMOUNT_MINOR = _env_positive_int("RAZORPAY_MEMBERSHIP_AMOUNT_MINOR")
+    RAZORPAY_MEMBERSHIP_CURRENCY = os.getenv("RAZORPAY_MEMBERSHIP_CURRENCY", "INR").strip().upper()
+    RAZORPAY_MEMBERSHIP_TOTAL_COUNT = _env_positive_int("RAZORPAY_MEMBERSHIP_TOTAL_COUNT")
+    RAZORPAY_MEMBERSHIP_WEBHOOK_SECRET = os.getenv("RAZORPAY_MEMBERSHIP_WEBHOOK_SECRET")
     TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
     TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
     TWILIO_WHATSAPP_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER")
@@ -148,6 +166,26 @@ class Settings:
             for name in twilio_names:
                 if not getattr(self, name):
                     missing.append(name)
+
+        # Membership is an optional deploy-time capability and its plan ID is
+        # also the kill switch. Partial configuration disables checkout through
+        # membership_razorpay_ready(); it must not prevent a safe deployment.
+        if self.RAZORPAY_MEMBERSHIP_AMOUNT_MINOR not in (None, 49_900):
+            raise RuntimeError(
+                "Invalid runtime configuration: RAZORPAY_MEMBERSHIP_AMOUNT_MINOR must be 49900"
+            )
+        if self.RAZORPAY_MEMBERSHIP_CURRENCY != "INR":
+            raise RuntimeError(
+                "Invalid runtime configuration: RAZORPAY_MEMBERSHIP_CURRENCY must be INR"
+            )
+        if (
+            self.RAZORPAY_MEMBERSHIP_WEBHOOK_SECRET
+            and self.RAZORPAY_WEBHOOK_SECRET
+            and self.RAZORPAY_MEMBERSHIP_WEBHOOK_SECRET == self.RAZORPAY_WEBHOOK_SECRET
+        ):
+            raise RuntimeError(
+                "Invalid runtime configuration: membership and cohort webhook secrets must be independent"
+            )
 
         if missing:
             raise RuntimeError(

@@ -1,10 +1,5 @@
-import { Check, CreditCard, MessageCircle } from "lucide-react";
-
-const whatsappUrl =
-  "https://wa.me/918551915656?text=Hi%20Amit%2C%20I%20am%20interested%20in%20Neurocient%20membership.";
-
-const checkoutUrl = process.env.MEMBERSHIP_CHECKOUT_URL?.trim() || whatsappUrl;
-const hasGatewayCheckout = Boolean(process.env.MEMBERSHIP_CHECKOUT_URL?.trim());
+import { Check } from "lucide-react";
+import MembershipCheckout from "./MembershipCheckout";
 
 const plans = [
   {
@@ -23,7 +18,7 @@ const plans = [
   },
   {
     name: "Member",
-    price: "$9",
+    price: "₹499",
     desc: "Continue without free-account limits across the self-guided platform.",
     features: [
       "Everything in Explorer",
@@ -50,7 +45,7 @@ export default function MembershipPage() {
         <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-white/70">
           Begin free. When the free-account limits are reached, Membership
           keeps Insights, Practice, Spots, and Microchallenges available for
-          $9 per month.
+          ₹499 per month.
         </p>
         <div className="mt-10 grid gap-4 lg:grid-cols-2">
           {plans.map((plan) => (
@@ -83,29 +78,15 @@ export default function MembershipPage() {
                 ))}
               </ul>
               {plan.featured ? (
-                <a
-                  href={checkoutUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand-primary bg-white px-4 py-3 font-sans text-sm font-semibold text-brand-dark transition hover:text-brand-primary"
-                >
-                  {hasGatewayCheckout ? (
-                    <CreditCard className="h-4 w-4" />
-                  ) : (
-                    <MessageCircle className="h-4 w-4" />
-                  )}
-                  {hasGatewayCheckout ? "Join for $9/month" : "Join via WhatsApp"}
-                </a>
+                <MembershipCheckout />
               ) : null}
             </article>
           ))}
         </div>
-        {!hasGatewayCheckout && (
-          <p className="mx-auto mt-6 max-w-2xl text-center font-sans text-xs leading-6 text-white/55">
-            Membership is currently activated with personal assistance. Online
-            checkout will appear here when the payment gateway is connected.
-          </p>
-        )}
+        <p className="mx-auto mt-6 max-w-2xl text-center font-sans text-xs leading-6 text-white/55">
+          Recurring billing is handled securely by Razorpay. Access changes only
+          after Neurocient verifies Razorpay&apos;s payment confirmation.
+        </p>
       </div>
     </main>
   );

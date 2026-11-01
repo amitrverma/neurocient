@@ -12,6 +12,7 @@ from app.Routes import (
     contact_routes,
     ikea_routes,
     newsletter_routes,
+    membership_routes,
     notifications_routes,
     nudge_routes,
     preferences_route,
@@ -72,5 +73,6 @@ app.include_router(nudge_routes.router, prefix="/api", tags=["nudges"])
 app.include_router(preferences_route.router, prefix="/user", tags=["preferences"])
 app.include_router(caveman_scan_routes.router, prefix="/api", tags=["caveman-scan"])
 app.include_router(cohort_routes.router, prefix="/api", tags=["cohorts"])
+app.include_router(membership_routes.router, prefix="/api", tags=["membership"])
 app.include_router(contact_routes.router, prefix="/api", tags=["contact"])
 app.include_router(admin_data_routes.router, prefix="/api", tags=["admin"])

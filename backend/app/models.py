@@ -170,6 +170,36 @@ class PaymentWebhookEvent(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
+class CohortWelcomeEmailDelivery(Base):
+    """Durable, replay-safe welcome email for one paid cohort enrollment."""
+
+    __tablename__ = "cohort_welcome_email_deliveries"
+
+    enrollment_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("cohort_enrollments.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    recipient = Column(String, nullable=False)
+    payload = Column(JSON, nullable=False)
+    status = Column(String, nullable=False, default="pending", index=True)
+    attempt_count = Column(Integer, nullable=False, default=0)
+    provider_message_id = Column(String, nullable=True, unique=True)
+    last_error_code = Column(String, nullable=True)
+    first_dispatched_at = Column(DateTime, nullable=True)
+    last_attempt_at = Column(DateTime, nullable=True)
+    sent_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('pending', 'dispatching', 'failed', 'sent', 'suppressed', 'reconciliation_required')",
+            name="ck_cohort_welcome_email_status",
+        ),
+    )
+
+
 class WhatsAppWebhookEvent(Base):
     """Minimal durable replay record for an inbound Twilio message."""
 
@@ -207,6 +237,16 @@ class MembershipEntitlement(Base):
     provider = Column(String, nullable=True)
     provider_customer_id = Column(String, nullable=True, index=True)
     provider_subscription_id = Column(String, nullable=True, unique=True)
+    provider_plan_id = Column(String, nullable=True)
+    provider_payment_id = Column(String, nullable=True, index=True)
+    provider_status = Column(String, nullable=True)
+    checkout_operation_id = Column(UUID(as_uuid=True), nullable=True, unique=True)
+    checkout_state = Column(String, nullable=True, index=True)
+    price_minor = Column(Integer, nullable=True)
+    currency = Column(String, nullable=True)
+    billing_total_count = Column(Integer, nullable=True)
+    last_provider_event_at = Column(DateTime, nullable=True)
+    last_provider_event_rank = Column(Integer, nullable=True)
     current_period_end = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(
@@ -217,6 +257,58 @@ class MembershipEntitlement(Base):
     )
 
     user = relationship("User")
+
+
+class MembershipBillingEvent(Base):
+    """Privacy-minimised durable ledger for membership webhooks."""
+
+    __tablename__ = "membership_billing_events"
+
+    provider_event_id = Column(String, primary_key=True)
+    event_type = Column(String, nullable=False, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    provider_subscription_id = Column(String, nullable=True, index=True)
+    provider_payment_id = Column(String, nullable=True, index=True)
+    provider_customer_id = Column(String, nullable=True, index=True)
+    provider_plan_id = Column(String, nullable=True)
+    amount_minor = Column(Integer, nullable=True)
+    currency = Column(String, nullable=True)
+    provider_created_at = Column(DateTime, nullable=True)
+    current_period_end = Column(DateTime, nullable=True)
+    status = Column(String, nullable=False, default="received", index=True)
+    reason_code = Column(String, nullable=True)
+    processed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class MembershipWelcomeEmailDelivery(Base):
+    """Durable, replay-safe welcome email for a paid membership account."""
+
+    __tablename__ = "membership_welcome_email_deliveries"
+
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    recipient = Column(String, nullable=False)
+    payload = Column(JSON, nullable=False)
+    status = Column(String, nullable=False, default="pending", index=True)
+    attempt_count = Column(Integer, nullable=False, default=0)
+    provider_message_id = Column(String, nullable=True, unique=True)
+    last_error_code = Column(String, nullable=True)
+    first_dispatched_at = Column(DateTime, nullable=True)
+    last_attempt_at = Column(DateTime, nullable=True)
+    sent_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('pending', 'dispatching', 'failed', 'sent', 'suppressed', 'reconciliation_required')",
+            name="ck_membership_welcome_email_status",
+        ),
+    )
 
 class UserPreferences(Base):
     __tablename__ = "user_preferences"

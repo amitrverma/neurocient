@@ -1,6 +1,6 @@
 # Membership billing implementation contract
 
-Status: approved for implementation
+Status: approved contract; implementation candidate under verification
 
 Owner: Amit
 
@@ -8,10 +8,12 @@ Base revision: `cd08080a09ba6e7ce2b4b1fd9ebbe9f1965fd335`
 
 Contract version: 1.0 (2026-11-01)
 
+Implementation revision: working tree based on `0cd9062b2f371efa6f7ce052ce89762d19fa29cc`
+
 ## Outcome
 
 A signed-in Neurocient account can start a Razorpay subscription for the
-published USD 9 monthly membership. Paid access changes only after a verified,
+published INR 499 monthly membership. Paid access changes only after a verified,
 durably recorded provider event is safely applied to the provider-neutral
 membership entitlement. Browser callbacks, email addresses, and unverified
 provider payloads never grant access.
@@ -34,7 +36,7 @@ before either item is `Verified`.
 
 ## Confirmed product and provider decisions
 
-- The offer is one membership at USD 9 per month, with no trial in this slice.
+- The offer is one membership at INR 499 per month, with no trial in this slice.
 - A Razorpay plan is created and governed outside the application. Deployment
   supplies its plan ID and the intended finite billing-cycle count because the
   provider requires `total_count` or `end_at`. Missing or partial configuration
@@ -117,6 +119,11 @@ subscription; events for an older subscription cannot change the new one.
 - **PAY12-J:** Existing entitlement consumers, cohort checkout/webhooks, manual
   entitlements, free limits, and authentication boundaries retain their current
   behavior. A browser return or direct API call cannot bypass PAY-03.
+- **PAY12-K:** The first authoritative activation creates one durable welcome
+  email intent per account in the entitlement transaction. Dispatch uses a
+  stable provider idempotency key; webhook replay resumes failed delivery but
+  cannot duplicate a sent welcome. Email failure never revokes or fabricates
+  paid access, and inactive access suppresses an unsent welcome.
 
 ## Retry, concurrency, and failure contract
 
@@ -154,6 +161,35 @@ subscription; events for an older subscription cannot change the new one.
   cancellation/refund/dispute where the sandbox permits, and reconciliation on
   the exact staged candidate before `Verified`.
 
+## Local verification record
+
+Verified on 2026-11-01 against the uncommitted implementation candidate:
+
+- 220 backend tests passed; 22 provider-dependent tests were skipped after the
+  membership price correction and Modern Caveman boundary hardening.
+- 8 real-PostgreSQL membership integration tests passed, including concurrent
+  checkout, atomic replay, uncertain provider outcomes, rollback/retry, early
+  webhook recovery, cross-object ownership rejection, captured-charge validation,
+  and stable rejection of malformed signed payloads.
+- 7 focused membership checkout component tests passed; the production frontend
+  build and lint completed with zero errors. Existing generated-file warnings
+  remain non-blocking. The complete frontend suite still needs a clean assembled
+  release run; two unrelated tests timed out under concurrent suite load and then
+  passed when run in isolation.
+- Alembic reports local PostgreSQL at `20261101_0011 (head)` with no model drift.
+  Isolated migration exercises preserved representative legacy entitlements and
+  proved the destructive downgrade guard refuses to remove billing evidence.
+- The required independent two-stage review found no remaining blocking or
+  high-severity code defect after its findings were corrected.
+
+The separate Modern Caveman PostgreSQL capture/replay test also passed. Its
+remaining refund and reconciliation obligations are tracked under PAY-05 and
+`PAYMENT_PRODUCTS.md`; they are not evidence that membership billing is ready.
+
+This is local and code-review evidence only. PAY-01 and PAY-02 remain `In
+progress` until genuine Razorpay test-mode and assembled browser evidence is
+recorded for an exact committed candidate.
+
 ## Rollout and recovery
 
 Apply the additive migration first. Deploy backend configuration and webhook
@@ -166,7 +202,9 @@ access continues to fail closed from the last durable entitlement state.
 Forward repair is preferred after provider subscriptions exist. Do not delete
 event-ledger or checkout-operation records during rollback. Reconciliation must
 compare the current provider subscription with the local mapping before any
-manual correction.
+manual correction. The migration downgrade refuses to run after any billing
+ledger or checkout-operation evidence exists; roll application code forward or
+back while retaining the additive schema.
 
 ## Excluded scope
 

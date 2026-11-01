@@ -20,7 +20,7 @@ const MembershipModal = ({ isOpen, onClose, disableEscape = false }: MembershipM
         <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg text-center space-y-4">
           <Dialog.Title className="text-xl font-bold">Become a Member</Dialog.Title>
           <p className="text-md text-brand-dark">
-            You&apos;ve reached your free limit. Membership is $9 per month and
+            You&apos;ve reached your free limit. Membership is ₹499 per month and
             removes the self-guided platform limits.
           </p>
           <a

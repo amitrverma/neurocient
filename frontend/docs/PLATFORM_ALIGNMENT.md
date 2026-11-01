@@ -79,7 +79,7 @@ journey.
 | `/programs` | “What deeper ways of working with Neurocient exist?” | Offer index, not the centre of the self-guided product | Relevant personal or workplace offer |
 | `/saved` | “What did I want to return to?” | Account utility for saved reading | Saved item |
 | `/profile` | “What have I noticed, tried, and changed?” | Signed-in home for personal evidence, reflections, account settings, and delivery preferences | One relevant next move |
-| `/membership` | “What access can I buy?” | USD 9/month self-guided access after free limits | Hosted checkout or assisted activation |
+| `/membership` | “What access can I buy?” | INR 499/month self-guided access after free limits | Hosted checkout or assisted activation |
 | `/about` | “Who is behind this, and why should I trust it?” | Founder, mission, method, and credibility | A relevant starting point or contact |
 | `/contact` | “How can I speak with Neurocient?” | Personal, workplace, and collaboration contact | Successful enquiry |
 

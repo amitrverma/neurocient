@@ -11,7 +11,7 @@ const terms = [
   },
   {
     title: "Free access and membership",
-    text: "Some features have free usage limits. The current membership offering is US$9 per month and removes the stated limits on self-guided content and tools while the membership is active. The checkout must show the final price, currency, billing schedule, and applicable taxes before you pay. Membership does not include a Modern Caveman cohort unless the offer explicitly says so.",
+    text: "Some features have free usage limits. The current membership offering is ₹499 per month and removes the stated limits on self-guided content and tools while the membership is active. The checkout must show the final price, currency, billing schedule, and applicable taxes before you pay. Membership does not include a Modern Caveman cohort unless the offer explicitly says so.",
   },
   {
     title: "Billing, cancellation, and refunds",

@@ -1,0 +1,90 @@
+"""Razorpay adapter dedicated to recurring membership billing."""
+
+import hashlib
+import hmac
+
+import httpx
+
+from app.config import settings
+
+
+class ProviderRejected(RuntimeError):
+    """The provider certainly rejected the request; a new attempt is safe."""
+
+
+class ProviderOutcomeUnknown(RuntimeError):
+    """The request may have succeeded; automatic retry could double-create."""
+
+
+def membership_razorpay_ready() -> bool:
+    return bool(
+        settings.RAZORPAY_KEY_ID
+        and settings.RAZORPAY_KEY_SECRET
+        and settings.RAZORPAY_MEMBERSHIP_PLAN_ID
+        and settings.RAZORPAY_MEMBERSHIP_AMOUNT_MINOR == 49_900
+        and settings.RAZORPAY_MEMBERSHIP_CURRENCY == "INR"
+        and settings.RAZORPAY_MEMBERSHIP_TOTAL_COUNT
+        and settings.RAZORPAY_MEMBERSHIP_WEBHOOK_SECRET
+        and settings.RAZORPAY_MEMBERSHIP_WEBHOOK_SECRET
+        != settings.RAZORPAY_WEBHOOK_SECRET
+    )
+
+
+def verify_membership_webhook(body: bytes, signature: str | None) -> bool:
+    if not settings.RAZORPAY_MEMBERSHIP_WEBHOOK_SECRET or not signature:
+        return False
+    expected = hmac.new(
+        settings.RAZORPAY_MEMBERSHIP_WEBHOOK_SECRET.encode("utf-8"),
+        body,
+        hashlib.sha256,
+    ).hexdigest()
+    return hmac.compare_digest(expected, signature)
+
+
+async def _request(method: str, path: str, **kwargs) -> dict:
+    if not settings.RAZORPAY_KEY_ID or not settings.RAZORPAY_KEY_SECRET:
+        raise ProviderRejected("Membership checkout is not configured")
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            response = await client.request(
+                method,
+                f"https://api.razorpay.com/v1/{path.lstrip('/')}",
+                auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET),
+                **kwargs,
+            )
+    except httpx.RequestError as exc:
+        raise ProviderOutcomeUnknown("Razorpay outcome is unknown") from exc
+    if response.status_code >= 500:
+        raise ProviderOutcomeUnknown("Razorpay outcome is unknown")
+    if response.status_code >= 400:
+        raise ProviderRejected("Razorpay rejected the membership request")
+    try:
+        return response.json()
+    except ValueError as exc:
+        raise ProviderOutcomeUnknown("Razorpay returned an invalid response") from exc
+
+
+async def fetch_membership_plan() -> dict:
+    if not settings.RAZORPAY_MEMBERSHIP_PLAN_ID:
+        raise ProviderRejected("Membership plan is not configured")
+    return await _request("GET", f"plans/{settings.RAZORPAY_MEMBERSHIP_PLAN_ID}")
+
+
+async def create_membership_subscription(*, user_id: str, operation_id: str) -> dict:
+    if not settings.RAZORPAY_MEMBERSHIP_PLAN_ID or not settings.RAZORPAY_MEMBERSHIP_TOTAL_COUNT:
+        raise ProviderRejected("Membership plan is not configured")
+    return await _request(
+        "POST",
+        "subscriptions",
+        json={
+            "plan_id": settings.RAZORPAY_MEMBERSHIP_PLAN_ID,
+            "total_count": settings.RAZORPAY_MEMBERSHIP_TOTAL_COUNT,
+            "quantity": 1,
+            "customer_notify": 1,
+            "notes": {
+                "purpose": "neurocient_membership",
+                "user_id": user_id,
+                "operation_id": operation_id,
+            },
+        },
+    )

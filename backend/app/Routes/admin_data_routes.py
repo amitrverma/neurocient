@@ -13,6 +13,7 @@ from app.models import (
     CavemanSpot,
     CohortEnrollment,
     IkeaWorksheet,
+    MembershipBillingEvent,
     MembershipEntitlement,
     MicrochallengeDefinition,
     MicrochallengeLog,
@@ -214,9 +215,45 @@ async def admin_memberships(
             "name": user.name,
             "status": item.status,
             "provider": item.provider,
+            "provider_status": item.provider_status,
+            "provider_subscription_id": item.provider_subscription_id,
+            "checkout_state": item.checkout_state,
             "current_period_end": iso(item.current_period_end),
             "updated_at": iso(item.updated_at),
         } for item, user in rows],
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+    }
+
+
+@router.get("/admin/membership-events")
+async def admin_membership_events(
+    page: int = Query(default=1),
+    page_size: int = Query(default=50),
+    _: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    page, page_size, offset = pagination(page, page_size)
+    total = (await db.execute(select(func.count(MembershipBillingEvent.provider_event_id)))).scalar_one()
+    events = (await db.execute(
+        select(MembershipBillingEvent)
+        .order_by(MembershipBillingEvent.created_at.desc())
+        .offset(offset)
+        .limit(page_size)
+    )).scalars().all()
+    return {
+        "items": [{
+            "id": event.provider_event_id,
+            "event_type": event.event_type,
+            "user_id": str(event.user_id) if event.user_id else None,
+            "provider_subscription_id": event.provider_subscription_id,
+            "status": event.status,
+            "reason_code": event.reason_code,
+            "provider_created_at": iso(event.provider_created_at),
+            "processed_at": iso(event.processed_at),
+            "created_at": iso(event.created_at),
+        } for event in events],
         "total": total,
         "page": page,
         "page_size": page_size,

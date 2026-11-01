@@ -36,6 +36,13 @@ A cohort belongs to the Modern Caveman facilitated program and records:
 - public title, slug, description, audience, and facilitator;
 - start and end dates, timezone, enrolment window, and session details;
 - hard capacity, price, currency, and Razorpay checkout configuration;
+
+For the current offer, price and currency are fixed backend invariants: INR
+21,000 (2,100,000 minor units) for one cohort place. International conversion,
+where available, belongs to Razorpay, the card issuer, or the customer bank; the
+application does not calculate live exchange rates. Schedule and capacity remain
+cohort-specific, but administrators cannot publish a different offer price in
+this release.
 - public state and operational timestamps.
 
 Canonical cohort states are:

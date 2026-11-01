@@ -1368,7 +1368,7 @@ Implication:
 
 The self-guided platform uses a three-stage access model: anonymous use up to
 the existing anonymous limit, authenticated free use up to the existing account
-limits, then paid Membership at USD 9 per month. A free account may save one
+limits, then paid Membership at INR 499 per month. A free account may save one
 Practice loop. Paid Membership removes the self-guided limits.
 
 Reason:
@@ -1415,7 +1415,23 @@ Implication:
 The Modern Caveman remains a paid, cohort-based facilitated personal program.
 The Caveman in the Cubicle diagnostic remains a public self-serve assessment
 that leads to the facilitated CIC program. Neither offer is bundled into the
-$9 self-guided Membership by default.
+INR 499 self-guided Membership by default.
+
+## 2026-11-01: Membership launches at INR 499 per month
+
+The self-guided Membership is priced at INR 499 per month for the initial
+Razorpay launch. The account's test-mode Subscriptions API does not currently
+accept USD plans, so price validation, checkout copy, and provider configuration
+use INR consistently. International payment acceptance remains an account and
+payment-method capability; it does not change the plan's INR denomination.
+
+This is a staged launch decision, not a retreat from global availability.
+Neurocient is intended to become globally purchasable, but it will not present
+browser-calculated currency conversions as owned prices. INR remains the sole
+authoritative currency until international recurring payments and their
+compliance, renewal, refund, settlement, and reconciliation paths are proven.
+Future local-currency offers must be versioned alongside INR so an existing
+subscriber's price and renewal validation never change implicitly.
 
 ## 2026-10-15: Claims governance is deferred as one platform decision
 
@@ -1554,3 +1570,16 @@ This preserves WhatsApp and push as lightweight reinforcement channels rather
 than generic engagement machinery. Reminder content still has to return the
 person to useful recognition or an active experiment; consent does not make a
 generic notification product-appropriate.
+
+## 2026-11-01: Paid confirmation is an arrival, not a receipt line
+
+After an authoritative payment confirmation, Membership and cohort purchase
+surfaces must orient the person to what has changed and offer a useful next
+step. The membership state names the unlocked areas, shows the paid-through
+date, and leads with Practice while keeping Insights available. It replaces the
+checkout action; it does not leave a paid member facing another payment button.
+
+The matching welcome email is a transactional continuation of verified access,
+not optional engagement messaging. It is sent once from durable webhook state,
+never from the browser callback, and directs the member toward one concrete
+place to begin without implying that payment alone has created progress.

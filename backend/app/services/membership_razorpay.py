@@ -6,6 +6,7 @@ import hmac
 import httpx
 
 from app.config import settings
+from app.observability import correlation_headers
 
 
 class ProviderRejected(RuntimeError):
@@ -14,6 +15,10 @@ class ProviderRejected(RuntimeError):
 
 class ProviderOutcomeUnknown(RuntimeError):
     """The request may have succeeded; automatic retry could double-create."""
+
+
+class ProviderNotFound(ProviderRejected):
+    """The provider authoritatively reports that the subscription is absent."""
 
 
 def membership_razorpay_ready() -> bool:
@@ -50,12 +55,15 @@ async def _request(method: str, path: str, **kwargs) -> dict:
                 method,
                 f"https://api.razorpay.com/v1/{path.lstrip('/')}",
                 auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET),
+                headers=correlation_headers(),
                 **kwargs,
             )
     except httpx.RequestError as exc:
         raise ProviderOutcomeUnknown("Razorpay outcome is unknown") from exc
     if response.status_code >= 500:
         raise ProviderOutcomeUnknown("Razorpay outcome is unknown")
+    if response.status_code == 404:
+        raise ProviderNotFound("Razorpay subscription was not found")
     if response.status_code >= 400:
         raise ProviderRejected("Razorpay rejected the membership request")
     try:
@@ -68,6 +76,24 @@ async def fetch_membership_plan() -> dict:
     if not settings.RAZORPAY_MEMBERSHIP_PLAN_ID:
         raise ProviderRejected("Membership plan is not configured")
     return await _request("GET", f"plans/{settings.RAZORPAY_MEMBERSHIP_PLAN_ID}")
+
+
+async def fetch_membership_subscription(subscription_id: str) -> dict:
+    if not subscription_id or len(subscription_id) > 255:
+        raise ProviderRejected("Membership subscription is invalid")
+    return await _request("GET", f"subscriptions/{subscription_id}")
+
+
+async def cancel_membership_subscription_at_period_end(
+    subscription_id: str,
+) -> dict:
+    if not subscription_id or len(subscription_id) > 255:
+        raise ProviderRejected("Membership subscription is invalid")
+    return await _request(
+        "POST",
+        f"subscriptions/{subscription_id}/cancel",
+        json={"cancel_at_cycle_end": 1},
+    )
 
 
 async def create_membership_subscription(*, user_id: str, operation_id: str) -> dict:

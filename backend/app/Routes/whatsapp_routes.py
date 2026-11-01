@@ -13,6 +13,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
+from app.services.notification_provider import NotificationOutcomeUnknown
 from app.database import get_db
 from app.models import CavemanSpot, UserPreferences, WhatsAppWebhookEvent
 from app.services.twilio_webhook import (
@@ -230,13 +231,26 @@ def send_whatsapp_message(
             if emit_logs:
                 logger.info("whatsapp_send outcome=accepted")
             return True
+        if response.status_code >= 500:
+            if emit_logs:
+                logger.warning(
+                    "whatsapp_send_failed reason=provider_outcome_unknown status_code=%s",
+                    response.status_code,
+                )
+            raise NotificationOutcomeUnknown(
+                "WhatsApp provider outcome is unknown"
+            )
         if emit_logs:
             logger.warning(
                 "whatsapp_send_failed reason=provider_status status_code=%s",
                 response.status_code,
             )
         return False
-    except Exception:
+    except NotificationOutcomeUnknown:
+        raise
+    except Exception as error:
         if emit_logs:
             logger.warning("whatsapp_send_failed reason=transport_error")
-        return False
+        raise NotificationOutcomeUnknown(
+            "WhatsApp delivery outcome is unknown"
+        ) from error

@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from typing import Literal
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import func, or_, select
+from sqlalchemy import case, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -19,6 +19,7 @@ from app.models import (
     MicrochallengeLog,
     NewsletterSubscriber,
     Participant,
+    ReconciliationIssue,
     SavedArticle,
     User,
     UserMicrochallenge,
@@ -31,8 +32,80 @@ from app.models import (
 from app.services.admin import require_admin
 from app.services.admin_data import auth_method, grouped_counts, iso, pagination, user_payload
 from app.services.membership import ACTIVE_MEMBERSHIP_STATUSES
+from app.services.operational_health import operational_snapshot
 
 router = APIRouter()
+
+
+def reconciliation_severity_order():
+    return case(
+        (ReconciliationIssue.severity == "critical", 0),
+        else_=1,
+    ).asc()
+
+
+@router.get("/admin/operations")
+async def admin_operations(
+    _: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    return await operational_snapshot(db)
+
+
+@router.get("/admin/reconciliation-issues")
+async def admin_reconciliation_issues(
+    status: Literal["open", "resolved"] = "open",
+    page: int = Query(default=1),
+    page_size: int = Query(default=50),
+    _: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    page, page_size, offset = pagination(page, page_size)
+    total = (
+        await db.execute(
+            select(func.count(ReconciliationIssue.id)).where(
+                ReconciliationIssue.status == status
+            )
+        )
+    ).scalar_one()
+    issues = (
+        await db.execute(
+            select(ReconciliationIssue)
+            .where(ReconciliationIssue.status == status)
+            .order_by(
+                reconciliation_severity_order(),
+                ReconciliationIssue.last_seen_at.desc(),
+                ReconciliationIssue.id.asc(),
+            )
+            .offset(offset)
+            .limit(page_size)
+        )
+    ).scalars().all()
+    return {
+        "issues": [
+            {
+                "id": str(issue.id),
+                "product": issue.product,
+                "issue_code": issue.issue_code,
+                "object_type": issue.object_type,
+                "local_object_id": issue.local_object_id,
+                "provider_object_id": issue.provider_object_id,
+                "severity": issue.severity,
+                "status": issue.status,
+                "details": issue.details,
+                "first_seen_at": iso(issue.first_seen_at),
+                "last_seen_at": iso(issue.last_seen_at),
+                "resolved_at": iso(issue.resolved_at),
+                "correlation_id": (
+                    str(issue.correlation_id) if issue.correlation_id else None
+                ),
+            }
+            for issue in issues
+        ],
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+    }
 
 
 def _search_clause(query: str | None, *columns):

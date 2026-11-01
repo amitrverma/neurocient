@@ -109,6 +109,52 @@ describe("membership checkout", () => {
     expect(screen.queryByRole("button", { name: /join for/i })).not.toBeInTheDocument();
   });
 
+  it("requests cancellation only after confirmation and keeps paid access visible", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input) === "/api/membership/status") {
+        return response({
+          is_active: true,
+          status: "active",
+          current_period_end: "2026-11-30T18:30:00",
+          checkout_configured: true,
+        });
+      }
+      if (String(input) === "/api/membership/cancel" && init?.method === "POST") {
+        return response({ status: "requested", effective_at: "2026-11-30T18:30:00" }, 202);
+      }
+      throw new Error(`Unexpected request: ${String(input)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<MembershipCheckout />);
+
+    fireEvent.click(await screen.findByRole("button", { name: /cancel membership/i }));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: /confirm cancellation/i }));
+
+    expect(await screen.findByText(/cancellation is scheduled/i)).toBeInTheDocument();
+    expect(screen.getByText(/access remains active through 30 november 2026/i)).toBeInTheDocument();
+    expect(screen.getByText(/welcome to neurocient/i)).toBeInTheDocument();
+  });
+
+  it("reports uncertain cancellation without pretending access changed", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input) === "/api/membership/status") {
+        return response({ is_active: true, status: "active", checkout_configured: true });
+      }
+      return response(
+        { detail: { code: "cancellation_reconciliation_required" } },
+        502,
+      );
+    }));
+    render(<MembershipCheckout />);
+
+    fireEvent.click(await screen.findByRole("button", { name: /cancel membership/i }));
+    fireEvent.click(screen.getByRole("button", { name: /confirm cancellation/i }));
+
+    expect(await screen.findByText(/needs confirmation from razorpay/i)).toBeInTheDocument();
+    expect(screen.getByText(/welcome to neurocient/i)).toBeInTheDocument();
+  });
+
   it("blocks retry messaging when creation needs reconciliation", async () => {
     vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
       if (String(input) === "/api/membership/status") {

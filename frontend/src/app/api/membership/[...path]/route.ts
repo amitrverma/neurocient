@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { abuseProxyHeaders, backendResponseInit } from "@/lib/abuseProxy";
+import {
+  abuseProxyHeaders,
+  backendResponseInit,
+  correlationHeaders,
+} from "@/lib/abuseProxy";
 
 async function proxy(
   req: Request,
@@ -11,6 +15,7 @@ async function proxy(
     method: req.method,
     headers: {
       Cookie: req.headers.get("cookie") || "",
+      ...correlationHeaders(req),
       ...(req.method === "GET"
         ? {}
         : abuseProxyHeaders(req, backendPath)),

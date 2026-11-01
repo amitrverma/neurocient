@@ -3,7 +3,10 @@ import { createHmac } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { abuseProxyHeaders } from "./abuseProxy";
+import { abuseProxyHeaders, correlationHeaders } from "./abuseProxy";
+
+const UUID_PATTERN_FOR_TEST =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 describe("abuse proxy identity", () => {
   const originalSecret = process.env.ABUSE_PROXY_SECRET;
@@ -32,7 +35,7 @@ describe("abuse proxy identity", () => {
     const expected = createHmac("sha256", secret)
       .update("1700000000\nPOST\n/auth/login\n2001:db8::1")
       .digest("hex");
-    expect(headers).toEqual({
+    expect(headers).toMatchObject({
       "X-Neurocient-Client-IP": "2001:db8::1",
       "X-Neurocient-Proxy-Timestamp": "1700000000",
       "X-Neurocient-Proxy-Signature": expected,
@@ -75,7 +78,17 @@ describe("abuse proxy identity", () => {
         new Request("http://localhost:3000/api/auth/logout", { method: "POST" }),
         "/auth/logout",
       ),
-    ).toEqual({ Origin: "http://localhost:3000" });
+    ).toMatchObject({ Origin: "http://localhost:3000" });
+  });
+
+  it("preserves a valid correlation ID and replaces an invalid one", () => {
+    const valid = "123e4567-e89b-42d3-a456-426614174000";
+    expect(correlationHeaders(new Request("https://site.test", {
+      headers: { "x-correlation-id": valid },
+    }))).toEqual({ "X-Correlation-ID": valid });
+    expect(correlationHeaders(new Request("https://site.test", {
+      headers: { "x-correlation-id": "private value" },
+    }))["X-Correlation-ID"]).toMatch(UUID_PATTERN_FOR_TEST);
   });
 
   it("signs expanded IPv6 text exactly for backend verification", () => {

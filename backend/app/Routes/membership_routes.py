@@ -11,7 +11,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings
 from app.database import get_db
 from app.models import MembershipBillingEvent, MembershipEntitlement, User
-from app.services.membership import entitlement_is_active, membership_summary
+from app.services.membership import (
+    entitlement_is_active,
+    lock_membership_entitlement,
+    membership_summary,
+)
 from app.services import membership_welcome_email
 from app.services.membership_billing import (
     BillingEvent,
@@ -123,13 +127,7 @@ def _checkout_payload(entitlement: MembershipEntitlement, user: User) -> dict:
 
 
 async def _lock_entitlement(db: AsyncSession, user_id) -> MembershipEntitlement | None:
-    result = await db.execute(
-        select(MembershipEntitlement)
-        .where(MembershipEntitlement.user_id == user_id)
-        .with_for_update()
-        .execution_options(populate_existing=True)
-    )
-    return result.scalar_one_or_none()
+    return await lock_membership_entitlement(db, user_id)
 
 
 def _apply_event(entitlement: MembershipEntitlement, event: MembershipBillingEvent) -> tuple[str, str | None]:
@@ -279,6 +277,12 @@ async def membership_status(
     summary = await membership_summary(db, current_user.id)
     entitlement = await db.get(MembershipEntitlement, current_user.id)
     summary["checkout_state"] = entitlement.checkout_state if entitlement else None
+    summary["cancellation_state"] = entitlement.cancellation_state if entitlement else None
+    summary["cancellation_requested_at"] = (
+        entitlement.cancellation_requested_at.isoformat()
+        if entitlement and entitlement.cancellation_requested_at
+        else None
+    )
     summary["checkout_configured"] = membership_razorpay_ready()
     return summary
 
@@ -346,6 +350,8 @@ async def begin_membership_checkout(
         entitlement.last_provider_event_at = None
         entitlement.last_provider_event_rank = None
         entitlement.checkout_state = None
+        entitlement.cancellation_state = None
+        entitlement.cancellation_requested_at = None
     if entitlement and entitlement.checkout_state == "ready" and entitlement.provider_subscription_id:
         return _checkout_payload(entitlement, current_user)
     if entitlement and entitlement.checkout_state in {"creating", "unknown"}:
@@ -608,6 +614,8 @@ async def membership_webhook(
 
     event.user_id = entitlement.user_id
     outcome, reason = _apply_event(entitlement, event)
+    if event.event_type == "subscription.cancelled" and outcome == "applied":
+        entitlement.cancellation_state = "completed"
     event.status = outcome
     event.reason_code = reason
     event.processed_at = datetime.utcnow()

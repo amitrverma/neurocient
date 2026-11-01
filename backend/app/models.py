@@ -242,6 +242,8 @@ class MembershipEntitlement(Base):
     provider_status = Column(String, nullable=True)
     checkout_operation_id = Column(UUID(as_uuid=True), nullable=True, unique=True)
     checkout_state = Column(String, nullable=True, index=True)
+    cancellation_state = Column(String, nullable=True, index=True)
+    cancellation_requested_at = Column(DateTime, nullable=True)
     price_minor = Column(Integer, nullable=True)
     currency = Column(String, nullable=True)
     billing_total_count = Column(Integer, nullable=True)
@@ -254,6 +256,13 @@ class MembershipEntitlement(Base):
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
         nullable=False,
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "cancellation_state IS NULL OR cancellation_state IN ('requesting', 'requested', 'failed', 'unknown', 'completed')",
+            name="ck_membership_cancellation_state",
+        ),
     )
 
     user = relationship("User")
@@ -308,6 +317,120 @@ class MembershipWelcomeEmailDelivery(Base):
             "status IN ('pending', 'dispatching', 'failed', 'sent', 'suppressed', 'reconciliation_required')",
             name="ck_membership_welcome_email_status",
         ),
+    )
+
+
+class ReconciliationIssue(Base):
+    """Observation-only operational record for contradictory durable state."""
+
+    __tablename__ = "reconciliation_issues"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    dedupe_key = Column(String(64), nullable=False, unique=True)
+    product = Column(String, nullable=False, index=True)
+    issue_code = Column(String, nullable=False, index=True)
+    object_type = Column(String, nullable=False)
+    local_object_id = Column(String, nullable=False)
+    provider_object_id = Column(String, nullable=True)
+    severity = Column(String, nullable=False, default="warning")
+    status = Column(String, nullable=False, default="open", index=True)
+    details = Column(JSON, nullable=False, default=dict)
+    correlation_id = Column(UUID(as_uuid=True), nullable=True)
+    first_seen_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    last_seen_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    resolved_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("status IN ('open', 'resolved')", name="ck_reconciliation_issue_status"),
+        CheckConstraint("severity IN ('warning', 'critical')", name="ck_reconciliation_issue_severity"),
+        Index("ix_reconciliation_issue_open", "status", "last_seen_at"),
+    )
+
+
+class ReconciliationCheckpoint(Base):
+    """Durable cursor guaranteeing eventual coverage of bounded scans."""
+
+    __tablename__ = "reconciliation_checkpoints"
+
+    stream_name = Column(String, primary_key=True)
+    cursor = Column(String, nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
+class ScheduledJobRun(Base):
+    """Durable unique claim and outcome for one logical scheduled run."""
+
+    __tablename__ = "scheduled_job_runs"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    job_name = Column(String, nullable=False)
+    run_key = Column(String, nullable=False)
+    status = Column(String, nullable=False, default="running", index=True)
+    attempt_count = Column(Integer, nullable=False, default=1)
+    correlation_id = Column(UUID(as_uuid=True), nullable=False)
+    lease_expires_at = Column(DateTime, nullable=False, index=True)
+    result = Column(JSON, nullable=False, default=dict)
+    last_error_code = Column(String, nullable=True)
+    started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    completed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("job_name", "run_key", name="uq_scheduled_job_run_key"),
+        CheckConstraint(
+            "status IN ('running', 'completed', 'failed', 'reconciliation_required')",
+            name="ck_scheduled_job_run_status",
+        ),
+    )
+
+
+class WorkerHeartbeat(Base):
+    """Last-seen signal for one logical dedicated worker role."""
+
+    __tablename__ = "worker_heartbeats"
+
+    worker_name = Column(String, primary_key=True)
+    instance_id = Column(UUID(as_uuid=True), nullable=False)
+    started_at = Column(DateTime, nullable=False)
+    last_seen_at = Column(DateTime, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
+class NotificationDispatch(Base):
+    """Replay-safe claim for one optional notification delivery."""
+
+    __tablename__ = "notification_dispatches"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    purpose = Column(String, nullable=False)
+    channel = Column(String, nullable=False)
+    destination_key = Column(String, nullable=False)
+    dispatch_date = Column(Date, nullable=False)
+    status = Column(String, nullable=False, default="dispatching", index=True)
+    attempt_count = Column(Integer, nullable=False, default=1)
+    correlation_id = Column(UUID(as_uuid=True), nullable=False)
+    provider_message_id = Column(String, nullable=True)
+    last_error_code = Column(String, nullable=True)
+    first_attempt_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    last_attempt_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    completed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id", "purpose", "channel", "dispatch_date",
+            name="uq_notification_dispatch_daily",
+        ),
+        CheckConstraint(
+            "status IN ('dispatching', 'sent', 'failed', 'skipped', 'reconciliation_required')",
+            name="ck_notification_dispatch_status",
+        ),
+        CheckConstraint("channel IN ('push', 'whatsapp')", name="ck_notification_dispatch_channel"),
     )
 
 class UserPreferences(Base):

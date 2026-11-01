@@ -111,7 +111,7 @@ az containerapp update `
   --name neurocient `
   --resource-group Neurocient `
   --image $image `
-  --set-env-vars ENABLE_SCHEDULER=true
+  --set-env-vars ENABLE_SCHEDULER=false
 ```
 
 This update changes only the image and the explicit scheduler setting. It preserves ingress, scale, registry identity, and all other environment values. Do not reuse mutable version tags such as `1.6`; the commit SHA is the release identity.
@@ -148,18 +148,24 @@ consume an account or guest grant. See `../implementation/CSRF_PROTECTION.md`.
 
 The live app currently has twelve settings stored as literal environment values, including database, JWT, OpenAI, Firebase, and Twilio credentials. Before broadening deployment access, move every sensitive value to an Azure Container App secret and make the corresponding environment entry a `secretref:`. Do not copy the values into GitHub variables or workflow YAML. Image-only manual deployments preserve those references after the migration.
 
-## Scheduler constraint
+## Dedicated scheduler worker
 
-The API currently embeds APScheduler. `ENABLE_SCHEDULER` therefore defaults to `false`.
+The FastAPI web process never starts schedules. `ENABLE_SCHEDULER` is read only
+by the dedicated `python -m app.worker` entry point and defaults to `false`.
+Keep it false on every web revision.
 
-The legacy production image always started this scheduler, and the existing Container App is constrained to exactly one replica. To preserve scheduled reminder behavior during the migration, explicitly add `ENABLE_SCHEDULER=true` to the Container App before deploying the monorepo image. Leaving it absent or setting it to `false` is a conscious decision to pause those reminders.
+Reminders and payment reconciliation remain paused until a separately deployed
+worker process has the same image, database, provider configuration and secret
+references, with `ENABLE_SCHEDULER=true`. PostgreSQL-backed run and delivery
+claims prevent two workers from executing the same logical daily job or
+repeating a claimed notification after restart. An interrupted external
+delivery becomes `reconciliation_required`; it is not automatically replayed.
 
-For the first release, either:
-
-- set it to `true` and retain the current always-running single replica (`minReplicas=1`, `maxReplicas=1`); or
-- keep it `false` and accept that scheduled reminders are paused.
-
-Do not enable it on a scaling web tier: each replica would run the same schedules and could duplicate external messages. The durable target is a separate scheduled worker or Azure Container Apps Job.
+Do not launch the worker as a second command inside the web container. Deploy it
+as a separately owned Container App worker or job so web scaling and worker
+lifecycle remain independent. Before enabling it, verify unique claims,
+restart/interruption behavior, readiness, operational signals, and provider
+delivery in staging.
 
 ## Verification
 

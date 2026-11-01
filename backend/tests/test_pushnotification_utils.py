@@ -30,7 +30,7 @@ async def test_send_push_success(monkeypatch):
     db.execute.assert_not_awaited()
 
 
-@pytest.mark.parametrize("status", [410, 404, 400, 401, 500])
+@pytest.mark.parametrize("status", [410, 404, 400, 401])
 @pytest.mark.asyncio
 async def test_send_push_failures(monkeypatch, status):
     setup_settings(monkeypatch)
@@ -54,3 +54,35 @@ async def test_send_push_failures(monkeypatch, status):
     else:
         db.execute.assert_not_awaited()
         db.commit.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_send_push_without_provider_response_is_outcome_unknown(monkeypatch):
+    setup_settings(monkeypatch)
+
+    def fake_webpush(**kwargs):
+        raise WebPushException("transport lost", response=None)
+
+    monkeypatch.setattr(pushnotification, "webpush", fake_webpush)
+    with pytest.raises(pushnotification.NotificationOutcomeUnknown):
+        await pushnotification.send_push(
+            {"endpoint": "e", "keys": {}},
+            "data",
+            AsyncMock(),
+        )
+
+
+@pytest.mark.asyncio
+async def test_send_push_provider_5xx_is_outcome_unknown(monkeypatch):
+    setup_settings(monkeypatch)
+
+    def fake_webpush(**kwargs):
+        raise WebPushException("provider unavailable", response=DummyResponse(503))
+
+    monkeypatch.setattr(pushnotification, "webpush", fake_webpush)
+    with pytest.raises(pushnotification.NotificationOutcomeUnknown):
+        await pushnotification.send_push(
+            {"endpoint": "e", "keys": {}},
+            "data",
+            AsyncMock(),
+        )

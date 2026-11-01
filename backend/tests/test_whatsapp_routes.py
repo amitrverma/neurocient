@@ -158,6 +158,24 @@ def test_provider_send_failure_does_not_log_private_response(monkeypatch, caplog
     assert "private outbound content" not in caplog.text
 
 
+def test_provider_5xx_is_outcome_unknown(monkeypatch, caplog):
+    class Response:
+        status_code = 503
+
+    _configure(monkeypatch)
+    monkeypatch.setattr(settings, "TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886")
+    monkeypatch.setattr(whatsapp_routes.requests, "post", lambda *args, **kwargs: Response())
+    caplog.set_level(logging.INFO, logger="whatsapp")
+
+    with pytest.raises(whatsapp_routes.NotificationOutcomeUnknown):
+        whatsapp_routes.send_whatsapp_message(
+            "+919876543210",
+            "private outbound content",
+        )
+    assert "+919876543210" not in caplog.text
+    assert "private outbound content" not in caplog.text
+
+
 def test_unexpected_provider_exception_is_contained(monkeypatch, caplog):
     _configure(monkeypatch)
     monkeypatch.setattr(settings, "TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886")
@@ -170,10 +188,11 @@ def test_unexpected_provider_exception_is_contained(monkeypatch, caplog):
     )
     caplog.set_level(logging.INFO, logger="whatsapp")
 
-    assert whatsapp_routes.send_whatsapp_message(
-        "+919876543210",
-        "private outbound content",
-    ) is False
+    with pytest.raises(whatsapp_routes.NotificationOutcomeUnknown):
+        whatsapp_routes.send_whatsapp_message(
+            "+919876543210",
+            "private outbound content",
+        )
     assert "private-unexpected-provider-error" not in caplog.text
     assert "+919876543210" not in caplog.text
     assert "private outbound content" not in caplog.text

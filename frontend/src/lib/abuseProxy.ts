@@ -1,4 +1,4 @@
-import { createHmac } from "node:crypto";
+import { createHmac, randomUUID } from "node:crypto";
 import { isIP } from "node:net";
 
 function clientIp(request: Request): string {
@@ -10,12 +10,24 @@ function clientIp(request: Request): string {
   return isIP(candidate) ? candidate : "0.0.0.0";
 }
 
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export function correlationHeaders(request: Request): Record<string, string> {
+  const inbound = request.headers.get("x-correlation-id")?.trim();
+  return {
+    "X-Correlation-ID":
+      inbound && UUID_PATTERN.test(inbound) ? inbound.toLowerCase() : randomUUID(),
+  };
+}
+
 export function abuseProxyHeaders(
   request: Request,
   backendPath: string,
   nowSeconds = Math.floor(Date.now() / 1000),
   outboundMethod = request.method,
 ): Record<string, string> {
+  const correlation = correlationHeaders(request);
   const secret = process.env.ABUSE_PROXY_SECRET;
   if (!secret) {
     if (
@@ -25,7 +37,7 @@ export function abuseProxyHeaders(
     ) {
       throw new Error("Protected proxy is unavailable");
     }
-    return { Origin: new URL(request.url).origin };
+    return { Origin: new URL(request.url).origin, ...correlation };
   }
   if (secret.length < 32) {
     throw new Error("Protected proxy is misconfigured");
@@ -35,6 +47,7 @@ export function abuseProxyHeaders(
     .update(`${nowSeconds}\n${outboundMethod.toUpperCase()}\n${backendPath}\n${ip}`)
     .digest("hex");
   return {
+    ...correlation,
     "X-Neurocient-Client-IP": ip,
     "X-Neurocient-Proxy-Timestamp": String(nowSeconds),
     "X-Neurocient-Proxy-Signature": signature,
@@ -56,7 +69,7 @@ export function mutationProxyHeaders(
 
 export function backendResponseInit(response: Response): ResponseInit {
   const headers = new Headers();
-  for (const name of ["retry-after", "cache-control"]) {
+  for (const name of ["retry-after", "cache-control", "x-correlation-id"]) {
     const value = response.headers.get(name);
     if (value) headers.set(name, value);
   }

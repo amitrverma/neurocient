@@ -1,11 +1,20 @@
 from __future__ import annotations
 
+import logging
+import time
+import json
 from urllib.parse import urlsplit
 
 from starlette.requests import Request
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from app.config import settings
+from app.observability import (
+    current_correlation_id,
+    log_event,
+    normalize_correlation_id,
+    safe_exception_fields,
+)
 from app.services.rate_limits import has_valid_proxy_signature
 
 
@@ -18,6 +27,95 @@ BROWSER_CREDENTIAL_COOKIES = {
     "guest_access_id",
 }
 
+logger = logging.getLogger("http")
+
+
+class CorrelationMiddleware:
+    def __init__(self, app: ASGIApp):
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        inbound = _header_values(scope, b"x-correlation-id")
+        correlation_id = normalize_correlation_id(
+            inbound[0] if len(inbound) == 1 else None
+        )
+        token = current_correlation_id.set(correlation_id)
+        started = time.perf_counter()
+        status_code = 500
+        response_started = False
+
+        async def send_with_correlation(message: Message) -> None:
+            nonlocal response_started, status_code
+            if message["type"] == "http.response.start":
+                response_started = True
+                status_code = message["status"]
+                headers = [
+                    (key, value)
+                    for key, value in message.get("headers", [])
+                    if key.lower() != b"x-correlation-id"
+                ]
+                headers.append((b"x-correlation-id", correlation_id.encode("ascii")))
+                message = {**message, "headers": headers}
+            await send(message)
+
+        try:
+            await self.app(scope, receive, send_with_correlation)
+            log_event(
+                logger,
+                "http_request_finished",
+                component="fastapi",
+                operation="http_request",
+                outcome="success" if status_code < 500 else "failure",
+                method=scope.get("method"),
+                route=getattr(scope.get("route"), "path", None) or "unmatched",
+                status_code=status_code,
+                duration_ms=round((time.perf_counter() - started) * 1000, 2),
+            )
+        except Exception as error:
+            log_event(
+                logger,
+                "http_request_failed",
+                level=logging.ERROR,
+                component="fastapi",
+                operation="http_request",
+                outcome="failure",
+                method=scope.get("method"),
+                route=getattr(scope.get("route"), "path", None) or "unmatched",
+                status_code=500,
+                duration_ms=round((time.perf_counter() - started) * 1000, 2),
+                **safe_exception_fields(error),
+            )
+            if response_started:
+                raise
+            body = json.dumps(
+                {
+                    "detail": {
+                        "code": "internal_error",
+                        "correlation_id": correlation_id,
+                    }
+                },
+                separators=(",", ":"),
+            ).encode("utf-8")
+            await send_with_correlation(
+                {
+                    "type": "http.response.start",
+                    "status": 500,
+                    "headers": [
+                        (b"content-type", b"application/json"),
+                        (b"content-length", str(len(body)).encode("ascii")),
+                        (b"cache-control", b"no-store"),
+                    ],
+                }
+            )
+            await send_with_correlation(
+                {"type": "http.response.body", "body": body}
+            )
+        finally:
+            current_correlation_id.reset(token)
 
 class MutationBodyLimitMiddleware:
     def __init__(self, app: ASGIApp, max_bytes: int = MAX_MUTATION_BODY_BYTES):

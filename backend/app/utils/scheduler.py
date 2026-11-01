@@ -1,68 +1,212 @@
+from __future__ import annotations
+
+import logging
+import uuid
+from datetime import datetime
+
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-from sqlalchemy.exc import OperationalError
-import asyncio
-import logging
+from apscheduler.triggers.interval import IntervalTrigger
 from pytz import timezone
+from sqlalchemy.exc import OperationalError
 
 from app.database import AsyncSessionLocal
+from app.observability import current_correlation_id, log_event, safe_exception_fields
+from app.services.job_control import (
+    claim_job_run,
+    complete_job_run,
+    fail_job_run,
+    mark_stale_dispatches_uncertain,
+    record_worker_heartbeat,
+)
+from app.services.payment_reconciliation import run_payment_reconciliation
 from app.utils.reminder_engine import (
-    send_spot_pushes,
+    send_daily_nudge,
     send_microchallenge_pushes,
-    send_daily_nudge
+    send_spot_pushes,
 )
 
-# Setup logging for visibility in Azure logs
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("apscheduler")
 
-# Initialize scheduler
+logger = logging.getLogger("scheduler")
 scheduler = AsyncIOScheduler()
 india_tz = timezone("Asia/Kolkata")
-
-def start_scheduler():
-    if scheduler.running:
-        logger.info("Scheduler is already running")
-        return
-
-    scheduler.add_job(run_behavioral_job, CronTrigger(hour=9, minute=0, timezone=india_tz), id="behavioral_job", replace_existing=True)
-    scheduler.add_job(run_challenge_job, CronTrigger(hour=13, minute=0, timezone=india_tz), id="challenge_job", replace_existing=True)
-    scheduler.add_job(run_spot_job, CronTrigger(hour=20, minute=0, timezone=india_tz), id="spot_job", replace_existing=True)
-    scheduler.start()
-    logger.info("✅ Scheduler started with behavioral (9AM), challenge (12PM), and spot (8PM) jobs")
-
-def stop_scheduler():
-    if scheduler.running:
-        scheduler.shutdown(wait=False)
-        logger.info("Scheduler stopped")
+worker_instance_id = uuid.uuid4()
+worker_started_at = datetime.utcnow()
 
 
-# Robust safe DB wrapper
-async def run_safe(task_func, name: str):
-    for attempt in range(3):
-        try:
-            async with AsyncSessionLocal() as db:
-                result = await task_func(db)
-            logger.info(
-                "Job '%s' completed on attempt %s result=%s",
-                name,
-                attempt + 1,
-                result,
+def _daily_run_key(now: datetime | None = None) -> str:
+    current = now or datetime.now(india_tz)
+    if current.tzinfo is None:
+        current = india_tz.localize(current)
+    return current.astimezone(india_tz).date().isoformat()
+
+
+async def run_claimed_job(task_func, name: str, *, run_key: str | None = None):
+    logical_key = run_key or _daily_run_key()
+    try:
+        async with AsyncSessionLocal() as claim_db:
+            run = await claim_job_run(
+                claim_db,
+                job_name=name,
+                run_key=logical_key,
             )
-            break
-        except OperationalError as e:
-            logger.warning(f"⚠️ Job '{name}' DB error on attempt {attempt+1}: {e}")
-            await asyncio.sleep(3)
-        except Exception as e:
-            logger.exception(f"🔥 Unexpected error in job '{name}': {e}")
-            break
+    except OperationalError:
+        log_event(
+            logger,
+            "scheduled_job_claim_failed",
+            level=logging.ERROR,
+            component="worker",
+            operation="scheduled_job",
+            outcome="failure",
+            job_name=name,
+            run_key=logical_key,
+            reason_code="database_unavailable",
+            retryable=True,
+        )
+        return None
 
-# Individual job runners
+    if run is None:
+        log_event(
+            logger,
+            "scheduled_job_duplicate_skipped",
+            component="worker",
+            operation="scheduled_job",
+            outcome="skipped",
+            job_name=name,
+            run_key=logical_key,
+            reason_code="durable_claim_exists",
+        )
+        return None
+
+    token = current_correlation_id.set(str(run.correlation_id))
+    try:
+        async with AsyncSessionLocal() as recovery_db:
+            await mark_stale_dispatches_uncertain(recovery_db)
+        async with AsyncSessionLocal() as task_db:
+            result = await task_func(task_db)
+        safe_result = {
+            key: value
+            for key, value in (result or {}).items()
+            if isinstance(value, int) and not isinstance(value, bool)
+        }
+        async with AsyncSessionLocal() as outcome_db:
+            await complete_job_run(outcome_db, run.id, safe_result)
+        log_event(
+            logger,
+            "scheduled_job_finished",
+            component="worker",
+            operation="scheduled_job",
+            outcome="success",
+            job_name=name,
+            run_key=logical_key,
+            count=sum(safe_result.values()),
+        )
+        return result
+    except Exception as error:
+        async with AsyncSessionLocal() as outcome_db:
+            await fail_job_run(
+                outcome_db,
+                run.id,
+                error_code=type(error).__name__,
+            )
+        log_event(
+            logger,
+            "scheduled_job_failed",
+            level=logging.ERROR,
+            component="worker",
+            operation="scheduled_job",
+            outcome="failure",
+            job_name=name,
+            run_key=logical_key,
+            reason_code="task_failed",
+            retryable=False,
+            **safe_exception_fields(error),
+        )
+        return None
+    finally:
+        current_correlation_id.reset(token)
+
+
 async def run_spot_job():
-    await run_safe(send_spot_pushes, "spot_push")
+    return await run_claimed_job(send_spot_pushes, "spot_reminder")
+
 
 async def run_challenge_job():
-    await run_safe(send_microchallenge_pushes, "microchallenge_push")
+    return await run_claimed_job(send_microchallenge_pushes, "microchallenge")
+
 
 async def run_behavioral_job():
-     await run_safe(send_daily_nudge, "daily_nudge")
+    return await run_claimed_job(send_daily_nudge, "daily_nudge")
+
+
+async def run_reconciliation_job():
+    return await run_claimed_job(run_payment_reconciliation, "payment_reconciliation")
+
+
+async def record_heartbeat():
+    async with AsyncSessionLocal() as db:
+        await record_worker_heartbeat(
+            db,
+            worker_name="scheduler",
+            instance_id=worker_instance_id,
+            started_at=worker_started_at,
+        )
+
+
+def start_scheduler() -> None:
+    if scheduler.running:
+        log_event(
+            logger,
+            "scheduler_start_skipped",
+            component="worker",
+            operation="scheduler_start",
+            outcome="skipped",
+            reason_code="already_running",
+        )
+        return
+
+    jobs = (
+        (run_reconciliation_job, "payment_reconciliation", 3, 0),
+        (run_behavioral_job, "daily_nudge", 9, 0),
+        (run_challenge_job, "microchallenge", 13, 0),
+        (run_spot_job, "spot_reminder", 20, 0),
+    )
+    scheduler.add_job(
+        record_heartbeat,
+        IntervalTrigger(minutes=1),
+        id="worker_heartbeat",
+        replace_existing=True,
+        coalesce=True,
+        max_instances=1,
+    )
+    for func, job_id, hour, minute in jobs:
+        scheduler.add_job(
+            func,
+            CronTrigger(hour=hour, minute=minute, timezone=india_tz),
+            id=job_id,
+            replace_existing=True,
+            coalesce=True,
+            max_instances=1,
+            misfire_grace_time=15 * 60,
+        )
+    scheduler.start()
+    log_event(
+        logger,
+        "scheduler_started",
+        component="worker",
+        operation="scheduler_start",
+        outcome="success",
+        count=len(jobs) + 1,
+    )
+
+
+def stop_scheduler() -> None:
+    if scheduler.running:
+        scheduler.shutdown(wait=False)
+        log_event(
+            logger,
+            "scheduler_stopped",
+            component="worker",
+            operation="scheduler_stop",
+            outcome="success",
+        )

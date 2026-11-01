@@ -3,6 +3,7 @@ from app.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete
 from app.models import WebPushSubscription
+from app.services.notification_provider import NotificationOutcomeUnknown
 import logging
 import json
 
@@ -41,5 +42,10 @@ async def send_push(subscription: dict, payload: str, db: AsyncSession, sub_id=N
             logger.error("Push authentication failed (401).")
         else:
             logger.error("Unhandled WebPush error.")
+
+        if status_code is None or status_code >= 500:
+            raise NotificationOutcomeUnknown(
+                "Web Push delivery outcome is unknown"
+            ) from ex
 
         return None

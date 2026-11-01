@@ -1,8 +1,9 @@
 import asyncio
 import json
 import logging
-from datetime import date
+from datetime import date, datetime
 from typing import Literal
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,6 +17,11 @@ from app.models import (
     WebPushSubscription,
 )
 from app.Routes.whatsapp_routes import send_whatsapp_message
+from app.observability import log_event, safe_exception_fields
+from app.services.job_control import (
+    claim_notification_dispatch,
+    finish_notification_dispatch,
+)
 from app.utils.pushnotification import send_push
 
 logger = logging.getLogger("notification_delivery")
@@ -26,6 +32,10 @@ PURPOSE_FIELDS = {
     "spot_reminder": "spot_reminder_enabled",
     "microchallenge": "microchallenge_enabled",
 }
+
+
+def _dispatch_date() -> date:
+    return datetime.now(ZoneInfo("Asia/Kolkata")).date()
 
 
 async def has_spotted_today(user_id, db: AsyncSession):
@@ -108,25 +118,93 @@ async def _deliver_to_user(
                 )
             )
         ).scalars().all()
-        for subscription in subscriptions:
-            await db.refresh(
-                prefs,
-                attribute_names=[PURPOSE_FIELDS[purpose], "push_enabled"],
+        dispatch = (
+            await claim_notification_dispatch(
+                db,
+                user_id=user_id,
+                purpose=purpose,
+                channel="push",
+                destination_key="user-push",
+                dispatch_date=_dispatch_date(),
             )
-            if not (
-                getattr(prefs, PURPOSE_FIELDS[purpose]) and prefs.push_enabled
-            ):
-                break
-            delivered = await send_push(
-                {"endpoint": subscription.endpoint, "keys": subscription.keys},
-                payload=json.dumps({"title": title, "body": body}),
-                db=db,
-                sub_id=subscription.id,
+            if subscriptions
+            else None
+        )
+        if subscriptions and dispatch is None:
+            logger.info(
+                "notification_skipped purpose=%s channel=push reason=durable_claim_exists",
+                purpose,
             )
-            if delivered:
-                push_success += 1
-            else:
+        elif dispatch is not None:
+            delivered = False
+            uncertain_error = None
+            consent_revoked = False
+            for subscription in subscriptions:
+                await db.refresh(
+                    prefs,
+                    attribute_names=[PURPOSE_FIELDS[purpose], "push_enabled"],
+                )
+                if not (
+                    getattr(prefs, PURPOSE_FIELDS[purpose]) and prefs.push_enabled
+                ):
+                    consent_revoked = True
+                    break
+                try:
+                    delivered = bool(
+                        await send_push(
+                            {
+                                "endpoint": subscription.endpoint,
+                                "keys": subscription.keys,
+                            },
+                            payload=json.dumps({"title": title, "body": body}),
+                            db=db,
+                            sub_id=subscription.id,
+                        )
+                    )
+                except Exception as error:
+                    uncertain_error = error
+                    break
+                if delivered:
+                    break
+
+            if consent_revoked:
+                await finish_notification_dispatch(
+                    db,
+                    dispatch.id,
+                    status="skipped",
+                    error_code="consent_revoked",
+                )
+            elif uncertain_error is not None:
+                await finish_notification_dispatch(
+                    db,
+                    dispatch.id,
+                    status="reconciliation_required",
+                    error_code="provider_outcome_unknown",
+                )
+                log_event(
+                    logger,
+                    "notification_delivery_uncertain",
+                    level=logging.ERROR,
+                    component="worker",
+                    operation="notification_delivery",
+                    outcome="uncertain",
+                    purpose=purpose,
+                    channel="push",
+                    reason_code="provider_outcome_unknown",
+                    **safe_exception_fields(uncertain_error),
+                )
                 push_failed += 1
+            else:
+                await finish_notification_dispatch(
+                    db,
+                    dispatch.id,
+                    status="sent" if delivered else "failed",
+                    error_code=None if delivered else "provider_rejected",
+                )
+                if delivered:
+                    push_success += 1
+                else:
+                    push_failed += 1
 
     whatsapp_success = 0
     whatsapp_failed = 0
@@ -145,14 +223,52 @@ async def _deliver_to_user(
         and prefs.whatsapp_verified
         and prefs.whatsapp_number
     ):
-        if await asyncio.to_thread(
-            send_whatsapp_message,
-            prefs.whatsapp_number,
-            whatsapp_body or f"{title} {body}",
-        ):
-            whatsapp_success = 1
-        else:
-            whatsapp_failed = 1
+        dispatch = await claim_notification_dispatch(
+            db,
+            user_id=user_id,
+            purpose=purpose,
+            channel="whatsapp",
+            destination_key="verified-account-number",
+            dispatch_date=_dispatch_date(),
+        )
+        if dispatch is not None:
+            try:
+                delivered = await asyncio.to_thread(
+                    send_whatsapp_message,
+                    prefs.whatsapp_number,
+                    whatsapp_body or f"{title} {body}",
+                )
+            except Exception as error:
+                await finish_notification_dispatch(
+                    db,
+                    dispatch.id,
+                    status="reconciliation_required",
+                    error_code="provider_outcome_unknown",
+                )
+                log_event(
+                    logger,
+                    "notification_delivery_uncertain",
+                    level=logging.ERROR,
+                    component="worker",
+                    operation="notification_delivery",
+                    outcome="uncertain",
+                    purpose=purpose,
+                    channel="whatsapp",
+                    reason_code="provider_outcome_unknown",
+                    **safe_exception_fields(error),
+                )
+                whatsapp_failed = 1
+            else:
+                await finish_notification_dispatch(
+                    db,
+                    dispatch.id,
+                    status="sent" if delivered else "failed",
+                    error_code=None if delivered else "provider_rejected",
+                )
+                if delivered:
+                    whatsapp_success = 1
+                else:
+                    whatsapp_failed = 1
 
     logger.info(
         "notification_delivery_finished purpose=%s push_success=%s push_failed=%s "

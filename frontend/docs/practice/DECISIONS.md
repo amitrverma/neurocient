@@ -1583,3 +1583,15 @@ The matching welcome email is a transactional continuation of verified access,
 not optional engagement messaging. It is sent once from durable webhook state,
 never from the browser callback, and directs the member toward one concrete
 place to begin without implying that payment alone has created progress.
+
+## 2026-11-01: Membership cancellation preserves the paid period
+
+Membership cancellation is requested at the end of the current paid billing
+period. The member keeps access through the date already paid for. The browser
+request records intent and may report that provider confirmation is pending; it
+does not remove access. Only a verified provider lifecycle event changes the
+authoritative entitlement.
+
+Provider/local contradictions begin as observation-only reconciliation issues.
+They are visible to an administrator but do not automatically change access or
+move money until provider-shaped evidence and an explicit repair contract exist.

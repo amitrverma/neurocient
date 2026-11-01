@@ -6,7 +6,7 @@ Owner: Amit
 
 Base revision: `cd08080a09ba6e7ce2b4b1fd9ebbe9f1965fd335`
 
-Contract version: 1.0 (2026-11-01)
+Contract version: 1.1 (2026-11-01)
 
 Implementation revision: working tree based on `0cd9062b2f371efa6f7ce052ce89762d19fa29cc`
 
@@ -30,9 +30,11 @@ before either item is `Verified`.
 - Razorpay sends signed lifecycle events to a membership-specific webhook.
 - Feature routes continue reading only the provider-neutral
   `membership_entitlements` record.
-- An administrator may inspect billing and event state through the existing
-  read-only admin console. Customer cancellation and billing management remain
-  PAY-04 scope.
+- An administrator may inspect billing, event, operational, and reconciliation
+  state through the existing admin console.
+- A paid member may request cancellation at the end of the current paid period.
+  The provider request is durable and replay-safe; only the verified cancellation
+  webhook changes access.
 
 ## Confirmed product and provider decisions
 
@@ -124,6 +126,10 @@ subscription; events for an older subscription cannot change the new one.
   stable provider idempotency key; webhook replay resumes failed delivery but
   cannot duplicate a sent welcome. Email failure never revokes or fabricates
   paid access, and inactive access suppresses an unsent welcome.
+- **PAY12-L:** Cancellation is authenticated and requested for period end. A
+  browser response never removes access. Provider rejection is safely retryable;
+  uncertain completion blocks automatic retry and becomes visible to bounded
+  observation-only reconciliation.
 
 ## Retry, concurrency, and failure contract
 
@@ -208,8 +214,8 @@ back while retaining the additive schema.
 
 ## Excluded scope
 
-- Customer cancellation/billing portal and automated provider reconciliation
-  UI (PAY-04).
+- Automatic reconciliation repair and provider-hosted invoice or plan-change
+  management. The current admin view is observation-only.
 - Cohort capacity-conflict refunds and cohort payment recovery (PAY-05).
 - Taxes, invoices, coupons, plan changes, trials, annual plans, and proration.
 - Marketing email, dunning messages, or provider notification customization.

@@ -21,6 +21,8 @@ type MembershipStatus = {
   current_period_end?: string | null;
   checkout_configured?: boolean;
   checkout_state?: string | null;
+  cancellation_state?: string | null;
+  cancellation_requested_at?: string | null;
 };
 
 const formatAccessDate = (value?: string | null) => {
@@ -69,6 +71,8 @@ export default function MembershipCheckout() {
   const [working, setWorking] = useState(false);
   const [status, setStatus] = useState<MembershipStatus | null>(null);
   const [message, setMessage] = useState("");
+  const [confirmCancellation, setConfirmCancellation] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   const refreshStatus = useCallback(async () => {
     if (!user) return null;
@@ -155,6 +159,39 @@ export default function MembershipCheckout() {
     }
   }, [user, waitForConfirmation]);
 
+  const active = Boolean(status?.is_active);
+  const configured = status?.checkout_configured !== false;
+  const accessDate = formatAccessDate(status?.current_period_end);
+
+  const cancelMembership = useCallback(async () => {
+    setCancelling(true);
+    setMessage("");
+    try {
+      const response = await fetch("/api/membership/cancel", { method: "POST" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setMessage(
+          data?.detail?.code === "cancellation_reconciliation_required"
+            ? "Your cancellation request needs confirmation from Razorpay. Access remains unchanged while we reconcile it."
+            : "Cancellation could not be requested. Please try again shortly.",
+        );
+      } else {
+        setStatus((current) => ({
+          ...current,
+          cancellation_state: data.status || "requested",
+        }));
+        setMessage("");
+      }
+    } catch {
+      setMessage(
+        "Cancellation confirmation could not be checked. Access remains unchanged while we reconcile it.",
+      );
+    } finally {
+      setCancelling(false);
+      setConfirmCancellation(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (pendingAfterAuth && user) {
       setPendingAfterAuth(false);
@@ -162,11 +199,10 @@ export default function MembershipCheckout() {
     }
   }, [pendingAfterAuth, startCheckout, user]);
 
-  const active = Boolean(status?.is_active);
-  const configured = status?.checkout_configured !== false;
-  const accessDate = formatAccessDate(status?.current_period_end);
-
   if (active) {
+    const cancellationScheduled = ["requested", "completed"].includes(
+      status?.cancellation_state || "",
+    );
     return (
       <section
         className="mt-7 overflow-hidden rounded-2xl border border-brand-secondary/50 bg-[#f7f3e8] text-brand-dark shadow-[0_18px_50px_rgba(0,0,0,0.16)]"
@@ -208,6 +244,50 @@ export default function MembershipCheckout() {
             Explore Insights
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
+        </div>
+        <div className="border-t border-brand-dark/10 px-5 py-4 sm:px-6">
+          {cancellationScheduled ? (
+            <p className="font-sans text-sm leading-6 text-brand-dark/70">
+              Cancellation is scheduled. Your access remains active
+              {accessDate ? ` through ${accessDate}` : " through the current paid period"}.
+            </p>
+          ) : confirmCancellation ? (
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="font-sans text-sm leading-6 text-brand-dark/70">
+                Cancel at the end of the current paid period?
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmCancellation(false)}
+                  className="min-h-11 rounded-full border border-brand-dark/20 px-4 font-sans text-sm font-semibold"
+                >
+                  Keep membership
+                </button>
+                <button
+                  type="button"
+                  disabled={cancelling}
+                  onClick={() => void cancelMembership()}
+                  className="min-h-11 rounded-full bg-brand-dark px-4 font-sans text-sm font-semibold text-white disabled:opacity-60"
+                >
+                  {cancelling ? "Requesting…" : "Confirm cancellation"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirmCancellation(true)}
+              className="min-h-11 font-sans text-sm font-semibold text-brand-dark/65 underline decoration-brand-dark/25 underline-offset-4 hover:text-brand-dark"
+            >
+              Cancel membership
+            </button>
+          )}
+          {message ? (
+            <p className="mt-3 font-sans text-sm leading-6 text-brand-dark/70">
+              {message}
+            </p>
+          ) : null}
         </div>
       </section>
     );

@@ -4,6 +4,7 @@ import hmac
 import httpx
 
 from app.config import settings
+from app.observability import correlation_headers
 
 
 class ProviderRejected(RuntimeError):
@@ -28,6 +29,7 @@ async def create_order(*, amount_minor: int, currency: str, receipt: str, notes:
             response = await client.post(
                 "https://api.razorpay.com/v1/orders",
                 auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET),
+                headers=correlation_headers(),
                 json={
                     "amount": amount_minor,
                     "currency": currency,

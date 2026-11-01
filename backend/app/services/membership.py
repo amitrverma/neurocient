@@ -75,6 +75,19 @@ async def get_membership_entitlement(
     return result.scalar_one_or_none()
 
 
+async def lock_membership_entitlement(
+    db: AsyncSession,
+    user_id: UUID,
+) -> MembershipEntitlement | None:
+    result = await db.execute(
+        select(MembershipEntitlement)
+        .where(MembershipEntitlement.user_id == user_id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
+    return result.scalar_one_or_none()
+
+
 async def has_active_membership(db: AsyncSession, user_id: UUID) -> bool:
     return entitlement_is_active(await get_membership_entitlement(db, user_id))
 

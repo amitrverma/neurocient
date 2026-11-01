@@ -7,6 +7,17 @@ import pytest
 from app.utils import reminder_engine
 
 
+@pytest.fixture(autouse=True)
+def durable_dispatch_claims(monkeypatch):
+    claim = AsyncMock(
+        side_effect=lambda *args, **kwargs: SimpleNamespace(id="dispatch-id")
+    )
+    finish = AsyncMock()
+    monkeypatch.setattr(reminder_engine, "claim_notification_dispatch", claim)
+    monkeypatch.setattr(reminder_engine, "finish_notification_dispatch", finish)
+    return claim, finish
+
+
 class FakeResult:
     def __init__(self, values):
         self.values = values
@@ -184,6 +195,99 @@ def test_provider_rejections_are_counted_as_failures(monkeypatch):
         "whatsapp_success": 0,
         "whatsapp_failed": 1,
     }
+
+
+def test_transport_ambiguous_delivery_requires_reconciliation(
+    monkeypatch,
+    durable_dispatch_claims,
+):
+    _, finish = durable_dispatch_claims
+    monkeypatch.setattr(
+        reminder_engine,
+        "send_push",
+        AsyncMock(side_effect=RuntimeError("transport lost after submit")),
+    )
+    db = DeliverySession(
+        preferences(nudge_enabled=True, push_enabled=True),
+        [SimpleNamespace(id="s1", endpoint="https://push.test/1", keys={})],
+    )
+
+    result = asyncio.run(
+        reminder_engine._deliver_to_user(
+            db,
+            user_id="u1",
+            purpose="nudge",
+            title="Title",
+            body="Body",
+        )
+    )
+
+    assert result["push_failed"] == 1
+    assert finish.await_args.kwargs == {
+        "status": "reconciliation_required",
+        "error_code": "provider_outcome_unknown",
+    }
+
+
+def test_push_falls_back_to_next_device_under_one_daily_claim(
+    monkeypatch,
+    durable_dispatch_claims,
+):
+    claim, finish = durable_dispatch_claims
+    send_push = AsyncMock(side_effect=[None, True])
+    monkeypatch.setattr(reminder_engine, "send_push", send_push)
+    db = DeliverySession(
+        preferences(nudge_enabled=True, push_enabled=True),
+        [
+            SimpleNamespace(id="expired", endpoint="https://push.test/1", keys={}),
+            SimpleNamespace(id="valid", endpoint="https://push.test/2", keys={}),
+        ],
+    )
+
+    result = asyncio.run(
+        reminder_engine._deliver_to_user(
+            db,
+            user_id="u1",
+            purpose="nudge",
+            title="Title",
+            body="Body",
+        )
+    )
+
+    assert result["push_success"] == 1
+    assert send_push.await_count == 2
+    claim.assert_awaited_once()
+    assert finish.await_args.kwargs == {"status": "sent", "error_code": None}
+
+
+def test_existing_dispatch_claim_prevents_duplicate_provider_call(
+    monkeypatch,
+    durable_dispatch_claims,
+):
+    claim, finish = durable_dispatch_claims
+    claim.side_effect = None
+    claim.return_value = None
+    send_push = AsyncMock(return_value=True)
+    monkeypatch.setattr(reminder_engine, "send_push", send_push)
+    db = DeliverySession(
+        preferences(nudge_enabled=True, push_enabled=True),
+        [SimpleNamespace(id="s1", endpoint="https://push.test/1", keys={})],
+    )
+
+    result = asyncio.run(
+        reminder_engine._deliver_to_user(
+            db,
+            user_id="u1",
+            purpose="nudge",
+            title="Title",
+            body="Body",
+        )
+    )
+
+    assert result["push_success"] == 0
+    assert result["push_failed"] == 0
+    send_push.assert_not_awaited()
+    finish.assert_not_awaited()
 
 
 @pytest.mark.parametrize(

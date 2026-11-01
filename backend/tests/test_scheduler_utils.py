@@ -1,7 +1,19 @@
 import asyncio
-from sqlalchemy.exc import OperationalError
+import uuid
+from datetime import datetime
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
+
+import pytest
 
 from app.utils import scheduler
+
+
+@pytest.fixture(autouse=True)
+def stale_dispatch_recovery(monkeypatch):
+    recovery = AsyncMock(return_value=0)
+    monkeypatch.setattr(scheduler, "mark_stale_dispatches_uncertain", recovery)
+    return recovery
 
 
 class DummySession:
@@ -9,53 +21,67 @@ class DummySession:
         return object()
 
     async def __aexit__(self, exc_type, exc, tb):
-        pass
+        return None
 
 
-def test_run_safe_success(monkeypatch):
+def test_daily_run_key_uses_india_calendar_day():
+    value = datetime.fromisoformat("2026-11-01T23:45:00+05:30")
+    assert scheduler._daily_run_key(value) == "2026-11-01"
+
+
+def test_claimed_job_completes_once(monkeypatch):
+    run = SimpleNamespace(id=uuid.uuid4(), correlation_id=uuid.uuid4())
+    claim = AsyncMock(return_value=run)
+    complete = AsyncMock()
+    fail = AsyncMock()
+    task = AsyncMock(return_value={"sent": 2})
     monkeypatch.setattr(scheduler, "AsyncSessionLocal", lambda: DummySession())
+    monkeypatch.setattr(scheduler, "claim_job_run", claim)
+    monkeypatch.setattr(scheduler, "complete_job_run", complete)
+    monkeypatch.setattr(scheduler, "fail_job_run", fail)
 
-    calls = []
+    result = asyncio.run(
+        scheduler.run_claimed_job(task, "daily_nudge", run_key="2026-11-01")
+    )
 
-    async def task(db):
-        calls.append(db)
+    assert result == {"sent": 2}
+    task.assert_awaited_once()
+    complete.assert_awaited_once()
+    fail.assert_not_awaited()
 
-    asyncio.run(scheduler.run_safe(task, "success"))
-    assert len(calls) == 1
 
-
-def test_run_safe_retries(monkeypatch):
+def test_duplicate_claim_never_executes_task(monkeypatch):
     monkeypatch.setattr(scheduler, "AsyncSessionLocal", lambda: DummySession())
+    monkeypatch.setattr(scheduler, "claim_job_run", AsyncMock(return_value=None))
+    task = AsyncMock()
 
-    async def no_sleep(_):
-        pass
+    result = asyncio.run(
+        scheduler.run_claimed_job(task, "daily_nudge", run_key="2026-11-01")
+    )
 
-    monkeypatch.setattr(scheduler.asyncio, "sleep", no_sleep)
-
-    class Task:
-        def __init__(self):
-            self.calls = 0
-
-        async def __call__(self, db):
-            self.calls += 1
-            if self.calls == 1:
-                raise OperationalError("stmt", {}, None)
-
-    task = Task()
-    asyncio.run(scheduler.run_safe(task, "retry"))
-    assert task.calls == 2
+    assert result is None
+    task.assert_not_awaited()
 
 
-def test_run_safe_exception(monkeypatch):
+def test_task_failure_is_recorded_without_automatic_replay(monkeypatch):
+    run = SimpleNamespace(id=uuid.uuid4(), correlation_id=uuid.uuid4())
+    task = AsyncMock(side_effect=ValueError("private provider detail"))
+    fail = AsyncMock()
     monkeypatch.setattr(scheduler, "AsyncSessionLocal", lambda: DummySession())
+    monkeypatch.setattr(scheduler, "claim_job_run", AsyncMock(return_value=run))
+    monkeypatch.setattr(scheduler, "complete_job_run", AsyncMock())
+    monkeypatch.setattr(scheduler, "fail_job_run", fail)
 
-    async def task(db):
-        raise ValueError("boom")
+    result = asyncio.run(
+        scheduler.run_claimed_job(task, "daily_nudge", run_key="2026-11-01")
+    )
 
-    asyncio.run(scheduler.run_safe(task, "error"))
+    assert result is None
+    task.assert_awaited_once()
+    fail.assert_awaited_once()
 
 
-def test_start_scheduler(monkeypatch):
+def test_start_scheduler_registers_worker_jobs(monkeypatch):
     calls = []
 
     class DummyScheduler:
@@ -69,11 +95,14 @@ def test_start_scheduler(monkeypatch):
 
     monkeypatch.setattr(scheduler, "scheduler", DummyScheduler())
     monkeypatch.setattr(scheduler, "CronTrigger", lambda **kwargs: ("cron", kwargs))
+    monkeypatch.setattr(scheduler, "IntervalTrigger", lambda **kwargs: ("interval", kwargs))
 
     scheduler.start_scheduler()
 
-    add_calls = [c for c in calls if c[0] == "add"]
-    assert len(add_calls) == 3
+    add_calls = [call for call in calls if call[0] == "add"]
+    assert len(add_calls) == 5
+    assert all(call[2]["coalesce"] is True for call in add_calls)
+    assert all(call[2]["max_instances"] == 1 for call in add_calls)
     assert ("start",) in calls
 
 
@@ -88,5 +117,4 @@ def test_start_scheduler_is_idempotent(monkeypatch):
             raise AssertionError("must not start twice")
 
     monkeypatch.setattr(scheduler, "scheduler", RunningScheduler())
-
     scheduler.start_scheduler()

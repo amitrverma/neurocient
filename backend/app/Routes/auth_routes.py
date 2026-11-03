@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+import logging
 import secrets
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
@@ -10,8 +11,6 @@ from app.database import get_db
 from app.models import (
     PasswordResetToken,
     User,
-    Waitlist,
-    Participant,
     UserPreferences,
 )
 from app.utils.auth import (
@@ -46,6 +45,8 @@ from app.services.admin import (
     provision_configured_admin,
     roles_for_user,
 )
+
+logger = logging.getLogger(__name__)
 
 # ---------------- Firebase init ----------------
 firebase_creds_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
@@ -425,61 +426,46 @@ async def firebase_login(request: Request, db: AsyncSession = Depends(get_db)):
 
         email, name, google_id = _verified_google_identity(decoded_token)
 
-        # Ensure participant exists
-        stmt = select(Participant).where(func.lower(Participant.email) == email)
+        # A verified Google identity follows the same open account-provisioning
+        # contract as email signup. The former Participant/Waitlist gate was a
+        # legacy preview rule that returned 200 without creating a session.
+        stmt = select(User).where(func.lower(User.email) == email)
         result = await db.execute(stmt)
-        participant = result.scalars().first()
+        user = result.scalars().first()
 
-        if participant:
-            stmt = select(User).where(func.lower(User.email) == email)
-            result = await db.execute(stmt)
-            user = result.scalars().first()
+        if user and user.google_id and user.google_id != google_id:
+            raise HTTPException(status_code=401, detail="Google identity mismatch")
 
-            if user and user.google_id and user.google_id != google_id:
-                raise HTTPException(status_code=401, detail="Google identity mismatch")
+        if not user:
+            user = User(id=uuid.uuid4(), email=email, name=name, google_id=google_id)
+            db.add(user)
+            await db.flush()
+            db.add(UserPreferences(user_id=user.id))
+        elif not user.google_id:
+            user.google_id = google_id
+        await db.commit()
+        await db.refresh(user)
 
-            if not user:
-                user = User(id=uuid.uuid4(), email=email, name=name, google_id=google_id)
-                db.add(user)
-                await db.flush()
-
-                # Create default preferences row for a newly provisioned user.
-                prefs = UserPreferences(user_id=user.id)
-                db.add(prefs)
-                await db.commit()
-
-            if user and not user.google_id:
-                user.google_id = google_id
-                await db.commit()
-                await db.refresh(user)
-
-            tokens = await issue_session(db, user.id)
-            response = JSONResponse(
-                content={
-                    "user": {"id": str(user.id), "name": user.name, "email": user.email},
-                }
-            )
-            set_auth_cookies(response, tokens)
-
-            track_event(str(user.id), "user_login", {"method": "firebase"})
-            return response
-
-        # If not participant, put on waitlist
-        stmt = select(Waitlist).where(func.lower(Waitlist.email) == email)
-        result = await db.execute(stmt)
-        existing = result.scalars().first()
-
-        if not existing:
-            waitlist_entry = Waitlist(email=email, name=name)
-            db.add(waitlist_entry)
-            await db.commit()
-
-        track_event(email, "firebase_preview")
-        return JSONResponse(
-            content={"user": {"name": name, "email": email}, "preview": True}
+        await provision_configured_admin(db, user)
+        roles = await roles_for_user(db, user.id)
+        tokens = await issue_session(db, user.id)
+        response = JSONResponse(
+            content={
+                "user": {
+                    "id": str(user.id),
+                    "name": user.name,
+                    "email": user.email,
+                    "roles": roles,
+                },
+            }
         )
+        set_auth_cookies(response, tokens)
+
+        track_event(str(user.id), "user_login", {"method": "firebase"})
+        return response
 
     except HTTPException:
         raise
     except Exception:
+        logger.exception("Unexpected Firebase login failure")
         raise HTTPException(status_code=500, detail="Server error during Firebase login")

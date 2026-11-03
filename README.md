@@ -30,6 +30,10 @@ the local connection settings, then add any optional integration credentials
 needed for the feature you are developing. The Docker volume preserves local
 data across container restarts.
 
+Copy `frontend/.env.example` to `frontend/.env.local` so server-side Next.js
+routes use the local backend at `http://127.0.0.1:8000`. Restart the frontend
+development server after changing environment variables.
+
 Apply schema migrations before starting the backend:
 
 ```powershell

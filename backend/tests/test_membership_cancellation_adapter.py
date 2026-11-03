@@ -30,14 +30,10 @@ class FakeClient:
         return self.response
 
 
-def test_period_end_confirmation_requires_matching_subscription_and_flag():
-    assert _confirms_period_end(
-        {"id": "sub_1", "cancel_at_cycle_end": 1}, "sub_1"
-    )
-    assert not _confirms_period_end({"id": "sub_1"}, "sub_1")
-    assert not _confirms_period_end(
-        {"id": "sub_other", "cancel_at_cycle_end": 1}, "sub_1"
-    )
+def test_period_end_confirmation_requires_matching_subscription():
+    assert _confirms_period_end({"id": "sub_1", "status": "active"}, "sub_1")
+    assert not _confirms_period_end({}, "sub_1")
+    assert not _confirms_period_end({"id": "sub_other"}, "sub_1")
 
 
 @pytest.mark.asyncio
@@ -57,7 +53,7 @@ async def test_cancellation_requests_period_end_not_immediate(monkeypatch):
     assert response["id"] == "sub_1"
     assert client.request_call[0] == "POST"
     assert client.request_call[1].endswith("/subscriptions/sub_1/cancel")
-    assert client.request_call[2]["json"] == {"cancel_at_cycle_end": 1}
+    assert client.request_call[2]["json"]["cancel_at_cycle_end"] is True
 
 
 @pytest.mark.asyncio

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ArrowRight, Check, LoaderCircle } from "lucide-react";
+import { ArrowRight, Check, CircleAlert, LoaderCircle } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "@/app/components/AuthModal";
 
@@ -27,8 +27,39 @@ type CheckoutResponse = {
 
 type MyCohortEnrollment = {
   status: string;
+  payment_confirmation_pending?: boolean;
   cohort: { id: string };
 };
+
+type ConfirmationStatus = "idle" | "checking" | "delayed";
+
+const errorCode = (data: unknown): string | undefined => {
+  if (!data || typeof data !== "object" || !("detail" in data)) return undefined;
+  const detail = data.detail;
+  if (!detail || typeof detail !== "object" || !("code" in detail)) return undefined;
+  return typeof detail.code === "string" ? detail.code : undefined;
+};
+
+const withReference = (message: string, response: Response): string => {
+  const correlationId = response.headers.get("x-correlation-id");
+  return correlationId ? `${message} Reference: ${correlationId.slice(0, 8)}.` : message;
+};
+
+const CHECKOUT_WINDOW_TIMEOUT_MS = 3_000;
+const CONFIRMATION_POLL_INTERVAL_MS = 2_000;
+const CONFIRMATION_POLL_ATTEMPTS = 15;
+
+const checkoutWindowIsPresent = (): boolean => Array.from(
+  document.querySelectorAll<HTMLElement>(
+    "iframe.razorpay-checkout-frame, .razorpay-container",
+  ),
+).some((element) => {
+  if (!element.isConnected || element.hidden || element.getAttribute("aria-hidden") === "true") {
+    return false;
+  }
+  const style = window.getComputedStyle(element);
+  return style.display !== "none" && style.visibility !== "hidden" && style.opacity !== "0";
+});
 
 declare global {
   interface Window {
@@ -70,8 +101,10 @@ export default function Pricing() {
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageIsError, setMessageIsError] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [hasConfirmedPlace, setHasConfirmedPlace] = useState(false);
+  const [confirmationStatus, setConfirmationStatus] = useState<ConfirmationStatus>("idle");
   const userId = user?.id;
 
   const refreshCohort = useCallback(async () => {
@@ -89,12 +122,18 @@ export default function Pricing() {
       const response = await fetch("/api/cohorts/my", { cache: "no-store" });
       if (!response.ok) return false;
       const data = await response.json();
-      const confirmed = (data.enrollments || []).some(
-        (enrollment: MyCohortEnrollment) =>
-          enrollment.cohort?.id === cohortId
-          && ["paid", "active", "completed"].includes(enrollment.status),
+      const enrollment = (data.enrollments || []).find(
+        (candidate: MyCohortEnrollment) => candidate.cohort?.id === cohortId,
+      ) as MyCohortEnrollment | undefined;
+      const confirmed = Boolean(
+        enrollment && ["paid", "active", "completed"].includes(enrollment.status),
       );
       setHasConfirmedPlace(confirmed);
+      if (confirmed) {
+        setConfirmationStatus("idle");
+      } else if (enrollment?.payment_confirmation_pending) {
+        setConfirmationStatus((current) => current === "delayed" ? current : "checking");
+      }
       return confirmed;
     } catch {
       return false;
@@ -111,6 +150,37 @@ export default function Pricing() {
     if (ready && cohort?.id) void refreshEnrollment(cohort.id);
   }, [cohort?.id, ready, refreshEnrollment]);
 
+  useEffect(() => {
+    if (confirmationStatus !== "checking" || !cohort?.id) return;
+
+    let active = true;
+    let attempts = 0;
+    let timer: number | undefined;
+
+    const checkConfirmation = async () => {
+      attempts += 1;
+      const confirmed = await refreshEnrollment(cohort.id);
+      if (!active) return;
+      if (confirmed) {
+        setConfirmationStatus("idle");
+        setMessage("");
+        await refreshCohort().catch(() => undefined);
+        return;
+      }
+      if (attempts >= CONFIRMATION_POLL_ATTEMPTS) {
+        setConfirmationStatus("delayed");
+        return;
+      }
+      timer = window.setTimeout(checkConfirmation, CONFIRMATION_POLL_INTERVAL_MS);
+    };
+
+    timer = window.setTimeout(checkConfirmation, CONFIRMATION_POLL_INTERVAL_MS);
+    return () => {
+      active = false;
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
+  }, [cohort?.id, confirmationStatus, refreshCohort, refreshEnrollment]);
+
   const joinWaitlist = async () => {
     if (!user) return setShowAuth(true);
     if (!cohort) return;
@@ -124,18 +194,44 @@ export default function Pricing() {
   const startCheckout = async () => {
     if (!user) return setShowAuth(true);
     if (!cohort) return;
+    let checkoutOpenWatchdog: number | undefined;
+    const stopCheckoutOpenWatchdog = () => {
+      if (checkoutOpenWatchdog !== undefined) {
+        window.clearTimeout(checkoutOpenWatchdog);
+        checkoutOpenWatchdog = undefined;
+      }
+    };
     setWorking(true);
     setMessage("");
+    setMessageIsError(false);
+    setConfirmationStatus("idle");
     try {
       const response = await fetch(`/api/cohorts/${cohort.id}/checkout`, { method: "POST" });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        setMessage(response.status === 409 ? "This cohort has just filled. You can join the waitlist." : "Checkout is not available yet. Please check back shortly.");
+        const code = errorCode(data);
+        let nextMessage: string;
+        if (code === "checkout_reconciliation_required") {
+          nextMessage = "This checkout attempt may have reached the payment provider, so we cannot safely start another one yet. Your place is not confirmed. Please contact support before trying again.";
+        } else if (code === "cohort_full") {
+          nextMessage = "This cohort has just filled. You can join the waitlist.";
+        } else if (response.status === 409) {
+          nextMessage = "Your enrollment status has changed. Refresh the page before trying again.";
+        } else if (response.status === 429) {
+          nextMessage = "There have been several checkout attempts. Please wait before trying again. You have not been charged.";
+        } else if (response.status === 401) {
+          nextMessage = "Your session has ended. Please log in again before starting checkout.";
+        } else {
+          nextMessage = "Secure checkout is temporarily unavailable. Checkout did not start, and you have not been charged. Please try again later.";
+        }
+        setMessage(withReference(nextMessage, response));
+        setMessageIsError(true);
         setWorking(false);
         return;
       }
       if (!(await loadRazorpay()) || !window.Razorpay) {
         setMessage("The secure payment window could not be loaded.");
+        setMessageIsError(true);
         setWorking(false);
         return;
       }
@@ -150,6 +246,7 @@ export default function Pricing() {
         prefill: { email: data.email },
         theme: { color: "#5EB1BF" },
         handler: async (payment: CheckoutResponse) => {
+          stopCheckoutOpenWatchdog();
           setMessage("Authenticating payment responseâ€¦");
           try {
             const verificationResponse = await fetch(`/api/cohorts/${cohort.id}/checkout/verify`, {
@@ -161,24 +258,25 @@ export default function Pricing() {
 
             if (!verificationResponse.ok || verification.verified !== true) {
               setMessage("We could not authenticate the payment response. Your place has not been confirmed. Please contact support before retrying.");
-            } else if (
-              verification.confirmed === true
-              || await refreshEnrollment(cohort.id)
-            ) {
+              setMessageIsError(true);
+            } else if (verification.confirmed === true) {
               setHasConfirmedPlace(true);
               await refreshCohort();
               setMessage("");
             } else {
-              setMessage("Payment authenticated. We are waiting for Razorpay to confirm capture before reserving your place.");
+              setMessage("");
+              setConfirmationStatus("checking");
             }
           } catch {
             setMessage("Payment was submitted, but its confirmation could not be checked. Please contact support before retrying.");
+            setMessageIsError(true);
           } finally {
             setWorking(false);
           }
         },
         modal: {
           ondismiss: () => {
+            stopCheckoutOpenWatchdog();
             setMessage("Checkout closed. No place has been confirmed.");
             setWorking(false);
           },
@@ -186,12 +284,24 @@ export default function Pricing() {
       });
 
       checkout.on?.("payment.failed", () => {
+        stopCheckoutOpenWatchdog();
         setMessage("Payment was not completed. No place has been confirmed. You can try again.");
+        setMessageIsError(true);
         setWorking(false);
       });
+      checkoutOpenWatchdog = window.setTimeout(() => {
+        if (!checkoutWindowIsPresent()) {
+          setMessage("The secure payment window did not open. Checkout did not start, and you have not been charged. Please try again later.");
+          setMessageIsError(true);
+          setWorking(false);
+        }
+        checkoutOpenWatchdog = undefined;
+      }, CHECKOUT_WINDOW_TIMEOUT_MS);
       checkout.open();
     } catch {
+      stopCheckoutOpenWatchdog();
       setMessage("Checkout could not be started. Please try again shortly.");
+      setMessageIsError(true);
       setWorking(false);
     }
   };
@@ -246,6 +356,28 @@ export default function Pricing() {
                   <p className="mc-reservation-next">No further action is needed right now.</p>
                 </div>
               </div>
+            ) : confirmationStatus !== "idle" ? (
+              <div
+                className="mc-reservation-confirmation mc-reservation-confirmation--pending"
+                role="status"
+                aria-live="polite"
+              >
+                <span className="mc-reservation-mark mc-reservation-mark--pending" aria-hidden="true">
+                  <LoaderCircle className={confirmationStatus === "checking" ? "h-5 w-5 animate-spin" : "h-5 w-5"} />
+                </span>
+                <div>
+                  <p className="mc-reservation-label">Payment processing</p>
+                  <h4>{confirmationStatus === "checking" ? "Confirming your place" : "Confirmation is taking longer"}</h4>
+                  <p className="mc-reservation-detail">
+                    We received the payment response and are waiting for final confirmation.
+                  </p>
+                  <p className="mc-reservation-next">
+                    {confirmationStatus === "checking"
+                      ? "Please keep this page open and do not pay again."
+                      : "Do not pay again. Refresh this page after a few minutes or contact support if your place is still not confirmed."}
+                  </p>
+                </div>
+              </div>
             ) : cohort?.enrollment_open ? (
               <button className="mc-checkout-button" disabled={working || !ready} onClick={startCheckout}>
                 {working ? "Preparing…" : user ? "Reserve my place" : "Log in to join"}<ArrowRight className="h-4 w-4" />
@@ -260,7 +392,22 @@ export default function Pricing() {
           </div>
         </div>
 
-        {message ? <p className="mc-checkout-message" role="status">{message}</p> : null}
+        {message ? (
+          <div
+            className={`mc-checkout-feedback${messageIsError ? " mc-checkout-feedback--error" : ""}`}
+            role={messageIsError ? "alert" : "status"}
+          >
+            <span className="mc-checkout-feedback-mark" aria-hidden="true">
+              <CircleAlert className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="mc-checkout-feedback-label">
+                {messageIsError ? "Checkout could not continue" : "Checkout update"}
+              </p>
+              <p className="mc-checkout-message">{message}</p>
+            </div>
+          </div>
+        ) : null}
         {cohort && !cohort.checkout_configured && cohort.enrollment_open ? (
           <p className="mc-checkout-note">Online enrollment is being prepared. Your account will be required before payment.</p>
         ) : null}

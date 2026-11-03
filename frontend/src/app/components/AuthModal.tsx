@@ -36,7 +36,10 @@ const AuthModal = ({
   );
 
   const finishAuth = async (eventName: string) => {
-    await login();
+    if (!(await login())) {
+      notify("Sign-in completed, but the session could not be confirmed. Please try again.", "error");
+      return false;
+    }
     onClose();
     onSuccess?.();
     trackEvent(eventName);
@@ -48,6 +51,7 @@ const AuthModal = ({
         "Push notifications are disabled. You can enable them anytime from Profile -> Preferences.",
       );
     }
+    return true;
   };
 
   const handleGoogleLogin = async () => {
@@ -63,12 +67,15 @@ const AuthModal = ({
         body: JSON.stringify({ idToken }),
       });
 
-      await res.json().catch(() => ({}));
+      const data = await res.json().catch(() => ({}));
 
-      if (res.ok) {
+      if (res.ok && data?.user?.id && data?.preview !== true) {
         await finishAuth("Login Completed");
       } else {
-        notify("Google login failed.", "error");
+        const detail = typeof data?.detail === "string"
+          ? data.detail
+          : "Google login failed.";
+        notify(detail, "error");
       }
     } catch (err) {
       console.error("Google login failed:", err);

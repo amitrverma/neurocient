@@ -123,13 +123,14 @@ async def test_create_order_distinguishes_rejection_from_unknown_outcome(monkeyp
         "app.services.razorpay.httpx.AsyncClient",
         lambda **_kwargs: FakeClient(response=httpx.Response(400, json={})),
     )
-    with pytest.raises(ProviderRejected):
+    with pytest.raises(ProviderRejected) as rejected:
         await create_order(
             amount_minor=2_100_000,
             currency="INR",
             receipt="enrollment-1",
             notes={},
         )
+    assert rejected.value.reason_code == "provider_rejected_request"
 
     request = httpx.Request("POST", "https://api.razorpay.com/v1/orders")
     monkeypatch.setattr(
@@ -143,6 +144,26 @@ async def test_create_order_distinguishes_rejection_from_unknown_outcome(monkeyp
             receipt="enrollment-1",
             notes={},
         )
+
+
+@pytest.mark.asyncio
+async def test_create_order_classifies_provider_authentication_failure(monkeypatch):
+    monkeypatch.setattr(settings, "RAZORPAY_KEY_ID", "key")
+    monkeypatch.setattr(settings, "RAZORPAY_KEY_SECRET", "wrong-secret")
+    monkeypatch.setattr(
+        "app.services.razorpay.httpx.AsyncClient",
+        lambda **_kwargs: FakeClient(response=httpx.Response(401, json={"error": {}})),
+    )
+
+    with pytest.raises(ProviderRejected) as rejected:
+        await create_order(
+            amount_minor=2_100_000,
+            currency="INR",
+            receipt="enrollment-1",
+            notes={},
+        )
+
+    assert rejected.value.reason_code == "provider_authentication_failed"
 
 
 @pytest.mark.asyncio

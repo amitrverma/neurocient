@@ -39,7 +39,12 @@ async def test_cancellation_is_period_end_intent_and_webhook_remains_authority(m
     async def cancel_provider(subscription_id):
         nonlocal calls
         calls += 1
-        return {"id": subscription_id, "status": "active", "cancel_at_cycle_end": 1}
+        return {
+            "id": subscription_id,
+            "status": "active",
+            "has_scheduled_changes": False,
+            "change_scheduled_at": None,
+        }
 
     monkeypatch.setattr(
         membership_cancellation_routes,

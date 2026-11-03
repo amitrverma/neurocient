@@ -35,10 +35,12 @@ async def _mark_cancellation_state(
 
 
 def _confirms_period_end(response: dict, subscription_id: str) -> bool:
-    return (
-        response.get("id") == subscription_id
-        and response.get("cancel_at_cycle_end") in {True, 1}
-    )
+    # Razorpay returns the subscription entity for an accepted cancellation but
+    # does not echo cancel_at_cycle_end or expose a scheduled-change marker.
+    # The adapter reaches this check only after a 2xx response to the controlled
+    # period-end cancellation request, so the matching subscription id is the
+    # authoritative acknowledgement.
+    return response.get("id") == subscription_id
 
 
 @router.post(

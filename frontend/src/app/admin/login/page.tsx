@@ -24,7 +24,11 @@ export default function AdminLoginPage() {
       setWorking(false);
       return;
     }
-    await login();
+    if (!(await login())) {
+      setError("Sign-in completed, but the session could not be confirmed.");
+      setWorking(false);
+      return;
+    }
     window.location.href = "/admin";
   };
 

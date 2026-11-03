@@ -167,6 +167,9 @@ async def test_cohort_capture_claim_is_atomic_and_price_is_authoritative(monkeyp
             assert invalid_callback.status_code == 400
             assert verified_callback.status_code == 200
             assert verified_callback.json() == {"verified": True, "confirmed": False}
+            pending_snapshot = await client.get("/api/cohorts/my")
+            assert pending_snapshot.status_code == 200
+            assert pending_snapshot.json()["enrollments"][0]["payment_confirmation_pending"] is True
             assert provider_calls == []
             async with AsyncSessionLocal() as db:
                 pending_enrollment = await db.get(CohortEnrollment, enrollment_id)
@@ -194,6 +197,10 @@ async def test_cohort_capture_claim_is_atomic_and_price_is_authoritative(monkeyp
                 content=body,
                 headers={"x-razorpay-signature": signature},
             )
+            confirmed_snapshot = await client.get("/api/cohorts/my")
+            assert confirmed_snapshot.status_code == 200
+            assert confirmed_snapshot.json()["enrollments"][0]["status"] == "paid"
+            assert confirmed_snapshot.json()["enrollments"][0]["payment_confirmation_pending"] is False
 
         assert first.status_code in (200, 503)
         assert second.status_code in (200, 503)

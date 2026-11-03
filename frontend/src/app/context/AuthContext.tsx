@@ -18,7 +18,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: () => Promise<void>;
+  login: () => Promise<boolean>;
   logout: (redirect?: boolean) => Promise<void>;
   ready: boolean;
 }
@@ -84,14 +84,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = async () => {
-    // After login/signup/firebase-login, cookies are already set
-    const res = await fetch("/api/auth/me", { credentials: "include" });
-    if (res.ok) {
+    try {
+      // After login/signup/firebase-login, cookies should already be set.
+      const res = await fetch("/api/auth/me", { credentials: "include" });
+      if (!res.ok) {
+        setUser(null);
+        return false;
+      }
       const u = await res.json();
       setUser(u);
       if (u?.id) {
         posthog.identify(u.id, { email: u.email, name: u.name });
       }
+      return true;
+    } catch {
+      setUser(null);
+      return false;
     }
   };
 

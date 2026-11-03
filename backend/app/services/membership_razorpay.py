@@ -2,11 +2,15 @@
 
 import hashlib
 import hmac
+import logging
 
 import httpx
 
 from app.config import settings
 from app.observability import correlation_headers
+
+
+logger = logging.getLogger(__name__)
 
 
 class ProviderRejected(RuntimeError):
@@ -60,6 +64,22 @@ async def _request(method: str, path: str, **kwargs) -> dict:
             )
     except httpx.RequestError as exc:
         raise ProviderOutcomeUnknown("Razorpay outcome is unknown") from exc
+    if response.status_code >= 400:
+        provider_code = None
+        try:
+            payload = response.json()
+            if isinstance(payload, dict) and isinstance(payload.get("error"), dict):
+                provider_code = payload["error"].get("code")
+        except ValueError:
+            pass
+        logger.warning(
+            "membership_razorpay_request_rejected",
+            extra={
+                "method": method,
+                "status_code": response.status_code,
+                "provider_code": provider_code,
+            },
+        )
     if response.status_code >= 500:
         raise ProviderOutcomeUnknown("Razorpay outcome is unknown")
     if response.status_code == 404:
@@ -92,7 +112,7 @@ async def cancel_membership_subscription_at_period_end(
     return await _request(
         "POST",
         f"subscriptions/{subscription_id}/cancel",
-        json={"cancel_at_cycle_end": 1},
+        json={"cancel_at_cycle_end": True},
     )
 
 

@@ -111,14 +111,12 @@ def test_firebase_login_rejects_existing_google_uid_mismatch(monkeypatch):
     }
     monkeypatch.setattr(firebase_auth, "verify_id_token", lambda *_args, **_kwargs: claims)
 
-    participant_result = Mock()
-    participant_result.scalars.return_value.first.return_value = SimpleNamespace()
     user_result = Mock()
     user_result.scalars.return_value.first.return_value = SimpleNamespace(
         google_id="expected-google-id"
     )
     db = Mock()
-    db.execute = AsyncMock(side_effect=[participant_result, user_result])
+    db.execute = AsyncMock(return_value=user_result)
 
     with pytest.raises(HTTPException) as exc_info:
         asyncio.run(

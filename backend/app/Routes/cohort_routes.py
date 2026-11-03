@@ -181,14 +181,29 @@ async def current_modern_caveman(db: AsyncSession = Depends(get_db)):
 
 @router.get("/cohorts/my")
 async def my_cohorts(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    current_payment_status = (
+        select(PaymentRecord.status)
+        .where(
+            PaymentRecord.enrollment_id == CohortEnrollment.id,
+            PaymentRecord.provider_order_id == CohortEnrollment.provider_order_id,
+        )
+        .order_by(PaymentRecord.updated_at.desc())
+        .limit(1)
+        .correlate(CohortEnrollment)
+        .scalar_subquery()
+    )
     result = await db.execute(
-        select(CohortEnrollment, Cohort)
+        select(
+            CohortEnrollment,
+            Cohort,
+            current_payment_status.label("current_payment_status"),
+        )
         .join(Cohort, Cohort.id == CohortEnrollment.cohort_id)
         .where(CohortEnrollment.user_id == current_user.id)
         .order_by(Cohort.starts_at.desc())
     )
     enrollments = []
-    for enrollment, cohort in result.all():
+    for enrollment, cohort, payment_status in result.all():
         session_result = await db.execute(
             select(CohortSession)
             .where(
@@ -201,6 +216,10 @@ async def my_cohorts(current_user: User = Depends(get_current_user), db: AsyncSe
         enrollments.append({
             "id": str(enrollment.id),
             "status": enrollment.status,
+            "payment_confirmation_pending": (
+                enrollment.status == "pending_payment"
+                and payment_status == "signature_verified"
+            ),
             "cohort": {
                 "id": str(cohort.id),
                 "title": cohort.title,
@@ -255,7 +274,10 @@ async def begin_checkout(cohort_id: uuid.UUID, current_user: User = Depends(get_
         [("checkout_user", str(current_user.id))],
     )
     if not razorpay_ready():
-        raise HTTPException(status_code=503, detail="Checkout is not configured")
+        raise HTTPException(
+            status_code=503,
+            detail={"code": "checkout_temporarily_unavailable"},
+        )
     result = await db.execute(select(Cohort).where(Cohort.id == cohort_id).with_for_update())
     cohort = result.scalar_one_or_none()
     if not cohort or cohort.status not in PUBLIC_STATUSES:
@@ -327,7 +349,8 @@ async def begin_checkout(cohort_id: uuid.UUID, current_user: User = Depends(get_
         enrollment.reservation_expires_at = None
         await db.commit()
         raise HTTPException(
-            status_code=502, detail={"code": "provider_rejected_order"}
+            status_code=503,
+            detail={"code": "checkout_temporarily_unavailable"},
         )
     except ProviderOutcomeUnknown:
         result = await db.execute(

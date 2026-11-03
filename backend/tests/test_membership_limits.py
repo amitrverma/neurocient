@@ -7,6 +7,7 @@ import pytest
 from fastapi import HTTPException
 
 from app.Routes import challenge_routes, ikea_routes, spot_routes
+from app.services import spot_capture
 
 
 class ScalarResult:
@@ -25,6 +26,9 @@ class OneResultSession:
 
     async def execute(self, _statement):
         return ScalarResult(self.value)
+
+    async def scalar(self, _statement):
+        return self.value
 
     def add(self, value):
         self.added.append(value)
@@ -47,7 +51,7 @@ def assert_membership_required(error: HTTPException, resource: str, limit: int):
 
 def test_free_account_cannot_create_sixteenth_spot(monkeypatch):
     monkeypatch.setattr(
-        spot_routes,
+        spot_capture,
         "has_active_membership",
         AsyncMock(return_value=False),
     )

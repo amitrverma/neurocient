@@ -10,22 +10,27 @@ from app.models import (
     MicrochallengeLog,
     User,
 )
-from datetime import datetime, date
 from uuid import UUID
 from app.utils.auth import get_current_user
 from pydantic import BaseModel
-from typing import Optional
+from typing import Literal, Optional
 from app.analytics.posthog_client import track_event
 from app.services.membership import (
     has_active_membership,
     lock_account_access,
     membership_required_detail,
 )
+from app.services.microchallenge_progress import (
+    CHALLENGE_DURATION_DAYS,
+    final_status,
+    product_today,
+    progress_percent,
+    record_checkin,
+)
+from app.services.product_clock import utcnow_naive
 
 router = APIRouter()
 
-CHALLENGE_DURATION_DAYS = 21
-CHALLENGE_SUCCESS_DAYS = 17
 FREE_MICROCHALLENGE_LIMIT = 5
 
 # ----------------------
@@ -38,19 +43,6 @@ def serialize_datetime(dt):
 def serialize_date(d):
     return d.isoformat() if d else None
 
-
-def progress_percent(completed_days: int) -> float:
-    return min(
-        100.0,
-        round((completed_days / CHALLENGE_DURATION_DAYS) * 100, 1),
-    )
-
-
-def final_status(started_at: datetime, completed_days: int, today: date) -> str:
-    days_elapsed = (today - started_at.date()).days + 1
-    if days_elapsed <= CHALLENGE_DURATION_DAYS:
-        return "active"
-    return "success" if completed_days >= CHALLENGE_SUCCESS_DAYS else "failed"
 
 # ----------------------
 # Challenge Catalog
@@ -118,7 +110,7 @@ async def assign_microchallenge(
         user_id=current_user.id,
         challenge_id=challenge_id,
         status="active",
-        started_at=datetime.utcnow(),
+        started_at=utcnow_naive(),
     )
     db.add(mapping)
     await db.commit()
@@ -186,7 +178,7 @@ async def remove_assignment(
         raise HTTPException(status_code=404, detail="Active challenge not found")
 
     assignment.status = "removed"
-    assignment.completed_at = datetime.utcnow()
+    assignment.completed_at = utcnow_naive()
     db.add(assignment)
     await db.commit()
     return {"message": "Challenge removed"}
@@ -214,12 +206,14 @@ async def my_microchallenges(
             select(MicrochallengeLog).where(MicrochallengeLog.assignment_id == um.id)
         )
         logs = logs_result.scalars().all()
-        progress = progress_percent(len(logs))
+        completed_days = sum(getattr(log, "outcome", "done") == "done" for log in logs)
+        progress = progress_percent(completed_days)
 
-        outcome = final_status(um.started_at, len(logs), date.today())
+        today = product_today()
+        outcome = final_status(um.started_at, completed_days, today)
         if um.status == "active" and outcome != "active":
             um.status = outcome
-            um.completed_at = datetime.utcnow()
+            um.completed_at = utcnow_naive()
             db.add(um)
             status_changed = True
 
@@ -241,7 +235,11 @@ async def my_microchallenges(
 
             # progress percentage only
             "progress": progress,
-            "logged_today": any(log.log_date == date.today() for log in logs),
+            "logged_today": any(log.log_date == today for log in logs),
+            "today_outcome": next(
+                (getattr(log, "outcome", "done") for log in logs if log.log_date == today),
+                None,
+            ),
         })
 
     if status_changed:
@@ -257,6 +255,7 @@ async def my_microchallenges(
 class LogTodayRequest(BaseModel):
     assignment_id: UUID
     note: Optional[str] = ""
+    outcome: Literal["done", "partly", "not_today"] = "done"
 
 
 @router.post("/log")
@@ -265,86 +264,43 @@ async def log_today(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    today = date.today()
-
-    # validate assignment
-    result = await db.execute(
-        select(UserMicrochallenge).where(
-            UserMicrochallenge.id == payload.assignment_id,
-            UserMicrochallenge.user_id == current_user.id,
-            UserMicrochallenge.status == "active",
-        )
+    checkin = await record_checkin(
+        db,
+        user_id=current_user.id,
+        assignment_id=payload.assignment_id,
+        outcome=payload.outcome,
+        note=payload.note or "",
     )
-    assignment = result.scalar_one_or_none()
-    if not assignment:
+    if checkin.result == "no_active":
         raise HTTPException(status_code=404, detail="Active assignment not found")
-
-    days_elapsed = (today - assignment.started_at.date()).days + 1
-    if days_elapsed > CHALLENGE_DURATION_DAYS:
-        logs_result = await db.execute(
-            select(MicrochallengeLog).where(
-                MicrochallengeLog.assignment_id == payload.assignment_id,
-            )
-        )
-        logs = logs_result.scalars().all()
-        assignment.status = final_status(assignment.started_at, len(logs), today)
-        assignment.completed_at = datetime.utcnow()
-        db.add(assignment)
+    if checkin.result == "ended":
         await db.commit()
         raise HTTPException(
             status_code=409,
             detail={
                 "code": "challenge_ended",
                 "message": "This 21-day experiment has ended.",
-                "status": assignment.status,
+                "status": checkin.status,
             },
         )
-
-    # prevent duplicate log
-    result = await db.execute(
-        select(MicrochallengeLog).where(
-            MicrochallengeLog.assignment_id == payload.assignment_id,
-            MicrochallengeLog.log_date == today,
-        )
-    )
-    if result.scalar_one_or_none():
-        logs_result = await db.execute(
-            select(MicrochallengeLog).where(
-                MicrochallengeLog.assignment_id == payload.assignment_id
-            )
-        )
-        progress = progress_percent(len(logs_result.scalars().all()))
+    if checkin.result == "already_recorded":
         return {
             "message": "Already logged today",
-            "progress": progress,
-            "status": assignment.status,
-            "completed_at": assignment.completed_at,
+            "progress": progress_percent(checkin.completed_days),
+            "status": checkin.status,
+            "completed_at": None,
+            "outcome": checkin.outcome,
         }
-
-    # insert new log
-    new_log = MicrochallengeLog(
-        assignment_id=payload.assignment_id,
-        log_date=today,
-        note=payload.note or "",
-        created_at=datetime.utcnow(),
-    )
-    db.add(new_log)
     await db.commit()
-
-    # count logs for progress
-    logs_result = await db.execute(
-        select(MicrochallengeLog).where(MicrochallengeLog.assignment_id == payload.assignment_id)
-    )
-    logs = logs_result.scalars().all()
-    progress = progress_percent(len(logs))
 
     track_event(str(current_user.id), "challenge_logged", {"assignment_id": str(payload.assignment_id)})
 
     return {
         "message": "Log successful",
-        "progress": progress,
-        "status": assignment.status,
-        "completed_at": assignment.completed_at,
+        "progress": progress_percent(checkin.completed_days),
+        "status": checkin.status,
+        "completed_at": None,
+        "outcome": checkin.outcome,
     }
 
 
@@ -373,8 +329,9 @@ async def get_progress(
     )
     logs = result.scalars().all()
 
-    completed_days = len(logs)
-    days_elapsed = (date.today() - assignment.started_at.date()).days + 1
+    completed_days = sum(getattr(log, "outcome", "done") == "done" for log in logs)
+    today = product_today()
+    days_elapsed = (today - assignment.started_at.date()).days + 1
     ratio = (
         completed_days / CHALLENGE_DURATION_DAYS
         if days_elapsed > CHALLENGE_DURATION_DAYS
@@ -384,9 +341,9 @@ async def get_progress(
     # Update status if challenge has ended
     status = assignment.status
     if status == "active" and days_elapsed > CHALLENGE_DURATION_DAYS:
-        status = final_status(assignment.started_at, completed_days, date.today())
+        status = final_status(assignment.started_at, completed_days, today)
         assignment.status = status
-        assignment.completed_at = datetime.utcnow()
+        assignment.completed_at = utcnow_naive()
         db.add(assignment)
         await db.commit()
 
@@ -398,7 +355,14 @@ async def get_progress(
         "success_ratio": round(ratio * 100, 1),
         "started_at": serialize_datetime(assignment.started_at),
         "completed_at": serialize_datetime(assignment.completed_at),
-        "notes": [{"date": serialize_date(log.log_date), "note": log.note or ""} for log in logs],
+        "notes": [
+            {
+                "date": serialize_date(log.log_date),
+                "outcome": getattr(log, "outcome", "done"),
+                "note": log.note or "",
+            }
+            for log in logs
+        ],
     }
 
 # ----------------------

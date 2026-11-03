@@ -544,6 +544,7 @@ class MicrochallengeLog(Base):
         nullable=False,
     )
     log_date = Column(Date, nullable=False)
+    outcome = Column(String, nullable=False, default="done")
     note = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -551,6 +552,10 @@ class MicrochallengeLog(Base):
 
     __table_args__ = (
         UniqueConstraint("assignment_id", "log_date", name="uq_assignment_log_date"),
+        CheckConstraint(
+            "outcome IN ('done', 'partly', 'not_today')",
+            name="ck_microchallenge_log_outcome",
+        ),
     )
   
 
@@ -606,6 +611,21 @@ class BehavioralNudge(Base):
     link = Column(String, nullable=True)              # Optional blog/article/resource URL
     is_active = Column(Boolean, default=True)         # Only active nudges are served
     created_at = Column(DateTime, default=datetime.utcnow)    
+
+
+class DailyNudgeSelection(Base):
+    """One shared nudge selection for each Neurocient product day."""
+
+    __tablename__ = "daily_nudge_selections"
+
+    selection_date = Column(Date, primary_key=True)
+    nudge_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("behavioral_nudges.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 class WeeklyReflection(Base):
     __tablename__ = "weekly_reflections"

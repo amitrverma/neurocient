@@ -1,9 +1,9 @@
 import asyncio
 import logging
 import re
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 from urllib.parse import parse_qsl
-from uuid import uuid4
+from uuid import UUID
 
 import requests
 from fastapi import APIRouter, Depends, Request
@@ -14,8 +14,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.services.notification_provider import NotificationOutcomeUnknown
+from app.services.whatsapp_content import bounded_whatsapp_message
 from app.database import get_db
-from app.models import CavemanSpot, UserPreferences, WhatsAppWebhookEvent
+from app.models import (
+    NotificationDispatch,
+    UserPreferences,
+    WhatsAppWebhookEvent,
+)
+from app.services.microchallenge_progress import (
+    add_obstacle_note,
+    product_today,
+    record_checkin,
+)
+from app.services.spot_capture import capture_spot
 from app.services.twilio_webhook import (
     twilio_webhook_ready,
     validate_twilio_request,
@@ -31,6 +42,21 @@ MAX_FORM_BYTES = 8192
 MAX_FORM_FIELDS = 64
 MAX_FIELD_NAME_LENGTH = 128
 ACCEPTED_RESPONSE = {"status": "accepted"}
+HELP_MESSAGE = (
+    "I can save what you noticed in Spot the Inner Caveman or update today's "
+    "experiment. Send 'spot: ...', or reply Done, Partly, or Didn't happen "
+    "to an experiment reminder."
+)
+MICROCHALLENGE_RESPONSES = {
+    "done": "done",
+    "1": "done",
+    "partly": "partly",
+    "2": "partly",
+    "didn't happen": "not_today",
+    "did not happen": "not_today",
+    "not today": "not_today",
+    "3": "not_today",
+}
 
 
 def _utcnow() -> datetime:
@@ -42,6 +68,53 @@ def _safe_error(status_code: int) -> JSONResponse:
         {"status": "rejected", "message": "Unable to process request"},
         status_code=status_code,
     )
+
+
+def parse_microchallenge_response(message: str) -> str | None:
+    return MICROCHALLENGE_RESPONSES.get(message.strip().lower())
+
+
+def parse_obstacle_note(message: str) -> str | None:
+    normalized = message.strip()
+    if not normalized.lower().startswith("note:"):
+        return None
+    note = normalized[5:].strip()
+    return note or None
+
+
+def microchallenge_acknowledgement(outcome: str) -> str:
+    if outcome == "done":
+        return "Recorded for today."
+    if outcome == "partly":
+        return (
+            "Recorded. Partial attempts still show what makes the behaviour "
+            "easier or harder. If you want, reply 'note: ...' with what got in the way."
+        )
+    return (
+        "Recorded. Nothing to make up for. This helps show what got in the way. "
+        "If you want, reply 'note: ...' with what got in the way."
+    )
+
+
+async def _prompted_assignment_id(db: AsyncSession, user_id) -> UUID | None:
+    destination_key = await db.scalar(
+        select(NotificationDispatch.destination_key).where(
+            NotificationDispatch.user_id == user_id,
+            NotificationDispatch.purpose == "microchallenge",
+            NotificationDispatch.channel == "whatsapp",
+            NotificationDispatch.dispatch_date == product_today(),
+            NotificationDispatch.status.in_(
+                ["dispatching", "sent", "reconciliation_required"]
+            ),
+        )
+    )
+    prefix = "microchallenge-assignment:"
+    if not destination_key or not destination_key.startswith(prefix):
+        return None
+    try:
+        return UUID(destination_key.removeprefix(prefix))
+    except ValueError:
+        return None
 
 
 async def _read_bounded_form(request: Request) -> dict[str, str]:
@@ -127,7 +200,9 @@ async def whatsapp_webhook(
         if normalized_body.lower().startswith("spot:")
         else ""
     )
-    should_acknowledge = False
+    microchallenge_outcome = parse_microchallenge_response(normalized_body)
+    obstacle_note = parse_obstacle_note(normalized_body)
+    acknowledgement: str | None = None
 
     try:
         claim = await db.execute(
@@ -147,25 +222,72 @@ async def whatsapp_webhook(
             logger.info("whatsapp_webhook_accepted")
             return JSONResponse(ACCEPTED_RESPONSE)
 
-        if description:
-            result = await db.execute(
-                select(UserPreferences.user_id).where(
-                    UserPreferences.whatsapp_number == from_number,
-                    UserPreferences.whatsapp_verified.is_(True),
-                )
+        result = await db.execute(
+            select(UserPreferences.user_id).where(
+                UserPreferences.whatsapp_number == from_number,
+                UserPreferences.whatsapp_verified.is_(True),
             )
-            user_id = result.scalar_one_or_none()
-            if user_id is not None:
-                db.add(
-                    CavemanSpot(
-                        id=uuid4(),
-                        user_id=user_id,
-                        description=description,
-                        date=date.today(),
-                        created_at=_utcnow(),
-                    )
+        )
+        user_id = result.scalar_one_or_none()
+        if user_id is not None:
+            if description:
+                capture = await capture_spot(
+                    db,
+                    user_id=user_id,
+                    description=description,
+                    spot_date=product_today(),
+                    created_at=_utcnow(),
                 )
-                should_acknowledge = True
+                if capture.result == "recorded":
+                    acknowledgement = (
+                        "Recorded. What you noticed is saved in "
+                        "Spot the Inner Caveman."
+                    )
+                else:
+                    acknowledgement = (
+                        "Your free Spot the Inner Caveman limit has been reached. "
+                        "Open Neurocient to continue with membership."
+                    )
+            elif microchallenge_outcome is not None:
+                prompted_assignment_id = await _prompted_assignment_id(db, user_id)
+                if prompted_assignment_id is None:
+                    acknowledgement = (
+                        "There isn't a recent experiment reminder to update. "
+                        "Open Neurocient to check your active experiment."
+                    )
+                else:
+                    checkin = await record_checkin(
+                        db,
+                        user_id=user_id,
+                        assignment_id=prompted_assignment_id,
+                        outcome=microchallenge_outcome,
+                    )
+                    if checkin.result == "recorded":
+                        acknowledgement = microchallenge_acknowledgement(
+                            microchallenge_outcome
+                        )
+                    elif checkin.result == "already_recorded":
+                        acknowledgement = "Today's experiment has already been recorded."
+                    elif checkin.result == "ended":
+                        acknowledgement = "That experiment has ended. Your progress is saved."
+                    else:
+                        acknowledgement = (
+                            "That reminder no longer matches your active experiment. "
+                            "Open Neurocient to check what is active now."
+                        )
+            elif obstacle_note is not None:
+                note_recorded = await add_obstacle_note(
+                    db,
+                    user_id=user_id,
+                    note=obstacle_note,
+                )
+                acknowledgement = (
+                    "Thanks. That's recorded with today's experiment."
+                    if note_recorded
+                    else "There isn't a recent experiment response waiting for a note."
+                )
+            else:
+                acknowledgement = HELP_MESSAGE
 
         await db.execute(
             update(WhatsAppWebhookEvent)
@@ -179,12 +301,12 @@ async def whatsapp_webhook(
         logger.error("whatsapp_webhook_failed reason=internal_error")
         return _safe_error(500)
 
-    if should_acknowledge:
+    if acknowledgement:
         try:
             await asyncio.to_thread(
                 send_whatsapp_message,
                 from_number,
-                "Got it. Your caveman has been spotted and logged.",
+                acknowledgement,
                 emit_logs=False,
             )
         except Exception:
@@ -200,7 +322,7 @@ def send_whatsapp_message(
     message: str,
     *,
     emit_logs: bool = True,
-) -> bool:
+) -> bool | str:
     if not (
         settings.TWILIO_ACCOUNT_SID
         and settings.TWILIO_AUTH_TOKEN
@@ -217,7 +339,7 @@ def send_whatsapp_message(
     data = {
         "From": settings.TWILIO_WHATSAPP_NUMBER,
         "To": f"whatsapp:{to_number}",
-        "Body": message,
+        "Body": bounded_whatsapp_message(message),
     }
 
     try:
@@ -230,7 +352,16 @@ def send_whatsapp_message(
         if response.status_code == 201:
             if emit_logs:
                 logger.info("whatsapp_send outcome=accepted")
-            return True
+            try:
+                provider_message_id = response.json().get("sid")
+            except Exception:
+                provider_message_id = None
+            return (
+                provider_message_id
+                if isinstance(provider_message_id, str)
+                and MESSAGE_SID_PATTERN.fullmatch(provider_message_id)
+                else True
+            )
         if response.status_code >= 500:
             if emit_logs:
                 logger.warning(

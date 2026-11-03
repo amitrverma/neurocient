@@ -70,6 +70,115 @@ def test_has_logged_micro_today_uses_persisted_result():
     assert asyncio.run(reminder_engine.has_logged_micro_today("u1", db)) is False
 
 
+def test_microchallenge_reminder_uses_active_experiment_content():
+    title, body, whatsapp_body = reminder_engine.microchallenge_reminder_copy(
+        "Put the phone away",
+        ["Leave your phone outside the room for the first ten minutes.", "Begin work."],
+    )
+
+    assert title == "Today's experiment"
+    assert body == "Put the phone away"
+    assert "Put the phone away" in whatsapp_body
+    assert "Leave your phone outside the room" in whatsapp_body
+    assert "Done" in whatsapp_body
+    assert "Partly" in whatsapp_body
+    assert "Didn't happen" in whatsapp_body
+
+
+def test_microchallenge_reminder_keeps_response_options_with_long_content():
+    _title, _body, whatsapp_body = reminder_engine.microchallenge_reminder_copy(
+        "T" * 2_000,
+        ["I" * 2_000],
+    )
+
+    assert len(whatsapp_body) <= 1_600
+    assert whatsapp_body.endswith(
+        "How did it go? Reply:\n1. Done\n2. Partly\n3. Didn't happen"
+    )
+
+
+def test_microchallenge_job_sends_active_content_only_when_unreported(monkeypatch):
+    monkeypatch.setattr(
+        reminder_engine,
+        "_candidate_user_ids",
+        AsyncMock(return_value=["u1", "u2", "u3"]),
+    )
+    monkeypatch.setattr(
+        reminder_engine,
+        "has_logged_micro_today",
+        AsyncMock(side_effect=[False, True, False]),
+    )
+    active = SimpleNamespace(
+        title="Put the phone away",
+        instructions=["Leave it outside the room for ten minutes."],
+    )
+    monkeypatch.setattr(
+        reminder_engine,
+        "active_microchallenge",
+        AsyncMock(side_effect=[(SimpleNamespace(id="a1"), active), None]),
+    )
+    deliver = AsyncMock(
+        return_value={
+            "push_success": 0,
+            "push_failed": 0,
+            "whatsapp_success": 1,
+            "whatsapp_failed": 0,
+        }
+    )
+    monkeypatch.setattr(reminder_engine, "_deliver_to_user", deliver)
+
+    result = asyncio.run(reminder_engine.send_microchallenge_pushes(SimpleNamespace()))
+
+    assert result["whatsapp_success"] == 1
+    deliver.assert_awaited_once()
+    assert deliver.await_args.kwargs["user_id"] == "u1"
+    assert deliver.await_args.kwargs["whatsapp_destination_key"] == (
+        "microchallenge-assignment:a1"
+    )
+    assert "Put the phone away" in deliver.await_args.kwargs["whatsapp_body"]
+    assert "Leave it outside the room" in deliver.await_args.kwargs["whatsapp_body"]
+
+
+def test_daily_nudge_yields_to_due_microchallenge_reminder(monkeypatch):
+    monkeypatch.setattr(
+        reminder_engine,
+        "get_daily_active_nudge",
+        AsyncMock(
+            return_value=SimpleNamespace(
+                id="n1",
+                title="Nudge",
+                quote="Return to one useful idea.",
+                paragraphs=[],
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        reminder_engine,
+        "_candidate_user_ids",
+        AsyncMock(return_value=["u1", "u2"]),
+    )
+    monkeypatch.setattr(
+        reminder_engine,
+        "microchallenge_reminder_due",
+        AsyncMock(side_effect=[True, False]),
+    )
+    deliver = AsyncMock(
+        return_value={
+            "push_success": 0,
+            "push_failed": 0,
+            "whatsapp_success": 1,
+            "whatsapp_failed": 0,
+        }
+    )
+    monkeypatch.setattr(reminder_engine, "_deliver_to_user", deliver)
+
+    result = asyncio.run(reminder_engine.send_daily_nudge(SimpleNamespace()))
+
+    deliver.assert_awaited_once()
+    assert deliver.await_args.kwargs["user_id"] == "u2"
+    assert result["whatsapp_success"] == 1
+
+
 @pytest.mark.parametrize(
     ("purpose", "purpose_field"),
     [
@@ -159,6 +268,44 @@ def test_enabled_purpose_delivers_only_enabled_verified_channels(monkeypatch):
     }
     send_push.assert_awaited_once()
     send_whatsapp.assert_awaited_once()
+
+
+def test_whatsapp_provider_message_id_is_persisted(
+    monkeypatch,
+    durable_dispatch_claims,
+):
+    _, finish = durable_dispatch_claims
+    provider_message_id = "SM" + "7" * 32
+    monkeypatch.setattr(
+        reminder_engine.asyncio,
+        "to_thread",
+        AsyncMock(return_value=provider_message_id),
+    )
+    db = DeliverySession(
+        preferences(
+            nudge_enabled=True,
+            whatsapp_enabled=True,
+            whatsapp_verified=True,
+            whatsapp_number="+919876543210",
+        )
+    )
+
+    result = asyncio.run(
+        reminder_engine._deliver_to_user(
+            db,
+            user_id="u1",
+            purpose="nudge",
+            title="Title",
+            body="Body",
+        )
+    )
+
+    assert result["whatsapp_success"] == 1
+    assert finish.await_args.kwargs == {
+        "status": "sent",
+        "error_code": None,
+        "provider_message_id": provider_message_id,
+    }
 
 
 def test_provider_rejections_are_counted_as_failures(monkeypatch):

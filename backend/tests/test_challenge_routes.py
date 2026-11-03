@@ -37,6 +37,9 @@ class SequencedSession:
     async def execute(self, _statement):
         return self.results.pop(0)
 
+    async def scalar(self, _statement):
+        return self.results.pop(0).scalar()
+
     async def commit(self):
         self.commits += 1
 
@@ -89,12 +92,12 @@ def test_duplicate_daily_log_returns_complete_current_state():
         completed_at=None,
         started_at=datetime.now(),
     )
-    existing_log = SimpleNamespace(log_date=date.today())
     db = SequencedSession(
         [
             FakeResult(scalar=assignment),
-            FakeResult(scalar=existing_log),
-            FakeResult(scalars=[existing_log]),
+            FakeResult(scalar=1),
+            FakeResult(scalar=None),
+            FakeResult(scalar="done"),
         ]
     )
 
@@ -146,11 +149,10 @@ def test_logging_after_day_21_finalizes_and_rejects_the_log():
             datetime.min.time(),
         ),
     )
-    logs = [SimpleNamespace(log_date=date.today()) for _ in range(16)]
     db = SequencedSession(
         [
             FakeResult(scalar=assignment),
-            FakeResult(scalars=logs),
+            FakeResult(scalar=16),
         ]
     )
 

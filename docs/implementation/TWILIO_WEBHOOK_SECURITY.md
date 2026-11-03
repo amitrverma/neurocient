@@ -29,18 +29,20 @@ internal exception details.
   WhatsApp E.164 sender shapes before database access.
 - Use Twilio's `MessageSid` as a durable unique replay key. Store only the SID,
   processing state, and timestamps—not the phone number or message body.
-- A valid `spot:` message receives the same generic accepted response whether
-  or not the sender matches an account. Non-Spot and replayed messages also
-  receive a generic accepted response. The response never reveals account
-  membership or whether a Spot was written.
-- Preserve the existing acknowledgement only for a newly persisted Spot. This
-  same-sender acknowledgement intentionally confirms the write to that sender;
+- A valid inbound message receives the same generic HTTP response whether or
+  not the sender matches an account. Spot, Microchallenge, help, unknown, and
+  replayed messages use the same webhook response. It never reveals account
+  membership or whether a user record was written.
+- A newly persisted Spot, a Microchallenge outcome, or an unrecognised message
+  from a verified sender may receive a same-sender acknowledgement or guidance.
+  This reply intentionally confirms or explains the interaction to that sender;
   the no-enumeration guarantee applies to the webhook HTTP response, where
   known, unknown, non-Spot, and replay responses are identical.
   The webhook acknowledgement path suppresses outcome logs so it cannot reveal
   account membership by timestamp correlation. Outbound delivery failure does
   not make Twilio retry the inbound write.
-- Commit the replay claim and Spot in one transaction before acknowledgement.
+- Commit the replay claim and any Spot or Microchallenge mutation in one
+  transaction before acknowledgement.
   A crash after commit but before acknowledgement accepts an at-most-once
   availability tradeoff: replay will not attempt the acknowledgement again.
 - This slice secures the existing inbound flow. Outbound consent policy,
@@ -52,9 +54,9 @@ internal exception details.
 - **WA-01:** Missing or invalid Twilio signatures, signatures made for a
   different URL, and requests for a different Twilio account are rejected
   before database lookup, write, or outbound acknowledgement.
-- **WA-02:** A well-formed provider `MessageSid` can cause at most one Spot
-  write and at most one acknowledgement attempt, including concurrent requests
-  and requests handled by different application replicas.
+- **WA-02:** A well-formed provider `MessageSid` can cause at most one Spot or
+  Microchallenge write and at most one acknowledgement attempt, including
+  concurrent requests and requests handled by different application replicas.
 - **WA-03:** Non-urlencoded, duplicate-field, over-8-KiB, over-64-field, and
   malformed content is rejected safely. Message bodies are limited to 1,600
   Unicode characters; empty Spot descriptions do not create records.
@@ -108,7 +110,8 @@ backend before downgrading the table.
 ## Excluded scope
 
 - Consent capture, opt-out handling, template policy, and scheduler ownership
-  remain CONSENT-01.
+  remain CONSENT-01. The deterministic companion behaviour is governed by
+  `WHATSAPP_COMPANION.md`.
 - Edge and account rate limiting remain SEC-03.
 - Provider-wide sandbox coverage remains TEST-02.
 - Broader structured logging and alerting remain OPS-05 and OPS-06.

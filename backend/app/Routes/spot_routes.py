@@ -1,22 +1,19 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import func
 from app.database import get_db
 from app.models import CavemanSpot, User
 from app.utils.auth import get_current_user
-from datetime import date, datetime
-import uuid
+from datetime import date
 from app.analytics.posthog_client import track_event
-from app.services.membership import (
-    has_active_membership,
-    lock_account_access,
-    membership_required_detail,
-)
+from app.services.membership import membership_required_detail
+from app.services.product_clock import product_today, utcnow_naive
+from app.services.spot_capture import FREE_SPOT_LIMIT, capture_spot
 
 router = APIRouter(prefix="/spots")
-
-FREE_SPOT_LIMIT = 15
+logger = logging.getLogger("spots")
 
 @router.post("/")
 async def create_spot(
@@ -32,26 +29,29 @@ async def create_spot(
         if not description:
             raise HTTPException(status_code=400, detail="Description is required")
 
-        await lock_account_access(db, current_user.id)
-        if not await has_active_membership(db, current_user.id):
-            count_result = await db.execute(
-                select(func.count(CavemanSpot.id)).where(
-                    CavemanSpot.user_id == current_user.id,
-                )
+        try:
+            effective_date = date.fromisoformat(spot_date) if spot_date else product_today()
+        except (TypeError, ValueError):
+            raise HTTPException(
+                status_code=422,
+                detail="Date must use YYYY-MM-DD format",
             )
-            if (count_result.scalar() or 0) >= FREE_SPOT_LIMIT:
-                raise HTTPException(
-                    status_code=402,
-                    detail=membership_required_detail("spots", FREE_SPOT_LIMIT),
-                )
 
-        new_spot = CavemanSpot(
+        capture = await capture_spot(
+            db,
             user_id=current_user.id,
             description=description,
-            date=date.fromisoformat(spot_date) if spot_date else date.today(),
-            created_at=datetime.utcnow(),
+            spot_date=effective_date,
+            created_at=utcnow_naive(),
         )
-        db.add(new_spot)
+        if capture.result == "limit_reached":
+            raise HTTPException(
+                status_code=402,
+                detail=membership_required_detail("spots", FREE_SPOT_LIMIT),
+            )
+        new_spot = capture.spot
+        if new_spot is None:
+            raise RuntimeError("Spot capture did not return a record")
         await db.commit()
         await db.refresh(new_spot)
         track_event(str(current_user.id), "spot_created")
@@ -64,8 +64,13 @@ async def create_spot(
         }
     except HTTPException:
         raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create spot: {e}")
+    except Exception:
+        await db.rollback()
+        logger.error("spot_create_failed reason=internal_error")
+        raise HTTPException(
+            status_code=500,
+            detail="Spot could not be saved",
+        )
 
 
 @router.get("/")
@@ -90,5 +95,9 @@ async def get_spots(
             }
             for s in spots
         ]
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {e}")
+    except Exception:
+        logger.error("spot_list_failed reason=internal_error")
+        raise HTTPException(
+            status_code=500,
+            detail="Spots could not be loaded",
+        )

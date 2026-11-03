@@ -285,6 +285,14 @@ Procrastination should be framed as life lost to autopilot without turning that 
 ## Reinforcement Authoring
 Every challenge should include reinforcement prompts that retrieve the user's own insight.
 
+For an active Microchallenge, reinforcement must also work as a compact WhatsApp
+check-in. Reminder copy should name the actual experiment and retrieve its first
+concrete instruction rather than say only that a challenge is open. The initial
+daily outcomes are `Done`, `Partly`, and `Didn't happen`. All are useful evidence;
+only `Done` advances completed-day progress. Copy for partial or absent action
+must remain direct and non-judgmental, without turning a missed action into a
+manufactured success.
+
 Poor:
 
 > "Do your procrastination challenge."

@@ -1595,3 +1595,45 @@ authoritative entitlement.
 Provider/local contradictions begin as observation-only reconciliation issues.
 They are visible to an administrator but do not automatically change access or
 move money until provider-shaped evidence and an explicit repair contract exist.
+
+## 2026-11-03: WhatsApp is a companion surface for daily product interaction
+
+The web application remains where a person chooses and configures their work.
+WhatsApp supports three lightweight continuations against the same account
+state: recording a Spot the Inner Caveman entry, reporting today's active
+Microchallenge, and receiving the daily nugget. It is initially deterministic rather than an
+open-ended AI chatbot.
+
+A Microchallenge reminder names the person's actual active experiment and is
+sent only when they have not reported that India calendar day. The response
+choices are `Done`, `Partly`, and `Didn't happen`. All three are truthful daily
+evidence and suppress another reminder; only `Done` advances the existing
+completed-day progress calculation. The same outcome is visible on the web, and
+the existing web log request remains a `Done` response when it omits an outcome.
+After `Partly` or `Didn't happen`, the person may add one optional obstacle note
+to the same daily record rather than entering another flow.
+
+This refines the 2026-10-15 threshold decision: success now means 17 `Done`
+days, not merely 17 response records. Historical logs are treated as `Done`
+because the previous interface could record only completed repetitions.
+
+When a daily nugget and an unreported active Microchallenge are both due, the
+Microchallenge reminder takes priority and the nugget is skipped for that day.
+This prevents two reinforcement messages from competing for the same return.
+
+The daily nugget is one shared piece of content, not two independently random
+choices. The first home or delivery request for an India calendar day durably
+selects one active nugget. The web dashboard and WhatsApp reuse that selection
+for the rest of the day even if the active content inventory changes. This
+keeps WhatsApp a continuation of Neurocient rather than a parallel content
+surface.
+
+This keeps reinforcement emotionally light without turning lack of action into
+false progress. A WhatsApp response never selects a new challenge or bypasses
+the earlier Identity, Knowledge, and Environment work that made the active
+experiment appropriate.
+
+WhatsApp also does not bypass product access rules. A Spot the Inner Caveman
+entry uses the same serialized free-account allowance and membership decision
+as the web surface, so concurrent web and WhatsApp capture cannot create an
+extra free entry.

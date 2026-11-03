@@ -116,8 +116,12 @@ Existing primitives include:
 - authoritative optional-notification consent, verified WhatsApp ownership, and
   channel details through `UserPreferences`; legacy `User.phone_number` and
   `User.whatsapp_opt_in` do not authorize reinforcement delivery
-- WhatsApp webhook/send utilities in `backend/app/Routes/whatsapp_routes.py`
-- microchallenge assignment, logging, and progress through `/api/challenges/**`
+- WhatsApp companion routing in `backend/app/Routes/whatsapp_routes.py` for
+  Caveman Spots and active-Microchallenge outcomes, plus shared outbound nugget
+  and reminder delivery
+- microchallenge assignment, daily outcomes, and progress through
+  `/api/challenges/**`; `Done`, `Partly`, and `Didn't happen` share one daily
+  record, while only `Done` advances completed-day progress
 - "Spot the Inner Caveman" logging through spots APIs and WhatsApp `spot:` messages
 - IKEA worksheet and tracker models through `IkeaWorksheet`, `IkeaTracker`, and `/ikea/**`
 - nudges, push notifications, and reminder utilities through existing notification routes
@@ -149,7 +153,12 @@ Better:
 
 > "Want this insight to come back when the loop returns?"
 
-For the early product, Practice remains a web app with WhatsApp integration. WhatsApp is a reinforcement channel, not the primary app surface. The product should remain free for anyone to try while the business model and cash flow are still being validated.
+For the early product, Practice remains a web app with a WhatsApp companion.
+The web is where a person chooses and configures their work; WhatsApp supports
+lightweight daily continuation through Spots, active-Microchallenge reporting,
+and nuggets. It is not the primary app surface or an open-ended AI chatbot. The
+product should remain free for anyone to try while the business model and cash
+flow are still being validated.
 
 When the user opts into reinforcement, Practice should hand off to existing authenticated systems for progress tracking, WhatsApp details, reminders, and persistence.
 

@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.helper.common import get_random_active_nudge
+from app.helper.common import get_daily_active_nudge
 from app.models import (
     CavemanSpot,
     MicrochallengeLog,
@@ -21,6 +21,11 @@ from app.observability import log_event, safe_exception_fields
 from app.services.job_control import (
     claim_notification_dispatch,
     finish_notification_dispatch,
+)
+from app.services.microchallenge_progress import active_microchallenge, product_today
+from app.services.whatsapp_content import (
+    bounded_whatsapp_message,
+    microchallenge_whatsapp_message,
 )
 from app.utils.pushnotification import send_push
 
@@ -43,7 +48,7 @@ async def has_spotted_today(user_id, db: AsyncSession):
         await db.scalar(
             select(CavemanSpot.id).where(
                 CavemanSpot.user_id == user_id,
-                CavemanSpot.date == date.today(),
+                CavemanSpot.date == product_today(),
             )
         )
     ) is not None
@@ -59,10 +64,37 @@ async def has_logged_micro_today(user_id, db: AsyncSession):
             )
             .where(
                 UserMicrochallenge.user_id == user_id,
-                MicrochallengeLog.log_date == date.today(),
+                MicrochallengeLog.log_date == product_today(),
             )
         )
     ) is not None
+
+
+async def microchallenge_reminder_due(user_id, db: AsyncSession) -> bool:
+    enabled = await db.scalar(
+        select(UserPreferences.microchallenge_enabled).where(
+            UserPreferences.user_id == user_id
+        )
+    )
+    if not enabled or await has_logged_micro_today(user_id, db):
+        return False
+    return await active_microchallenge(db, user_id) is not None
+
+
+def microchallenge_reminder_copy(
+    title: str,
+    instructions: list[str] | None,
+) -> tuple[str, str, str]:
+    first_instruction = next(
+        (
+            step.strip()
+            for step in (instructions or [])
+            if isinstance(step, str) and step.strip()
+        ),
+        "Return to the small experiment you chose.",
+    )
+    whatsapp_body = microchallenge_whatsapp_message(title, first_instruction)
+    return "Today's experiment", title, whatsapp_body
 
 
 async def _candidate_user_ids(db: AsyncSession, purpose: Purpose) -> list:
@@ -91,6 +123,7 @@ async def _deliver_to_user(
     title: str,
     body: str,
     whatsapp_body: str | None = None,
+    whatsapp_destination_key: str = "verified-account-number",
 ) -> dict[str, int]:
     """Re-read consent immediately before reaching either provider adapter."""
     prefs = await db.scalar(
@@ -228,16 +261,17 @@ async def _deliver_to_user(
             user_id=user_id,
             purpose=purpose,
             channel="whatsapp",
-            destination_key="verified-account-number",
+            destination_key=whatsapp_destination_key,
             dispatch_date=_dispatch_date(),
         )
         if dispatch is not None:
             try:
-                delivered = await asyncio.to_thread(
+                provider_result = await asyncio.to_thread(
                     send_whatsapp_message,
                     prefs.whatsapp_number,
                     whatsapp_body or f"{title} {body}",
                 )
+                delivered = bool(provider_result)
             except Exception as error:
                 await finish_notification_dispatch(
                     db,
@@ -259,12 +293,13 @@ async def _deliver_to_user(
                 )
                 whatsapp_failed = 1
             else:
-                await finish_notification_dispatch(
-                    db,
-                    dispatch.id,
-                    status="sent" if delivered else "failed",
-                    error_code=None if delivered else "provider_rejected",
-                )
+                finish_kwargs = {
+                    "status": "sent" if delivered else "failed",
+                    "error_code": None if delivered else "provider_rejected",
+                }
+                if delivered and isinstance(provider_result, str):
+                    finish_kwargs["provider_message_id"] = provider_result
+                await finish_notification_dispatch(db, dispatch.id, **finish_kwargs)
                 if delivered:
                     whatsapp_success = 1
                 else:
@@ -325,17 +360,23 @@ async def send_microchallenge_pushes(db: AsyncSession):
     whatsapp_failed = 0
     for user_id in await _candidate_user_ids(db, "microchallenge"):
         if await has_logged_micro_today(user_id, db):
-            title = "Experiment recorded"
-            body = "You recorded today's practical experiment."
-        else:
-            title = "Your practical experiment"
-            body = "Your current experiment is still open."
+            continue
+        active = await active_microchallenge(db, user_id)
+        if active is None:
+            continue
+        assignment, challenge = active
+        title, body, whatsapp_body = microchallenge_reminder_copy(
+            challenge.title,
+            challenge.instructions,
+        )
         result = await _deliver_to_user(
             db,
             user_id=user_id,
             purpose="microchallenge",
             title=title,
             body=body,
+            whatsapp_body=whatsapp_body,
+            whatsapp_destination_key=f"microchallenge-assignment:{assignment.id}",
         )
         push_success += result["push_success"]
         push_failed += result["push_failed"]
@@ -350,7 +391,7 @@ async def send_microchallenge_pushes(db: AsyncSession):
 
 
 async def send_daily_nudge(db: AsyncSession):
-    nudge = await get_random_active_nudge(db)
+    nudge = await get_daily_active_nudge(db)
     title = nudge.title or "Inner Caveman reminder"
     body = nudge.quote or (
         nudge.paragraphs[0]
@@ -360,12 +401,19 @@ async def send_daily_nudge(db: AsyncSession):
     message = f"*{title}*\n\n" + "\n\n".join(nudge.paragraphs or [])
     if nudge.quote:
         message += f"\n\n_{nudge.quote}_"
+    message = bounded_whatsapp_message(message)
 
     push_success = 0
     push_failed = 0
     whatsapp_success = 0
     whatsapp_failed = 0
     for user_id in await _candidate_user_ids(db, "nudge"):
+        if await microchallenge_reminder_due(user_id, db):
+            logger.info(
+                "notification_skipped purpose=nudge "
+                "reason=microchallenge_reminder_priority"
+            )
+            continue
         result = await _deliver_to_user(
             db,
             user_id=user_id,

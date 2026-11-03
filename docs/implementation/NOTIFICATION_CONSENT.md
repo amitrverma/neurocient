@@ -22,9 +22,10 @@ delivery, including when the preference changes after a job was scheduled.
 - A signed-in user may request a WhatsApp ownership code and confirm it.
 - The scheduler and authenticated admin trigger routes may request delivery.
 - Twilio may deliver a signed inbound `spot:` message from a verified number.
-- Password reset email, a reply to an inbound WhatsApp Spot, contact-form
-  forwarding, and a separately submitted newsletter subscription are distinct
-  user-initiated or service-message purposes and are not optional reinforcement.
+- Password reset email, replies to an inbound WhatsApp Spot or Microchallenge
+  update, contact-form forwarding, and a separately submitted newsletter
+  subscription are distinct user-initiated or service-message purposes and are
+  not optional reinforcement.
 
 ## Decisions
 
@@ -47,8 +48,9 @@ delivery, including when the preference changes after a job was scheduled.
   fields are rejected; clients cannot set verification state or verification
   secrets.
 - The inbound WhatsApp account lookup uses only the current verified number.
-  The existing same-sender acknowledgement remains a transactional response to
-  a user-initiated Spot and is not optional reinforcement.
+  Same-sender acknowledgements and command guidance remain transactional
+  responses to a user-initiated Spot or Microchallenge update and are not
+  optional reinforcement.
 - Scheduler startup remains disabled by default through `ENABLE_SCHEDULER=false`.
   Admin trigger routes remain protected by `ADMIN_API_KEY`; when invoked they use
   the same consent-enforcing delivery path as scheduled jobs.

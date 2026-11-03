@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 import logging
 
 import openai
@@ -12,6 +12,7 @@ from app.models import (
     MicrochallengeLog, User, UserMicrochallenge, WeeklyReflection,
 )
 from app.services.rate_limits import enforce, enforce_ip
+from app.services.product_clock import product_today
 from app.utils.auth import get_current_user
 
 router = APIRouter()
@@ -30,7 +31,7 @@ async def generate_weekly_reflection(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    today = datetime.utcnow().date()
+    today = product_today()
     week_start = today - timedelta(days=today.weekday())
     week_end = week_start + timedelta(days=6)
     # Serialize this user's path so concurrent requests cannot multiply provider spend.
@@ -91,7 +92,11 @@ async def generate_weekly_reflection(
     if mc_logs:
         prompt += "\nMicrochallenge Logs:\n"
         for log, definition in mc_logs[:100]:
-            prompt += f"- Challenge: {(definition.title or '')[:300]}, Note: {(log.note or 'no note')[:500]}\n"
+            prompt += (
+                f"- Challenge: {(definition.title or '')[:300]}, "
+                f"Outcome: {getattr(log, 'outcome', 'done')}, "
+                f"Note: {(log.note or 'no note')[:500]}\n"
+            )
     if spots:
         prompt += "\nCaveman Spots:\n"
         for spot in spots[:100]:

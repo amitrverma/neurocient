@@ -18,6 +18,9 @@ import MembershipModal from "../../components/MembershipModal";
 import { useNotification } from "../../components/NotificationProvider";
 import ConfettiCelebration from "../../components/ui/ConfettiCelebration";
 import type { ProtectiveMove } from "@/app/diagnostics/caveman-scan/scanEvidence";
+import MicrochallengeCheckin, {
+  type CheckinOutcome,
+} from "./MicrochallengeCheckin";
 
 interface AssignedChallenge {
   assignment_id: string;
@@ -34,6 +37,7 @@ interface AssignedChallenge {
   progress: number;
   logged_today?: boolean;
   loggedToday?: boolean;
+  today_outcome?: "done" | "partly" | "not_today" | null;
 }
 
 interface AvailableChallenge {
@@ -161,13 +165,20 @@ const MicrochallengesPage = () => {
     setOpenId(openId === assignmentId ? null : assignmentId);
   };
 
-  const handleLog = async (assignment: AssignedChallenge) => {
+  const handleLog = async (
+    assignment: AssignedChallenge,
+    outcome: CheckinOutcome,
+  ) => {
     try {
       const res = await fetch("/api/challenges/log", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ assignment_id: assignment.assignment_id, note }),
+        body: JSON.stringify({
+          assignment_id: assignment.assignment_id,
+          note,
+          outcome,
+        }),
       });
 
       if (!res.ok) {
@@ -208,13 +219,14 @@ const MicrochallengesPage = () => {
                 ...challenge,
                 progress: Math.round(data.progress),
                 loggedToday: true,
+                today_outcome: data.outcome || outcome,
                 status: data.status,
                 completed_at: data.completed_at || challenge.completed_at,
               }
             : challenge,
         ),
       );
-      notify("Logged successfully.", "success");
+      notify("Today’s outcome was recorded.", "success");
       setNote("");
     } catch (err) {
       console.error("Error logging challenge:", err);
@@ -339,7 +351,7 @@ const MicrochallengesPage = () => {
           <p className="tool-detail-lede">
             {guidedEntry
               ? "You have recorded the response in real life. Now choose one small experiment that fits the pattern and changes one part of the situation."
-              : "Microchallenges are 21-day behavior experiments. Log at least 17 days to complete the experiment, while using each repetition to learn what helps in real conditions."}
+              : "Microchallenges are 21-day behavior experiments. Complete the experiment on at least 17 days, while using every daily report to learn what helps in real conditions."}
           </p>
         </div>
 
@@ -429,7 +441,7 @@ const MicrochallengesPage = () => {
                     note={note}
                     onNoteChange={setNote}
                     onToggle={() => toggleOpen(challenge.assignment_id)}
-                    onLog={() => handleLog(challenge)}
+                    onLog={(outcome) => handleLog(challenge, outcome)}
                     onRemove={() => handleRemove(challenge.assignment_id)}
                   />
                 ))}
@@ -488,7 +500,7 @@ const ChallengeRow = ({
   note: string;
   onNoteChange: (value: string) => void;
   onToggle: () => void;
-  onLog: () => void;
+  onLog: (outcome: CheckinOutcome) => void;
   onRemove: () => void;
 }) => {
   const progress = Math.min(100, Math.round(challenge.progress || 0));
@@ -561,23 +573,13 @@ const ChallengeRow = ({
           )}
 
           {challenge.status === "active" && (
-            <div className="mt-6 grid gap-3 md:grid-cols-[auto_1fr] md:items-center">
-              <button
-                onClick={onLog}
-                disabled={challenge.loggedToday}
-                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
-              >
-                <CheckCircle2 className="h-4 w-4" />
-                {challenge.loggedToday ? "Logged today" : "Log today"}
-              </button>
-              <textarea
-                value={note}
-                onChange={(event) => onNoteChange(event.target.value)}
-                placeholder="Quick reflection, optional"
-                rows={1}
-                className="min-h-11 resize-none rounded-lg border border-brand-dark/15 px-4 py-3 font-sans text-sm text-brand-dark outline-none transition focus:border-brand-teal"
-              />
-            </div>
+            <MicrochallengeCheckin
+              loggedToday={Boolean(challenge.loggedToday)}
+              outcome={challenge.today_outcome}
+              note={note}
+              onNoteChange={onNoteChange}
+              onLog={onLog}
+            />
           )}
 
           {(challenge.status === "success" || challenge.status === "completed") &&

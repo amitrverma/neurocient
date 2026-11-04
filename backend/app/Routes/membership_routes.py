@@ -284,6 +284,8 @@ async def membership_status(
         else None
     )
     summary["checkout_configured"] = membership_razorpay_ready()
+    from app.services.paypal import paypal_membership_ready
+    summary["paypal_checkout_configured"] = paypal_membership_ready()
     return summary
 
 
@@ -504,6 +506,7 @@ async def membership_webhook(
         insert(MembershipBillingEvent)
         .values(
             provider_event_id=x_razorpay_event_id,
+            provider="razorpay",
             event_type=event_type,
             provider_subscription_id=subscription_id,
             provider_payment_id=payment_id,

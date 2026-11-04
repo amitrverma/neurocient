@@ -1,5 +1,11 @@
 # Neurocient Product System
 
+Status: current cross-product direction
+
+Owner: Neurocient product
+
+Last updated: 2026-11-04
+
 ## Purpose
 
 This document preserves the current product direction connecting Neurocient's positioning, the Inner Caveman Scan, Inner Caveman 101, Practice, and the existing behavior-change tools.
@@ -8,7 +14,86 @@ The product promise is:
 
 > **Get more life from life.**
 
-Neurocient exists to help people lose less time, attention, energy, connection, and possibility to protective patterns operating on autopilot. It should move beyond explaining those patterns in a knowledge base. It should help people see the patterns in themselves, understand what they protect, work with them in real situations, and retrieve useful responses when life happens again.
+Neurocient exists to help people lose less time, energy, connection, and possibility to automatic responses operating without intention. It should move beyond explaining those responses in a knowledge base. It should help people see what they actually do, understand why an evolved response arises, work with it in real situations, and retrieve a more useful response when life happens again.
+
+## Current Product Shape (2026-11-04)
+
+This is the current cross-product snapshot. Detailed Scan, Practice, payment,
+WhatsApp, administration, and security contracts remain authoritative within
+their own boundaries.
+
+### What Neurocient is
+
+Neurocient is a mobile-first, text-rich behaviour-change product for the gap
+between knowing what would help and doing it in ordinary life. It is not a
+content portal with some tools attached, a personality test, a generic habit
+tracker, or an open-ended wellness chatbot.
+
+The Inner Caveman is the shared explanation: evolved automatic processing can
+give a modern situation disproportionate survival-relevant meaning without
+intending, choosing, protecting, or trying to help. The response may once have
+been adaptive and may still be unhelpful in the present situation.
+
+The product movement is:
+
+> recognise what happened -> understand why it arose -> work with one real
+> behaviour -> try a small matched change -> retrieve it later -> notice
+> evidence in life
+
+### The connected surfaces
+
+1. **Public landing and Insights** make the knowing-doing problem recognisable
+   and provide the shared Inner Caveman explanation without requiring a course.
+2. **The Inner Caveman Scan** reflects only the person's actual selected
+   answers. It does not infer a type, dominant drive, score, or person-level
+   pattern. The complete primary result remains visible before authentication.
+3. **My Inner Caveman and Spots** preserve selected-answer reflections and add
+   situations the person notices in real life. Authentication creates
+   continuity; it does not unlock the meaning of the Scan result.
+4. **Practice** is the guided behaviour-change product. It uses Identity,
+   Knowledge, Environment, Action, and Reinforcement in that order, with one
+   concrete recognition or decision at a time. The current `/practice` route is
+   a clean shell awaiting the rebuilt reusable challenge flow; existing auth,
+   access, preferences, worksheet, tracker, challenge, progress, and reminder
+   infrastructure should be reused.
+5. **Microchallenges** are small real-world experiments that follow a relevant
+   understanding. They are not a detached challenge catalogue or a streak
+   system.
+6. **WhatsApp** is a deterministic companion for Spots, the active
+   Microchallenge check-in, and the shared daily nugget. The web remains where
+   a person chooses and configures their work.
+7. **Membership** unlocks the self-guided product. **Modern Caveman** is a
+   separate live, facilitated cohort purchase; it does not grant membership and
+   membership does not reserve a cohort place.
+
+### Access and commerce
+
+- Razorpay remains the primary checkout: INR 499/month for Membership and INR
+  21,000 once for Modern Caveman.
+- PayPal Sandbox is a secondary, explicitly labelled `Pay with PayPal` choice:
+  USD 6/month and USD 249 once. It is not presented as generic international
+  card entry because standard PayPal subscriptions may require a PayPal account.
+- Razorpay International Cards / International Payments activation has been
+  requested. If approved and proven in test mode, it is the preferred future
+  low-friction international card path. It must not silently replace the owned
+  INR or USD offers.
+- Provider callbacks never grant access by themselves. Server-created payment
+  objects, verified and deduplicated provider events, provider-neutral
+  entitlements, and separate cohort-enrolment state remain authoritative.
+
+### Provider state, not product completion
+
+- The WhatsApp transport is the direct Meta Cloud API. Genuine inbound test
+  delivery and local callback handling work; outbound delivery is waiting on
+  Meta to resolve test WABA error `131031 Business Account locked`.
+- Razorpay international card activation is awaiting Razorpay review.
+- PayPal Sandbox credentials, plans, webhooks, and local adapters are
+  configured; genuine buyer approval and complete lifecycle evidence remain
+  part of provider validation before any live enablement.
+
+These external waits do not justify parallel auth, progress, reminder,
+entitlement, enrolment, or reinforcement systems. New provider work must attach
+to the existing product state rather than create another product beside it.
 
 ## The Core Problem
 
@@ -16,13 +101,13 @@ People often know what they should do and may genuinely want to do it. Yet procr
 
 Most conventional fixes operate at the level of behavior: try harder, organize better, become more disciplined, or stay motivated. Neurocient starts underneath behavior.
 
-Many modern struggles contain older protective responses shaped around survival, belonging, hierarchy, bonds, and care. These responses are not personal failures. They may be sensible adaptations using old priorities in a very different environment.
+Many modern struggles contain evolved automatic responses shaped around survival, belonging, hierarchy, bonds, and care. These responses are not personal failures. They follow older tendencies operating in a very different environment, but that does not make them useful now.
 
 The product should help close the knowing-doing gap without shaming the user or turning the Inner Caveman into an enemy.
 
 ## The Inner Caveman
 
-The Inner Caveman is Neurocient's shorthand for the fast, protective system that reacts before deliberate reasoning. It is not a literal anatomical brain layer, a villain, a diagnosis, or a fixed personality type.
+The Inner Caveman is Neurocient's shorthand for evolved automatic processing that can shape a response before deliberate reasoning. It has no intention or agency. It is not a literal anatomical brain layer, an inner personality, a guardian, a villain, a diagnosis, or a fixed personality type.
 
 Its five core drives are:
 
@@ -54,17 +139,21 @@ The internal question is:
 
 > Which Watchtower does the Inner Caveman run to first when something happens?
 
-This is not a trait assignment. A person may use different Watchtowers in different contexts, and the portrait should describe that landscape rather than declare a dominant personality type.
+This is not a trait assignment. A person may respond differently across contexts. The current Scan does not aggregate answers into a Watchtower portrait or declare a dominant personality type; Watchtower metadata remains conceptual and authoring context only unless a later approved contract gives it another role.
 
 ### Rational Mind is not a Watchtower
 
-Rational Mind remains categorically separate. The Watchtowers scan for particular forms of survival-relevant meaning. Rational Mind stays with the available evidence and asks what is actually happening without automatically turning ambiguity into a protective story.
+Rational Mind remains categorically separate. The Watchtowers describe particular forms of survival-relevant meaning. Rational Mind stays with the available evidence and asks what is actually happening without automatically turning ambiguity into a survival-relevant story.
 
 Do not describe Rational Mind as a command tower, superior tower, or ruler defeating the Caveman. Useful internal shorthand is:
 
 > The Watchtowers ask, "What might this mean for us?" Rational Mind asks, "What is actually happening?"
 
-Persistence should therefore distinguish `WatchtowerId` from the Rational Mind response target. Do not model Rational Mind as a sixth Watchtower or sixth drive.
+If Watchtower evidence is used in future authored research or product work,
+persistence must distinguish `WatchtowerId` from the Rational Mind response
+target. Do not model Rational Mind as a sixth Watchtower or sixth drive. The
+current Scan persists selected option and reflection identifiers, not an
+inferred Watchtower result.
 
 ### Implementation direction
 
@@ -88,11 +177,15 @@ type Watchtower = {
 };
 ```
 
-Scenario responses should persist the selected evidence target, scenario and option versions, and the mapping at the time of selection. Reports should be generated from this evidence rather than storing only a winning Watchtower.
+This type model is retained only for future authoring or research that explicitly
+needs Watchtower evidence. It is not the current Scan persistence contract.
+Current Scan sessions persist canonical selected option IDs and stable
+reflection IDs under the versions defined in the Scan result contract; they do
+not persist a winning Watchtower or generated person-level result.
 
 ### Report and visual language
 
-Prefer portrait language such as:
+If a future approved experience uses Watchtower language, prefer situational language such as:
 
 - "Your Caveman often heads for the High Ground first."
 - "In closer relationships, it watches the Home Path."
@@ -116,16 +209,16 @@ The Scan is not a quiz, personality assessment, psychometric test, diagnosis, or
 
 It helps a person notice:
 
-- what their ancient protective system makes ordinary ambiguity mean;
-- which survival concerns their mind notices or protects first;
-- the situations in which particular drives repeatedly appear;
+- what evolved automatic processing can make ordinary ambiguity mean;
+- which survival-relevant meaning is authored into a selected response;
+- the particular situations in which the person recognises an automatic response;
 - where Rational Mind can hold the same moment without automatically making it a survival concern.
 
 The desired outcome is:
 
 > "I can finally see my Inner Caveman."
 
-Recognition, not numerical precision, is the primary success metric. The final result should read as a humane narrative portrait, not a diagnosis or percentage-led scorecard.
+Recognition, not numerical precision, is the primary success metric. The current result should reflect selected answers directly, not turn them into a diagnosis, portrait, or percentage-led scorecard.
 
 ### Experience model
 
@@ -137,12 +230,13 @@ Scenarios should feel ordinary, recent, concrete, emotionally safe, and drawn fr
 
 Rational Mind is not a sixth drive and not merely a "none of these" escape hatch. It supplies the contrast needed to understand whether an ancient drive is taking the interpretive lead at all.
 
-Without Rational Mind, every scenario presupposes that the moment must be interpreted through one of the five survival concerns. With it, the Scan can observe both:
+Without Rational Mind, every scenario presupposes that the moment must be
+interpreted through one of the five survival concerns. With it, each authored
+situation can show both an Inner Caveman response and a more deliberate
+alternative. The Scan reflects the option selected in that situation; it does
+not aggregate those choices into a leading drive or a rationality score.
 
-- which drive leads when the Inner Caveman is active; and
-- how often the person can respond to what is present without turning ambiguity into a protective story.
-
-Rational Mind should not be framed as defeating, silencing, or exiling the Caveman. Its role is to determine whether the protective interpretation fits the current moment.
+Rational Mind should not be framed as defeating, silencing, or exiling the Caveman. Its role is to determine whether the automatic interpretation fits the current moment.
 
 Self-report carries an unavoidable risk: a person may select how they want to see themselves rather than what actually arises. Neurocient accepts this risk. Design should reduce it by making every response equally human and believable, avoiding obviously virtuous Rational Mind copy, and asking about the first familiar voice rather than the best response.
 
@@ -152,32 +246,32 @@ Inner Caveman 101 is the shared orientation layer. The repository already contai
 
 Its job is not to become a compulsory course or another content dump. It should give users a usable mental model:
 
-- the Inner Caveman is fast and protective;
+- the Inner Caveman describes fast automatic processing without intention;
 - old drives can misread modern circumstances;
 - the response is not proof of personal failure;
-- the five drives describe what may be protected;
+- the five drives describe survival-relevant concerns that may become salient;
 - the event and the meaning assigned to it are not identical;
 - Rational Mind can appraise the moment more directly;
 - understanding creates room, but real-life practice updates the pattern.
 
 The Scan and 101 have different jobs:
 
-- **The Scan:** "Here is how this may be showing up in you."
+- **The Scan:** "Here are the moments and responses you recognised."
 - **Inner Caveman 101:** "Here is a way to understand what you just saw."
 
-The order may be flexible, but the two experiences should deliberately connect. A Scan portrait should lead into relevant parts of 101 rather than only linking to a generic content library.
+The order may be flexible, but the two experiences should deliberately connect. Selected-answer reflections should lead into relevant parts of 101 rather than only linking to a generic content library.
 
 ## Practice
 
 Practice is where Neurocient becomes applied rather than merely understood. It turns recognition into emotionally lightweight behavior change using IKEA + Reinforcement + Behavioral Design.
 
-The rudimentary procrastination Practice is the first proof case. Its concrete scenes include escaping into easier tasks, waiting for deadline pressure, planning instead of touching the work, protecting against a messy first version, and delaying because the next decision is unclear.
+The procrastination Practice is the first authored proof case for the rebuilt shared flow. Its concrete scenes include escaping into easier tasks, waiting for deadline pressure, planning instead of touching the work, avoiding a messy first version, and delaying because the next decision is unclear.
 
 Its behavioral spine is:
 
 1. Recognize a lived behavior moment.
 2. Audit familiar advice and expose the knowing-doing gap.
-3. Reveal the protective logic beneath the pattern.
+3. Reveal the emotional and automatic logic beneath the behaviour.
 4. Loosen the damaging identity story.
 5. Notice how the environment supports the old loop.
 6. Choose one small, matched action.
@@ -191,9 +285,9 @@ Procrastination is not the product architecture. It demonstrates how a broad Cav
 The existing repository capabilities should be understood as parts of one journey rather than a collection of unrelated destinations.
 
 1. **See it — Inner Caveman Scan**
-   Recognize the ancient interpretation and recurring drives.
+   Recognize the automatic interpretation in specific selected moments.
 2. **Understand it — Inner Caveman 101**
-   Learn why the pattern makes sense and what it may protect.
+   Learn why the response arises and what concern has become salient.
 3. **Find it in life — Spot Your Inner Caveman**
    Catch the pattern close to real moments and build awareness of triggers.
 4. **Work with one pattern — Practice**
@@ -255,30 +349,40 @@ These systems should be connected and reused. Do not create parallel auth, progr
 
 ## Current Working Product Statement
 
-> Neurocient helps people see the ancient protective patterns underneath modern struggles, understand them without shame, and work with them in real life so less of their one life is lost to autopilot.
+> Neurocient helps people see the evolved automatic responses underneath modern struggles, understand why they arise without shame, and work with them in real life so less of their one life is lost to autopilot.
 
 ## Scan Foundation Status
 
-The current recognition Scan uses:
+The current recognition Scan is governed by
+`frontend/docs/scan/RESULT_APPROACH.md` and uses:
 
-- scan version `recognition-1`;
-- evidence version `protective-moves-1`;
-- report version `two-level-portrait-1`;
-- the 12 landing-page-derived lived scenarios documented in the Scan authoring guide;
-- option-level protective moves, possible concerns, evidence strength, mirror language, costs, and optional Watchtower evidence;
-- deterministic portrait generation based on recurrence across different scenarios rather than a Caveman score;
-- an open primary portrait at `/diagnostics/caveman-scan/result`, followed by an authenticated deeper portrait at `/my-caveman`; and
-- versioned authenticated backend sessions containing responses, evidence, and the generated portrait.
+- interpretation version `selected-response-1`;
+- report version `answer-reflections-1`;
+- the lived scenarios and option-specific authoring metadata documented in the
+  Scan authoring guide;
+- a stable, varied sample drawn only from answers the person actually selected
+  and that are authored as Inner Caveman responses;
+- the complete public result at `/diagnostics/caveman-scan/result`; and
+- an authenticated continuation at `/my-caveman` that preserves the same
+  selected-answer foundation rather than generating a deeper diagnostic.
 
-The deeper portrait adds a supported secondary movement, life contexts, likely costs, moments of flexibility, repeated protective concerns, and a continuation selected from the primary movement. A concern is shown only when supported more than once, and missing evidence is never presented as a quiet Watchtower.
+The result must not infer a drive, type, trait, recurring movement,
+person-level pattern, prediction, or score from the answer set. A deliberate
+response is used as an authored contrast for a selected situation; Rational
+Mind is not turned into a percentage or virtue signal. If the person selected
+no authored Inner Caveman responses, the result says so and invents nothing.
 
-Authenticated users can revisit their latest completed portrait at `/my-caveman`. When the browser does not contain a current Scan, this dedicated personal surface loads the latest completed account portrait. Local storage remains a resume convenience rather than the account retrieval mechanism.
+Authentication saves continuity. It does not unlock the meaning of the public
+result. `/my-caveman` may show the fuller relevant answer set and situations the
+person later records from real life. **Record a real-life situation** continues
+to the canonical Spots tool at `/tools/spots`.
 
-The post-portrait progression is staged rather than presented as a tools menu:
+The conceptual continuation is:
 
-1. `/my-caveman` offers one personalised recognition cue.
-2. `/my-caveman/spot` records a real moment through the existing Spots system.
-3. The first Spot reinforces observation only; repeated evidence opens the microchallenge surface.
-4. Completed microchallenges may lead into Practice only when a relevant authored Practice exists. The current direct handoff is limited to procrastination; other Caveman movements must not be forced into it.
+> what I chose in the Scan -> what I notice in real life -> what I understand
+> -> what I try
 
-Saved Spots matching the primary movement are reflected back inside `/my-caveman`. The personal portrait therefore progresses from scan evidence to lived evidence and changes its single next action accordingly. Internal pattern identifiers stored with Spots are never displayed to users and “patterns” must not become the user-facing frame for the journey.
+Microchallenges or Practice should follow only when the person's actual
+situation and an authored product flow make that continuation relevant. The
+product must not force every Scan response into procrastination or manufacture
+a person-level classification to choose the next surface.

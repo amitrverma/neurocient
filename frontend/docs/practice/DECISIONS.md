@@ -1652,3 +1652,16 @@ purposes, Spot allowance, Microchallenge response authority, and daily nugget
 selection remain unchanged. Provider-specific authentication, payload parsing,
 and outbound HTTP calls stay inside the WhatsApp adapter so a future transport
 change does not fork those product rules.
+
+## 2026-11-04: Keep Razorpay primary and offer PayPal as a secondary wallet
+
+Razorpay remains the primary checkout for Membership and Modern Caveman.
+PayPal remains available as a separately labelled secondary choice for the
+owned USD offers, using `Pay with PayPal` language rather than presenting it as
+a generic international card checkout.
+
+This avoids implying a Razorpay-like card-entry experience. Standard PayPal
+subscriptions may require the buyer to sign in to or create a PayPal account,
+and guest card availability for one-time checkout is controlled by PayPal. A
+future low-friction international card processor can be evaluated without
+changing the existing provider-neutral entitlement and enrolment boundaries.

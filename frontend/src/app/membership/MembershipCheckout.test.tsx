@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   user: { id: "user-1", email: "member@example.test" } as { id: string; email: string } | null,
   razorpayOptions: null as Record<string, unknown> | null,
   open: vi.fn(),
+  redirect: vi.fn(),
 }));
 
 vi.mock("@/app/context/AuthContext", () => ({
@@ -13,6 +14,9 @@ vi.mock("@/app/context/AuthContext", () => ({
 }));
 vi.mock("@/app/components/AuthModal", () => ({
   default: ({ isOpen }: { isOpen: boolean }) => isOpen ? <div role="dialog">Sign in</div> : null,
+}));
+vi.mock("@/lib/providerRedirect", () => ({
+  redirectToProvider: mocks.redirect,
 }));
 
 import MembershipCheckout from "./MembershipCheckout";
@@ -28,6 +32,7 @@ describe("membership checkout", () => {
     mocks.user = { id: "user-1", email: "member@example.test" };
     mocks.razorpayOptions = null;
     mocks.open.mockReset();
+    mocks.redirect.mockReset();
     window.Razorpay = function Razorpay(options: Record<string, unknown>) {
       mocks.razorpayOptions = options;
       return { open: mocks.open };
@@ -88,6 +93,35 @@ describe("membership checkout", () => {
     handler();
     expect(await screen.findByRole("status")).toHaveTextContent("Your membership is active.");
     expect(fetchMock.mock.calls.filter(([url]) => String(url) === "/api/membership/checkout")).toHaveLength(1);
+  });
+
+  it("offers the server-created PayPal USD subscription separately", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input) === "/api/membership/status") {
+        return response({
+          is_active: false,
+          checkout_configured: true,
+          paypal_checkout_configured: true,
+        });
+      }
+      if (String(input) === "/api/membership/paypal/checkout") {
+        return response({ approval_url: "https://www.sandbox.paypal.com/approve" });
+      }
+      throw new Error(`Unexpected request: ${String(input)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<MembershipCheckout />);
+
+    const buttons = await screen.findAllByRole("button");
+    expect(buttons[0]).toHaveAccessibleName("Join for ₹499/month");
+    expect(buttons[1]).toHaveAccessibleName("Pay with PayPal · USD 6/month");
+    fireEvent.click(buttons[1]);
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(
+      "/api/membership/paypal/checkout",
+      { method: "POST" },
+    ));
+    expect(mocks.redirect).toHaveBeenCalledWith("https://www.sandbox.paypal.com/approve");
   });
 
   it("replaces checkout with a meaningful active-membership arrival state", async () => {
@@ -151,7 +185,7 @@ describe("membership checkout", () => {
     fireEvent.click(await screen.findByRole("button", { name: /cancel membership/i }));
     fireEvent.click(screen.getByRole("button", { name: /confirm cancellation/i }));
 
-    expect(await screen.findByText(/needs confirmation from razorpay/i)).toBeInTheDocument();
+    expect(await screen.findByText(/needs confirmation from the payment provider/i)).toBeInTheDocument();
     expect(screen.getByText(/welcome to neurocient/i)).toBeInTheDocument();
   });
 

@@ -118,6 +118,7 @@ class CohortEnrollment(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     status = Column(String, nullable=False, default="pending_payment", index=True)
     reservation_expires_at = Column(DateTime, nullable=True)
+    provider = Column(String, nullable=False, default="razorpay")
     provider_order_id = Column(String, nullable=True, unique=True, index=True)
     provider_payment_id = Column(String, nullable=True, unique=True, index=True)
     amount_minor = Column(Integer, nullable=False)
@@ -163,6 +164,7 @@ class PaymentWebhookEvent(Base):
     __tablename__ = "payment_webhook_events"
 
     provider_event_id = Column(String, primary_key=True)
+    provider = Column(String, nullable=False, default="razorpay")
     event_type = Column(String, nullable=False)
     payload = Column(JSON, nullable=False)
     status = Column(String, nullable=False, default="received")
@@ -274,6 +276,7 @@ class MembershipBillingEvent(Base):
     __tablename__ = "membership_billing_events"
 
     provider_event_id = Column(String, primary_key=True)
+    provider = Column(String, nullable=False, default="razorpay", index=True)
     event_type = Column(String, nullable=False, index=True)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
     provider_subscription_id = Column(String, nullable=True, index=True)

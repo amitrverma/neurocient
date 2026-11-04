@@ -11,6 +11,11 @@ from app.services.membership_razorpay import (
     ProviderRejected,
     cancel_membership_subscription_at_period_end,
 )
+from app.services.paypal import (
+    ProviderOutcomeUnknown as PayPalOutcomeUnknown,
+    ProviderRejected as PayPalRejected,
+    cancel_membership_subscription as cancel_paypal_membership_subscription,
+)
 from app.services.rate_limits import enforce, enforce_ip
 from app.utils.auth import get_current_user
 
@@ -56,7 +61,7 @@ async def cancel_membership(
     entitlement = await lock_membership_entitlement(db, current_user.id)
     if (
         entitlement is None
-        or entitlement.provider != "razorpay"
+        or entitlement.provider not in {"razorpay", "paypal"}
         or not entitlement.provider_subscription_id
         or entitlement.status in {"canceled", "expired", "refunded", "disputed"}
     ):
@@ -82,15 +87,19 @@ async def cancel_membership(
     await db.commit()
 
     try:
-        response = await cancel_membership_subscription_at_period_end(subscription_id)
-    except ProviderRejected as error:
+        response = (
+            await cancel_membership_subscription_at_period_end(subscription_id)
+            if entitlement.provider == "razorpay"
+            else await cancel_paypal_membership_subscription(subscription_id)
+        )
+    except (ProviderRejected, PayPalRejected) as error:
         await _mark_cancellation_state(
             db, current_user.id, subscription_id, "failed"
         )
         raise HTTPException(
             502, detail={"code": "cancellation_provider_rejected"}
         ) from error
-    except ProviderOutcomeUnknown as error:
+    except (ProviderOutcomeUnknown, PayPalOutcomeUnknown) as error:
         await _mark_cancellation_state(
             db, current_user.id, subscription_id, "unknown"
         )

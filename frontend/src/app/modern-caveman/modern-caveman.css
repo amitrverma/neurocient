@@ -589,6 +589,17 @@
 .mc-checkout-button:hover { transform: translateY(-1px); }
 .mc-checkout-button:disabled { cursor: wait; opacity: 0.58; }
 
+.mc-checkout-button--secondary {
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  background: transparent;
+  color: white;
+}
+
+.mc-checkout-button--secondary:hover {
+  border-color: rgba(255, 255, 255, 0.64);
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .mc-price-action {
   width: 100%;
 }

@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   razorpayOptions: null as Record<string, unknown> | null,
   failureHandler: null as ((response: unknown) => void) | null,
   open: vi.fn(),
+  redirect: vi.fn(),
 }));
 
 vi.mock("@/app/context/AuthContext", () => ({
@@ -16,6 +17,9 @@ vi.mock("@/app/context/AuthContext", () => ({
 }));
 vi.mock("@/app/components/AuthModal", () => ({
   default: () => null,
+}));
+vi.mock("@/lib/providerRedirect", () => ({
+  redirectToProvider: mocks.redirect,
 }));
 
 import Pricing from "./Pricing";
@@ -32,6 +36,7 @@ const cohort = {
   enrollment_open: true,
   waitlist_available: false,
   checkout_configured: true,
+  paypal_checkout_configured: true,
 };
 
 const response = (body: unknown, status = 200) =>
@@ -45,6 +50,7 @@ describe("Modern Caveman checkout", () => {
     mocks.razorpayOptions = null;
     mocks.failureHandler = null;
     mocks.open.mockReset();
+    mocks.redirect.mockReset();
     window.Razorpay = function Razorpay(options: Record<string, unknown>) {
       mocks.razorpayOptions = options;
       return {
@@ -54,6 +60,29 @@ describe("Modern Caveman checkout", () => {
         },
       };
     } as typeof window.Razorpay;
+  });
+
+  it("keeps Razorpay primary and labels PayPal as the secondary international choice", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url === "/api/cohorts/modern-caveman") return response({ cohort });
+      if (url === "/api/cohorts/my") return response({ enrollments: [] });
+      if (url === "/api/cohorts/cohort-1/paypal/checkout") {
+        return response({ approval_url: "https://www.sandbox.paypal.com/approve" });
+      }
+      throw new Error(`Unexpected request: ${url}`);
+    }));
+    render(<Pricing />);
+
+    const primary = await screen.findByRole("button", { name: /reserve my place/i });
+    const paypal = screen.getByRole("button", { name: "Pay with PayPal · USD 249" });
+    expect(primary).toHaveClass("mc-checkout-button");
+    expect(paypal).toHaveClass("mc-checkout-button--secondary");
+
+    fireEvent.click(paypal);
+    await waitFor(() => {
+      expect(mocks.redirect).toHaveBeenCalledWith("https://www.sandbox.paypal.com/approve");
+    });
   });
 
   afterEach(() => {

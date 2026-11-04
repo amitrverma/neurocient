@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Check, CreditCard, LoaderCircle } from "lucide-react";
 import AuthModal from "@/app/components/AuthModal";
 import { useAuth } from "@/app/context/AuthContext";
+import { redirectToProvider } from "@/lib/providerRedirect";
 
 declare global {
   interface Window {
@@ -20,6 +21,7 @@ type MembershipStatus = {
   status?: string;
   current_period_end?: string | null;
   checkout_configured?: boolean;
+  paypal_checkout_configured?: boolean;
   checkout_state?: string | null;
   cancellation_state?: string | null;
   cancellation_requested_at?: string | null;
@@ -68,6 +70,7 @@ export default function MembershipCheckout() {
   const { user, ready } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
   const [pendingAfterAuth, setPendingAfterAuth] = useState(false);
+  const [pendingProvider, setPendingProvider] = useState<"razorpay" | "paypal">("razorpay");
   const [working, setWorking] = useState(false);
   const [status, setStatus] = useState<MembershipStatus | null>(null);
   const [message, setMessage] = useState("");
@@ -100,19 +103,28 @@ export default function MembershipCheckout() {
         await new Promise((resolve) => window.setTimeout(resolve, 2000));
       }
       setMessage(
-        "Confirmation is taking longer than usual. Your account will update after Razorpay confirms the payment.",
+        "Confirmation is taking longer than usual. Your account will update after the payment provider confirms it.",
       );
     } catch {
       setMessage(
-        "Payment was submitted, but confirmation could not be checked. Your account will update after Razorpay confirms it.",
+        "Payment was submitted, but confirmation could not be checked. Your account will update after the payment provider confirms it.",
       );
     }
     setWorking(false);
   }, [refreshStatus]);
 
+  useEffect(() => {
+    if (!user || typeof window === "undefined") return;
+    if (new URLSearchParams(window.location.search).get("paypal") === "approved") {
+      setWorking(true);
+      void waitForConfirmation();
+    }
+  }, [user, waitForConfirmation]);
+
   const startCheckout = useCallback(async () => {
     if (!user) {
       setPendingAfterAuth(true);
+      setPendingProvider("razorpay");
       setShowAuth(true);
       return;
     }
@@ -159,8 +171,40 @@ export default function MembershipCheckout() {
     }
   }, [user, waitForConfirmation]);
 
+  const startPayPalCheckout = useCallback(async () => {
+    if (!user) {
+      setPendingProvider("paypal");
+      setPendingAfterAuth(true);
+      setShowAuth(true);
+      return;
+    }
+    setWorking(true);
+    setMessage("");
+    try {
+      const response = await fetch("/api/membership/paypal/checkout", { method: "POST" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || typeof data.approval_url !== "string") {
+        const code = data?.detail?.code;
+        setMessage(
+          code === "reconciliation_required"
+            ? "A previous checkout needs confirmation. Please contact support before trying again."
+            : code === "checkout_provider_conflict"
+              ? "Another payment checkout is already open. Complete or resolve it before switching providers."
+              : "PayPal checkout is temporarily unavailable. Please try again shortly.",
+        );
+        setWorking(false);
+        return;
+      }
+      redirectToProvider(data.approval_url);
+    } catch {
+      setMessage("PayPal checkout is temporarily unavailable. Please try again shortly.");
+      setWorking(false);
+    }
+  }, [user]);
+
   const active = Boolean(status?.is_active);
   const configured = status?.checkout_configured !== false;
+  const paypalConfigured = status?.paypal_checkout_configured === true;
   const accessDate = formatAccessDate(status?.current_period_end);
 
   const cancelMembership = useCallback(async () => {
@@ -172,7 +216,7 @@ export default function MembershipCheckout() {
       if (!response.ok) {
         setMessage(
           data?.detail?.code === "cancellation_reconciliation_required"
-            ? "Your cancellation request needs confirmation from Razorpay. Access remains unchanged while we reconcile it."
+            ? "Your cancellation request needs confirmation from the payment provider. Access remains unchanged while we reconcile it."
             : "Cancellation could not be requested. Please try again shortly.",
         );
       } else {
@@ -195,9 +239,10 @@ export default function MembershipCheckout() {
   useEffect(() => {
     if (pendingAfterAuth && user) {
       setPendingAfterAuth(false);
-      void startCheckout();
+      if (pendingProvider === "paypal") void startPayPalCheckout();
+      else void startCheckout();
     }
-  }, [pendingAfterAuth, startCheckout, user]);
+  }, [pendingAfterAuth, pendingProvider, startCheckout, startPayPalCheckout, user]);
 
   if (active) {
     const cancellationScheduled = ["requested", "completed"].includes(
@@ -295,11 +340,12 @@ export default function MembershipCheckout() {
 
   return (
     <>
+      <div className="mt-7 grid gap-3 sm:grid-cols-2">
       <button
         type="button"
         onClick={() => void startCheckout()}
         disabled={!ready || working || !configured}
-        className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand-primary bg-white px-4 py-3 font-sans text-sm font-semibold text-brand-dark transition hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand-secondary bg-brand-secondary px-4 py-3 font-sans text-sm font-semibold text-brand-dark transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
       >
         {working ? (
           <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -314,6 +360,16 @@ export default function MembershipCheckout() {
               ? "Join for ₹499/month"
               : "Log in to join"}
       </button>
+      <button
+        type="button"
+        onClick={() => void startPayPalCheckout()}
+        disabled={!ready || working || !paypalConfigured}
+        className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/35 bg-transparent px-4 py-3 font-sans text-sm font-semibold text-white transition hover:border-white/60 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <CreditCard className="h-4 w-4" aria-hidden="true" />
+        {user ? "Pay with PayPal · USD 6/month" : "Log in to pay with PayPal"}
+      </button>
+      </div>
       {message ? (
         <p className="mt-4 font-sans text-sm leading-6 text-white/70" role="status">
           {message}

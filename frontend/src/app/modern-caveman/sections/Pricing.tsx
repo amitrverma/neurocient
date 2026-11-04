@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, Check, CircleAlert, LoaderCircle } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "@/app/components/AuthModal";
+import { redirectToProvider } from "@/lib/providerRedirect";
 
 type Cohort = {
   id: string;
@@ -17,6 +18,7 @@ type Cohort = {
   enrollment_open: boolean;
   waitlist_available: boolean;
   checkout_configured: boolean;
+  paypal_checkout_configured?: boolean;
 };
 
 type CheckoutResponse = {
@@ -106,6 +108,7 @@ export default function Pricing() {
   const [hasConfirmedPlace, setHasConfirmedPlace] = useState(false);
   const [confirmationStatus, setConfirmationStatus] = useState<ConfirmationStatus>("idle");
   const userId = user?.id;
+  const paypalReturnHandled = useRef(false);
 
   const refreshCohort = useCallback(async () => {
     const response = await fetch("/api/cohorts/modern-caveman", { cache: "no-store" });
@@ -306,6 +309,69 @@ export default function Pricing() {
     }
   };
 
+  const startPayPalCheckout = async () => {
+    if (!user) return setShowAuth(true);
+    if (!cohort) return;
+    setWorking(true);
+    setMessage("");
+    setMessageIsError(false);
+    try {
+      const response = await fetch(`/api/cohorts/${cohort.id}/paypal/checkout`, {
+        method: "POST",
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || typeof data.approval_url !== "string") {
+        const code = errorCode(data);
+        setMessage(
+          code === "checkout_reconciliation_required"
+            ? "This checkout may have reached PayPal. Do not pay again; contact support before retrying."
+            : code === "checkout_provider_conflict"
+              ? "Another payment checkout is already open. Complete or resolve it before switching providers."
+              : "PayPal checkout is temporarily unavailable. No place has been confirmed.",
+        );
+        setMessageIsError(true);
+        setWorking(false);
+        return;
+      }
+      redirectToProvider(data.approval_url);
+    } catch {
+      setMessage("PayPal checkout could not be started. No place has been confirmed.");
+      setMessageIsError(true);
+      setWorking(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!user || !cohort?.id || paypalReturnHandled.current) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("paypal") !== "approved") return;
+    const orderId = params.get("token");
+    paypalReturnHandled.current = true;
+    if (!orderId) {
+      setMessage("PayPal returned without an order reference. Your place has not been confirmed.");
+      setMessageIsError(true);
+      return;
+    }
+    setWorking(true);
+    void fetch(`/api/cohorts/${cohort.id}/paypal/capture`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ order_id: orderId }),
+    })
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || data.captured !== true) throw new Error("capture_not_confirmed");
+        setMessage("");
+        setConfirmationStatus("checking");
+        window.history.replaceState({}, "", window.location.pathname + "#pricing");
+      })
+      .catch(() => {
+        setMessage("Payment approval was returned, but capture confirmation is uncertain. Do not pay again; contact support.");
+        setMessageIsError(true);
+      })
+      .finally(() => setWorking(false));
+  }, [cohort?.id, user]);
+
   const formattedPrice = cohort
     ? new Intl.NumberFormat("en-IN", { style: "currency", currency: cohort.currency, maximumFractionDigits: 0 }).format(cohort.price_minor / 100)
     : "₹21,000";
@@ -379,9 +445,18 @@ export default function Pricing() {
                 </div>
               </div>
             ) : cohort?.enrollment_open ? (
-              <button className="mc-checkout-button" disabled={working || !ready} onClick={startCheckout}>
+              <div className="grid gap-3">
+              <button className="mc-checkout-button" disabled={working || !ready || !cohort.checkout_configured} onClick={startCheckout}>
                 {working ? "Preparing…" : user ? "Reserve my place" : "Log in to join"}<ArrowRight className="h-4 w-4" />
               </button>
+              <button
+                className="mc-checkout-button mc-checkout-button--secondary"
+                disabled={working || !ready || !cohort.paypal_checkout_configured}
+                onClick={startPayPalCheckout}
+              >
+                {user ? "Pay with PayPal · USD 249" : "Log in to pay with PayPal"}<ArrowRight className="h-4 w-4" />
+              </button>
+              </div>
             ) : cohort?.waitlist_available ? (
               <button className="mc-checkout-button" disabled={working || !ready} onClick={joinWaitlist}>
                 {working ? "Adding…" : user ? "Join the waitlist" : "Log in to join waitlist"}<ArrowRight className="h-4 w-4" />

@@ -4,7 +4,7 @@ Status: approved product contract; implementation under verification
 
 Owner: Amit
 
-Last amended: 2026-11-01
+Last amended: 2026-11-04
 
 ## Canonical offers
 
@@ -15,6 +15,8 @@ webhook state machines, or access consequences.
 | --- | --- | --- | --- |
 | Membership | Recurring Razorpay subscription | INR 499 each month (49,900 minor units) | Active provider-verified entitlement unlocks the self-guided membership |
 | Modern Caveman | One-time Razorpay order for a published cohort | INR 21,000 (2,100,000 minor units) | Captured, verified payment confirms one seat in the selected cohort |
+| Membership (international) | Recurring PayPal subscription | USD 6 each month (600 minor units) | Active provider-verified entitlement unlocks the self-guided membership |
+| Modern Caveman (international) | One-time PayPal order for a published cohort | USD 249 (24,900 minor units) | Captured, verified payment confirms one seat in the selected cohort |
 
 “Equivalent” means any conversion displayed or applied by the payment provider,
 card issuer, or customer bank. Neurocient does not calculate or persist a live FX
@@ -30,13 +32,17 @@ and reconciliation paths are validated. An overseas customer may use an
 international payment method only when Razorpay has enabled that capability;
 this does not make a converted display amount an authoritative Neurocient price.
 
-Multi-currency pricing is a later, explicit product and billing change. It must
-use versioned currency-specific offers and provider plans rather than replacing
-the INR environment variables or applying a browser-calculated FX rate. Existing
-INR subscriptions and their renewals must continue to validate against the offer
-they originally purchased. Revisit this decision after international recurring
-payments are approved and proven, or when sustained non-India demand justifies
-owned USD, EUR, GBP, or other local-currency offers.
+USD pricing is now an explicit international offer implemented through PayPal
+Sandbox. It uses versioned currency-specific configuration and a provider plan;
+it does not replace the INR environment variables or apply a browser-calculated
+FX rate. Existing INR subscriptions and renewals continue to validate against
+their original Razorpay offer. Razorpay remains the primary checkout. PayPal is
+an explicitly labelled secondary wallet choice, not the sole international card
+path; its standard subscription flow may require the buyer to use a PayPal
+account. EUR, GBP, and other currencies remain deferred.
+
+The PayPal-specific contract is
+`docs/implementation/PAYPAL_INTERNATIONAL_BILLING.md`.
 
 ## Boundaries
 

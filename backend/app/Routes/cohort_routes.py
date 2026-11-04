@@ -32,6 +32,7 @@ from app.services.cohorts import (
     validate_cohort_values,
     validate_modern_caveman_price,
 )
+from app.services.cohort_billing import CaptureMismatch, apply_verified_capture
 from app.services.razorpay import (
     ProviderOutcomeUnknown,
     ProviderRejected,
@@ -40,6 +41,7 @@ from app.services.razorpay import (
     verify_checkout_signature,
     verify_webhook_signature,
 )
+from app.services.paypal import paypal_cohort_ready
 from app.services.rate_limits import enforce, enforce_ip
 from app.utils.auth import get_current_user
 
@@ -145,6 +147,7 @@ def cohort_payload(cohort: Cohort, seats: int, *, include_private: bool = False)
         "enrollment_open": enrollment_is_open(cohort, seats),
         "waitlist_available": cohort.status == "full" or seats >= cohort.capacity,
         "checkout_configured": razorpay_ready(),
+        "paypal_checkout_configured": paypal_cohort_ready(),
     }
     if include_private:
         data.update(
@@ -324,6 +327,7 @@ async def begin_checkout(cohort_id: uuid.UUID, current_user: User = Depends(get_
         amount_minor=cohort.price_minor, currency=cohort.currency,
     )
     enrollment.status = "checkout_creating"
+    enrollment.provider = "razorpay"
     enrollment.reservation_expires_at = expires_at
     enrollment.amount_minor = cohort.price_minor
     enrollment.currency = cohort.currency
@@ -470,6 +474,7 @@ async def razorpay_webhook(request: Request, x_razorpay_signature: str | None = 
     payment = payload.get("payload", {}).get("payment", {}).get("entity", {})
     webhook = PaymentWebhookEvent(
         provider_event_id=event_id,
+        provider="razorpay",
         event_type=event_type,
         payload={
             "payment_id": payment.get("id"),
@@ -518,65 +523,27 @@ async def razorpay_webhook(request: Request, x_razorpay_signature: str | None = 
         webhook.processed_at = datetime.utcnow()
         await db.commit()
         raise HTTPException(status_code=400, detail={"code": "invalid_payment"})
-    result = await db.execute(select(CohortEnrollment).where(CohortEnrollment.provider_order_id == order_id).with_for_update())
-    enrollment = result.scalar_one_or_none()
-    if not enrollment or payment.get("amount") != enrollment.amount_minor or payment.get("currency") != enrollment.currency:
+    try:
+        capture_result = await apply_verified_capture(
+            db,
+            webhook=webhook,
+            provider="razorpay",
+            order_id=order_id,
+            payment_id=payment.get("id"),
+            amount_minor=payment.get("amount"),
+            currency=payment.get("currency"),
+        )
+    except CaptureMismatch:
         webhook.status = "rejected"
         webhook.processed_at = datetime.utcnow()
         await db.commit()
         raise HTTPException(status_code=409, detail="Payment does not match an enrollment")
-    if enrollment.status == "paid":
-        if enrollment.provider_payment_id != payment.get("id"):
-            webhook.status = "rejected"
-            webhook.processed_at = datetime.utcnow()
-            await db.commit()
-            raise HTTPException(status_code=409, detail="Enrollment already has a different payment")
-        webhook.status = "processed"
-        webhook.processed_at = datetime.utcnow()
-        await cohort_welcome_email.ensure_welcome_email_delivery(db, enrollment.id)
-        await db.commit()
-        await _deliver_paid_enrollment_welcome(db, enrollment.id, event_id)
-        return {"ok": True, "duplicate": True}
-    cohort_result = await db.execute(select(Cohort).where(Cohort.id == enrollment.cohort_id).with_for_update())
-    cohort = cohort_result.scalar_one()
-    occupied = await occupied_seats(db, cohort.id)
-    current_reservation_counted = bool(
-        enrollment.status == "pending_payment"
-        and enrollment.reservation_expires_at
-        and enrollment.reservation_expires_at > datetime.utcnow()
-    )
-    occupied_other = max(occupied - (1 if current_reservation_counted else 0), 0)
-    if not captured_payment_has_seat(
-        reservation_expires_at=enrollment.reservation_expires_at,
-        occupied_other_seats=occupied_other,
-        capacity=cohort.capacity,
-    ):
-        enrollment.status = "cancelled"
-        enrollment.provider_payment_id = payment.get("id")
-        payment_result = await db.execute(select(PaymentRecord).where(PaymentRecord.provider_order_id == order_id))
-        record = payment_result.scalar_one_or_none()
-        if record:
-            record.status = "capacity_conflict"
-            record.provider_payment_id = payment.get("id")
-        webhook.status = "capacity_conflict"
-        webhook.processed_at = datetime.utcnow()
-        await audit(db, None, "payment.capacity_conflict", "cohort_enrollment", enrollment.id, {"provider_order_id": order_id})
-        await db.commit()
-        return {"ok": True, "requires_refund": True}
-    enrollment.status = "paid"
-    enrollment.provider_payment_id = payment.get("id")
-    enrollment.paid_at = datetime.utcnow()
-    payment_result = await db.execute(select(PaymentRecord).where(PaymentRecord.provider_order_id == order_id))
-    record = payment_result.scalar_one_or_none()
-    if record:
-        record.status = "captured"
-        record.provider_payment_id = payment.get("id")
-    webhook.status = "processed"
-    webhook.processed_at = datetime.utcnow()
-    await audit(db, None, "payment.captured", "cohort_enrollment", enrollment.id, {"provider_order_id": order_id})
-    await cohort_welcome_email.ensure_welcome_email_delivery(db, enrollment.id)
     await db.commit()
-    await _deliver_paid_enrollment_welcome(db, enrollment.id, event_id)
+    if capture_result.requires_refund:
+        return {"ok": True, "requires_refund": True}
+    await _deliver_paid_enrollment_welcome(db, capture_result.enrollment_id, event_id)
+    if capture_result.outcome == "duplicate":
+        return {"ok": True, "duplicate": True}
     return {"ok": True}
 
 

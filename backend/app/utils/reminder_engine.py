@@ -16,7 +16,7 @@ from app.models import (
     UserPreferences,
     WebPushSubscription,
 )
-from app.Routes.whatsapp_routes import send_whatsapp_message
+from app.services.meta_whatsapp import send_whatsapp_message
 from app.observability import log_event, safe_exception_fields
 from app.services.job_control import (
     claim_notification_dispatch,

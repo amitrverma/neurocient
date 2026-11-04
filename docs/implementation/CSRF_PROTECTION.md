@@ -79,7 +79,7 @@ points: the Next.js `/api` boundary and direct FastAPI access.
 - Rejection happens before authentication dependencies, database writes, session
   rotation/revocation, and provider calls.
 - Bearer-only API calls without Neurocient cookies remain supported.
-- Razorpay and Twilio webhooks, admin-key notification jobs, and public anonymous
+- Razorpay and Meta WhatsApp webhooks, admin-key notification jobs, and public anonymous
   mutations without session cookies retain their existing authentication and
   abuse controls. If any such request includes Neurocient session cookies, it is
   treated as browser state and must pass CSRF proof.

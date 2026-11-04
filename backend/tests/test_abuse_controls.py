@@ -96,10 +96,12 @@ def test_production_requires_strong_abuse_secrets(monkeypatch):
     monkeypatch.setattr(Settings, "RATE_LIMIT_ENABLED", True)
     monkeypatch.setattr(Settings, "RATE_LIMIT_KEY_SECRET", "short")
     monkeypatch.setattr(Settings, "ABUSE_PROXY_SECRET", "also-short")
-    monkeypatch.setattr(Settings, "TWILIO_ACCOUNT_SID", "AC" + "1" * 32)
-    monkeypatch.setattr(Settings, "TWILIO_AUTH_TOKEN", "secret")
-    monkeypatch.setattr(Settings, "TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886")
-    monkeypatch.setattr(Settings, "TWILIO_WHATSAPP_WEBHOOK_URL", "https://api.example.com/wa/webhook/whatsapp")
+    monkeypatch.setattr(Settings, "WHATSAPP_ACCESS_TOKEN", "access-token")
+    monkeypatch.setattr(Settings, "WHATSAPP_APP_SECRET", "app-secret")
+    monkeypatch.setattr(Settings, "WHATSAPP_VERIFY_TOKEN", "verify-token")
+    monkeypatch.setattr(Settings, "WHATSAPP_BUSINESS_ACCOUNT_ID", "123456789")
+    monkeypatch.setattr(Settings, "WHATSAPP_PHONE_NUMBER_ID", "987654321")
+    monkeypatch.setattr(Settings, "WHATSAPP_GRAPH_API_VERSION", "v24.0")
     with pytest.raises(RuntimeError, match="RATE_LIMIT_KEY_SECRET"):
         Settings().validate_for_startup()
 
@@ -113,10 +115,12 @@ def test_production_rejects_reused_abuse_secret(monkeypatch):
     monkeypatch.setattr(Settings, "RATE_LIMIT_ENABLED", True)
     monkeypatch.setattr(Settings, "RATE_LIMIT_KEY_SECRET", shared)
     monkeypatch.setattr(Settings, "ABUSE_PROXY_SECRET", shared)
-    monkeypatch.setattr(Settings, "TWILIO_ACCOUNT_SID", "AC" + "1" * 32)
-    monkeypatch.setattr(Settings, "TWILIO_AUTH_TOKEN", "secret")
-    monkeypatch.setattr(Settings, "TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886")
-    monkeypatch.setattr(Settings, "TWILIO_WHATSAPP_WEBHOOK_URL", "https://api.example.com/wa/webhook/whatsapp")
+    monkeypatch.setattr(Settings, "WHATSAPP_ACCESS_TOKEN", "access-token")
+    monkeypatch.setattr(Settings, "WHATSAPP_APP_SECRET", "app-secret")
+    monkeypatch.setattr(Settings, "WHATSAPP_VERIFY_TOKEN", "verify-token")
+    monkeypatch.setattr(Settings, "WHATSAPP_BUSINESS_ACCOUNT_ID", "123456789")
+    monkeypatch.setattr(Settings, "WHATSAPP_PHONE_NUMBER_ID", "987654321")
+    monkeypatch.setattr(Settings, "WHATSAPP_GRAPH_API_VERSION", "v24.0")
     with pytest.raises(RuntimeError, match="must be independent"):
         Settings().validate_for_startup()
 

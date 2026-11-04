@@ -1,3 +1,6 @@
+import hashlib
+import hmac
+import json
 import logging
 from unittest.mock import AsyncMock
 from uuid import uuid4
@@ -5,7 +8,6 @@ from uuid import uuid4
 import httpx
 import pytest
 from fastapi import FastAPI
-from twilio.request_validator import RequestValidator
 
 from app.Routes import whatsapp_routes
 from app.config import settings
@@ -13,9 +15,51 @@ from app.database import get_db
 from app.services.microchallenge_progress import CheckinResult
 
 
-WEBHOOK_URL = "https://api.example.com/wa/webhook/whatsapp"
-AUTH_TOKEN = "route-test-auth-token"
-ACCOUNT_SID = "AC" + "1" * 32
+APP_SECRET = "route-test-meta-app-secret"
+VERIFY_TOKEN = "route-test-verify-token"
+WABA_ID = "123456789012345"
+PHONE_NUMBER_ID = "987654321098765"
+
+
+def _configure(monkeypatch):
+    monkeypatch.setattr(settings, "WHATSAPP_ACCESS_TOKEN", "route-access-token")
+    monkeypatch.setattr(settings, "WHATSAPP_APP_SECRET", APP_SECRET)
+    monkeypatch.setattr(settings, "WHATSAPP_VERIFY_TOKEN", VERIFY_TOKEN)
+    monkeypatch.setattr(settings, "WHATSAPP_BUSINESS_ACCOUNT_ID", WABA_ID)
+    monkeypatch.setattr(settings, "WHATSAPP_PHONE_NUMBER_ID", PHONE_NUMBER_ID)
+    monkeypatch.setattr(settings, "WHATSAPP_GRAPH_API_VERSION", "v24.0")
+
+
+def _payload(message_id: str, phone: str, body: str) -> dict:
+    return {
+        "object": "whatsapp_business_account",
+        "entry": [{
+            "id": WABA_ID,
+            "changes": [{
+                "field": "messages",
+                "value": {
+                    "messaging_product": "whatsapp",
+                    "metadata": {
+                        "display_phone_number": "15551234567",
+                        "phone_number_id": PHONE_NUMBER_ID,
+                    },
+                    "messages": [{
+                        "from": phone.removeprefix("+"),
+                        "id": message_id,
+                        "timestamp": "1730678400",
+                        "type": "text",
+                        "text": {"body": body},
+                    }],
+                },
+            }],
+        }],
+    }
+
+
+def _signed_request(payload: dict) -> tuple[bytes, dict[str, str]]:
+    raw_body = json.dumps(payload, separators=(",", ":")).encode()
+    digest = hmac.new(APP_SECRET.encode(), raw_body, hashlib.sha256).hexdigest()
+    return raw_body, {"X-Hub-Signature-256": f"sha256={digest}"}
 
 
 @pytest.mark.parametrize(
@@ -74,6 +118,17 @@ class FailingSession:
         return None
 
 
+class EmptySession:
+    def __init__(self):
+        self.commits = 0
+
+    async def commit(self):
+        self.commits += 1
+
+    async def rollback(self):
+        return None
+
+
 class ScalarResult:
     def __init__(self, value=None):
         self.value = value
@@ -83,8 +138,8 @@ class ScalarResult:
 
 
 class MicrochallengeSession:
-    def __init__(self, message_sid, user_id, assignment_id):
-        self.results = [ScalarResult(message_sid), ScalarResult(user_id), ScalarResult()]
+    def __init__(self, message_id, user_id, assignment_id):
+        self.results = [ScalarResult(message_id), ScalarResult(user_id), ScalarResult()]
         self.assignment_id = assignment_id
         self.commits = 0
 
@@ -105,37 +160,58 @@ class MicrochallengeSession:
         return None
 
 
-def _configure(monkeypatch):
-    monkeypatch.setattr(settings, "TWILIO_ACCOUNT_SID", ACCOUNT_SID)
-    monkeypatch.setattr(settings, "TWILIO_AUTH_TOKEN", AUTH_TOKEN)
-    monkeypatch.setattr(settings, "TWILIO_WHATSAPP_WEBHOOK_URL", WEBHOOK_URL)
+def _app_with_db(db):
+    app = FastAPI()
+    app.include_router(whatsapp_routes.router, prefix="/wa")
+    app.dependency_overrides[get_db] = lambda: db
+    return app
+
+
+@pytest.mark.asyncio
+async def test_meta_webhook_verification_returns_only_the_challenge(monkeypatch):
+    _configure(monkeypatch)
+    app = _app_with_db(EmptySession())
+    transport = httpx.ASGITransport(app=app)
+
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        verified = await client.get(
+            "/wa/webhook/whatsapp",
+            params={
+                "hub.mode": "subscribe",
+                "hub.verify_token": VERIFY_TOKEN,
+                "hub.challenge": "123456789",
+            },
+        )
+        rejected = await client.get(
+            "/wa/webhook/whatsapp",
+            params={
+                "hub.mode": "subscribe",
+                "hub.verify_token": "wrong",
+                "hub.challenge": "123456789",
+            },
+        )
+
+    assert verified.status_code == 200
+    assert verified.text == "123456789"
+    assert rejected.status_code == 403
 
 
 @pytest.mark.asyncio
 async def test_internal_failure_is_generic_and_privacy_safe(monkeypatch, caplog):
+    _configure(monkeypatch)
     phone = "+919876543210"
     private_message = "private-message-canary"
-    form = {
-        "AccountSid": ACCOUNT_SID,
-        "MessageSid": "SM" + "2" * 32,
-        "From": f"whatsapp:{phone}",
-        "Body": f"spot: {private_message}",
-    }
-    signature = RequestValidator(AUTH_TOKEN).compute_signature(WEBHOOK_URL, form)
-
-    _configure(monkeypatch)
-
-    app = FastAPI()
-    app.include_router(whatsapp_routes.router, prefix="/wa")
-    app.dependency_overrides[get_db] = lambda: FailingSession()
+    payload = _payload("wamid.private-failure", phone, f"spot: {private_message}")
+    raw_body, headers = _signed_request(payload)
+    app = _app_with_db(FailingSession())
     transport = httpx.ASGITransport(app=app)
     caplog.set_level(logging.INFO, logger="whatsapp")
 
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post(
             "/wa/webhook/whatsapp",
-            data=form,
-            headers={"X-Twilio-Signature": signature},
+            content=raw_body,
+            headers={"Content-Type": "application/json", **headers},
         )
 
     assert response.status_code == 500
@@ -147,7 +223,7 @@ async def test_internal_failure_is_generic_and_privacy_safe(monkeypatch, caplog)
     assert phone not in observable
     assert private_message not in observable
     assert "private-database-detail" not in observable
-    assert signature not in observable
+    assert headers["X-Hub-Signature-256"] not in observable
 
 
 @pytest.mark.asyncio
@@ -155,10 +231,10 @@ async def test_verified_microchallenge_response_uses_shared_checkin_and_acknowle
     monkeypatch,
 ):
     _configure(monkeypatch)
-    message_sid = "SM" + "3" * 32
+    message_id = "wamid.microchallenge-partly"
     user_id = uuid4()
     assignment_id = uuid4()
-    db = MicrochallengeSession(message_sid, user_id, assignment_id)
+    db = MicrochallengeSession(message_id, user_id, assignment_id)
     record_checkin = AsyncMock(
         return_value=CheckinResult(
             result="recorded",
@@ -175,26 +251,17 @@ async def test_verified_microchallenge_response_uses_shared_checkin_and_acknowle
         "send_whatsapp_message",
         lambda number, message, *, emit_logs=True: sent.append(
             (number, message, emit_logs)
-        )
-        or True,
+        ) or True,
     )
-    app = FastAPI()
-    app.include_router(whatsapp_routes.router, prefix="/wa")
-    app.dependency_overrides[get_db] = lambda: db
-    transport = httpx.ASGITransport(app=app)
-    form = {
-        "AccountSid": ACCOUNT_SID,
-        "MessageSid": message_sid,
-        "From": "whatsapp:+919876543210",
-        "Body": "Partly",
-    }
-    signature = RequestValidator(AUTH_TOKEN).compute_signature(WEBHOOK_URL, form)
+    payload = _payload(message_id, "+919876543210", "Partly")
+    raw_body, headers = _signed_request(payload)
+    transport = httpx.ASGITransport(app=_app_with_db(db))
 
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post(
             "/wa/webhook/whatsapp",
-            data=form,
-            headers={"X-Twilio-Signature": signature},
+            content=raw_body,
+            headers={"Content-Type": "application/json", **headers},
         )
 
     assert response.status_code == 200
@@ -205,24 +272,20 @@ async def test_verified_microchallenge_response_uses_shared_checkin_and_acknowle
         assignment_id=assignment_id,
         outcome="partly",
     )
-    assert sent == [
-        (
-            "+919876543210",
-            "Recorded. Partial attempts still show what makes the behaviour easier or harder. "
-            "If you want, reply 'note: ...' with what got in the way.",
-            False,
-        )
-    ]
+    assert sent == [(
+        "+919876543210",
+        "Recorded. Partial attempts still show what makes the behaviour easier or harder. "
+        "If you want, reply 'note: ...' with what got in the way.",
+        False,
+    )]
 
 
 @pytest.mark.asyncio
-async def test_microchallenge_response_without_today_prompt_cannot_mutate_active_work(
-    monkeypatch,
-):
+async def test_response_without_today_prompt_cannot_mutate_active_work(monkeypatch):
     _configure(monkeypatch)
-    message_sid = "SM" + "4" * 32
+    message_id = "wamid.no-current-prompt"
     user_id = uuid4()
-    db = MicrochallengeSession(message_sid, user_id, None)
+    db = MicrochallengeSession(message_id, user_id, None)
     record_checkin = AsyncMock()
     sent = []
     monkeypatch.setattr(whatsapp_routes, "record_checkin", record_checkin)
@@ -231,23 +294,15 @@ async def test_microchallenge_response_without_today_prompt_cannot_mutate_active
         "send_whatsapp_message",
         lambda _number, message, *, emit_logs=True: sent.append(message) or True,
     )
-    app = FastAPI()
-    app.include_router(whatsapp_routes.router, prefix="/wa")
-    app.dependency_overrides[get_db] = lambda: db
-    transport = httpx.ASGITransport(app=app)
-    form = {
-        "AccountSid": ACCOUNT_SID,
-        "MessageSid": message_sid,
-        "From": "whatsapp:+919876543210",
-        "Body": "Done",
-    }
-    signature = RequestValidator(AUTH_TOKEN).compute_signature(WEBHOOK_URL, form)
+    payload = _payload(message_id, "+919876543210", "Done")
+    raw_body, headers = _signed_request(payload)
+    transport = httpx.ASGITransport(app=_app_with_db(db))
 
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post(
             "/wa/webhook/whatsapp",
-            data=form,
-            headers={"X-Twilio-Signature": signature},
+            content=raw_body,
+            headers={"Content-Type": "application/json", **headers},
         )
 
     assert response.status_code == 200
@@ -259,160 +314,72 @@ async def test_microchallenge_response_without_today_prompt_cannot_mutate_active
 
 
 @pytest.mark.asyncio
+async def test_status_callback_is_acknowledged_without_database_lookup(monkeypatch):
+    _configure(monkeypatch)
+    db = EmptySession()
+    payload = _payload("wamid.ignored", "+919876543210", "ignored")
+    value = payload["entry"][0]["changes"][0]["value"]
+    value.pop("messages")
+    value["statuses"] = [{"id": "wamid.outbound", "status": "delivered"}]
+    raw_body, headers = _signed_request(payload)
+    transport = httpx.ASGITransport(app=_app_with_db(db))
+
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.post(
+            "/wa/webhook/whatsapp",
+            content=raw_body,
+            headers={"Content-Type": "application/json", **headers},
+        )
+
+    assert response.status_code == 200
+    assert db.commits == 1
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ("content", "content_type", "expected_status"),
     [
-        (b"{}", "application/json", 415),
-        (b"Body=one&Body=two", "application/x-www-form-urlencoded", 400),
-        (b"x" * 8193, "application/x-www-form-urlencoded", 413),
-        (
-            "&".join(f"Field{index}=x" for index in range(65)).encode(),
-            "application/x-www-form-urlencoded",
-            400,
-        ),
+        (b"{}", "text/plain", 415),
+        (b"not-json", "application/json", 400),
+        (b"x" * 65_537, "application/json", 413),
     ],
+    ids=["unsupported-content-type", "malformed-json", "oversized-json"],
 )
-async def test_rejects_ambiguous_or_oversized_forms_before_database_access(
+async def test_rejects_unsupported_malformed_or_oversized_requests_before_database(
     monkeypatch,
     content,
     content_type,
     expected_status,
 ):
     _configure(monkeypatch)
-    app = FastAPI()
-    app.include_router(whatsapp_routes.router, prefix="/wa")
-    app.dependency_overrides[get_db] = lambda: FailingSession()
-    transport = httpx.ASGITransport(app=app)
+    headers = {"Content-Type": content_type}
+    if content == b"not-json":
+        digest = hmac.new(APP_SECRET.encode(), content, hashlib.sha256).hexdigest()
+        headers["X-Hub-Signature-256"] = f"sha256={digest}"
+    transport = httpx.ASGITransport(app=_app_with_db(FailingSession()))
 
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post(
             "/wa/webhook/whatsapp",
             content=content,
-            headers={
-                "Content-Type": content_type,
-                "X-Twilio-Signature": "not-relevant-before-safe-rejection",
-            },
+            headers=headers,
         )
 
     assert response.status_code == expected_status
 
 
 @pytest.mark.asyncio
-async def test_enforces_message_body_character_boundary(monkeypatch):
+async def test_rejects_text_above_meta_boundary_before_database(monkeypatch):
     _configure(monkeypatch)
-    app = FastAPI()
-    app.include_router(whatsapp_routes.router, prefix="/wa")
-    app.dependency_overrides[get_db] = lambda: FailingSession()
-    transport = httpx.ASGITransport(app=app)
+    payload = _payload("wamid.too-long", "+919876543210", "x" * 4097)
+    raw_body, headers = _signed_request(payload)
+    transport = httpx.ASGITransport(app=_app_with_db(FailingSession()))
 
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
-        responses = []
-        for length in (1600, 1601):
-            form = {
-                "AccountSid": ACCOUNT_SID,
-                "MessageSid": "SM" + str(length).zfill(32),
-                "From": "whatsapp:+919876543210",
-                "Body": "x" * length,
-            }
-            signature = RequestValidator(AUTH_TOKEN).compute_signature(WEBHOOK_URL, form)
-            responses.append(
-                await client.post(
-                    "/wa/webhook/whatsapp",
-                    data=form,
-                    headers={"X-Twilio-Signature": signature},
-                )
-            )
-
-    assert [response.status_code for response in responses] == [500, 400]
-
-
-def test_provider_send_failure_does_not_log_private_response(monkeypatch, caplog):
-    private_provider_body = "provider-private-response"
-
-    class Response:
-        status_code = 400
-        text = private_provider_body
-
-    monkeypatch.setattr(settings, "TWILIO_ACCOUNT_SID", ACCOUNT_SID)
-    monkeypatch.setattr(settings, "TWILIO_AUTH_TOKEN", AUTH_TOKEN)
-    monkeypatch.setattr(settings, "TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886")
-    monkeypatch.setattr(whatsapp_routes.requests, "post", lambda *args, **kwargs: Response())
-    caplog.set_level(logging.INFO, logger="whatsapp")
-
-    assert whatsapp_routes.send_whatsapp_message(
-        "+919876543210",
-        "private outbound content",
-    ) is False
-    assert private_provider_body not in caplog.text
-    assert "+919876543210" not in caplog.text
-    assert "private outbound content" not in caplog.text
-
-
-def test_provider_send_bounds_body_and_returns_message_sid(monkeypatch):
-    provider_message_id = "SM" + "8" * 32
-    captured = {}
-
-    class Response:
-        status_code = 201
-
-        @staticmethod
-        def json():
-            return {"sid": provider_message_id}
-
-    _configure(monkeypatch)
-    monkeypatch.setattr(settings, "TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886")
-
-    def capture_post(*_args, **kwargs):
-        captured.update(kwargs["data"])
-        return Response()
-
-    monkeypatch.setattr(whatsapp_routes.requests, "post", capture_post)
-
-    result = whatsapp_routes.send_whatsapp_message(
-        "+919876543210",
-        "private outbound content " * 200,
-    )
-
-    assert result == provider_message_id
-    assert len(captured["Body"]) <= 1_600
-    assert captured["Body"].endswith("…")
-
-
-def test_provider_5xx_is_outcome_unknown(monkeypatch, caplog):
-    class Response:
-        status_code = 503
-
-    _configure(monkeypatch)
-    monkeypatch.setattr(settings, "TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886")
-    monkeypatch.setattr(whatsapp_routes.requests, "post", lambda *args, **kwargs: Response())
-    caplog.set_level(logging.INFO, logger="whatsapp")
-
-    with pytest.raises(whatsapp_routes.NotificationOutcomeUnknown):
-        whatsapp_routes.send_whatsapp_message(
-            "+919876543210",
-            "private outbound content",
+        response = await client.post(
+            "/wa/webhook/whatsapp",
+            content=raw_body,
+            headers={"Content-Type": "application/json", **headers},
         )
-    assert "+919876543210" not in caplog.text
-    assert "private outbound content" not in caplog.text
 
-
-def test_unexpected_provider_exception_is_contained(monkeypatch, caplog):
-    _configure(monkeypatch)
-    monkeypatch.setattr(settings, "TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886")
-    monkeypatch.setattr(
-        whatsapp_routes.requests,
-        "post",
-        lambda *args, **kwargs: (_ for _ in ()).throw(
-            RuntimeError("private-unexpected-provider-error")
-        ),
-    )
-    caplog.set_level(logging.INFO, logger="whatsapp")
-
-    with pytest.raises(whatsapp_routes.NotificationOutcomeUnknown):
-        whatsapp_routes.send_whatsapp_message(
-            "+919876543210",
-            "private outbound content",
-        )
-    assert "private-unexpected-provider-error" not in caplog.text
-    assert "+919876543210" not in caplog.text
-    assert "private outbound content" not in caplog.text
+    assert response.status_code == 400

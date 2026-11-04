@@ -27,7 +27,7 @@ const sections = [
   {
     title: "Services that help us operate",
     paragraphs: [
-      "We use service providers only where needed to run Neurocient. These currently include hosting and database infrastructure, Google Firebase for optional Google sign-in, PostHog for product analytics, Razorpay for payment processing, Resend for contact email, OpenAI for requested generated reflections, Azure storage for article audio, browser push infrastructure, and Twilio/WhatsApp for reminders you enable.",
+      "We use service providers only where needed to run Neurocient. These currently include hosting and database infrastructure, Google Firebase for optional Google sign-in, PostHog for product analytics, Razorpay for payment processing, Resend for contact email, OpenAI for requested generated reflections, Azure storage for article audio, browser push infrastructure, and Meta's WhatsApp Business Platform for reminders you enable.",
       "Those providers process information under their own terms and may process it outside India. Payment details entered in Razorpay checkout are handled by Razorpay; its buyer privacy notice explains that processing.",
     ],
   },

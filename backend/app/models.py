@@ -201,11 +201,11 @@ class CohortWelcomeEmailDelivery(Base):
 
 
 class WhatsAppWebhookEvent(Base):
-    """Minimal durable replay record for an inbound Twilio message."""
+    """Minimal durable replay record for an inbound WhatsApp provider message."""
 
     __tablename__ = "whatsapp_webhook_events"
 
-    provider_message_sid = Column(String(34), primary_key=True)
+    provider_message_id = Column(String(255), primary_key=True)
     status = Column(String, nullable=False, default="received")
     processed_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

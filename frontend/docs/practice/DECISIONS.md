@@ -1637,3 +1637,18 @@ WhatsApp also does not bypass product access rules. A Spot the Inner Caveman
 entry uses the same serialized free-account allowance and membership decision
 as the web surface, so concurrent web and WhatsApp capture cannot create an
 extra free entry.
+
+## 2026-11-04: Use the direct Meta WhatsApp Cloud API transport
+
+The WhatsApp companion integrates directly with Meta's official Cloud API.
+Twilio is removed before provider rollout because this feature is still under
+development and has no production traffic or compatibility obligation. Direct
+integration removes an intermediary fee and keeps webhook identity, delivery
+status, and template behavior aligned with the platform that owns the channel.
+
+This is a transport decision, not a new consent or product model. The existing
+verified-number ownership flow, authoritative `UserPreferences`, reminder
+purposes, Spot allowance, Microchallenge response authority, and daily nugget
+selection remain unchanged. Provider-specific authentication, payload parsing,
+and outbound HTTP calls stay inside the WhatsApp adapter so a future transport
+change does not fork those product rules.

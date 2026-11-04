@@ -1,4 +1,5 @@
 import os
+import re
 from urllib.parse import urlsplit
 from dotenv import load_dotenv
 
@@ -25,18 +26,8 @@ def _env_positive_int(name: str) -> int | None:
     return parsed
 
 
-def valid_twilio_webhook_url(value: str | None) -> bool:
-    if not value:
-        return False
-    parsed = urlsplit(value)
-    return bool(
-        parsed.scheme == "https"
-        and parsed.hostname
-        and parsed.username is None
-        and parsed.password is None
-        and not parsed.fragment
-        and parsed.path == "/wa/webhook/whatsapp"
-    )
+def valid_graph_api_version(value: str | None) -> bool:
+    return bool(value and re.fullmatch(r"v[1-9][0-9]*\.0", value))
 
 
 def parse_csrf_trusted_origins(value: str | None, env: str) -> tuple[str, ...]:
@@ -101,10 +92,12 @@ class Settings:
     RAZORPAY_MEMBERSHIP_CURRENCY = os.getenv("RAZORPAY_MEMBERSHIP_CURRENCY", "INR").strip().upper()
     RAZORPAY_MEMBERSHIP_TOTAL_COUNT = _env_positive_int("RAZORPAY_MEMBERSHIP_TOTAL_COUNT")
     RAZORPAY_MEMBERSHIP_WEBHOOK_SECRET = os.getenv("RAZORPAY_MEMBERSHIP_WEBHOOK_SECRET")
-    TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
-    TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-    TWILIO_WHATSAPP_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER")
-    TWILIO_WHATSAPP_WEBHOOK_URL = os.getenv("TWILIO_WHATSAPP_WEBHOOK_URL")
+    WHATSAPP_ACCESS_TOKEN = os.getenv("WHATSAPP_ACCESS_TOKEN")
+    WHATSAPP_APP_SECRET = os.getenv("WHATSAPP_APP_SECRET")
+    WHATSAPP_VERIFY_TOKEN = os.getenv("WHATSAPP_VERIFY_TOKEN")
+    WHATSAPP_BUSINESS_ACCOUNT_ID = os.getenv("WHATSAPP_BUSINESS_ACCOUNT_ID")
+    WHATSAPP_PHONE_NUMBER_ID = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
+    WHATSAPP_GRAPH_API_VERSION = os.getenv("WHATSAPP_GRAPH_API_VERSION")
     CONSENT_VERIFICATION_SECRET = os.getenv("CONSENT_VERIFICATION_SECRET")
     RESEND_API_KEY = os.getenv("RESEND_API_KEY")
     RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL")
@@ -156,14 +149,16 @@ class Settings:
             ):
                 missing.append("CSRF_TRUSTED_ORIGINS (HTTPS only)")
 
-        twilio_names = (
-            "TWILIO_ACCOUNT_SID",
-            "TWILIO_AUTH_TOKEN",
-            "TWILIO_WHATSAPP_NUMBER",
-            "TWILIO_WHATSAPP_WEBHOOK_URL",
+        whatsapp_names = (
+            "WHATSAPP_ACCESS_TOKEN",
+            "WHATSAPP_APP_SECRET",
+            "WHATSAPP_VERIFY_TOKEN",
+            "WHATSAPP_BUSINESS_ACCOUNT_ID",
+            "WHATSAPP_PHONE_NUMBER_ID",
+            "WHATSAPP_GRAPH_API_VERSION",
         )
-        if self.ENV == "prod" or any(getattr(self, name) for name in twilio_names):
-            for name in twilio_names:
+        if self.ENV == "prod" or any(getattr(self, name) for name in whatsapp_names):
+            for name in whatsapp_names:
                 if not getattr(self, name):
                     missing.append(name)
 
@@ -192,12 +187,43 @@ class Settings:
                 "Missing required runtime configuration: " + ", ".join(sorted(missing))
             )
 
-        if self.TWILIO_WHATSAPP_WEBHOOK_URL and not valid_twilio_webhook_url(
-            self.TWILIO_WHATSAPP_WEBHOOK_URL
+        if self.WHATSAPP_GRAPH_API_VERSION and not valid_graph_api_version(
+            self.WHATSAPP_GRAPH_API_VERSION
         ):
             raise RuntimeError(
                 "Invalid runtime configuration: "
-                "TWILIO_WHATSAPP_WEBHOOK_URL must be the exact HTTPS webhook route"
+                "WHATSAPP_GRAPH_API_VERSION must use the form v<major>.0"
+            )
+        if (
+            self.WHATSAPP_BUSINESS_ACCOUNT_ID
+            and not self.WHATSAPP_BUSINESS_ACCOUNT_ID.isdecimal()
+        ):
+            raise RuntimeError(
+                "Invalid runtime configuration: WHATSAPP_BUSINESS_ACCOUNT_ID must be numeric"
+            )
+        if (
+            self.WHATSAPP_PHONE_NUMBER_ID
+            and not self.WHATSAPP_PHONE_NUMBER_ID.isdecimal()
+        ):
+            raise RuntimeError(
+                "Invalid runtime configuration: WHATSAPP_PHONE_NUMBER_ID must be numeric"
+            )
+        for name in (
+            "WHATSAPP_ACCESS_TOKEN",
+            "WHATSAPP_APP_SECRET",
+            "WHATSAPP_VERIFY_TOKEN",
+        ):
+            value = getattr(self, name)
+            if value and len(value) < 32:
+                raise RuntimeError(
+                    f"Invalid runtime configuration: {name} must be at least 32 characters"
+                )
+        if (
+            self.WHATSAPP_APP_SECRET
+            and self.WHATSAPP_APP_SECRET == self.WHATSAPP_VERIFY_TOKEN
+        ):
+            raise RuntimeError(
+                "Invalid runtime configuration: WhatsApp app and verify secrets must be independent"
             )
 
 settings = Settings()

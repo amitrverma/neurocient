@@ -108,7 +108,8 @@ delivery, including when the preference changes after a job was scheduled.
   handling, and channel/purpose controls, plus a production frontend build.
 - Independent two-stage review because this change governs external side effects,
   personal contact data, and every notification entry point.
-- Twilio and web-push staging delivery remain required before `Verified` status.
+- Meta WhatsApp Cloud API and web-push staging delivery remain required before
+  `Verified` status.
 
 ## Implementation and local evidence
 
@@ -136,7 +137,7 @@ Implementation revision: `fc5ac86` on `dev`.
   remaining material CONSENT-01 code finding.
 
 Do not promote this item to `Verified` or enable scheduled delivery until genuine
-Twilio and Web Push staging delivery has passed on the exact release candidate.
+Meta WhatsApp and Web Push staging delivery has passed on the exact release candidate.
 
 ## Rollout and recovery
 
@@ -150,6 +151,6 @@ shared deployment; disabling the scheduler and admin key stops optional sends.
 
 - Newsletter campaign tooling and unsubscribe-link implementation.
 - Marketing email preferences; no account-marketing sender currently exists.
-- Twilio template approval and genuine provider sandbox certification (TEST-02).
+- Meta template approval and genuine test-number certification (TEST-02).
 - Moving APScheduler into a dedicated worker or adding a durable delivery queue.
 

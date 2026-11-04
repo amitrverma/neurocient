@@ -4,11 +4,15 @@ Status: implemented locally; genuine-provider staging pending
 
 Owner: Amit
 
-Contract version: 1.1 (2026-11-03)
+Contract version: 1.2 (2026-11-04)
 
 Version 1.1 makes the daily nugget selection durable and shared across the web
 and outbound delivery. It also requires bounded outbound WhatsApp bodies and
 retention of accepted provider message identifiers for dispatch correlation.
+Version 1.2 replaces the pre-release Twilio transport with the direct Meta
+WhatsApp Cloud API without changing companion behavior or consent authority.
+Version 1.2 replaces the pre-release Twilio transport with the direct Meta
+WhatsApp Cloud API without changing companion behavior or consent authority.
 
 ## Outcome
 
@@ -70,17 +74,18 @@ This is a deterministic companion, not an open-ended AI chatbot.
 
 ## Failure and privacy contract
 
-- The signed Twilio webhook, bounded form parsing, exact public URL validation,
-  privacy-safe logging, and MessageSid replay claim remain mandatory.
+- The Meta webhook's raw-body HMAC-SHA256 signature, configured business and
+  phone-number identities, bounded JSON parsing, privacy-safe logging, and
+  `wamid` replay claim remain mandatory.
 - The replay claim and any Spot or Microchallenge mutation commit in one database
   transaction before a reply is attempted.
 - A provider reply failure must not roll back a committed user record or invite
   duplicate mutation. Reply delivery remains best-effort until durable outbound
   replies and status callbacks are implemented.
-- Outbound bodies are bounded to the provider's 1,600-character limit. A long
+- Product-authored outbound bodies remain bounded to 1,600 characters. A long
   Microchallenge title or instruction must not remove the three response
-  options. When Twilio accepts a scheduled dispatch and returns a well-formed
-  MessageSid, that identifier is retained on the durable dispatch record.
+  options. When Meta accepts a scheduled dispatch and returns a well-formed
+  `wamid`, that identifier is retained on the durable dispatch record.
 - Phone numbers, message text, notes, verification codes, signatures, and
   provider response bodies must not appear in application logs.
 
@@ -103,7 +108,7 @@ This is a deterministic companion, not an open-ended AI chatbot.
   changes to the active nudge inventory.
 - **WA-COMP-08:** Provider-valid outbound bodies stay within 1,600 characters,
   Microchallenge response options survive truncation, and accepted scheduled
-  sends retain the provider MessageSid when available.
+  sends retain the provider `wamid` when available.
 - **WA-COMP-09:** Web and WhatsApp Spot capture enforce the same serialized
   free-account allowance; a denied WhatsApp write commits no Spot while keeping
   the webhook response generic.
@@ -113,7 +118,7 @@ This is a deterministic companion, not an open-ended AI chatbot.
 - approved WhatsApp authentication and reinforcement templates;
 - interactive reply buttons;
 - durable outbound reply records, delivery callbacks, retry, and reconciliation;
-- genuine Twilio staging evidence and limited-cohort rollout.
+- genuine Meta test-number/staging evidence and limited-cohort rollout.
 
 ## Rollout and recovery
 
@@ -133,7 +138,7 @@ experience.
 
 - Focused backend tests cover explicit command parsing, response authority,
   outcome semantics, note attachment, consent rechecks, provider failures,
-  content bounds, provider MessageSid retention, and reminder priority.
+  content bounds, provider `wamid` retention, and reminder priority.
 - Real PostgreSQL tests cover signed webhook privacy, sequential and concurrent
   replay, shared Microchallenge outcomes, rollback/retry behavior, and
   concurrent durable daily-nugget selection. They also prove that WhatsApp
@@ -141,13 +146,22 @@ experience.
 - A disposable PostgreSQL migration run proved legacy log backfill to `Done`,
   outcome constraint creation, daily-selection upgrade/downgrade/re-upgrade,
   and the forward-repair guard after `Partly` evidence.
-- Final local gates passed 283 backend non-integration tests, 13 affected real
-  PostgreSQL tests run in isolated processes, and all 146 frontend tests. The
-  affected frontend lint and the production frontend build also passed; the
-  build retains the repository's existing `turbopack.conditions` warning.
+- The 2026-11-04 provider pivot passed 292 backend non-integration tests. Four
+  Meta webhook PostgreSQL scenarios and the notification-consent integration
+  passed; every repository PostgreSQL scenario also passes when the existing
+  Windows event-loop-sensitive files run in isolated processes. The production
+  frontend build passed. Lint reports only existing generated-file warnings and
+  an unrelated `Pricing.tsx` apostrophe error; the changed privacy page is clean.
 - The legacy Microchallenge page remains an oversized orchestration surface at
   796 physical lines. The new check-in rendering was extracted into its own
   covered component so this change does not add another render responsibility;
   the next material Microchallenge-page change should continue decomposition.
-- Genuine Twilio delivery, template behavior, provider callbacks, and limited-
-  cohort operation remain provider-staging evidence and are not claimed here.
+- Genuine Meta outbound delivery, successful template behavior, delivery-status
+  reconciliation, and limited-cohort operation remain provider-staging evidence
+  and are not claimed here.
+- On 2026-11-04, genuine Meta test-number inbound delivery and callback handling
+  passed locally. Both direct Graph API text and Meta dashboard `hello_world`
+  template requests were accepted, then failed in Meta's delivery callback with
+  `131031 Business Account locked`. The test WABA and portfolio showed no visible
+  issues, so outbound delivery remains a Meta account-recovery blocker rather
+  than an application failure.

@@ -3,18 +3,20 @@ import pytest
 from app.config import Settings, parse_csrf_trusted_origins
 
 
-def _disable_twilio(monkeypatch):
+def _disable_whatsapp(monkeypatch):
     for name in (
-        "TWILIO_ACCOUNT_SID",
-        "TWILIO_AUTH_TOKEN",
-        "TWILIO_WHATSAPP_NUMBER",
-        "TWILIO_WHATSAPP_WEBHOOK_URL",
+        "WHATSAPP_ACCESS_TOKEN",
+        "WHATSAPP_APP_SECRET",
+        "WHATSAPP_VERIFY_TOKEN",
+        "WHATSAPP_BUSINESS_ACCOUNT_ID",
+        "WHATSAPP_PHONE_NUMBER_ID",
+        "WHATSAPP_GRAPH_API_VERSION",
     ):
         monkeypatch.setattr(Settings, name, None)
 
 
 def test_production_configuration_rejects_missing_secrets(monkeypatch):
-    _disable_twilio(monkeypatch)
+    _disable_whatsapp(monkeypatch)
     monkeypatch.setattr(Settings, "ENV", "prod")
     monkeypatch.setattr(Settings, "DATABASE_URL", None)
     monkeypatch.setattr(Settings, "JWT_SECRET", None)
@@ -31,7 +33,7 @@ def test_production_configuration_rejects_missing_secrets(monkeypatch):
 
 
 def test_development_configuration_only_requires_database(monkeypatch):
-    _disable_twilio(monkeypatch)
+    _disable_whatsapp(monkeypatch)
     monkeypatch.setattr(Settings, "ENV", "dev")
     monkeypatch.setattr(Settings, "DATABASE_URL", "sqlite:///:memory:")
     monkeypatch.setattr(Settings, "JWT_SECRET", None)
@@ -40,8 +42,8 @@ def test_development_configuration_only_requires_database(monkeypatch):
     Settings().validate_for_startup()
 
 
-def test_production_requires_complete_twilio_configuration(monkeypatch):
-    _disable_twilio(monkeypatch)
+def test_production_requires_complete_whatsapp_configuration(monkeypatch):
+    _disable_whatsapp(monkeypatch)
     monkeypatch.setattr(Settings, "ENV", "prod")
     monkeypatch.setattr(Settings, "DATABASE_URL", "postgresql://example")
     monkeypatch.setattr(Settings, "JWT_SECRET", "jwt-secret")
@@ -51,61 +53,83 @@ def test_production_requires_complete_twilio_configuration(monkeypatch):
         Settings().validate_for_startup()
 
     message = str(exc_info.value)
-    assert "TWILIO_ACCOUNT_SID" in message
-    assert "TWILIO_AUTH_TOKEN" in message
-    assert "TWILIO_WHATSAPP_NUMBER" in message
-    assert "TWILIO_WHATSAPP_WEBHOOK_URL" in message
+    assert "WHATSAPP_ACCESS_TOKEN" in message
+    assert "WHATSAPP_APP_SECRET" in message
+    assert "WHATSAPP_VERIFY_TOKEN" in message
+    assert "WHATSAPP_BUSINESS_ACCOUNT_ID" in message
+    assert "WHATSAPP_PHONE_NUMBER_ID" in message
+    assert "WHATSAPP_GRAPH_API_VERSION" in message
 
 
-def test_partial_twilio_configuration_fails_closed(monkeypatch):
-    _disable_twilio(monkeypatch)
+def test_partial_whatsapp_configuration_fails_closed(monkeypatch):
+    _disable_whatsapp(monkeypatch)
     monkeypatch.setattr(Settings, "ENV", "dev")
     monkeypatch.setattr(Settings, "DATABASE_URL", "sqlite:///:memory:")
-    monkeypatch.setattr(Settings, "TWILIO_ACCOUNT_SID", "AC" + "1" * 32)
+    monkeypatch.setattr(Settings, "WHATSAPP_ACCESS_TOKEN", "access-token")
 
     with pytest.raises(RuntimeError) as exc_info:
         Settings().validate_for_startup()
 
-    assert "TWILIO_WHATSAPP_WEBHOOK_URL" in str(exc_info.value)
+    assert "WHATSAPP_APP_SECRET" in str(exc_info.value)
 
 
-def test_twilio_webhook_url_requires_https(monkeypatch):
-    _disable_twilio(monkeypatch)
+def test_whatsapp_graph_api_version_is_explicit_and_versioned(monkeypatch):
+    _disable_whatsapp(monkeypatch)
     monkeypatch.setattr(Settings, "ENV", "dev")
     monkeypatch.setattr(Settings, "DATABASE_URL", "sqlite:///:memory:")
-    monkeypatch.setattr(Settings, "TWILIO_ACCOUNT_SID", "AC" + "1" * 32)
-    monkeypatch.setattr(Settings, "TWILIO_AUTH_TOKEN", "secret")
-    monkeypatch.setattr(Settings, "TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886")
-    monkeypatch.setattr(
-        Settings,
-        "TWILIO_WHATSAPP_WEBHOOK_URL",
-        "http://api.example.com/wa/webhook/whatsapp",
-    )
+    monkeypatch.setattr(Settings, "WHATSAPP_ACCESS_TOKEN", "access-token")
+    monkeypatch.setattr(Settings, "WHATSAPP_APP_SECRET", "app-secret")
+    monkeypatch.setattr(Settings, "WHATSAPP_VERIFY_TOKEN", "verify-token")
+    monkeypatch.setattr(Settings, "WHATSAPP_BUSINESS_ACCOUNT_ID", "123456789")
+    monkeypatch.setattr(Settings, "WHATSAPP_PHONE_NUMBER_ID", "987654321")
+    monkeypatch.setattr(Settings, "WHATSAPP_GRAPH_API_VERSION", "latest")
 
     with pytest.raises(RuntimeError) as exc_info:
         Settings().validate_for_startup()
 
-    assert "exact HTTPS webhook route" in str(exc_info.value)
+    assert "form v<major>.0" in str(exc_info.value)
 
 
 @pytest.mark.parametrize(
-    "url",
+    ("name", "value", "expected"),
     [
-        "https://api.example.com/wrong-path",
-        "https://user:password@api.example.com/wa/webhook/whatsapp",
-        "https://api.example.com/wa/webhook/whatsapp#fragment",
+        ("WHATSAPP_BUSINESS_ACCOUNT_ID", "not-an-id", "must be numeric"),
+        ("WHATSAPP_PHONE_NUMBER_ID", "phone-id", "must be numeric"),
+        ("WHATSAPP_ACCESS_TOKEN", "short", "at least 32 characters"),
+        ("WHATSAPP_APP_SECRET", "short", "at least 32 characters"),
+        ("WHATSAPP_VERIFY_TOKEN", "short", "at least 32 characters"),
     ],
 )
-def test_twilio_webhook_url_rejects_ambiguous_variants(monkeypatch, url):
-    _disable_twilio(monkeypatch)
+def test_complete_whatsapp_configuration_rejects_malformed_values(
+    monkeypatch, name, value, expected
+):
+    _disable_whatsapp(monkeypatch)
     monkeypatch.setattr(Settings, "ENV", "dev")
     monkeypatch.setattr(Settings, "DATABASE_URL", "sqlite:///:memory:")
-    monkeypatch.setattr(Settings, "TWILIO_ACCOUNT_SID", "AC" + "1" * 32)
-    monkeypatch.setattr(Settings, "TWILIO_AUTH_TOKEN", "secret")
-    monkeypatch.setattr(Settings, "TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886")
-    monkeypatch.setattr(Settings, "TWILIO_WHATSAPP_WEBHOOK_URL", url)
+    monkeypatch.setattr(Settings, "WHATSAPP_ACCESS_TOKEN", "a" * 40)
+    monkeypatch.setattr(Settings, "WHATSAPP_APP_SECRET", "b" * 32)
+    monkeypatch.setattr(Settings, "WHATSAPP_VERIFY_TOKEN", "c" * 32)
+    monkeypatch.setattr(Settings, "WHATSAPP_BUSINESS_ACCOUNT_ID", "123456789")
+    monkeypatch.setattr(Settings, "WHATSAPP_PHONE_NUMBER_ID", "987654321")
+    monkeypatch.setattr(Settings, "WHATSAPP_GRAPH_API_VERSION", "v24.0")
+    monkeypatch.setattr(Settings, name, value)
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(RuntimeError, match=expected):
+        Settings().validate_for_startup()
+
+
+def test_whatsapp_app_and_verify_secrets_must_be_independent(monkeypatch):
+    _disable_whatsapp(monkeypatch)
+    monkeypatch.setattr(Settings, "ENV", "dev")
+    monkeypatch.setattr(Settings, "DATABASE_URL", "sqlite:///:memory:")
+    monkeypatch.setattr(Settings, "WHATSAPP_ACCESS_TOKEN", "a" * 40)
+    monkeypatch.setattr(Settings, "WHATSAPP_APP_SECRET", "s" * 32)
+    monkeypatch.setattr(Settings, "WHATSAPP_VERIFY_TOKEN", "s" * 32)
+    monkeypatch.setattr(Settings, "WHATSAPP_BUSINESS_ACCOUNT_ID", "123456789")
+    monkeypatch.setattr(Settings, "WHATSAPP_PHONE_NUMBER_ID", "987654321")
+    monkeypatch.setattr(Settings, "WHATSAPP_GRAPH_API_VERSION", "v24.0")
+
+    with pytest.raises(RuntimeError, match="must be independent"):
         Settings().validate_for_startup()
 
 
@@ -136,7 +160,7 @@ def test_production_csrf_origins_reject_unsafe_or_ambiguous_values(value):
 
 
 def test_production_requires_explicit_csrf_origins(monkeypatch):
-    _disable_twilio(monkeypatch)
+    _disable_whatsapp(monkeypatch)
     monkeypatch.setattr(Settings, "ENV", "prod")
     monkeypatch.setattr(Settings, "DATABASE_URL", "postgresql://example")
     monkeypatch.setattr(Settings, "JWT_SECRET", "jwt")

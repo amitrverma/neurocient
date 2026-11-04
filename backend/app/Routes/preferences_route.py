@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings
 from app.database import get_db
 from app.models import User, UserPreferences
-from app.Routes.whatsapp_routes import send_whatsapp_message
+from app.services.meta_whatsapp import send_whatsapp_message
 from app.services.rate_limits import enforce, request_rules
 from app.utils.auth import get_current_user
 

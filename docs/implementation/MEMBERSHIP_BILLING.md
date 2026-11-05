@@ -6,14 +6,14 @@ Owner: Amit
 
 Base revision: `cd08080a09ba6e7ce2b4b1fd9ebbe9f1965fd335`
 
-Contract version: 1.1 (2026-11-01)
+Contract version: 1.2 (2026-11-05)
 
 Implementation revision: working tree based on `0cd9062b2f371efa6f7ce052ce89762d19fa29cc`
 
 ## Outcome
 
-A signed-in Neurocient account can start a Razorpay subscription for the
-published INR 499 monthly membership. Paid access changes only after a verified,
+A signed-in Neurocient account can start a Razorpay subscription for either the
+published INR 499 or USD 6 monthly membership offer. Paid access changes only after a verified,
 durably recorded provider event is safely applied to the provider-neutral
 membership entitlement. Browser callbacks, email addresses, and unverified
 provider payloads never grant access.
@@ -38,14 +38,16 @@ before either item is `Verified`.
 
 ## Confirmed product and provider decisions
 
-- The offer is one membership at INR 499 per month, with no trial in this slice.
-- A Razorpay plan is created and governed outside the application. Deployment
-  supplies its plan ID and the intended finite billing-cycle count because the
+- The product is one membership with two explicit currency offers: INR 499 and
+  USD 6 per month, with no trial in this slice. Currency is customer-selected;
+  neither IP address nor live FX determines it.
+- Separate Razorpay plans are created and governed outside the application.
+  Deployment supplies each plan ID and the intended finite billing-cycle count because the
   provider requires `total_count` or `end_at`. Missing or partial configuration
   disables checkout.
 - Before creating a subscription, the backend fetches the configured plan and
   verifies its amount, currency, monthly interval, and active state against the
-  Neurocient offer. A wrong plan fails closed before a subscription is created.
+  selected Neurocient offer. A wrong plan fails closed before a subscription is created.
 - Checkout is authenticated and tied to the immutable Neurocient user ID and a
   durable local checkout operation. The user email is presentation data only.
 - The browser receives only the public Razorpay key, provider subscription ID,
@@ -163,7 +165,7 @@ subscription; events for an older subscription cannot change the new one.
   authoritative activation.
 - Independent two-stage review because the change governs money, external side
   effects, concurrency-controlled state, and paid authorization.
-- Razorpay test-mode checkout, signed webhook lifecycle, duplicate/delayed event,
+- Razorpay test-mode INR and USD checkout, signed webhook lifecycle, duplicate/delayed event,
   cancellation/refund/dispute where the sandbox permits, and reconciliation on
   the exact staged candidate before `Verified`.
 
@@ -199,10 +201,10 @@ recorded for an exact committed candidate.
 ## Rollout and recovery
 
 Apply the additive migration first. Deploy backend configuration and webhook
-receiver while membership checkout remains disabled. Configure the Razorpay test
-plan and webhook, run the sandbox evidence, then deploy the frontend checkout.
-Enable live checkout only after the exact plan fingerprint and webhook secret are
-confirmed. Disabling the membership plan ID is the checkout kill switch; paid
+receiver while membership checkout remains disabled. Configure both Razorpay test
+plans and the webhook, run the sandbox evidence, then deploy the frontend checkout.
+Enable live checkout only after both exact plan fingerprints and the webhook secret are
+confirmed. Disabling one membership plan ID is that currency's checkout kill switch; paid
 access continues to fail closed from the last durable entitlement state.
 
 Forward repair is preferred after provider subscriptions exist. Do not delete
@@ -211,6 +213,20 @@ compare the current provider subscription with the local mapping before any
 manual correction. The migration downgrade refuses to run after any billing
 ledger or checkout-operation evidence exists; roll application code forward or
 back while retaining the additive schema.
+
+Legacy non-Razorpay entitlement state is never cleared automatically. The local
+reconciliation pass raises a critical `legacy_provider_migration_required`
+issue whenever an entitlement still names PayPal or another retired provider.
+For each issue, an operator must first verify the subscription directly in that
+provider's dashboard, record whether it is active, cancelled, expired, or only
+sandbox data, and preserve the provider subscription ID. Paid or uncertain
+provider state must remain blocked for reconciliation. Only verified inactive
+sandbox state may be detached from the current checkout fields, in one database
+transaction that also writes an `AdminAuditEvent` containing the operator, old
+provider, old subscription ID, provider status observed, observation time, and
+reason. Billing-event and checkout-operation history must not be deleted. Run
+reconciliation again after the repair; the issue should resolve only when the
+entitlement no longer points at the retired provider.
 
 ## Excluded scope
 

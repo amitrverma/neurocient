@@ -12,12 +12,10 @@ from app.Routes import (
     caveman_scan_routes,
     challenge_routes,
     cohort_routes,
-    cohort_paypal_routes,
     contact_routes,
     ikea_routes,
     newsletter_routes,
     membership_cancellation_routes,
-    membership_paypal_routes,
     membership_routes,
     notifications_routes,
     nudge_routes,
@@ -117,13 +115,11 @@ app.include_router(nudge_routes.router, prefix="/api", tags=["nudges"])
 app.include_router(preferences_route.router, prefix="/user", tags=["preferences"])
 app.include_router(caveman_scan_routes.router, prefix="/api", tags=["caveman-scan"])
 app.include_router(cohort_routes.router, prefix="/api", tags=["cohorts"])
-app.include_router(cohort_paypal_routes.router, prefix="/api", tags=["cohorts"])
 app.include_router(
     membership_cancellation_routes.router,
     prefix="/api",
     tags=["membership"],
 )
-app.include_router(membership_paypal_routes.router, prefix="/api", tags=["membership"])
 app.include_router(membership_routes.router, prefix="/api", tags=["membership"])
 app.include_router(contact_routes.router, prefix="/api", tags=["contact"])
 app.include_router(admin_data_routes.router, prefix="/api", tags=["admin"])

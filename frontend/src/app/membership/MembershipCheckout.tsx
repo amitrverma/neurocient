@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ArrowRight, Check, CreditCard, LoaderCircle } from "lucide-react";
 import AuthModal from "@/app/components/AuthModal";
 import { useAuth } from "@/app/context/AuthContext";
-import { redirectToProvider } from "@/lib/providerRedirect";
 
 declare global {
   interface Window {
@@ -21,7 +20,13 @@ type MembershipStatus = {
   status?: string;
   current_period_end?: string | null;
   checkout_configured?: boolean;
-  paypal_checkout_configured?: boolean;
+  checkout_offers?: Array<{
+    offer_id: "inr" | "usd";
+    amount: number;
+    currency: "INR" | "USD";
+    display_price: string;
+    configured: boolean;
+  }>;
   checkout_state?: string | null;
   cancellation_state?: string | null;
   cancellation_requested_at?: string | null;
@@ -70,7 +75,7 @@ export default function MembershipCheckout() {
   const { user, ready } = useAuth();
   const [showAuth, setShowAuth] = useState(false);
   const [pendingAfterAuth, setPendingAfterAuth] = useState(false);
-  const [pendingProvider, setPendingProvider] = useState<"razorpay" | "paypal">("razorpay");
+  const [pendingOffer, setPendingOffer] = useState<"inr" | "usd">("inr");
   const [working, setWorking] = useState(false);
   const [status, setStatus] = useState<MembershipStatus | null>(null);
   const [message, setMessage] = useState("");
@@ -113,25 +118,21 @@ export default function MembershipCheckout() {
     setWorking(false);
   }, [refreshStatus]);
 
-  useEffect(() => {
-    if (!user || typeof window === "undefined") return;
-    if (new URLSearchParams(window.location.search).get("paypal") === "approved") {
-      setWorking(true);
-      void waitForConfirmation();
-    }
-  }, [user, waitForConfirmation]);
-
-  const startCheckout = useCallback(async () => {
+  const startCheckout = useCallback(async (offerId: "inr" | "usd") => {
     if (!user) {
       setPendingAfterAuth(true);
-      setPendingProvider("razorpay");
+      setPendingOffer(offerId);
       setShowAuth(true);
       return;
     }
     setWorking(true);
     setMessage("");
     try {
-    const response = await fetch("/api/membership/checkout", { method: "POST" });
+    const response = await fetch("/api/membership/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ offer_id: offerId }),
+    });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
       const code = data?.detail?.code;
@@ -140,7 +141,22 @@ export default function MembershipCheckout() {
           ? "Your membership is already active."
           : code === "reconciliation_required"
             ? "A previous checkout needs confirmation. Please contact support before trying again."
+            : code === "checkout_offer_conflict"
+              ? "Another currency checkout is already open. Complete or resolve it before switching currency."
             : "Secure checkout is temporarily unavailable. Please try again shortly.",
+      );
+      setWorking(false);
+      return;
+    }
+    const expectedCurrency = offerId === "usd" ? "USD" : "INR";
+    const expectedAmount = offerId === "usd" ? 600 : 49_900;
+    if (
+      data.offer_id !== offerId
+      || data.currency !== expectedCurrency
+      || data.amount !== expectedAmount
+    ) {
+      setMessage(
+        "Checkout did not match the currency you selected. No payment window was opened.",
       );
       setWorking(false);
       return;
@@ -171,40 +187,11 @@ export default function MembershipCheckout() {
     }
   }, [user, waitForConfirmation]);
 
-  const startPayPalCheckout = useCallback(async () => {
-    if (!user) {
-      setPendingProvider("paypal");
-      setPendingAfterAuth(true);
-      setShowAuth(true);
-      return;
-    }
-    setWorking(true);
-    setMessage("");
-    try {
-      const response = await fetch("/api/membership/paypal/checkout", { method: "POST" });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || typeof data.approval_url !== "string") {
-        const code = data?.detail?.code;
-        setMessage(
-          code === "reconciliation_required"
-            ? "A previous checkout needs confirmation. Please contact support before trying again."
-            : code === "checkout_provider_conflict"
-              ? "Another payment checkout is already open. Complete or resolve it before switching providers."
-              : "PayPal checkout is temporarily unavailable. Please try again shortly.",
-        );
-        setWorking(false);
-        return;
-      }
-      redirectToProvider(data.approval_url);
-    } catch {
-      setMessage("PayPal checkout is temporarily unavailable. Please try again shortly.");
-      setWorking(false);
-    }
-  }, [user]);
-
   const active = Boolean(status?.is_active);
-  const configured = status?.checkout_configured !== false;
-  const paypalConfigured = status?.paypal_checkout_configured === true;
+  const offerConfigured = (offerId: "inr" | "usd") => {
+    const offer = status?.checkout_offers?.find((candidate) => candidate.offer_id === offerId);
+    return offer ? offer.configured : offerId === "inr" && status?.checkout_configured !== false;
+  };
   const accessDate = formatAccessDate(status?.current_period_end);
 
   const cancelMembership = useCallback(async () => {
@@ -239,10 +226,9 @@ export default function MembershipCheckout() {
   useEffect(() => {
     if (pendingAfterAuth && user) {
       setPendingAfterAuth(false);
-      if (pendingProvider === "paypal") void startPayPalCheckout();
-      else void startCheckout();
+      void startCheckout(pendingOffer);
     }
-  }, [pendingAfterAuth, pendingProvider, startCheckout, startPayPalCheckout, user]);
+  }, [pendingAfterAuth, pendingOffer, startCheckout, user]);
 
   if (active) {
     const cancellationScheduled = ["requested", "completed"].includes(
@@ -343,8 +329,8 @@ export default function MembershipCheckout() {
       <div className="mt-7 grid gap-3 sm:grid-cols-2">
       <button
         type="button"
-        onClick={() => void startCheckout()}
-        disabled={!ready || working || !configured}
+        onClick={() => void startCheckout("inr")}
+        disabled={!ready || working || !offerConfigured("inr")}
         className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand-secondary bg-brand-secondary px-4 py-3 font-sans text-sm font-semibold text-brand-dark transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
       >
         {working ? (
@@ -362,12 +348,12 @@ export default function MembershipCheckout() {
       </button>
       <button
         type="button"
-        onClick={() => void startPayPalCheckout()}
-        disabled={!ready || working || !paypalConfigured}
+        onClick={() => void startCheckout("usd")}
+        disabled={!ready || working || !offerConfigured("usd")}
         className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/35 bg-transparent px-4 py-3 font-sans text-sm font-semibold text-white transition hover:border-white/60 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <CreditCard className="h-4 w-4" aria-hidden="true" />
-        {user ? "Pay with PayPal · USD 6/month" : "Log in to pay with PayPal"}
+        {user ? "Join for US$6/month" : "Log in to join in USD"}
       </button>
       </div>
       {message ? (

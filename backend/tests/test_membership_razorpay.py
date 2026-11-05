@@ -44,3 +44,19 @@ def test_membership_readiness_requires_an_independent_webhook_secret(monkeypatch
     monkeypatch.setattr(settings, "RAZORPAY_MEMBERSHIP_WEBHOOK_SECRET", "same-secret")
 
     assert membership_razorpay_ready() is False
+
+
+def test_usd_membership_readiness_is_independent_of_inr_plan(monkeypatch):
+    monkeypatch.setattr(settings, "RAZORPAY_KEY_ID", "rzp_test_shared")
+    monkeypatch.setattr(settings, "RAZORPAY_KEY_SECRET", "shared-key-secret")
+    monkeypatch.setattr(settings, "RAZORPAY_WEBHOOK_SECRET", "cohort-secret")
+    monkeypatch.setattr(settings, "RAZORPAY_MEMBERSHIP_WEBHOOK_SECRET", "membership-secret")
+    monkeypatch.setattr(settings, "RAZORPAY_MEMBERSHIP_TOTAL_COUNT", 12)
+    monkeypatch.setattr(settings, "RAZORPAY_MEMBERSHIP_PLAN_ID", "plan_inr")
+    monkeypatch.setattr(settings, "RAZORPAY_MEMBERSHIP_USD_PLAN_ID", None)
+
+    assert membership_razorpay_ready("inr") is True
+    assert membership_razorpay_ready("usd") is False
+
+    monkeypatch.setattr(settings, "RAZORPAY_MEMBERSHIP_USD_PLAN_ID", "plan_usd")
+    assert membership_razorpay_ready("usd") is True

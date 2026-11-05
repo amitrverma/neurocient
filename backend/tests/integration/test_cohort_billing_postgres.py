@@ -21,6 +21,287 @@ pytestmark = [
 ]
 
 
+@pytest.mark.parametrize(
+    ("captured_amount", "captured_currency", "replacement_amount", "replacement_currency"),
+    [
+        (2_100_000, "INR", 24_900, "USD"),
+        (24_900, "USD", 2_100_000, "INR"),
+    ],
+)
+async def test_superseded_order_capture_uses_immutable_payment_record(
+    captured_amount,
+    captured_currency,
+    replacement_amount,
+    replacement_currency,
+):
+    from app.database import AsyncSessionLocal, engine
+    from app.models import (
+        AdminAuditEvent,
+        Cohort,
+        CohortEnrollment,
+        PaymentRecord,
+        PaymentWebhookEvent,
+        User,
+    )
+    from app.services.cohort_billing import apply_verified_capture
+
+    user_id, cohort_id, enrollment_id = uuid4(), uuid4(), uuid4()
+    captured_order_id = f"order_{captured_currency.lower()}_{uuid4().hex}"
+    replacement_order_id = f"order_{replacement_currency.lower()}_{uuid4().hex}"
+    captured_payment_id = f"pay_{uuid4().hex}"
+    replacement_payment_id = f"pay_{uuid4().hex}"
+    captured_event_id = f"evt_{uuid4().hex}"
+    replacement_event_id = f"evt_{uuid4().hex}"
+    now = datetime.utcnow()
+
+    try:
+        async with AsyncSessionLocal() as db:
+            db.add(User(id=user_id, email=f"superseded-{user_id}@example.test"))
+            db.add(Cohort(
+                id=cohort_id,
+                slug=f"superseded-{cohort_id}",
+                title="Superseded checkout cohort",
+                starts_at=now + timedelta(days=14),
+                ends_at=now + timedelta(days=42),
+                capacity=20,
+                price_minor=2_100_000,
+                currency="INR",
+                status="open",
+            ))
+            await db.flush()
+            db.add(CohortEnrollment(
+                id=enrollment_id,
+                cohort_id=cohort_id,
+                user_id=user_id,
+                status="pending_payment",
+                reservation_expires_at=now + timedelta(minutes=10),
+                provider="razorpay",
+                provider_order_id=replacement_order_id,
+                amount_minor=replacement_amount,
+                currency=replacement_currency,
+            ))
+            db.add_all([
+                PaymentRecord(
+                    enrollment_id=enrollment_id,
+                    provider="razorpay",
+                    provider_order_id=captured_order_id,
+                    status="superseded",
+                    amount_minor=captured_amount,
+                    currency=captured_currency,
+                ),
+                PaymentRecord(
+                    enrollment_id=enrollment_id,
+                    provider="razorpay",
+                    provider_order_id=replacement_order_id,
+                    status="created",
+                    amount_minor=replacement_amount,
+                    currency=replacement_currency,
+                ),
+            ])
+            await db.commit()
+
+            captured_webhook = PaymentWebhookEvent(
+                provider_event_id=captured_event_id,
+                provider="razorpay",
+                event_type="payment.captured",
+                payload={},
+            )
+            db.add(captured_webhook)
+            first_result = await apply_verified_capture(
+                db,
+                webhook=captured_webhook,
+                provider="razorpay",
+                order_id=captured_order_id,
+                payment_id=captured_payment_id,
+                amount_minor=captured_amount,
+                currency=captured_currency,
+            )
+            await db.commit()
+
+            assert first_result.outcome == "processed"
+            assert first_result.requires_refund is False
+            enrollment = await db.get(CohortEnrollment, enrollment_id)
+            assert enrollment.status == "paid"
+            assert enrollment.provider_order_id == captured_order_id
+            assert enrollment.provider_payment_id == captured_payment_id
+            assert enrollment.amount_minor == captured_amount
+            assert enrollment.currency == captured_currency
+            captured_record = await db.scalar(select(PaymentRecord).where(
+                PaymentRecord.provider_order_id == captured_order_id
+            ))
+            replacement_record = await db.scalar(select(PaymentRecord).where(
+                PaymentRecord.provider_order_id == replacement_order_id
+            ))
+            assert captured_record.status == "captured"
+            assert replacement_record.status == "superseded"
+
+            replacement_webhook = PaymentWebhookEvent(
+                provider_event_id=replacement_event_id,
+                provider="razorpay",
+                event_type="payment.captured",
+                payload={},
+            )
+            db.add(replacement_webhook)
+            second_result = await apply_verified_capture(
+                db,
+                webhook=replacement_webhook,
+                provider="razorpay",
+                order_id=replacement_order_id,
+                payment_id=replacement_payment_id,
+                amount_minor=replacement_amount,
+                currency=replacement_currency,
+            )
+            await db.commit()
+
+            assert second_result.outcome == "duplicate_payment"
+            assert second_result.requires_refund is True
+            await db.refresh(enrollment)
+            await db.refresh(replacement_record)
+            assert enrollment.provider_order_id == captured_order_id
+            assert enrollment.provider_payment_id == captured_payment_id
+            assert replacement_record.status == "duplicate_payment"
+            assert replacement_record.provider_payment_id == replacement_payment_id
+    finally:
+        async with AsyncSessionLocal() as db:
+            await db.execute(delete(PaymentWebhookEvent).where(
+                PaymentWebhookEvent.provider_event_id.in_(
+                    (captured_event_id, replacement_event_id)
+                )
+            ))
+            await db.execute(delete(AdminAuditEvent).where(
+                AdminAuditEvent.subject_id == str(enrollment_id)
+            ))
+            await db.execute(delete(Cohort).where(Cohort.id == cohort_id))
+            await db.execute(delete(User).where(User.id == user_id))
+            await db.commit()
+        await engine.dispose()
+
+
+async def test_superseded_order_capture_reaches_capacity_refund_path():
+    from app.database import AsyncSessionLocal, engine
+    from app.models import (
+        AdminAuditEvent,
+        Cohort,
+        CohortEnrollment,
+        PaymentRecord,
+        PaymentWebhookEvent,
+        User,
+    )
+    from app.services.cohort_billing import apply_verified_capture
+
+    user_id, occupying_user_id = uuid4(), uuid4()
+    cohort_id, enrollment_id, occupying_enrollment_id = uuid4(), uuid4(), uuid4()
+    stale_order_id = f"order_inr_{uuid4().hex}"
+    replacement_order_id = f"order_usd_{uuid4().hex}"
+    event_id = f"evt_{uuid4().hex}"
+    payment_id = f"pay_{uuid4().hex}"
+    now = datetime.utcnow()
+
+    try:
+        async with AsyncSessionLocal() as db:
+            db.add_all([
+                User(id=user_id, email=f"late-{user_id}@example.test"),
+                User(id=occupying_user_id, email=f"occupying-{occupying_user_id}@example.test"),
+            ])
+            db.add(Cohort(
+                id=cohort_id,
+                slug=f"full-{cohort_id}",
+                title="Full checkout cohort",
+                starts_at=now + timedelta(days=14),
+                ends_at=now + timedelta(days=42),
+                capacity=1,
+                price_minor=2_100_000,
+                currency="INR",
+                status="full",
+            ))
+            await db.flush()
+            db.add_all([
+                CohortEnrollment(
+                    id=enrollment_id,
+                    cohort_id=cohort_id,
+                    user_id=user_id,
+                    status="pending_payment",
+                    reservation_expires_at=now - timedelta(minutes=1),
+                    provider="razorpay",
+                    provider_order_id=replacement_order_id,
+                    amount_minor=24_900,
+                    currency="USD",
+                ),
+                CohortEnrollment(
+                    id=occupying_enrollment_id,
+                    cohort_id=cohort_id,
+                    user_id=occupying_user_id,
+                    status="paid",
+                    provider="razorpay",
+                    provider_order_id=f"order_paid_{uuid4().hex}",
+                    provider_payment_id=f"pay_paid_{uuid4().hex}",
+                    amount_minor=2_100_000,
+                    currency="INR",
+                    paid_at=now,
+                ),
+            ])
+            db.add_all([
+                PaymentRecord(
+                    enrollment_id=enrollment_id,
+                    provider="razorpay",
+                    provider_order_id=stale_order_id,
+                    status="superseded",
+                    amount_minor=2_100_000,
+                    currency="INR",
+                ),
+                PaymentRecord(
+                    enrollment_id=enrollment_id,
+                    provider="razorpay",
+                    provider_order_id=replacement_order_id,
+                    status="created",
+                    amount_minor=24_900,
+                    currency="USD",
+                ),
+            ])
+            await db.commit()
+
+            webhook = PaymentWebhookEvent(
+                provider_event_id=event_id,
+                provider="razorpay",
+                event_type="payment.captured",
+                payload={},
+            )
+            db.add(webhook)
+            result = await apply_verified_capture(
+                db,
+                webhook=webhook,
+                provider="razorpay",
+                order_id=stale_order_id,
+                payment_id=payment_id,
+                amount_minor=2_100_000,
+                currency="INR",
+            )
+            await db.commit()
+
+            assert result.outcome == "capacity_conflict"
+            assert result.requires_refund is True
+            enrollment = await db.get(CohortEnrollment, enrollment_id)
+            payment = await db.scalar(select(PaymentRecord).where(
+                PaymentRecord.provider_order_id == stale_order_id
+            ))
+            assert enrollment.status == "cancelled"
+            assert payment.status == "capacity_conflict"
+            assert payment.provider_payment_id == payment_id
+            assert webhook.status == "capacity_conflict"
+    finally:
+        async with AsyncSessionLocal() as db:
+            await db.execute(delete(PaymentWebhookEvent).where(
+                PaymentWebhookEvent.provider_event_id == event_id
+            ))
+            await db.execute(delete(AdminAuditEvent).where(
+                AdminAuditEvent.subject_id == str(enrollment_id)
+            ))
+            await db.execute(delete(Cohort).where(Cohort.id == cohort_id))
+            await db.execute(delete(User).where(User.id.in_((user_id, occupying_user_id))))
+            await db.commit()
+        await engine.dispose()
+
+
 async def test_cohort_capture_claim_is_atomic_and_price_is_authoritative(monkeypatch):
     from app.Routes import cohort_routes
     from app.config import settings

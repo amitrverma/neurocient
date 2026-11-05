@@ -6,7 +6,6 @@ const mocks = vi.hoisted(() => ({
   user: { id: "user-1", email: "member@example.test" } as { id: string; email: string } | null,
   razorpayOptions: null as Record<string, unknown> | null,
   open: vi.fn(),
-  redirect: vi.fn(),
 }));
 
 vi.mock("@/app/context/AuthContext", () => ({
@@ -15,10 +14,6 @@ vi.mock("@/app/context/AuthContext", () => ({
 vi.mock("@/app/components/AuthModal", () => ({
   default: ({ isOpen }: { isOpen: boolean }) => isOpen ? <div role="dialog">Sign in</div> : null,
 }));
-vi.mock("@/lib/providerRedirect", () => ({
-  redirectToProvider: mocks.redirect,
-}));
-
 import MembershipCheckout from "./MembershipCheckout";
 
 const response = (body: unknown, status = 200) =>
@@ -32,7 +27,6 @@ describe("membership checkout", () => {
     mocks.user = { id: "user-1", email: "member@example.test" };
     mocks.razorpayOptions = null;
     mocks.open.mockReset();
-    mocks.redirect.mockReset();
     window.Razorpay = function Razorpay(options: Record<string, unknown>) {
       mocks.razorpayOptions = options;
       return { open: mocks.open };
@@ -74,6 +68,9 @@ describe("membership checkout", () => {
         return response({
           key_id: "rzp_test_public",
           subscription_id: "sub_server_created",
+          offer_id: "inr",
+          amount: 49_900,
+          currency: "INR",
           name: "Neurocient Membership",
           description: "₹499 per month",
           email: "member@example.test",
@@ -95,33 +92,79 @@ describe("membership checkout", () => {
     expect(fetchMock.mock.calls.filter(([url]) => String(url) === "/api/membership/checkout")).toHaveLength(1);
   });
 
-  it("offers the server-created PayPal USD subscription separately", async () => {
-    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+  it("opens the server-created Razorpay USD subscription separately", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       if (String(input) === "/api/membership/status") {
         return response({
           is_active: false,
           checkout_configured: true,
-          paypal_checkout_configured: true,
+          checkout_offers: [
+            { offer_id: "inr", amount_minor: 49_900, currency: "INR", display_price: "₹499/month", configured: true },
+            { offer_id: "usd", amount_minor: 600, currency: "USD", display_price: "US$6/month", configured: true },
+          ],
         });
       }
-      if (String(input) === "/api/membership/paypal/checkout") {
-        return response({ approval_url: "https://www.sandbox.paypal.com/approve" });
+      if (String(input) === "/api/membership/checkout" && init?.method === "POST") {
+        return response({
+          key_id: "rzp_test_public",
+          subscription_id: "sub_usd_server_created",
+          offer_id: "usd",
+          amount: 600,
+          currency: "USD",
+          name: "Neurocient Membership",
+          description: "US$6 per month",
+          email: "member@example.test",
+        });
       }
       throw new Error(`Unexpected request: ${String(input)}`);
     });
     vi.stubGlobal("fetch", fetchMock);
     render(<MembershipCheckout />);
 
-    const buttons = await screen.findAllByRole("button");
-    expect(buttons[0]).toHaveAccessibleName("Join for ₹499/month");
-    expect(buttons[1]).toHaveAccessibleName("Pay with PayPal · USD 6/month");
-    fireEvent.click(buttons[1]);
+    const usdButton = await screen.findByRole("button", { name: "Join for US$6/month" });
+    fireEvent.click(usdButton);
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(
-      "/api/membership/paypal/checkout",
-      { method: "POST" },
-    ));
-    expect(mocks.redirect).toHaveBeenCalledWith("https://www.sandbox.paypal.com/approve");
+    await waitFor(() => expect(mocks.open).toHaveBeenCalledOnce());
+    expect(mocks.razorpayOptions?.subscription_id).toBe("sub_usd_server_created");
+    const checkoutCall = fetchMock.mock.calls.find(([url]) => String(url) === "/api/membership/checkout");
+    expect(checkoutCall?.[1]).toMatchObject({
+      method: "POST",
+      body: JSON.stringify({ offer_id: "usd" }),
+    });
+  });
+
+  it("refuses to open checkout when the server returns another currency", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input) === "/api/membership/status") {
+        return response({
+          is_active: false,
+          checkout_configured: true,
+          checkout_offers: [
+            { offer_id: "inr", amount: 49_900, currency: "INR", display_price: "â‚¹499/month", configured: true },
+            { offer_id: "usd", amount: 600, currency: "USD", display_price: "US$6/month", configured: true },
+          ],
+        });
+      }
+      if (String(input) === "/api/membership/checkout" && init?.method === "POST") {
+        return response({
+          key_id: "rzp_test_public",
+          subscription_id: "sub_wrong_currency",
+          offer_id: "inr",
+          amount: 49_900,
+          currency: "INR",
+        });
+      }
+      throw new Error(`Unexpected request: ${String(input)}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<MembershipCheckout />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Join for US$6/month" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Checkout did not match the currency you selected",
+    );
+    expect(mocks.open).not.toHaveBeenCalled();
   });
 
   it("replaces checkout with a meaningful active-membership arrival state", async () => {
@@ -225,6 +268,9 @@ describe("membership checkout", () => {
       return response({
         key_id: "rzp_test_public",
         subscription_id: "sub_retry_script",
+        offer_id: "inr",
+        amount: 49_900,
+        currency: "INR",
         name: "Neurocient Membership",
         description: "₹499 per month",
         email: "member@example.test",
@@ -262,6 +308,9 @@ describe("membership checkout", () => {
       return response({
         key_id: "rzp_test_public",
         subscription_id: "sub_confirmation_network",
+        offer_id: "inr",
+        amount: 49_900,
+        currency: "INR",
         name: "Neurocient Membership",
         description: "₹499 per month",
         email: "member@example.test",

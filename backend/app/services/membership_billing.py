@@ -7,7 +7,6 @@ fail-closed behaviour straightforward to exercise.
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from decimal import Decimal, InvalidOperation
 from typing import Any, Mapping
 
 
@@ -121,49 +120,6 @@ def validate_membership_plan(
     )
     if not active or candidate != expected:
         raise PlanMismatch("Razorpay membership plan does not match the configured offer")
-    return candidate
-
-
-def validate_paypal_membership_plan(
-    plan: Mapping[str, Any],
-    *,
-    plan_id: str,
-    amount_minor: int,
-    currency: str,
-) -> PlanFingerprint:
-    """Verify the configured PayPal plan against the owned monthly USD offer."""
-
-    try:
-        regular_cycles = [
-            cycle
-            for cycle in plan["billing_cycles"]
-            if cycle["tenure_type"] == "REGULAR"
-        ]
-        if len(regular_cycles) != 1:
-            raise ValueError("expected one regular cycle")
-        cycle = regular_cycles[0]
-        fixed_price = cycle["pricing_scheme"]["fixed_price"]
-        amount = Decimal(str(fixed_price["value"]))
-        candidate = PlanFingerprint(
-            plan_id=str(plan["id"]),
-            amount_minor=int(amount * 100),
-            currency=str(fixed_price["currency_code"]).upper(),
-            period=str(cycle["frequency"]["interval_unit"]).lower(),
-            interval=int(cycle["frequency"]["interval_count"]),
-        )
-        active = plan["status"] == "ACTIVE"
-    except (KeyError, TypeError, ValueError, InvalidOperation) as exc:
-        raise PlanMismatch("PayPal membership plan is incomplete") from exc
-
-    expected = PlanFingerprint(
-        plan_id=plan_id,
-        amount_minor=amount_minor,
-        currency=currency.upper(),
-        period="month",
-        interval=1,
-    )
-    if not active or candidate != expected:
-        raise PlanMismatch("PayPal membership plan does not match the configured offer")
     return candidate
 
 

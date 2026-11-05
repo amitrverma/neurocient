@@ -1665,3 +1665,15 @@ subscriptions may require the buyer to sign in to or create a PayPal account,
 and guest card availability for one-time checkout is controlled by PayPal. A
 future low-friction international card processor can be evaluated without
 changing the existing provider-neutral entitlement and enrolment boundaries.
+
+## 2026-11-05: Consolidate INR and USD checkout on Razorpay
+
+This decision supersedes the 2026-11-04 PayPal decision. Razorpay is the sole
+checkout provider for Membership and Modern Caveman. Each product presents an
+explicit INR and USD offer through the same product entry point: ₹499/month or
+US$6/month for Membership, and ₹21,000 or US$249 once for Modern Caveman.
+
+Amounts and currencies remain fixed server-owned invariants. Browser callbacks
+do not grant access, and verified provider events continue to update the existing
+provider-neutral entitlement or enrolment. USD availability fails closed when
+its required Razorpay plan or account capability is absent.

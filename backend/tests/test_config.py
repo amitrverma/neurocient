@@ -133,6 +133,15 @@ def test_whatsapp_app_and_verify_secrets_must_be_independent(monkeypatch):
         Settings().validate_for_startup()
 
 
+def test_membership_currency_plans_must_be_distinct(monkeypatch):
+    monkeypatch.setattr(Settings, "ENV", "dev")
+    monkeypatch.setattr(Settings, "RAZORPAY_MEMBERSHIP_PLAN_ID", "plan_same")
+    monkeypatch.setattr(Settings, "RAZORPAY_MEMBERSHIP_USD_PLAN_ID", "plan_same")
+
+    with pytest.raises(RuntimeError, match="plans must be distinct"):
+        Settings().validate_for_startup()
+
+
 def test_csrf_origins_are_normalized_and_development_has_local_defaults():
     assert parse_csrf_trusted_origins(None, "dev") == (
         "http://localhost:3000",

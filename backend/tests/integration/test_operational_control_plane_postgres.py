@@ -1,7 +1,7 @@
 import asyncio
 import os
 from datetime import date
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import UUID, uuid4
 
 import pytest
@@ -139,6 +139,103 @@ async def test_reconciliation_issue_upsert_preserves_history():
                     ReconciliationIssue.dedupe_key == observation.dedupe_key
                 )
             )
+            await db.commit()
+        await engine.dispose()
+
+
+async def test_local_reconciliation_surfaces_legacy_provider_and_duplicate_refund():
+    from app.database import AsyncSessionLocal, engine
+    from app.models import (
+        Cohort,
+        CohortEnrollment,
+        MembershipEntitlement,
+        PaymentRecord,
+        ReconciliationIssue,
+        User,
+    )
+    from app.services.payment_reconciliation import reconcile_local_payment_state
+
+    user_id, cohort_id, enrollment_id, payment_id = uuid4(), uuid4(), uuid4(), uuid4()
+    now = datetime.utcnow()
+    try:
+        async with AsyncSessionLocal() as db:
+            db.add(User(id=user_id, email=f"legacy-provider-{user_id}@example.test"))
+            db.add(Cohort(
+                id=cohort_id,
+                slug=f"duplicate-payment-{cohort_id}",
+                title="Duplicate payment reconciliation cohort",
+                starts_at=now,
+                ends_at=now + timedelta(days=1),
+                capacity=20,
+                price_minor=2_100_000,
+                currency="INR",
+                status="closed",
+            ))
+            await db.flush()
+            db.add(MembershipEntitlement(
+                user_id=user_id,
+                status="inactive",
+                provider="paypal",
+                provider_subscription_id=f"I-{uuid4().hex}",
+                provider_status="cancelled",
+                checkout_state="ready",
+                price_minor=600,
+                currency="USD",
+            ))
+            db.add(CohortEnrollment(
+                id=enrollment_id,
+                cohort_id=cohort_id,
+                user_id=user_id,
+                status="paid",
+                provider="razorpay",
+                provider_order_id=f"order_fulfilled_{uuid4().hex}",
+                provider_payment_id=f"pay_fulfilled_{uuid4().hex}",
+                amount_minor=2_100_000,
+                currency="INR",
+                paid_at=now,
+            ))
+            db.add(PaymentRecord(
+                id=payment_id,
+                enrollment_id=enrollment_id,
+                provider="razorpay",
+                provider_order_id=f"order_duplicate_{uuid4().hex}",
+                provider_payment_id=f"pay_duplicate_{uuid4().hex}",
+                status="duplicate_payment",
+                amount_minor=24_900,
+                currency="USD",
+            ))
+            await db.commit()
+
+        legacy_issue = None
+        refund_issue = None
+        for _ in range(5):
+            async with AsyncSessionLocal() as db:
+                await reconcile_local_payment_state(db)
+                legacy_issue = await db.scalar(select(ReconciliationIssue).where(
+                    ReconciliationIssue.issue_code == "legacy_provider_migration_required",
+                    ReconciliationIssue.local_object_id == str(user_id),
+                ))
+                refund_issue = await db.scalar(select(ReconciliationIssue).where(
+                    ReconciliationIssue.issue_code == "refund_required",
+                    ReconciliationIssue.local_object_id == str(payment_id),
+                ))
+            if legacy_issue and refund_issue:
+                break
+
+        assert legacy_issue is not None
+        assert legacy_issue.status == "open"
+        assert legacy_issue.severity == "critical"
+        assert legacy_issue.details == {"provider": "paypal"}
+        assert refund_issue is not None
+        assert refund_issue.status == "open"
+        assert refund_issue.severity == "critical"
+    finally:
+        async with AsyncSessionLocal() as db:
+            await db.execute(delete(ReconciliationIssue).where(
+                ReconciliationIssue.local_object_id.in_((str(user_id), str(payment_id)))
+            ))
+            await db.execute(delete(Cohort).where(Cohort.id == cohort_id))
+            await db.execute(delete(User).where(User.id == user_id))
             await db.commit()
         await engine.dispose()
 

@@ -36,6 +36,7 @@ describe("abuse proxy identity", () => {
       .update("1700000000\nPOST\n/auth/login\n2001:db8::1")
       .digest("hex");
     expect(headers).toMatchObject({
+      Origin: "https://site.test",
       "X-Neurocient-Client-IP": "2001:db8::1",
       "X-Neurocient-Proxy-Timestamp": "1700000000",
       "X-Neurocient-Proxy-Signature": expected,

@@ -90,47 +90,9 @@ class Settings:
     RAZORPAY_MEMBERSHIP_PLAN_ID = os.getenv("RAZORPAY_MEMBERSHIP_PLAN_ID")
     RAZORPAY_MEMBERSHIP_AMOUNT_MINOR = _env_positive_int("RAZORPAY_MEMBERSHIP_AMOUNT_MINOR")
     RAZORPAY_MEMBERSHIP_CURRENCY = os.getenv("RAZORPAY_MEMBERSHIP_CURRENCY", "INR").strip().upper()
+    RAZORPAY_MEMBERSHIP_USD_PLAN_ID = os.getenv("RAZORPAY_MEMBERSHIP_USD_PLAN_ID")
     RAZORPAY_MEMBERSHIP_TOTAL_COUNT = _env_positive_int("RAZORPAY_MEMBERSHIP_TOTAL_COUNT")
     RAZORPAY_MEMBERSHIP_WEBHOOK_SECRET = os.getenv("RAZORPAY_MEMBERSHIP_WEBHOOK_SECRET")
-    PAYPAL_ENV = os.getenv("PAYPAL_ENV", "sandbox").strip().lower()
-    PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID")
-    PAYPAL_CLIENT_SECRET = os.getenv("PAYPAL_CLIENT_SECRET")
-    PAYPAL_MEMBERSHIP_WEBHOOK_ID = os.getenv("PAYPAL_MEMBERSHIP_WEBHOOK_ID")
-    PAYPAL_COHORT_WEBHOOK_ID = os.getenv("PAYPAL_COHORT_WEBHOOK_ID")
-    PAYPAL_RETURN_BASE_URL = os.getenv(
-        "PAYPAL_RETURN_BASE_URL", "http://localhost:3000"
-    ).rstrip("/")
-    PAYPAL_MEMBERSHIP_PRODUCT_ID = os.getenv("PAYPAL_MEMBERSHIP_PRODUCT_ID")
-    PAYPAL_MEMBERSHIP_PLAN_ID = os.getenv("PAYPAL_MEMBERSHIP_PLAN_ID")
-    PAYPAL_MEMBERSHIP_AMOUNT_MINOR = _env_positive_int(
-        "PAYPAL_MEMBERSHIP_AMOUNT_MINOR"
-    )
-    PAYPAL_MEMBERSHIP_CURRENCY = os.getenv(
-        "PAYPAL_MEMBERSHIP_CURRENCY", "USD"
-    ).strip().upper()
-    PAYPAL_COHORT_AMOUNT_MINOR = _env_positive_int("PAYPAL_COHORT_AMOUNT_MINOR")
-    PAYPAL_COHORT_CURRENCY = os.getenv(
-        "PAYPAL_COHORT_CURRENCY", "USD"
-    ).strip().upper()
-    PAYPAL_ENV = os.getenv("PAYPAL_ENV", "sandbox").strip().lower()
-    PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID")
-    PAYPAL_CLIENT_SECRET = os.getenv("PAYPAL_CLIENT_SECRET")
-    PAYPAL_WEBHOOK_ID = os.getenv("PAYPAL_WEBHOOK_ID")
-    PAYPAL_RETURN_BASE_URL = os.getenv(
-        "PAYPAL_RETURN_BASE_URL", "http://localhost:3000"
-    ).rstrip("/")
-    PAYPAL_MEMBERSHIP_PRODUCT_ID = os.getenv("PAYPAL_MEMBERSHIP_PRODUCT_ID")
-    PAYPAL_MEMBERSHIP_PLAN_ID = os.getenv("PAYPAL_MEMBERSHIP_PLAN_ID")
-    PAYPAL_MEMBERSHIP_AMOUNT_MINOR = _env_positive_int(
-        "PAYPAL_MEMBERSHIP_AMOUNT_MINOR"
-    )
-    PAYPAL_MEMBERSHIP_CURRENCY = os.getenv(
-        "PAYPAL_MEMBERSHIP_CURRENCY", "USD"
-    ).strip().upper()
-    PAYPAL_COHORT_AMOUNT_MINOR = _env_positive_int("PAYPAL_COHORT_AMOUNT_MINOR")
-    PAYPAL_COHORT_CURRENCY = os.getenv(
-        "PAYPAL_COHORT_CURRENCY", "USD"
-    ).strip().upper()
     WHATSAPP_ACCESS_TOKEN = os.getenv("WHATSAPP_ACCESS_TOKEN")
     WHATSAPP_APP_SECRET = os.getenv("WHATSAPP_APP_SECRET")
     WHATSAPP_VERIFY_TOKEN = os.getenv("WHATSAPP_VERIFY_TOKEN")
@@ -213,54 +175,21 @@ class Settings:
                 "Invalid runtime configuration: RAZORPAY_MEMBERSHIP_CURRENCY must be INR"
             )
         if (
+            self.RAZORPAY_MEMBERSHIP_PLAN_ID
+            and self.RAZORPAY_MEMBERSHIP_USD_PLAN_ID
+            and self.RAZORPAY_MEMBERSHIP_PLAN_ID
+            == self.RAZORPAY_MEMBERSHIP_USD_PLAN_ID
+        ):
+            raise RuntimeError(
+                "Invalid runtime configuration: INR and USD membership plans must be distinct"
+            )
+        if (
             self.RAZORPAY_MEMBERSHIP_WEBHOOK_SECRET
             and self.RAZORPAY_WEBHOOK_SECRET
             and self.RAZORPAY_MEMBERSHIP_WEBHOOK_SECRET == self.RAZORPAY_WEBHOOK_SECRET
         ):
             raise RuntimeError(
                 "Invalid runtime configuration: membership and cohort webhook secrets must be independent"
-            )
-
-        if self.PAYPAL_ENV != "sandbox":
-            raise RuntimeError(
-                "Invalid runtime configuration: PAYPAL_ENV must remain sandbox until live approval"
-            )
-        if self.PAYPAL_MEMBERSHIP_AMOUNT_MINOR not in (None, 600):
-            raise RuntimeError(
-                "Invalid runtime configuration: PAYPAL_MEMBERSHIP_AMOUNT_MINOR must be 600"
-            )
-        if self.PAYPAL_MEMBERSHIP_CURRENCY != "USD":
-            raise RuntimeError(
-                "Invalid runtime configuration: PAYPAL_MEMBERSHIP_CURRENCY must be USD"
-            )
-        if self.PAYPAL_COHORT_AMOUNT_MINOR not in (None, 24_900):
-            raise RuntimeError(
-                "Invalid runtime configuration: PAYPAL_COHORT_AMOUNT_MINOR must be 24900"
-            )
-        if self.PAYPAL_COHORT_CURRENCY != "USD":
-            raise RuntimeError(
-                "Invalid runtime configuration: PAYPAL_COHORT_CURRENCY must be USD"
-            )
-
-        if self.PAYPAL_ENV != "sandbox":
-            raise RuntimeError(
-                "Invalid runtime configuration: PAYPAL_ENV must remain sandbox until live approval"
-            )
-        if self.PAYPAL_MEMBERSHIP_AMOUNT_MINOR not in (None, 600):
-            raise RuntimeError(
-                "Invalid runtime configuration: PAYPAL_MEMBERSHIP_AMOUNT_MINOR must be 600"
-            )
-        if self.PAYPAL_MEMBERSHIP_CURRENCY != "USD":
-            raise RuntimeError(
-                "Invalid runtime configuration: PAYPAL_MEMBERSHIP_CURRENCY must be USD"
-            )
-        if self.PAYPAL_COHORT_AMOUNT_MINOR not in (None, 24_900):
-            raise RuntimeError(
-                "Invalid runtime configuration: PAYPAL_COHORT_AMOUNT_MINOR must be 24900"
-            )
-        if self.PAYPAL_COHORT_CURRENCY != "USD":
-            raise RuntimeError(
-                "Invalid runtime configuration: PAYPAL_COHORT_CURRENCY must be USD"
             )
 
         if missing:

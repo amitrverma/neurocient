@@ -6,7 +6,6 @@ const mocks = vi.hoisted(() => ({
   razorpayOptions: null as Record<string, unknown> | null,
   failureHandler: null as ((response: unknown) => void) | null,
   open: vi.fn(),
-  redirect: vi.fn(),
 }));
 
 vi.mock("@/app/context/AuthContext", () => ({
@@ -18,10 +17,6 @@ vi.mock("@/app/context/AuthContext", () => ({
 vi.mock("@/app/components/AuthModal", () => ({
   default: () => null,
 }));
-vi.mock("@/lib/providerRedirect", () => ({
-  redirectToProvider: mocks.redirect,
-}));
-
 import Pricing from "./Pricing";
 
 const cohort = {
@@ -36,7 +31,10 @@ const cohort = {
   enrollment_open: true,
   waitlist_available: false,
   checkout_configured: true,
-  paypal_checkout_configured: true,
+  checkout_offers: [
+    { offer_id: "inr", amount_minor: 2_100_000, currency: "INR", display_price: "₹21,000", configured: true },
+    { offer_id: "usd", amount_minor: 24_900, currency: "USD", display_price: "US$249", configured: true },
+  ],
 };
 
 const response = (body: unknown, status = 200) =>
@@ -50,7 +48,6 @@ describe("Modern Caveman checkout", () => {
     mocks.razorpayOptions = null;
     mocks.failureHandler = null;
     mocks.open.mockReset();
-    mocks.redirect.mockReset();
     window.Razorpay = function Razorpay(options: Record<string, unknown>) {
       mocks.razorpayOptions = options;
       return {
@@ -62,27 +59,72 @@ describe("Modern Caveman checkout", () => {
     } as typeof window.Razorpay;
   });
 
-  it("keeps Razorpay primary and labels PayPal as the secondary international choice", async () => {
+  it("uses Razorpay for both INR and the secondary USD offer", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url === "/api/cohorts/modern-caveman") return response({ cohort });
+      if (url === "/api/cohorts/my") return response({ enrollments: [] });
+      if (url === "/api/cohorts/cohort-1/checkout" && init?.method === "POST") {
+        return response({
+          key_id: "rzp_test_public",
+          order_id: "order_usd_server_created",
+          amount: 24_900,
+          currency: "USD",
+          offer_id: "usd",
+          name: "Neurocient",
+          description: "Modern Caveman",
+          email: "member@example.test",
+        });
+      }
+      throw new Error(`Unexpected request: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<Pricing />);
+
+    const primary = await screen.findByRole("button", { name: /reserve my place/i });
+    const usd = screen.getByRole("button", { name: "Reserve for US$249" });
+    expect(primary).toHaveClass("mc-checkout-button");
+    expect(usd).toHaveClass("mc-checkout-button--secondary");
+
+    fireEvent.click(usd);
+    await waitFor(() => {
+      expect(mocks.open).toHaveBeenCalledOnce();
+    });
+    expect(mocks.razorpayOptions?.order_id).toBe("order_usd_server_created");
+    const checkoutCall = fetchMock.mock.calls.find(([url]) => String(url) === "/api/cohorts/cohort-1/checkout");
+    expect(checkoutCall?.[1]).toMatchObject({
+      method: "POST",
+      body: JSON.stringify({ offer_id: "usd" }),
+    });
+  });
+
+  it("does not open Razorpay when checkout returns a different offer", async () => {
     vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
       if (url === "/api/cohorts/modern-caveman") return response({ cohort });
       if (url === "/api/cohorts/my") return response({ enrollments: [] });
-      if (url === "/api/cohorts/cohort-1/paypal/checkout") {
-        return response({ approval_url: "https://www.sandbox.paypal.com/approve" });
+      if (url === "/api/cohorts/cohort-1/checkout") {
+        return response({
+          key_id: "rzp_test_public",
+          order_id: "order_wrong_offer",
+          amount: 2_100_000,
+          currency: "INR",
+          offer_id: "inr",
+          cohort_title: cohort.title,
+          email: "member@example.test",
+        });
       }
       throw new Error(`Unexpected request: ${url}`);
     }));
     render(<Pricing />);
 
-    const primary = await screen.findByRole("button", { name: /reserve my place/i });
-    const paypal = screen.getByRole("button", { name: "Pay with PayPal · USD 249" });
-    expect(primary).toHaveClass("mc-checkout-button");
-    expect(paypal).toHaveClass("mc-checkout-button--secondary");
+    fireEvent.click(await screen.findByRole("button", { name: "Reserve for US$249" }));
 
-    fireEvent.click(paypal);
-    await waitFor(() => {
-      expect(mocks.redirect).toHaveBeenCalledWith("https://www.sandbox.paypal.com/approve");
-    });
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /did not match the currency you selected/i,
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(/no payment window was opened/i);
+    expect(mocks.open).not.toHaveBeenCalled();
   });
 
   afterEach(() => {
@@ -108,6 +150,7 @@ describe("Modern Caveman checkout", () => {
           order_id: "order_server",
           amount: 2_100_000,
           currency: "INR",
+          offer_id: "inr",
           cohort_title: cohort.title,
           email: "member@example.test",
         });
@@ -155,6 +198,7 @@ describe("Modern Caveman checkout", () => {
           order_id: "order_server",
           amount: 2_100_000,
           currency: "INR",
+          offer_id: "inr",
           cohort_title: cohort.title,
           email: "member@example.test",
         });
@@ -214,6 +258,7 @@ describe("Modern Caveman checkout", () => {
           order_id: "order_server",
           amount: 2_100_000,
           currency: "INR",
+          offer_id: "inr",
           cohort_title: cohort.title,
           email: "member@example.test",
         });
@@ -263,6 +308,7 @@ describe("Modern Caveman checkout", () => {
           order_id: "order_server",
           amount: 2_100_000,
           currency: "INR",
+          offer_id: "inr",
           cohort_title: cohort.title,
           email: "member@example.test",
         });
@@ -292,6 +338,7 @@ describe("Modern Caveman checkout", () => {
         order_id: "order_server",
         amount: 2_100_000,
         currency: "INR",
+        offer_id: "inr",
         cohort_title: cohort.title,
         email: "member@example.test",
       });
@@ -315,6 +362,7 @@ describe("Modern Caveman checkout", () => {
         order_id: "order_server",
         amount: 2_100_000,
         currency: "INR",
+        offer_id: "inr",
         cohort_title: cohort.title,
         email: "member@example.test",
       });
@@ -350,6 +398,7 @@ describe("Modern Caveman checkout", () => {
         order_id: "order_server",
         amount: 2_100_000,
         currency: "INR",
+        offer_id: "inr",
         cohort_title: cohort.title,
         email: "member@example.test",
       });
@@ -390,6 +439,7 @@ describe("Modern Caveman checkout", () => {
         order_id: "order_server",
         amount: 2_100_000,
         currency: "INR",
+        offer_id: "inr",
         cohort_title: cohort.title,
         email: "member@example.test",
       });
@@ -478,6 +528,7 @@ describe("Modern Caveman checkout", () => {
           order_id: "order_server",
           amount: 2_100_000,
           currency: "INR",
+          offer_id: "inr",
           cohort_title: cohort.title,
           email: "member@example.test",
         });

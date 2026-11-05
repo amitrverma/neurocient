@@ -47,6 +47,7 @@ export function abuseProxyHeaders(
     .update(`${nowSeconds}\n${outboundMethod.toUpperCase()}\n${backendPath}\n${ip}`)
     .digest("hex");
   return {
+    Origin: new URL(request.url).origin,
     ...correlation,
     "X-Neurocient-Client-IP": ip,
     "X-Neurocient-Proxy-Timestamp": String(nowSeconds),

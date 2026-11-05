@@ -68,15 +68,13 @@ The product movement is:
 
 ### Access and commerce
 
-- Razorpay remains the primary checkout: INR 499/month for Membership and INR
-  21,000 once for Modern Caveman.
-- PayPal Sandbox is a secondary, explicitly labelled `Pay with PayPal` choice:
-  USD 6/month and USD 249 once. It is not presented as generic international
-  card entry because standard PayPal subscriptions may require a PayPal account.
-- Razorpay International Cards / International Payments activation has been
-  requested. If approved and proven in test mode, it is the preferred future
-  low-friction international card path. It must not silently replace the owned
-  INR or USD offers.
+- Razorpay is the sole checkout provider for the four owned offers: INR 499/month
+  and USD 6/month for Membership; INR 21,000 and USD 249 once for Modern Caveman.
+- Currency selection is explicit. The backend owns each exact amount/currency;
+  neither browser FX nor geographic inference changes the offer.
+- Razorpay International Cards / International Payments is account-enabled, but
+  genuine USD one-time and recurring lifecycle evidence is still required before
+  live international charging.
 - Provider callbacks never grant access by themselves. Server-created payment
   objects, verified and deduplicated provider events, provider-neutral
   entitlements, and separate cohort-enrolment state remain authoritative.
@@ -86,10 +84,9 @@ The product movement is:
 - The WhatsApp transport is the direct Meta Cloud API. Genuine inbound test
   delivery and local callback handling work; outbound delivery is waiting on
   Meta to resolve test WABA error `131031 Business Account locked`.
-- Razorpay international card activation is awaiting Razorpay review.
-- PayPal Sandbox credentials, plans, webhooks, and local adapters are
-  configured; genuine buyer approval and complete lifecycle evidence remain
-  part of provider validation before any live enablement.
+- Razorpay international card activation is shown as successful. A Test Mode USD
+  membership plan, recurring international approval, and genuine buyer/webhook/
+  settlement evidence remain external readiness requirements.
 
 These external waits do not justify parallel auth, progress, reminder,
 entitlement, enrolment, or reinforcement systems. New provider work must attach

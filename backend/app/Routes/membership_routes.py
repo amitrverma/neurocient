@@ -4,6 +4,7 @@ import uuid
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from pydantic import BaseModel, Field
 from sqlalchemy import or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -33,6 +34,12 @@ from app.services.membership_razorpay import (
     verify_membership_webhook,
 )
 from app.services.rate_limits import enforce, enforce_ip
+from app.services.payment_offers import (
+    MEMBERSHIP_INR_OFFER_ID,
+    membership_offer,
+    membership_offer_for_plan,
+    membership_offers,
+)
 from app.utils.auth import get_current_user
 
 
@@ -51,6 +58,10 @@ SUPPORTED_EVENTS = {
     "payment.refunded",
     "payment.dispute.created",
 }
+
+
+class MembershipCheckoutInput(BaseModel):
+    offer_id: str = Field(default=MEMBERSHIP_INR_OFFER_ID, pattern=r"^(inr|usd)$")
 
 
 async def _deliver_membership_welcome(
@@ -115,13 +126,15 @@ def _provider_integer(value, field: str) -> int | None:
 
 
 def _checkout_payload(entitlement: MembershipEntitlement, user: User) -> dict:
+    offer = membership_offer_for_plan(entitlement.provider_plan_id)
     return {
         "key_id": settings.RAZORPAY_KEY_ID,
         "subscription_id": entitlement.provider_subscription_id,
         "amount": entitlement.price_minor,
         "currency": entitlement.currency,
         "name": "Neurocient Membership",
-        "description": "₹499 per month",
+        "offer_id": offer.offer_id if offer else None,
+        "description": offer.display_price if offer else "Monthly membership",
         "email": user.email,
     }
 
@@ -170,13 +183,20 @@ def _ownership_error(
         entitlement.provider_subscription_id,
     ):
         return "subscription_mismatch"
-    if entitlement.provider_plan_id != settings.RAZORPAY_MEMBERSHIP_PLAN_ID:
-        return "plan_mismatch"
-    if event.event_type.startswith("subscription.") and (
-        event.provider_plan_id != settings.RAZORPAY_MEMBERSHIP_PLAN_ID
+    if entitlement.provider != "razorpay":
+        return "provider_mismatch"
+    owned_offer = membership_offer_for_plan(entitlement.provider_plan_id)
+    if (
+        owned_offer is None
+        or entitlement.price_minor != owned_offer.amount_minor
+        or entitlement.currency != owned_offer.currency
     ):
         return "plan_mismatch"
-    if event.provider_plan_id not in (None, settings.RAZORPAY_MEMBERSHIP_PLAN_ID):
+    if event.event_type.startswith("subscription.") and (
+        event.provider_plan_id != entitlement.provider_plan_id
+    ):
+        return "plan_mismatch"
+    if event.provider_plan_id not in (None, entitlement.provider_plan_id):
         return "plan_mismatch"
     if event.event_type.startswith("subscription.") and not event.provider_customer_id:
         return "customer_missing"
@@ -188,15 +208,15 @@ def _ownership_error(
         return "customer_mismatch"
     if event.event_type.startswith("payment.") and (
         not event.provider_payment_id
-        or event.amount_minor != settings.RAZORPAY_MEMBERSHIP_AMOUNT_MINOR
-        or event.currency != settings.RAZORPAY_MEMBERSHIP_CURRENCY
+        or event.amount_minor != entitlement.price_minor
+        or event.currency != entitlement.currency
     ):
         return "payment_mismatch"
     if (event.amount_minor is None) != (event.currency is None):
         return "price_mismatch"
     if event.amount_minor is not None and (
-        event.amount_minor != settings.RAZORPAY_MEMBERSHIP_AMOUNT_MINOR
-        or event.currency != settings.RAZORPAY_MEMBERSHIP_CURRENCY
+        event.amount_minor != entitlement.price_minor
+        or event.currency != entitlement.currency
     ):
         return "price_mismatch"
     return None
@@ -284,8 +304,16 @@ async def membership_status(
         else None
     )
     summary["checkout_configured"] = membership_razorpay_ready()
-    from app.services.paypal import paypal_membership_ready
-    summary["paypal_checkout_configured"] = paypal_membership_ready()
+    summary["checkout_offers"] = [
+        {
+            "offer_id": offer.offer_id,
+            "amount": offer.amount_minor,
+            "currency": offer.currency,
+            "display_price": offer.display_price,
+            "configured": membership_razorpay_ready(offer.offer_id),
+        }
+        for offer in membership_offers()
+    ]
     return summary
 
 
@@ -300,14 +328,23 @@ async def enforce_membership_checkout_ip(request: Request) -> None:
 async def begin_membership_checkout(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    payload: MembershipCheckoutInput | None = None,
 ):
     await enforce(db, [("checkout_user", str(current_user.id))])
+    offer = membership_offer((payload or MembershipCheckoutInput()).offer_id)
     existing = await db.get(MembershipEntitlement, current_user.id)
     if entitlement_is_active(existing):
         raise HTTPException(status_code=409, detail={"code": "membership_active"})
     if existing and existing.status not in {"canceled", "expired", "refunded", "disputed"}:
         if existing.checkout_state == "ready" and existing.provider_subscription_id:
-            if not membership_razorpay_ready():
+            if (
+                existing.provider != "razorpay"
+                or existing.provider_plan_id != offer.plan_id
+                or existing.price_minor != offer.amount_minor
+                or existing.currency != offer.currency
+            ):
+                raise HTTPException(status_code=409, detail={"code": "checkout_offer_conflict"})
+            if not membership_razorpay_ready(offer.offer_id):
                 raise HTTPException(status_code=503, detail={"code": "checkout_unavailable"})
             return _checkout_payload(existing, current_user)
         if existing.checkout_state in {"creating", "unknown"}:
@@ -316,16 +353,16 @@ async def begin_membership_checkout(
                 extra={"user_id": str(current_user.id), "operation_id": str(existing.checkout_operation_id)},
             )
             raise HTTPException(status_code=409, detail={"code": "reconciliation_required"})
-    if not membership_razorpay_ready():
+    if not membership_razorpay_ready(offer.offer_id):
         raise HTTPException(status_code=503, detail={"code": "checkout_unavailable"})
 
     try:
-        plan = await fetch_membership_plan()
+        plan = await fetch_membership_plan(offer.plan_id or "")
         validate_membership_plan(
             plan,
-            plan_id=settings.RAZORPAY_MEMBERSHIP_PLAN_ID,
-            amount_minor=settings.RAZORPAY_MEMBERSHIP_AMOUNT_MINOR,
-            currency=settings.RAZORPAY_MEMBERSHIP_CURRENCY,
+            plan_id=offer.plan_id or "",
+            amount_minor=offer.amount_minor,
+            currency=offer.currency,
         )
     except (ProviderRejected, ProviderOutcomeUnknown, PlanMismatch):
         logger.warning(
@@ -355,6 +392,13 @@ async def begin_membership_checkout(
         entitlement.cancellation_state = None
         entitlement.cancellation_requested_at = None
     if entitlement and entitlement.checkout_state == "ready" and entitlement.provider_subscription_id:
+        if (
+            entitlement.provider != "razorpay"
+            or entitlement.provider_plan_id != offer.plan_id
+            or entitlement.price_minor != offer.amount_minor
+            or entitlement.currency != offer.currency
+        ):
+            raise HTTPException(status_code=409, detail={"code": "checkout_offer_conflict"})
         return _checkout_payload(entitlement, current_user)
     if entitlement and entitlement.checkout_state in {"creating", "unknown"}:
         logger.warning(
@@ -368,16 +412,17 @@ async def begin_membership_checkout(
         entitlement = MembershipEntitlement(user_id=current_user.id, status="inactive")
         db.add(entitlement)
     entitlement.provider = "razorpay"
-    entitlement.provider_plan_id = settings.RAZORPAY_MEMBERSHIP_PLAN_ID
+    entitlement.provider_plan_id = offer.plan_id
     entitlement.checkout_operation_id = operation_id
     entitlement.checkout_state = "creating"
-    entitlement.price_minor = settings.RAZORPAY_MEMBERSHIP_AMOUNT_MINOR
-    entitlement.currency = settings.RAZORPAY_MEMBERSHIP_CURRENCY
+    entitlement.price_minor = offer.amount_minor
+    entitlement.currency = offer.currency
     entitlement.billing_total_count = settings.RAZORPAY_MEMBERSHIP_TOTAL_COUNT
     await db.commit()
 
     try:
         subscription = await create_membership_subscription(
+            plan_id=offer.plan_id or "",
             user_id=str(current_user.id),
             operation_id=str(operation_id),
         )
@@ -403,7 +448,7 @@ async def begin_membership_checkout(
         raise HTTPException(status_code=502, detail={"code": "reconciliation_required"})
 
     subscription_id = subscription.get("id")
-    if not subscription_id or subscription.get("plan_id") != settings.RAZORPAY_MEMBERSHIP_PLAN_ID:
+    if not subscription_id or subscription.get("plan_id") != offer.plan_id:
         entitlement = await _lock_entitlement(db, current_user.id)
         if entitlement and entitlement.checkout_operation_id == operation_id:
             entitlement.checkout_state = "unknown"
@@ -565,14 +610,12 @@ async def membership_webhook(
         not payment or not payment_id or payment_status != "captured"
     ):
         await _reject_webhook_event(db, event, "invalid_provider_data")
-    if (
-        event_type.startswith("subscription.")
-        and provider_plan_id != settings.RAZORPAY_MEMBERSHIP_PLAN_ID
-    ):
+    event_offer = membership_offer_for_plan(provider_plan_id)
+    if event_type.startswith("subscription.") and event_offer is None:
         await _reject_webhook_event(db, event, "plan_mismatch")
-    if payment and (
-        amount_minor != settings.RAZORPAY_MEMBERSHIP_AMOUNT_MINOR
-        or currency != settings.RAZORPAY_MEMBERSHIP_CURRENCY
+    if payment and event_offer is not None and (
+        amount_minor != event_offer.amount_minor
+        or currency != event_offer.currency
     ):
         await _reject_webhook_event(db, event, "price_mismatch")
     if (

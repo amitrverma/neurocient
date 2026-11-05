@@ -1,4 +1,10 @@
-# PayPal international billing implementation contract
+# PayPal international billing implementation contract (superseded)
+
+Status: superseded on 2026-11-05; retained only as historical design context.
+
+PayPal checkout and runtime configuration were removed when Razorpay became the
+sole provider for the owned INR and USD offers. Do not implement or operate from
+this document. The current contract is `PAYMENT_PRODUCTS.md`.
 
 Status: approved contract; implementation in progress
 

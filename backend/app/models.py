@@ -159,6 +159,14 @@ class PaymentRecord(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
+    __table_args__ = (
+        UniqueConstraint(
+            "provider",
+            "provider_order_id",
+            name="uq_payment_record_provider_order",
+        ),
+    )
+
 
 class PaymentWebhookEvent(Base):
     __tablename__ = "payment_webhook_events"

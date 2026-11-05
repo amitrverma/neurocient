@@ -36,6 +36,7 @@ MAX_RECONCILIATION_BATCH = 50
 LOCAL_OBSERVATION_CODES = {
     "checkout_outcome_unknown",
     "cancellation_outcome_unknown",
+    "legacy_provider_migration_required",
     "refund_required",
     "billing_event_unmatched",
     "welcome_delivery_failed",
@@ -160,14 +161,16 @@ async def _resolve_cleared_local_issues(db: AsyncSession) -> None:
         if issue.issue_code in {
             "checkout_outcome_unknown",
             "cancellation_outcome_unknown",
+            "legacy_provider_migration_required",
         } and issue.object_type == "membership_entitlement" and local_uuid:
             entitlement = await db.get(MembershipEntitlement, local_uuid)
             if entitlement:
-                still_open = (
-                    entitlement.checkout_state == "unknown"
-                    if issue.issue_code == "checkout_outcome_unknown"
-                    else entitlement.cancellation_state in {"unknown", "requesting"}
-                )
+                if issue.issue_code == "checkout_outcome_unknown":
+                    still_open = entitlement.checkout_state == "unknown"
+                elif issue.issue_code == "cancellation_outcome_unknown":
+                    still_open = entitlement.cancellation_state in {"unknown", "requesting"}
+                else:
+                    still_open = entitlement.provider != "razorpay"
         elif (
             issue.issue_code == "checkout_outcome_unknown"
             and issue.object_type == "payment_record"
@@ -179,7 +182,7 @@ async def _resolve_cleared_local_issues(db: AsyncSession) -> None:
         elif issue.issue_code == "refund_required" and local_uuid:
             payment = await db.get(PaymentRecord, local_uuid)
             if payment:
-                still_open = payment.status == "capacity_conflict"
+                still_open = payment.status in {"capacity_conflict", "duplicate_payment"}
         elif issue.issue_code == "billing_event_unmatched":
             event = await db.get(MembershipBillingEvent, issue.local_object_id)
             if event:
@@ -283,6 +286,7 @@ async def reconcile_local_payment_state(db: AsyncSession) -> dict[str, int]:
             select(MembershipEntitlement)
             .where(
                 or_(
+                    MembershipEntitlement.provider != "razorpay",
                     MembershipEntitlement.checkout_state == "unknown",
                     MembershipEntitlement.cancellation_state == "unknown",
                     (
@@ -297,11 +301,12 @@ async def reconcile_local_payment_state(db: AsyncSession) -> dict[str, int]:
         ),
     )
     for entitlement in memberships:
-        code = (
-            "checkout_outcome_unknown"
-            if entitlement.checkout_state == "unknown"
-            else "cancellation_outcome_unknown"
-        )
+        if entitlement.provider != "razorpay":
+            code = "legacy_provider_migration_required"
+        elif entitlement.checkout_state == "unknown":
+            code = "checkout_outcome_unknown"
+        else:
+            code = "cancellation_outcome_unknown"
         observations.append(
             ObservedIssue(
                 product="membership",
@@ -310,6 +315,11 @@ async def reconcile_local_payment_state(db: AsyncSession) -> dict[str, int]:
                 local_object_id=str(entitlement.user_id),
                 provider_object_id=entitlement.provider_subscription_id,
                 severity="critical",
+                details=(
+                    {"provider": entitlement.provider}
+                    if code == "legacy_provider_migration_required"
+                    else None
+                ),
             )
         )
 
@@ -320,7 +330,11 @@ async def reconcile_local_payment_state(db: AsyncSession) -> dict[str, int]:
         cursor_parser=uuid.UUID,
         query=(
             select(PaymentRecord)
-            .where(PaymentRecord.status.in_(["capacity_conflict", "checkout_unknown"]))
+            .where(PaymentRecord.status.in_([
+                "capacity_conflict",
+                "duplicate_payment",
+                "checkout_unknown",
+            ]))
         ),
     )
     for payment in payments:
@@ -329,13 +343,17 @@ async def reconcile_local_payment_state(db: AsyncSession) -> dict[str, int]:
                 product="cohort",
                 issue_code=(
                     "refund_required"
-                    if payment.status == "capacity_conflict"
+                    if payment.status in {"capacity_conflict", "duplicate_payment"}
                     else "checkout_outcome_unknown"
                 ),
                 object_type="payment_record",
                 local_object_id=str(payment.id),
                 provider_object_id=payment.provider_payment_id or payment.provider_order_id,
-                severity="critical" if payment.status == "capacity_conflict" else "warning",
+                severity=(
+                    "critical"
+                    if payment.status in {"capacity_conflict", "duplicate_payment"}
+                    else "warning"
+                ),
             )
         )
 

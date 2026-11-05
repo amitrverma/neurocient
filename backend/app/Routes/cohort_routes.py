@@ -41,7 +41,11 @@ from app.services.razorpay import (
     verify_checkout_signature,
     verify_webhook_signature,
 )
-from app.services.paypal import paypal_cohort_ready
+from app.services.payment_offers import (
+    COHORT_INR_OFFER_ID,
+    cohort_offer,
+    cohort_offers,
+)
 from app.services.rate_limits import enforce, enforce_ip
 from app.utils.auth import get_current_user
 
@@ -128,6 +132,10 @@ class CohortUpdate(BaseModel):
     status: str | None = None
 
 
+class CohortCheckoutInput(BaseModel):
+    offer_id: str = Field(default=COHORT_INR_OFFER_ID, pattern=r"^(inr|usd)$")
+
+
 def cohort_payload(cohort: Cohort, seats: int, *, include_private: bool = False) -> dict:
     data = {
         "id": str(cohort.id),
@@ -147,7 +155,16 @@ def cohort_payload(cohort: Cohort, seats: int, *, include_private: bool = False)
         "enrollment_open": enrollment_is_open(cohort, seats),
         "waitlist_available": cohort.status == "full" or seats >= cohort.capacity,
         "checkout_configured": razorpay_ready(),
-        "paypal_checkout_configured": paypal_cohort_ready(),
+        "checkout_offers": [
+            {
+                "offer_id": offer.offer_id,
+                "amount": offer.amount_minor,
+                "currency": offer.currency,
+                "display_price": offer.display_price,
+                "configured": razorpay_ready(),
+            }
+            for offer in cohort_offers()
+        ],
     }
     if include_private:
         data.update(
@@ -271,11 +288,17 @@ async def enforce_checkout_ip(request: Request) -> None:
     "/cohorts/{cohort_id}/checkout",
     dependencies=[Depends(enforce_checkout_ip)],
 )
-async def begin_checkout(cohort_id: uuid.UUID, current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def begin_checkout(
+    cohort_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    payload: CohortCheckoutInput | None = None,
+):
     await enforce(
         db,
         [("checkout_user", str(current_user.id))],
     )
+    offer = cohort_offer((payload or CohortCheckoutInput()).offer_id)
     if not razorpay_ready():
         raise HTTPException(
             status_code=503,
@@ -312,9 +335,19 @@ async def begin_checkout(cohort_id: uuid.UUID, current_user: User = Depends(get_
         and enrollment.reservation_expires_at > datetime.utcnow()
         and enrollment.provider_order_id
     ):
+        if (
+            enrollment.provider != "razorpay"
+            or enrollment.amount_minor != offer.amount_minor
+            or enrollment.currency != offer.currency
+        ):
+            raise HTTPException(
+                status_code=409,
+                detail={"code": "checkout_offer_conflict"},
+            )
         return {
             "key_id": settings.RAZORPAY_KEY_ID, "order_id": enrollment.provider_order_id,
             "amount": enrollment.amount_minor, "currency": enrollment.currency,
+            "offer_id": offer.offer_id,
             "cohort_title": cohort.title, "email": current_user.email,
             "reservation_expires_at": enrollment.reservation_expires_at.isoformat(),
         }
@@ -324,23 +357,29 @@ async def begin_checkout(cohort_id: uuid.UUID, current_user: User = Depends(get_
     expires_at = datetime.utcnow() + timedelta(minutes=15)
     enrollment = enrollment or CohortEnrollment(
         cohort_id=cohort.id, user_id=current_user.id,
-        amount_minor=cohort.price_minor, currency=cohort.currency,
+        amount_minor=offer.amount_minor, currency=offer.currency,
     )
     enrollment.status = "checkout_creating"
     enrollment.provider = "razorpay"
     enrollment.reservation_expires_at = expires_at
-    enrollment.amount_minor = cohort.price_minor
-    enrollment.currency = cohort.currency
+    enrollment.amount_minor = offer.amount_minor
+    enrollment.currency = offer.currency
     enrollment.provider_order_id = None
     db.add(enrollment)
     await db.commit()
     enrollment_id = enrollment.id
     try:
         order = await create_order(
-            amount_minor=cohort.price_minor,
-            currency=cohort.currency,
+            amount_minor=offer.amount_minor,
+            currency=offer.currency,
             receipt=str(enrollment_id),
-            notes={"cohort_id": str(cohort.id), "enrollment_id": str(enrollment_id), "user_id": str(current_user.id)},
+            notes={
+                "cohort_id": str(cohort.id),
+                "enrollment_id": str(enrollment_id),
+                "user_id": str(current_user.id),
+                "offer_id": offer.offer_id,
+                "purpose_code": "P1107",
+            },
         )
     except ProviderRejected:
         result = await db.execute(
@@ -377,13 +416,15 @@ async def begin_checkout(cohort_id: uuid.UUID, current_user: User = Depends(get_
     enrollment.status = "pending_payment"
     enrollment.provider_order_id = order["id"]
     db.add(PaymentRecord(
-        enrollment_id=enrollment.id, provider_order_id=order["id"], status="created",
-        amount_minor=cohort.price_minor, currency=cohort.currency,
+        enrollment_id=enrollment.id, provider="razorpay",
+        provider_order_id=order["id"], status="created",
+        amount_minor=offer.amount_minor, currency=offer.currency,
     ))
     await db.commit()
     return {
         "key_id": settings.RAZORPAY_KEY_ID, "order_id": order["id"],
-        "amount": cohort.price_minor, "currency": cohort.currency,
+        "amount": offer.amount_minor, "currency": offer.currency,
+        "offer_id": offer.offer_id,
         "cohort_title": cohort.title, "email": current_user.email,
         "reservation_expires_at": expires_at.isoformat(),
     }

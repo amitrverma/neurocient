@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ArrowRight, Check, CircleAlert, LoaderCircle } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "@/app/components/AuthModal";
-import { redirectToProvider } from "@/lib/providerRedirect";
 
 type Cohort = {
   id: string;
@@ -18,7 +17,13 @@ type Cohort = {
   enrollment_open: boolean;
   waitlist_available: boolean;
   checkout_configured: boolean;
-  paypal_checkout_configured?: boolean;
+  checkout_offers?: Array<{
+    offer_id: "inr" | "usd";
+    amount: number;
+    currency: "INR" | "USD";
+    display_price: string;
+    configured: boolean;
+  }>;
 };
 
 type CheckoutResponse = {
@@ -50,6 +55,10 @@ const withReference = (message: string, response: Response): string => {
 const CHECKOUT_WINDOW_TIMEOUT_MS = 3_000;
 const CONFIRMATION_POLL_INTERVAL_MS = 2_000;
 const CONFIRMATION_POLL_ATTEMPTS = 15;
+const CHECKOUT_OFFERS = {
+  inr: { amount: 2_100_000, currency: "INR" },
+  usd: { amount: 24_900, currency: "USD" },
+} as const;
 
 const checkoutWindowIsPresent = (): boolean => Array.from(
   document.querySelectorAll<HTMLElement>(
@@ -108,7 +117,6 @@ export default function Pricing() {
   const [hasConfirmedPlace, setHasConfirmedPlace] = useState(false);
   const [confirmationStatus, setConfirmationStatus] = useState<ConfirmationStatus>("idle");
   const userId = user?.id;
-  const paypalReturnHandled = useRef(false);
 
   const refreshCohort = useCallback(async () => {
     const response = await fetch("/api/cohorts/modern-caveman", { cache: "no-store" });
@@ -194,7 +202,7 @@ export default function Pricing() {
     setWorking(false);
   };
 
-  const startCheckout = async () => {
+  const startCheckout = async (offerId: "inr" | "usd") => {
     if (!user) return setShowAuth(true);
     if (!cohort) return;
     let checkoutOpenWatchdog: number | undefined;
@@ -209,7 +217,11 @@ export default function Pricing() {
     setMessageIsError(false);
     setConfirmationStatus("idle");
     try {
-      const response = await fetch(`/api/cohorts/${cohort.id}/checkout`, { method: "POST" });
+      const response = await fetch(`/api/cohorts/${cohort.id}/checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ offer_id: offerId }),
+      });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         const code = errorCode(data);
@@ -218,6 +230,8 @@ export default function Pricing() {
           nextMessage = "This checkout attempt may have reached the payment provider, so we cannot safely start another one yet. Your place is not confirmed. Please contact support before trying again.";
         } else if (code === "cohort_full") {
           nextMessage = "This cohort has just filled. You can join the waitlist.";
+        } else if (code === "checkout_offer_conflict") {
+          nextMessage = "Another currency checkout is already open. Complete or resolve it before switching currency.";
         } else if (response.status === 409) {
           nextMessage = "Your enrollment status has changed. Refresh the page before trying again.";
         } else if (response.status === 429) {
@@ -228,6 +242,17 @@ export default function Pricing() {
           nextMessage = "Secure checkout is temporarily unavailable. Checkout did not start, and you have not been charged. Please try again later.";
         }
         setMessage(withReference(nextMessage, response));
+        setMessageIsError(true);
+        setWorking(false);
+        return;
+      }
+      const expectedOffer = CHECKOUT_OFFERS[offerId];
+      if (
+        data.offer_id !== offerId
+        || data.amount !== expectedOffer.amount
+        || data.currency !== expectedOffer.currency
+      ) {
+        setMessage("Checkout did not match the currency you selected. No payment window was opened.");
         setMessageIsError(true);
         setWorking(false);
         return;
@@ -309,72 +334,15 @@ export default function Pricing() {
     }
   };
 
-  const startPayPalCheckout = async () => {
-    if (!user) return setShowAuth(true);
-    if (!cohort) return;
-    setWorking(true);
-    setMessage("");
-    setMessageIsError(false);
-    try {
-      const response = await fetch(`/api/cohorts/${cohort.id}/paypal/checkout`, {
-        method: "POST",
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || typeof data.approval_url !== "string") {
-        const code = errorCode(data);
-        setMessage(
-          code === "checkout_reconciliation_required"
-            ? "This checkout may have reached PayPal. Do not pay again; contact support before retrying."
-            : code === "checkout_provider_conflict"
-              ? "Another payment checkout is already open. Complete or resolve it before switching providers."
-              : "PayPal checkout is temporarily unavailable. No place has been confirmed.",
-        );
-        setMessageIsError(true);
-        setWorking(false);
-        return;
-      }
-      redirectToProvider(data.approval_url);
-    } catch {
-      setMessage("PayPal checkout could not be started. No place has been confirmed.");
-      setMessageIsError(true);
-      setWorking(false);
-    }
+  const offerConfigured = (offerId: "inr" | "usd") => {
+    const offer = cohort?.checkout_offers?.find((candidate) => candidate.offer_id === offerId);
+    return offer ? offer.configured : offerId === "inr" && cohort?.checkout_configured === true;
   };
-
-  useEffect(() => {
-    if (!user || !cohort?.id || paypalReturnHandled.current) return;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("paypal") !== "approved") return;
-    const orderId = params.get("token");
-    paypalReturnHandled.current = true;
-    if (!orderId) {
-      setMessage("PayPal returned without an order reference. Your place has not been confirmed.");
-      setMessageIsError(true);
-      return;
-    }
-    setWorking(true);
-    void fetch(`/api/cohorts/${cohort.id}/paypal/capture`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ order_id: orderId }),
-    })
-      .then(async (response) => {
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok || data.captured !== true) throw new Error("capture_not_confirmed");
-        setMessage("");
-        setConfirmationStatus("checking");
-        window.history.replaceState({}, "", window.location.pathname + "#pricing");
-      })
-      .catch(() => {
-        setMessage("Payment approval was returned, but capture confirmation is uncertain. Do not pay again; contact support.");
-        setMessageIsError(true);
-      })
-      .finally(() => setWorking(false));
-  }, [cohort?.id, user]);
-
-  const formattedPrice = cohort
-    ? new Intl.NumberFormat("en-IN", { style: "currency", currency: cohort.currency, maximumFractionDigits: 0 }).format(cohort.price_minor / 100)
-    : "₹21,000";
+  const formattedPrice = cohort?.checkout_offers?.length
+    ? cohort.checkout_offers.map((offer) => offer.display_price).join(" / ")
+    : cohort
+      ? new Intl.NumberFormat("en-IN", { style: "currency", currency: cohort.currency, maximumFractionDigits: 0 }).format(cohort.price_minor / 100)
+      : "₹21,000 / US$249";
 
   return (
     <section id="pricing" className="mc-section mc-pricing">
@@ -415,7 +383,7 @@ export default function Pricing() {
                 </span>
                 <div>
                   <p className="mc-reservation-label">Payment complete</p>
-                  <h4>You're in.</h4>
+                  <h4>You&apos;re in.</h4>
                   <p className="mc-reservation-detail">
                     Your place in {cohort?.title || "this cohort"} is confirmed.
                   </p>
@@ -446,15 +414,15 @@ export default function Pricing() {
               </div>
             ) : cohort?.enrollment_open ? (
               <div className="grid gap-3">
-              <button className="mc-checkout-button" disabled={working || !ready || !cohort.checkout_configured} onClick={startCheckout}>
-                {working ? "Preparing…" : user ? "Reserve my place" : "Log in to join"}<ArrowRight className="h-4 w-4" />
+              <button className="mc-checkout-button" disabled={working || !ready || !offerConfigured("inr")} onClick={() => void startCheckout("inr")}>
+                {working ? "Preparing…" : user ? "Reserve my place · ₹21,000" : "Log in to join"}<ArrowRight className="h-4 w-4" />
               </button>
               <button
                 className="mc-checkout-button mc-checkout-button--secondary"
-                disabled={working || !ready || !cohort.paypal_checkout_configured}
-                onClick={startPayPalCheckout}
+                disabled={working || !ready || !offerConfigured("usd")}
+                onClick={() => void startCheckout("usd")}
               >
-                {user ? "Pay with PayPal · USD 249" : "Log in to pay with PayPal"}<ArrowRight className="h-4 w-4" />
+                {user ? "Reserve for US$249" : "Log in to join in USD"}<ArrowRight className="h-4 w-4" />
               </button>
               </div>
             ) : cohort?.waitlist_available ? (
@@ -483,7 +451,7 @@ export default function Pricing() {
             </div>
           </div>
         ) : null}
-        {cohort && !cohort.checkout_configured && cohort.enrollment_open ? (
+        {cohort && !offerConfigured("inr") && !offerConfigured("usd") && cohort.enrollment_open ? (
           <p className="mc-checkout-note">Online enrollment is being prepared. Your account will be required before payment.</p>
         ) : null}
 

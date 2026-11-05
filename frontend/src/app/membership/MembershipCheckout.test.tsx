@@ -171,7 +171,10 @@ describe("membership checkout", () => {
     vi.stubGlobal("fetch", vi.fn(async () => response({
       is_active: true,
       status: "active",
-      current_period_end: "2026-11-30T18:30:00",
+      current_period_end: "2026-11-30T18:30:00Z",
+      access_ends_at: "2026-11-30T18:30:00Z",
+      renewal_at: "2026-11-30T18:30:00Z",
+      access_phase: "active",
       checkout_configured: true,
       checkout_state: "ready",
     })));
@@ -180,23 +183,90 @@ describe("membership checkout", () => {
 
     expect(await screen.findByRole("status")).toHaveTextContent("Welcome to Neurocient");
     expect(screen.getByText(/full access to insights, practice, spots and microchallenges/i)).toBeInTheDocument();
-    expect(screen.getByText(/access confirmed through 30 november 2026/i)).toBeInTheDocument();
+    expect(screen.getByText(/renews on 1 december 2026/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /begin with practice/i })).toHaveAttribute("href", "/practice");
     expect(screen.getByRole("link", { name: /explore insights/i })).toHaveAttribute("href", "/insights");
     expect(screen.queryByRole("button", { name: /join for/i })).not.toBeInTheDocument();
   });
 
+  it("shows renewal recovery with the authoritative access deadline", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => response({
+      is_active: true,
+      status: "past_due",
+      access_phase: "payment_retrying",
+      current_period_end: "2026-11-10T12:00:00Z",
+      access_ends_at: "2026-11-13T12:00:00Z",
+      grace_period_end: "2026-11-13T12:00:00Z",
+      checkout_configured: true,
+    })));
+
+    render(<MembershipCheckout />);
+
+    const status = await screen.findByRole("status");
+    expect(status).toHaveTextContent(/payment retry in progress/i);
+    expect(status).toHaveTextContent(/access continues through 13 november 2026/i);
+    expect(screen.queryByRole("button", { name: /join for/i })).not.toBeInTheDocument();
+  });
+
+  it("shows the three-day grace state without offering a duplicate subscription", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => response({
+      is_active: true,
+      status: "past_due",
+      access_phase: "grace_period",
+      current_period_end: "2026-11-10T12:00:00Z",
+      access_ends_at: "2026-11-13T12:00:00Z",
+      grace_period_end: "2026-11-13T12:00:00Z",
+      checkout_configured: true,
+    })));
+
+    render(<MembershipCheckout />);
+
+    const status = await screen.findByRole("status");
+    expect(status).toHaveTextContent(/three-day grace period/i);
+    expect(status).toHaveTextContent(/access continues through 13 november 2026/i);
+    expect(screen.queryByRole("button", { name: /join for/i })).not.toBeInTheDocument();
+  });
+
+  it("persists an uncertain checkout state across reload and blocks repayment", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => response({
+      is_active: false,
+      status: "inactive",
+      access_phase: "inactive",
+      checkout_state: "unknown",
+      checkout_configured: true,
+    })));
+
+    render(<MembershipCheckout />);
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      /previous checkout needs confirmation/i,
+    );
+    expect(screen.getAllByRole("button", { name: /join for/i })).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ disabled: true }),
+        expect.objectContaining({ disabled: true }),
+      ]),
+    );
+  });
+
   it("requests cancellation only after confirmation and keeps paid access visible", async () => {
+    let canceled = false;
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       if (String(input) === "/api/membership/status") {
         return response({
           is_active: true,
           status: "active",
           current_period_end: "2026-11-30T18:30:00",
+          access_ends_at: "2026-11-30T18:30:00",
+          renewal_at: canceled ? null : "2026-11-30T18:30:00",
+          cancellation_effective_at: canceled ? "2026-11-30T18:30:00" : null,
+          access_phase: canceled ? "cancellation_scheduled" : "active",
+          cancellation_state: canceled ? "requested" : null,
           checkout_configured: true,
         });
       }
       if (String(input) === "/api/membership/cancel" && init?.method === "POST") {
+        canceled = true;
         return response({ status: "requested", effective_at: "2026-11-30T18:30:00" }, 202);
       }
       throw new Error(`Unexpected request: ${String(input)}`);
@@ -209,8 +279,8 @@ describe("membership checkout", () => {
     fireEvent.click(screen.getByRole("button", { name: /confirm cancellation/i }));
 
     expect(await screen.findByText(/cancellation is scheduled/i)).toBeInTheDocument();
-    expect(screen.getByText(/access remains active through 30 november 2026/i)).toBeInTheDocument();
-    expect(screen.getByText(/welcome to neurocient/i)).toBeInTheDocument();
+    expect(screen.getByText(/access remains active through 1 december 2026/i)).toBeInTheDocument();
+    expect(screen.getByRole("status")).not.toHaveTextContent(/renews on/i);
   });
 
   it("reports uncertain cancellation without pretending access changed", async () => {

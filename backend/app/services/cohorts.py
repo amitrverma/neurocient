@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Cohort, CohortEnrollment
+from app.models import Cohort, CohortEnrollment, CohortWaitlistEntry
 
 SEAT_STATUSES = ("checkout_creating", "checkout_unknown", "pending_payment", "paid", "active")
 PUBLIC_STATUSES = ("published", "open", "full")
@@ -37,7 +37,7 @@ def validate_cohort_timezone(timezone: str) -> None:
 
 async def occupied_seats(db: AsyncSession, cohort_id, now: datetime | None = None) -> int:
     now = now or datetime.utcnow()
-    result = await db.execute(
+    enrollment_result = await db.execute(
         select(func.count(CohortEnrollment.id)).where(
             CohortEnrollment.cohort_id == cohort_id,
             CohortEnrollment.status.in_(SEAT_STATUSES),
@@ -50,10 +50,42 @@ async def occupied_seats(db: AsyncSession, cohort_id, now: datetime | None = Non
             ),
         )
     )
-    return int(result.scalar_one())
+    enrollment_count = int(enrollment_result.scalar_one())
+
+    seat_holding_enrollment = select(CohortEnrollment.id).where(
+        CohortEnrollment.cohort_id == CohortWaitlistEntry.cohort_id,
+        CohortEnrollment.user_id == CohortWaitlistEntry.user_id,
+        CohortEnrollment.status.in_(SEAT_STATUSES),
+        or_(
+            CohortEnrollment.status.not_in(("checkout_creating", "checkout_unknown", "pending_payment")),
+            and_(
+                CohortEnrollment.reservation_expires_at.is_not(None),
+                CohortEnrollment.reservation_expires_at > now,
+            ),
+        ),
+    )
+    offer_result = await db.execute(
+        select(func.count(CohortWaitlistEntry.id)).where(
+            CohortWaitlistEntry.cohort_id == cohort_id,
+            CohortWaitlistEntry.status.in_(("offered", "checkout_started")),
+            or_(
+                CohortWaitlistEntry.offer_email_status != "sent",
+                and_(
+                    CohortWaitlistEntry.offer_expires_at.is_not(None),
+                    CohortWaitlistEntry.offer_expires_at > now,
+                ),
+            ),
+            ~seat_holding_enrollment.exists(),
+        )
+    )
+    return enrollment_count + int(offer_result.scalar_one())
 
 
 def enrollment_is_open(cohort: Cohort, seats: int, now: datetime | None = None) -> bool:
+    return cohort.status == "open" and enrollment_window_is_open(cohort, now) and seats < cohort.capacity
+
+
+def enrollment_window_is_open(cohort: Cohort, now: datetime | None = None) -> bool:
     try:
         timezone = ZoneInfo(cohort.timezone)
     except (ZoneInfoNotFoundError, ValueError, TypeError):
@@ -64,13 +96,15 @@ def enrollment_is_open(cohort: Cohort, seats: int, now: datetime | None = None) 
         if reference.tzinfo is None
         else reference.astimezone(timezone).replace(tzinfo=None)
     )
-    if cohort.status != "open":
-        return False
     if cohort.enrollment_opens_at and wall_clock_now < cohort.enrollment_opens_at:
         return False
     if cohort.enrollment_closes_at and wall_clock_now >= cohort.enrollment_closes_at:
         return False
-    return seats < cohort.capacity
+    # A cohort never accepts new participants after it has started, even when
+    # an explicit enrollment close was omitted or configured too late.
+    if wall_clock_now >= cohort.starts_at:
+        return False
+    return True
 
 
 def captured_payment_has_seat(*, reservation_expires_at, occupied_other_seats: int, capacity: int, now: datetime | None = None) -> bool:

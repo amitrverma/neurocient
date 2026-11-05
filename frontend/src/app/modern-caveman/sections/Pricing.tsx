@@ -15,6 +15,7 @@ type Cohort = {
   price_minor: number;
   currency: string;
   enrollment_open: boolean;
+  enrollment_window_open?: boolean;
   waitlist_available: boolean;
   checkout_configured: boolean;
   checkout_offers?: Array<{
@@ -38,6 +39,13 @@ type MyCohortEnrollment = {
   cohort: { id: string };
 };
 
+type WaitlistStatus = {
+  status: string;
+  can_checkout: boolean;
+  offer_expires_at?: string | null;
+  offer_email_status?: string | null;
+};
+
 type ConfirmationStatus = "idle" | "checking" | "delayed";
 
 const errorCode = (data: unknown): string | undefined => {
@@ -59,6 +67,10 @@ const CHECKOUT_OFFERS = {
   inr: { amount: 2_100_000, currency: "INR" },
   usd: { amount: 24_900, currency: "USD" },
 } as const;
+
+const parseBackendDate = (value: string): Date => new Date(
+  `${value}${/[zZ]|[+-]\d\d:\d\d$/.test(value) ? "" : "Z"}`,
+);
 
 const checkoutWindowIsPresent = (): boolean => Array.from(
   document.querySelectorAll<HTMLElement>(
@@ -115,7 +127,9 @@ export default function Pricing() {
   const [messageIsError, setMessageIsError] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [hasConfirmedPlace, setHasConfirmedPlace] = useState(false);
+  const [checkoutUncertain, setCheckoutUncertain] = useState(false);
   const [confirmationStatus, setConfirmationStatus] = useState<ConfirmationStatus>("idle");
+  const [waitlistStatus, setWaitlistStatus] = useState<WaitlistStatus | null>(null);
   const userId = user?.id;
 
   const refreshCohort = useCallback(async () => {
@@ -127,6 +141,7 @@ export default function Pricing() {
   const refreshEnrollment = useCallback(async (cohortId: string) => {
     if (!userId) {
       setHasConfirmedPlace(false);
+      setCheckoutUncertain(false);
       return false;
     }
     try {
@@ -139,7 +154,11 @@ export default function Pricing() {
       const confirmed = Boolean(
         enrollment && ["paid", "active", "completed"].includes(enrollment.status),
       );
+      const uncertain = Boolean(
+        enrollment && ["checkout_creating", "checkout_unknown"].includes(enrollment.status),
+      );
       setHasConfirmedPlace(confirmed);
+      setCheckoutUncertain(uncertain);
       if (confirmed) {
         setConfirmationStatus("idle");
       } else if (enrollment?.payment_confirmation_pending) {
@@ -151,6 +170,20 @@ export default function Pricing() {
     }
   }, [userId]);
 
+  const refreshWaitlistStatus = useCallback(async (cohortId: string) => {
+    if (!userId) {
+      setWaitlistStatus(null);
+      return;
+    }
+    try {
+      const response = await fetch(`/api/cohorts/${cohortId}/waitlist/status`, { cache: "no-store" });
+      if (!response.ok) return;
+      setWaitlistStatus(await response.json());
+    } catch {
+      // The public cohort state remains usable if this account-specific refresh fails.
+    }
+  }, [userId]);
+
   useEffect(() => {
     refreshCohort()
       .catch(() => setMessage("Cohort details are temporarily unavailable."))
@@ -158,8 +191,26 @@ export default function Pricing() {
   }, [refreshCohort]);
 
   useEffect(() => {
-    if (ready && cohort?.id) void refreshEnrollment(cohort.id);
-  }, [cohort?.id, ready, refreshEnrollment]);
+    if (ready && cohort?.id) {
+      void refreshEnrollment(cohort.id);
+      void refreshWaitlistStatus(cohort.id);
+    }
+  }, [cohort?.id, ready, refreshEnrollment, refreshWaitlistStatus]);
+
+  useEffect(() => {
+    if (!waitlistStatus?.can_checkout || !waitlistStatus.offer_expires_at) return;
+    const expiresAt = parseBackendDate(waitlistStatus.offer_expires_at).getTime();
+    if (Number.isNaN(expiresAt)) return;
+    const remaining = expiresAt - Date.now();
+    if (remaining <= 0) {
+      setWaitlistStatus((current) => current ? { ...current, can_checkout: false } : current);
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setWaitlistStatus((current) => current ? { ...current, can_checkout: false } : current);
+    }, remaining);
+    return () => window.clearTimeout(timer);
+  }, [waitlistStatus?.can_checkout, waitlistStatus?.offer_expires_at]);
 
   useEffect(() => {
     if (confirmationStatus !== "checking" || !cohort?.id) return;
@@ -199,6 +250,8 @@ export default function Pricing() {
     const response = await fetch(`/api/cohorts/${cohort.id}/waitlist`, { method: "POST" });
     const data = await response.json().catch(() => ({}));
     setMessage(response.ok ? `You are on the waitlist${data.position ? ` at position ${data.position}` : ""}.` : "We could not add you to the waitlist.");
+    setMessageIsError(!response.ok);
+    if (response.ok) setWaitlistStatus(data);
     setWorking(false);
   };
 
@@ -228,8 +281,13 @@ export default function Pricing() {
         let nextMessage: string;
         if (code === "checkout_reconciliation_required") {
           nextMessage = "This checkout attempt may have reached the payment provider, so we cannot safely start another one yet. Your place is not confirmed. Please contact support before trying again.";
+          setCheckoutUncertain(true);
         } else if (code === "cohort_full") {
           nextMessage = "This cohort has just filled. You can join the waitlist.";
+          await Promise.all([
+            refreshCohort().catch(() => undefined),
+            refreshWaitlistStatus(cohort.id),
+          ]);
         } else if (code === "checkout_offer_conflict") {
           nextMessage = "Another currency checkout is already open. Complete or resolve it before switching currency.";
         } else if (response.status === 409) {
@@ -344,6 +402,23 @@ export default function Pricing() {
       ? new Intl.NumberFormat("en-IN", { style: "currency", currency: cohort.currency, maximumFractionDigits: 0 }).format(cohort.price_minor / 100)
       : "₹21,000 / US$249";
 
+  const hasWaitlistOffer = waitlistStatus?.can_checkout === true;
+  const waitlistOfferNeedsReview = waitlistStatus?.status === "offered"
+    && waitlistStatus.offer_email_status === "reconciliation_required";
+  const waitlistOfferBeingPrepared = waitlistStatus?.status === "offered"
+    && waitlistStatus.offer_email_status !== "sent"
+    && !waitlistOfferNeedsReview;
+  const waitlistOfferDeadline = hasWaitlistOffer && waitlistStatus.offer_expires_at
+    ? parseBackendDate(waitlistStatus.offer_expires_at).toLocaleString("en-IN", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZoneName: "short",
+      })
+    : null;
+
   return (
     <section id="pricing" className="mc-section mc-pricing">
       <div className="mc-pricing-inner">
@@ -365,7 +440,7 @@ export default function Pricing() {
               <div className="mc-cohort-facts">
                 <p>{cohort.title}</p>
                 <p>Starts {new Date(cohort.starts_at).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>
-                <p>{cohort.seats_remaining > 0 ? `${cohort.seats_remaining} of ${cohort.capacity} places available` : "Cohort full"}</p>
+                <p>{hasWaitlistOffer ? "One place held for you" : cohort.seats_remaining > 0 ? `${cohort.seats_remaining} of ${cohort.capacity} places available` : "Cohort full"}</p>
               </div>
             ) : (
               <p>The next cohort will be announced here.</p>
@@ -390,6 +465,22 @@ export default function Pricing() {
                   <p className="mc-reservation-next">No further action is needed right now.</p>
                 </div>
               </div>
+            ) : checkoutUncertain ? (
+              <div
+                className="mc-reservation-confirmation mc-reservation-confirmation--pending"
+                role="status"
+                aria-live="polite"
+              >
+                <span className="mc-reservation-mark mc-reservation-mark--pending" aria-hidden="true">
+                  <CircleAlert className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="mc-reservation-label">Checkout unresolved</p>
+                  <h4>Do not pay again</h4>
+                  <p className="mc-reservation-detail">A previous checkout may have reached the payment provider.</p>
+                  <p className="mc-reservation-next">Your place is not confirmed yet. Contact support so we can reconcile it safely.</p>
+                </div>
+              </div>
             ) : confirmationStatus !== "idle" ? (
               <div
                 className="mc-reservation-confirmation mc-reservation-confirmation--pending"
@@ -412,8 +503,24 @@ export default function Pricing() {
                   </p>
                 </div>
               </div>
-            ) : cohort?.enrollment_open ? (
+            ) : waitlistOfferNeedsReview ? (
+              <div className="font-sans text-sm text-white/80" role="status">
+                <p className="font-bold text-white">Your place needs an email check.</p>
+                <p className="mt-1">We could not confirm whether the payment email was accepted. Your payment window has not been confirmed, and our team needs to resolve it before you pay.</p>
+              </div>
+            ) : waitlistOfferBeingPrepared ? (
+              <div className="font-sans text-sm text-white/80" role="status">
+                <p className="font-bold text-white">A place is being prepared for you.</p>
+                <p className="mt-1">We will email your payment link when delivery is confirmed. Your 24-hour payment window has not started yet.</p>
+              </div>
+            ) : cohort?.enrollment_open || hasWaitlistOffer ? (
               <div className="grid gap-3">
+              {hasWaitlistOffer ? (
+                <div className="mb-1 text-white" role="status">
+                  <p className="font-sans text-xs font-bold uppercase tracking-wider text-brand-yellow">Your waitlist place is available</p>
+                  <p className="mt-1 font-sans text-sm text-white/80">Complete payment{waitlistOfferDeadline ? ` by ${waitlistOfferDeadline}` : " before the offer expires"}. The offer belongs to this account.</p>
+                </div>
+              ) : null}
               <button className="mc-checkout-button" disabled={working || !ready || !offerConfigured("inr")} onClick={() => void startCheckout("inr")}>
                 {working ? "Preparing…" : user ? "Reserve my place · ₹21,000" : "Log in to join"}<ArrowRight className="h-4 w-4" />
               </button>
@@ -430,7 +537,7 @@ export default function Pricing() {
                 {working ? "Adding…" : user ? "Join the waitlist" : "Log in to join waitlist"}<ArrowRight className="h-4 w-4" />
               </button>
             ) : cohort ? (
-              <p className="font-sans text-sm text-white/70">Enrollment opens soon.</p>
+              <p className="font-sans text-sm text-white/70">Enrollment is not currently open for this cohort.</p>
             ) : null}
           </div>
         </div>

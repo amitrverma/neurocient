@@ -59,6 +59,105 @@ describe("Modern Caveman checkout", () => {
     } as typeof window.Razorpay;
   });
 
+  it("shows account-bound payment choices for an unexpired waitlist offer", async () => {
+    const fullCohort = {
+      ...cohort,
+      seats_remaining: 0,
+      enrollment_open: false,
+      waitlist_available: true,
+    };
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url === "/api/cohorts/modern-caveman") return response({ cohort: fullCohort });
+      if (url === "/api/cohorts/my") return response({ enrollments: [] });
+      if (url.endsWith("/waitlist/status")) {
+        return response({
+          status: "offered",
+          can_checkout: true,
+          offer_expires_at: "2026-11-06T12:00:00",
+          offer_email_status: "sent",
+        });
+      }
+      throw new Error(`Unexpected request: ${url}`);
+    }));
+
+    render(<Pricing />);
+
+    expect(await screen.findByText(/your waitlist place is available/i)).toBeInTheDocument();
+    expect(screen.getByText(/offer belongs to this account/i)).toBeInTheDocument();
+    expect(screen.getByText(/one place held for you/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /reserve my place/i })).toBeEnabled();
+    expect(screen.getByRole("button", { name: /reserve for us\$249/i })).toBeEnabled();
+    expect(screen.queryByRole("button", { name: /join the waitlist/i })).not.toBeInTheDocument();
+  });
+
+  it("does not expose payment when a waitlist offer is no longer valid", async () => {
+    const fullCohort = {
+      ...cohort,
+      seats_remaining: 0,
+      enrollment_open: false,
+      waitlist_available: true,
+    };
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url === "/api/cohorts/modern-caveman") return response({ cohort: fullCohort });
+      if (url === "/api/cohorts/my") return response({ enrollments: [] });
+      if (url.endsWith("/waitlist/status")) {
+        return response({ status: "offered", can_checkout: false, offer_expires_at: null, offer_email_status: "sent" });
+      }
+      throw new Error(`Unexpected request: ${url}`);
+    }));
+
+    render(<Pricing />);
+
+    expect(await screen.findByRole("button", { name: /join the waitlist/i })).toBeEnabled();
+    expect(screen.queryByRole("button", { name: /reserve my place/i })).not.toBeInTheDocument();
+  });
+
+  it("does not start the payment clock while the offer email is awaiting delivery", async () => {
+    const fullCohort = {
+      ...cohort,
+      seats_remaining: 0,
+      enrollment_open: false,
+      waitlist_available: true,
+    };
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url === "/api/cohorts/modern-caveman") return response({ cohort: fullCohort });
+      if (url === "/api/cohorts/my") return response({ enrollments: [] });
+      if (url.endsWith("/waitlist/status")) {
+        return response({ status: "offered", can_checkout: false, offer_expires_at: null, offer_email_status: "failed" });
+      }
+      throw new Error(`Unexpected request: ${url}`);
+    }));
+
+    render(<Pricing />);
+
+    expect(await screen.findByText(/place is being prepared/i)).toBeInTheDocument();
+    expect(screen.getByText(/24-hour payment window has not started/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /reserve my place/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /join the waitlist/i })).not.toBeInTheDocument();
+  });
+
+  it("explains when an ambiguous offer email needs review", async () => {
+    const fullCohort = { ...cohort, seats_remaining: 0, enrollment_open: false, waitlist_available: true };
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url === "/api/cohorts/modern-caveman") return response({ cohort: fullCohort });
+      if (url === "/api/cohorts/my") return response({ enrollments: [] });
+      if (url.endsWith("/waitlist/status")) {
+        return response({ status: "offered", can_checkout: false, offer_expires_at: null, offer_email_status: "reconciliation_required" });
+      }
+      throw new Error(`Unexpected request: ${url}`);
+    }));
+
+    render(<Pricing />);
+
+    expect(await screen.findByText(/place needs an email check/i)).toBeInTheDocument();
+    expect(screen.getByText(/could not confirm whether the payment email was accepted/i)).toBeInTheDocument();
+    expect(screen.queryByText(/will email your payment link/i)).not.toBeInTheDocument();
+  });
+
   it("uses Razorpay for both INR and the secondary USD offer", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
@@ -506,6 +605,30 @@ describe("Modern Caveman checkout", () => {
     );
     expect(screen.getByRole("alert")).toHaveTextContent(/contact support before trying again/i);
     expect(mocks.open).not.toHaveBeenCalled();
+    expect(screen.getByRole("status")).toHaveTextContent(/do not pay again/i);
+    expect(screen.queryByRole("button", { name: /reserve my place/i })).not.toBeInTheDocument();
+  });
+
+  it("restores unresolved checkout protection after a page reload", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url === "/api/cohorts/modern-caveman") return response({ cohort });
+      if (url === "/api/cohorts/my") {
+        return response({
+          enrollments: [{ status: "checkout_unknown", cohort: { id: cohort.id } }],
+        });
+      }
+      if (url.endsWith("/waitlist/status")) {
+        return response({ status: "not_joined", can_checkout: false });
+      }
+      throw new Error(`Unexpected request: ${url}`);
+    }));
+
+    render(<Pricing />);
+
+    expect(await screen.findByRole("status")).toHaveTextContent(/checkout unresolved/i);
+    expect(screen.getByRole("status")).toHaveTextContent(/do not pay again/i);
+    expect(screen.queryByRole("button", { name: /reserve my place/i })).not.toBeInTheDocument();
   });
 
   it("refreshes seats and replaces checkout after capture is confirmed", async () => {

@@ -137,11 +137,26 @@ class CohortWaitlistEntry(Base):
     cohort_id = Column(UUID(as_uuid=True), ForeignKey("cohorts.id", ondelete="CASCADE"), nullable=False)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     status = Column(String, nullable=False, default="waiting")
+    offered_at = Column(DateTime, nullable=True)
+    offer_expires_at = Column(DateTime, nullable=True)
+    offer_email_sent_at = Column(DateTime, nullable=True)
+    offer_email_provider_id = Column(String, nullable=True)
+    offer_email_status = Column(String, nullable=False, default="pending", index=True)
+    offer_email_attempt_count = Column(Integer, nullable=False, default=0)
+    offer_email_last_error_code = Column(String, nullable=True)
+    offer_email_first_dispatched_at = Column(DateTime, nullable=True)
+    offer_email_last_attempt_at = Column(DateTime, nullable=True)
+    offer_email_payload = Column(JSON, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     __table_args__ = (
         UniqueConstraint("cohort_id", "user_id", name="uq_cohort_waitlist_user"),
         Index("ix_cohort_waitlist_order", "cohort_id", "created_at"),
+        Index("ix_cohort_waitlist_offer_expiry", "cohort_id", "status", "offer_expires_at"),
+        CheckConstraint(
+            "offer_email_status IN ('pending', 'dispatching', 'failed', 'sent', 'reconciliation_required')",
+            name="ck_cohort_waitlist_offer_email_status",
+        ),
     )
 
 

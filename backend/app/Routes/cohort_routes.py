@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -27,10 +27,15 @@ from app.services.cohorts import (
     PUBLIC_STATUSES,
     captured_payment_has_seat,
     enrollment_is_open,
+    enrollment_window_is_open,
     occupied_seats,
     validate_cohort_timezone,
     validate_cohort_values,
     validate_modern_caveman_price,
+)
+from app.services.waitlist_offers import (
+    dispatch_waitlist_offers_for_cohort,
+    waitlist_offer_is_checkoutable,
 )
 from app.services.cohort_billing import CaptureMismatch, apply_verified_capture
 from app.services.razorpay import (
@@ -136,6 +141,10 @@ class CohortCheckoutInput(BaseModel):
     offer_id: str = Field(default=COHORT_INR_OFFER_ID, pattern=r"^(inr|usd)$")
 
 
+class WaitlistOfferEmailResolutionInput(BaseModel):
+    action: str = Field(pattern=r"^(confirmed_sent|retry_confirmed_absent|revoke)$")
+
+
 def cohort_payload(cohort: Cohort, seats: int, *, include_private: bool = False) -> dict:
     data = {
         "id": str(cohort.id),
@@ -153,7 +162,9 @@ def cohort_payload(cohort: Cohort, seats: int, *, include_private: bool = False)
         "currency": cohort.currency,
         "status": cohort.status,
         "enrollment_open": enrollment_is_open(cohort, seats),
-        "waitlist_available": cohort.status == "full" or seats >= cohort.capacity,
+        "enrollment_window_open": enrollment_window_is_open(cohort),
+        "waitlist_available": enrollment_window_is_open(cohort)
+        and (cohort.status == "full" or seats >= cohort.capacity),
         "checkout_configured": razorpay_ready(),
         "checkout_offers": [
             {
@@ -260,6 +271,8 @@ async def join_waitlist(cohort_id: uuid.UUID, current_user: User = Depends(get_c
     cohort = await db.get(Cohort, cohort_id)
     if not cohort or cohort.status not in PUBLIC_STATUSES:
         raise HTTPException(status_code=404, detail="Cohort not found")
+    if not enrollment_window_is_open(cohort):
+        raise HTTPException(status_code=409, detail={"code": "enrollment_closed"})
     seats = await occupied_seats(db, cohort.id)
     if cohort.status != "full" and seats < cohort.capacity:
         raise HTTPException(status_code=409, detail="Waitlist opens when the cohort is full")
@@ -272,12 +285,71 @@ async def join_waitlist(cohort_id: uuid.UUID, current_user: User = Depends(get_c
         db.add(entry)
         await db.commit()
         await db.refresh(entry)
+    elif (
+        entry.status in ("offered", "checkout_started")
+        and entry.offer_email_status == "sent"
+        and entry.offer_expires_at
+        and entry.offer_expires_at <= datetime.utcnow()
+    ):
+        entry.status = "offer_expired"
+
+    # Rejoining is an explicit user action. A missed offer does not silently
+    # retain or restore the person's old FIFO position.
+    if entry.status == "offer_expired":
+        entry.status = "waiting"
+        entry.created_at = datetime.utcnow()
+        entry.offered_at = None
+        entry.offer_expires_at = None
+        entry.offer_email_sent_at = None
+        entry.offer_email_provider_id = None
+        entry.offer_email_status = "pending"
+        entry.offer_email_attempt_count = 0
+        entry.offer_email_last_error_code = None
+        entry.offer_email_first_dispatched_at = None
+        entry.offer_email_last_attempt_at = None
+        entry.offer_email_payload = None
+        await db.commit()
+    can_checkout = waitlist_offer_is_checkoutable(entry, cohort)
     position_result = await db.execute(select(func.count(CohortWaitlistEntry.id)).where(
         CohortWaitlistEntry.cohort_id == cohort_id,
         CohortWaitlistEntry.status == "waiting",
-        CohortWaitlistEntry.created_at <= entry.created_at,
+        or_(
+            CohortWaitlistEntry.created_at < entry.created_at,
+            and_(
+                CohortWaitlistEntry.created_at == entry.created_at,
+                CohortWaitlistEntry.id <= entry.id,
+            ),
+        ),
     ))
-    return {"status": entry.status, "position": int(position_result.scalar_one())}
+    return {
+        "status": entry.status,
+        "position": int(position_result.scalar_one()) if entry.status == "waiting" else None,
+        "can_checkout": can_checkout,
+        "offer_expires_at": entry.offer_expires_at.isoformat() if can_checkout else None,
+    }
+
+
+@router.get("/cohorts/{cohort_id}/waitlist/status")
+async def waitlist_status(
+    cohort_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    cohort = await db.get(Cohort, cohort_id)
+    result = await db.execute(
+        select(CohortWaitlistEntry).where(
+            CohortWaitlistEntry.cohort_id == cohort_id,
+            CohortWaitlistEntry.user_id == current_user.id,
+        )
+    )
+    entry = result.scalar_one_or_none()
+    can_checkout = waitlist_offer_is_checkoutable(entry, cohort)
+    return {
+        "status": entry.status if entry else "not_joined",
+        "can_checkout": can_checkout,
+        "offer_expires_at": entry.offer_expires_at.isoformat() if can_checkout else None,
+        "offer_email_status": entry.offer_email_status if entry else None,
+    }
 
 
 async def enforce_checkout_ip(request: Request) -> None:
@@ -317,6 +389,16 @@ async def begin_checkout(
             status_code=503,
             detail={"code": "cohort_price_misconfigured"},
         )
+    waitlist_result = await db.execute(
+        select(CohortWaitlistEntry)
+        .where(
+            CohortWaitlistEntry.cohort_id == cohort_id,
+            CohortWaitlistEntry.user_id == current_user.id,
+        )
+        .with_for_update()
+    )
+    waitlist_entry = waitlist_result.scalar_one_or_none()
+    has_waitlist_offer = waitlist_offer_is_checkoutable(waitlist_entry, cohort)
     existing_result = await db.execute(select(CohortEnrollment).where(
         CohortEnrollment.cohort_id == cohort_id, CohortEnrollment.user_id == current_user.id
     ))
@@ -344,6 +426,9 @@ async def begin_checkout(
                 status_code=409,
                 detail={"code": "checkout_offer_conflict"},
             )
+        if has_waitlist_offer and waitlist_entry.status != "checkout_started":
+            waitlist_entry.status = "checkout_started"
+            await db.commit()
         return {
             "key_id": settings.RAZORPAY_KEY_ID, "order_id": enrollment.provider_order_id,
             "amount": enrollment.amount_minor, "currency": enrollment.currency,
@@ -352,7 +437,22 @@ async def begin_checkout(
             "reservation_expires_at": enrollment.reservation_expires_at.isoformat(),
         }
     seats = await occupied_seats(db, cohort.id)
-    if not enrollment_is_open(cohort, seats):
+    public_checkout_open = enrollment_is_open(cohort, seats)
+    offered_checkout_open = (
+        has_waitlist_offer
+        and cohort.status in ("open", "full")
+        and enrollment_window_is_open(cohort)
+        and max(seats - 1, 0) < cohort.capacity
+    )
+    waiting_count = await db.scalar(
+        select(func.count(CohortWaitlistEntry.id)).where(
+            CohortWaitlistEntry.cohort_id == cohort.id,
+            CohortWaitlistEntry.status == "waiting",
+        )
+    )
+    if (public_checkout_open and waiting_count and not has_waitlist_offer) or (
+        not public_checkout_open and not offered_checkout_open
+    ):
         raise HTTPException(status_code=409, detail={"code": "cohort_full", "waitlist_available": True})
     expires_at = datetime.utcnow() + timedelta(minutes=15)
     enrollment = enrollment or CohortEnrollment(
@@ -365,6 +465,8 @@ async def begin_checkout(
     enrollment.amount_minor = offer.amount_minor
     enrollment.currency = offer.currency
     enrollment.provider_order_id = None
+    if has_waitlist_offer:
+        waitlist_entry.status = "checkout_started"
     db.add(enrollment)
     await db.commit()
     enrollment_id = enrollment.id
@@ -624,8 +726,91 @@ async def admin_cohort_detail(cohort_id: uuid.UUID, _: User = Depends(require_ad
     data["waitlist"] = [{
         "id": str(item.id), "status": item.status, "email": user.email, "name": user.name,
         "joined_at": item.created_at.isoformat(),
+        "offer_expires_at": item.offer_expires_at.isoformat() if item.offer_expires_at else None,
+        "offer_email_sent_at": item.offer_email_sent_at.isoformat() if item.offer_email_sent_at else None,
+        "offer_email_status": item.offer_email_status,
+        "offer_email_last_error_code": item.offer_email_last_error_code,
     } for item, user in waitlist_result.all()]
     return data
+
+
+@router.post("/admin/cohorts/{cohort_id}/waitlist/offer-next")
+async def admin_offer_next_waitlist_place(
+    cohort_id: uuid.UUID,
+    admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    counts = await dispatch_waitlist_offers_for_cohort(db, cohort_id)
+    await audit(
+        db,
+        admin,
+        "cohort.waitlist_offer_sent",
+        "cohort_waitlist_entry",
+        cohort_id,
+        counts,
+    )
+    await db.commit()
+    return counts
+
+
+@router.post("/admin/cohorts/{cohort_id}/waitlist/{entry_id}/resolve-email")
+async def admin_resolve_waitlist_offer_email(
+    cohort_id: uuid.UUID,
+    entry_id: uuid.UUID,
+    data: WaitlistOfferEmailResolutionInput,
+    admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(CohortWaitlistEntry)
+        .where(
+            CohortWaitlistEntry.id == entry_id,
+            CohortWaitlistEntry.cohort_id == cohort_id,
+        )
+        .with_for_update()
+    )
+    entry = result.scalar_one_or_none()
+    if not entry:
+        raise HTTPException(status_code=404, detail="Waitlist offer not found")
+    if entry.status != "offered" or entry.offer_email_status != "reconciliation_required":
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "waitlist_offer_resolution_not_required"},
+        )
+
+    now = datetime.utcnow()
+    if data.action == "confirmed_sent":
+        entry.offer_email_status = "sent"
+        entry.offer_email_sent_at = entry.offer_email_sent_at or now
+        entry.offer_email_last_error_code = None
+        entry.offer_email_payload = None
+        if not entry.offer_expires_at or entry.offer_expires_at <= now:
+            entry.status = "offer_expired"
+    elif data.action == "retry_confirmed_absent":
+        entry.offer_email_status = "pending"
+        entry.offer_email_attempt_count = 0
+        entry.offer_email_last_error_code = None
+        entry.offer_email_first_dispatched_at = None
+        entry.offer_email_last_attempt_at = None
+        entry.offer_email_payload = None
+        entry.offer_expires_at = None
+    else:
+        entry.status = "offer_expired"
+        entry.offer_email_last_error_code = "operator_revoked"
+
+    await audit(
+        db,
+        admin,
+        "cohort.waitlist_offer_email_resolved",
+        "cohort_waitlist_entry",
+        entry.id,
+        {"resolution": data.action, "resulting_status": entry.status},
+    )
+    await db.commit()
+    return {
+        "status": entry.status,
+        "offer_email_status": entry.offer_email_status,
+    }
 
 
 @router.post("/admin/cohorts", status_code=status.HTTP_201_CREATED)

@@ -9,6 +9,8 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import (
+    CohortEnrollment,
+    CohortWaitlistEntry,
     CohortWelcomeEmailDelivery,
     MembershipBillingEvent,
     MembershipEntitlement,
@@ -40,6 +42,7 @@ LOCAL_OBSERVATION_CODES = {
     "refund_required",
     "billing_event_unmatched",
     "welcome_delivery_failed",
+    "waitlist_offer_delivery_failed",
 }
 
 
@@ -179,6 +182,14 @@ async def _resolve_cleared_local_issues(db: AsyncSession) -> None:
             payment = await db.get(PaymentRecord, local_uuid)
             if payment:
                 still_open = payment.status == "checkout_unknown"
+        elif (
+            issue.issue_code == "checkout_outcome_unknown"
+            and issue.object_type == "cohort_enrollment"
+            and local_uuid
+        ):
+            enrollment = await db.get(CohortEnrollment, local_uuid)
+            if enrollment:
+                still_open = enrollment.status == "checkout_unknown"
         elif issue.issue_code == "refund_required" and local_uuid:
             payment = await db.get(PaymentRecord, local_uuid)
             if payment:
@@ -196,6 +207,14 @@ async def _resolve_cleared_local_issues(db: AsyncSession) -> None:
             delivery = await db.get(model, local_uuid)
             if delivery:
                 still_open = delivery.status in {"failed", "reconciliation_required"}
+        elif issue.issue_code == "waitlist_offer_delivery_failed" and local_uuid:
+            entry = await db.get(CohortWaitlistEntry, local_uuid)
+            if entry:
+                still_open = (
+                    entry.status == "offered"
+                    and entry.offer_email_status
+                    in {"failed", "reconciliation_required"}
+                )
         if not still_open:
             issue.status = "resolved"
             issue.resolved_at = now
@@ -357,6 +376,28 @@ async def reconcile_local_payment_state(db: AsyncSession) -> dict[str, int]:
             )
         )
 
+    unknown_enrollments = await bounded_reconciliation_page(
+        db,
+        stream_name="cohort_checkout_unknown",
+        key_column=CohortEnrollment.id,
+        cursor_parser=uuid.UUID,
+        query=(
+            select(CohortEnrollment)
+            .where(CohortEnrollment.status == "checkout_unknown")
+        ),
+    )
+    for enrollment in unknown_enrollments:
+        observations.append(
+            ObservedIssue(
+                product="cohort",
+                issue_code="checkout_outcome_unknown",
+                object_type="cohort_enrollment",
+                local_object_id=str(enrollment.id),
+                provider_object_id=enrollment.provider_order_id,
+                severity="critical",
+            )
+        )
+
     billing_events = await bounded_reconciliation_page(
         db,
         stream_name="membership_billing_events",
@@ -408,6 +449,37 @@ async def reconcile_local_payment_state(db: AsyncSession) -> dict[str, int]:
                     details={"delivery_status": delivery.status},
                 )
             )
+
+    waitlist_deliveries = await bounded_reconciliation_page(
+        db,
+        stream_name="cohort_waitlist_offer_delivery",
+        key_column=CohortWaitlistEntry.id,
+        cursor_parser=uuid.UUID,
+        query=(
+            select(CohortWaitlistEntry)
+            .where(
+                CohortWaitlistEntry.status == "offered",
+                CohortWaitlistEntry.offer_email_status.in_(
+                    ["failed", "reconciliation_required"]
+                )
+            )
+        ),
+    )
+    for entry in waitlist_deliveries:
+        observations.append(
+            ObservedIssue(
+                product="cohort",
+                issue_code="waitlist_offer_delivery_failed",
+                object_type="cohort_waitlist_entry",
+                local_object_id=str(entry.id),
+                severity=(
+                    "critical"
+                    if entry.offer_email_status == "reconciliation_required"
+                    else "warning"
+                ),
+                details={"delivery_status": entry.offer_email_status},
+            )
+        )
 
     for issue in observations:
         await record_issue(db, issue)

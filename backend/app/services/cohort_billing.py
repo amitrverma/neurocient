@@ -10,6 +10,7 @@ from app.models import (
     AdminAuditEvent,
     Cohort,
     CohortEnrollment,
+    CohortWaitlistEntry,
     PaymentRecord,
     PaymentWebhookEvent,
 )
@@ -125,13 +126,31 @@ async def apply_verified_capture(
         select(Cohort).where(Cohort.id == enrollment.cohort_id).with_for_update()
     )
     cohort = cohort_result.scalar_one()
+    now = datetime.utcnow()
+    waitlist_entry = await db.scalar(
+        select(CohortWaitlistEntry).where(
+            CohortWaitlistEntry.cohort_id == enrollment.cohort_id,
+            CohortWaitlistEntry.user_id == enrollment.user_id,
+        )
+    )
     occupied = await occupied_seats(db, cohort.id)
     current_reservation_counted = bool(
         enrollment.status == "pending_payment"
         and enrollment.reservation_expires_at
-        and enrollment.reservation_expires_at > datetime.utcnow()
+        and enrollment.reservation_expires_at > now
     )
-    occupied_other = max(occupied - (1 if current_reservation_counted else 0), 0)
+    current_offer_counted = bool(
+        not current_reservation_counted
+        and waitlist_entry
+        and waitlist_entry.status in ("offered", "checkout_started")
+        and waitlist_entry.offer_email_status == "sent"
+        and waitlist_entry.offer_expires_at
+        and waitlist_entry.offer_expires_at > now
+    )
+    occupied_other = max(
+        occupied - (1 if current_reservation_counted or current_offer_counted else 0),
+        0,
+    )
     if not captured_payment_has_seat(
         reservation_expires_at=enrollment.reservation_expires_at,
         occupied_other_seats=occupied_other,
@@ -152,6 +171,8 @@ async def apply_verified_capture(
                 details={"provider": provider, "provider_order_id": order_id},
             )
         )
+        if waitlist_entry and waitlist_entry.status in ("offered", "checkout_started"):
+            waitlist_entry.status = "offer_expired"
         return CaptureResult(enrollment.id, "capacity_conflict", requires_refund=True)
 
     enrollment.status = "paid"
@@ -161,6 +182,8 @@ async def apply_verified_capture(
     enrollment.amount_minor = record.amount_minor
     enrollment.currency = record.currency
     enrollment.paid_at = datetime.utcnow()
+    if waitlist_entry:
+        waitlist_entry.status = "enrolled"
     record.status = "captured"
     record.provider_payment_id = payment_id
     other_attempts_result = await db.execute(

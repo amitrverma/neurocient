@@ -103,6 +103,7 @@ class Settings:
     RESEND_API_KEY = os.getenv("RESEND_API_KEY")
     RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL")
     PASSWORD_RESET_BASE_URL = os.getenv("PASSWORD_RESET_BASE_URL")
+    PUBLIC_SITE_URL = os.getenv("PUBLIC_SITE_URL", "https://neurocient.com").rstrip("/")
     RATE_LIMIT_ENABLED = _env_bool("RATE_LIMIT_ENABLED", default=False)
     RATE_LIMIT_KEY_SECRET = os.getenv("RATE_LIMIT_KEY_SECRET")
     ABUSE_PROXY_SECRET = os.getenv("ABUSE_PROXY_SECRET")

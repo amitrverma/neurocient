@@ -6,7 +6,7 @@ Owner: Amit
 
 Base revision: `cd08080a09ba6e7ce2b4b1fd9ebbe9f1965fd335`
 
-Contract version: 1.2 (2026-11-05)
+Contract version: 1.3 (2026-11-05)
 
 Implementation revision: working tree based on `0cd9062b2f371efa6f7ce052ce89762d19fa29cc`
 
@@ -57,6 +57,16 @@ before either item is `Verified`.
   membership. Reload/re-entry reads authoritative backend status.
 - Membership webhooks use a membership-specific endpoint and secret so their
   state machine and ledger do not become coupled to cohort fulfilment.
+- Membership is date-aware. The customer surface names the next relevant date:
+  renewal, paid-through, cancellation-effective, or grace end. Enforcement uses
+  authoritative UTC timestamps; presentation uses an unambiguous customer-local
+  date and names a timezone when an exact cutoff matters.
+- A failed renewal does not revoke an already-paid period. Recovery receives a
+  fixed three-day grace period after the provider-verified `current_end`.
+  Initial payment failure has no grace because no paid period was established.
+- One account has at most one current Razorpay subscription generation. Active,
+  retrying, grace-period, cancellation-scheduled, and uncertain states cannot
+  start a second subscription.
 
 ## Authoritative state and lifecycle
 
@@ -72,16 +82,23 @@ Provider lifecycle maps as follows:
 | --- | --- | --- |
 | checkout created/authenticated | `checkout_pending` / `authenticated` | No |
 | `subscription.activated`, `subscription.charged`, `subscription.resumed` | `active` with a future provider `current_end` | Yes |
-| `subscription.pending`, `subscription.halted`, `subscription.paused` | `past_due` or `paused` | No |
-| `subscription.cancelled` | `canceled` | No |
-| `subscription.completed` | `expired` | No |
+| `subscription.pending`, `subscription.halted` after a previously paid cycle | `past_due` | Through `current_end` plus three days |
+| `subscription.pending`, `subscription.halted` without a paid cycle | `past_due` | No |
+| `subscription.paused` | `paused` | Through an already-paid `current_end`; no additional grace |
+| period-end cancellation requested and provider-acknowledged | active with `cancellation_state=requested` | Through `current_end`; no additional grace |
+| `subscription.cancelled` | `canceled` | Through an already-paid `current_end`; no additional grace |
+| `subscription.completed` | `expired` | Through an already-paid `current_end`; no additional grace |
 | refund against the current membership payment | `refunded` | No |
 | dispute/chargeback against the current membership payment | `disputed` | No |
 
-`active` without a future paid-through time remains inactive under the existing
-access policy. Refund, dispute, cancellation, and completion are terminal for
-that provider subscription. A later purchase creates a new provider
-subscription; events for an older subscription cannot change the new one.
+An active or recovery state without a valid paid-through time remains inactive.
+The grace deadline is exactly 72 hours after the authoritative paid-through
+timestamp; it is not extended by reload, another failed attempt, or a delayed
+duplicate event. Refund and dispute restrict access immediately. Cancellation
+and completion are terminal for that provider subscription but do not
+retroactively erase an already-paid period. A later purchase creates a new
+provider subscription; events for an older subscription cannot change the new
+one.
 
 ## Invariants and acceptance criteria
 
@@ -109,17 +126,21 @@ subscription; events for an older subscription cannot change the new one.
   subscription. Equal-time ambiguity resolves toward no access and remains
   visible for reconciliation.
 - **PAY12-G:** Activation and renewal require a verified active/charged event
-  with a future `current_end`. Pending, halted, paused, cancelled, completed,
-  refunded, disputed, malformed, unmatched, and unknown states grant no access.
+  with a valid `current_end`. A later renewal failure preserves access through
+  that paid-through time plus exactly three days; initial payment failure grants
+  no access. Paused, cancelled, and completed states may preserve only the
+  already-paid period and receive no grace. Refunded, disputed, malformed,
+  unmatched, and unknown states grant no access.
 - **PAY12-H:** Event receipt, ledger outcome, and entitlement mutation commit in
   one transaction. Storage failure is not acknowledged as success. Provider
   failures and reconciliation-required states have stable, privacy-safe error
   codes and logs without secrets, full payloads, payment details, or email.
 - **PAY12-I:** The membership UI requires sign-in, prevents duplicate submission,
   presents price/currency/recurrence before opening checkout, reports pending
-  confirmation truthfully, and recovers on reload from backend state. Keyboard,
-  narrow-screen, dismissal, script-load failure, and provider failure states
-  remain usable.
+  confirmation truthfully, names the currently relevant renewal, paid-through,
+  cancellation, or grace date, and recovers on reload from backend state.
+  Keyboard, narrow-screen, dismissal, script-load failure, and provider failure
+  states remain usable.
 - **PAY12-J:** Existing entitlement consumers, cohort checkout/webhooks, manual
   entitlements, free limits, and authentication boundaries retain their current
   behavior. A browser return or direct API call cannot bypass PAY-03.
@@ -129,9 +150,14 @@ subscription; events for an older subscription cannot change the new one.
   cannot duplicate a sent welcome. Email failure never revokes or fabricates
   paid access, and inactive access suppresses an unsent welcome.
 - **PAY12-L:** Cancellation is authenticated and requested for period end. A
-  browser response never removes access. Provider rejection is safely retryable;
-  uncertain completion blocks automatic retry and becomes visible to bounded
-  observation-only reconciliation.
+  browser response never removes access or shortens the paid-through period.
+  Provider rejection is safely retryable; uncertain completion blocks automatic
+  retry and becomes visible to bounded observation-only reconciliation.
+- **PAY12-M:** An account with a current active, retrying, grace-period,
+  cancellation-scheduled, or uncertain Razorpay subscription cannot create a
+  second subscription. A terminal generation must be established before a new
+  purchase replaces it, and later events for the old generation cannot revive or
+  overwrite the replacement.
 
 ## Retry, concurrency, and failure contract
 
@@ -234,5 +260,7 @@ entitlement no longer points at the retired provider.
   management. The current admin view is observation-only.
 - Cohort capacity-conflict refunds and cohort payment recovery (PAY-05).
 - Taxes, invoices, coupons, plan changes, trials, annual plans, and proration.
-- Marketing email, dunning messages, or provider notification customization.
+- Marketing email, provider notification customization, or a general-purpose
+  dunning platform. Transactional state-change messages required by the
+  date-aware payment experience remain in scope.
 - Enabling live charges or mutating production Razorpay configuration.

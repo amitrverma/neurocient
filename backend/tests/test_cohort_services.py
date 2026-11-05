@@ -19,6 +19,7 @@ def cohort(**overrides):
         "timezone": "Asia/Kolkata",
         "enrollment_opens_at": None,
         "enrollment_closes_at": None,
+        "starts_at": datetime(2027, 1, 1, 12),
     }
     values.update(overrides)
     return SimpleNamespace(**values)
@@ -62,6 +63,7 @@ def test_enrollment_window_and_status_are_enforced():
     assert enrollment_is_open(cohort(status="full"), 0, now) is False
     assert enrollment_is_open(cohort(enrollment_opens_at=now + timedelta(minutes=1)), 0, now) is False
     assert enrollment_is_open(cohort(enrollment_closes_at=now), 0, now) is False
+    assert enrollment_is_open(cohort(starts_at=now), 0, now) is False
 
 
 def test_enrollment_window_uses_the_cohort_wall_clock():

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -20,6 +20,7 @@ from app.services.job_control import (
     record_worker_heartbeat,
 )
 from app.services.payment_reconciliation import run_payment_reconciliation
+from app.services.waitlist_offers import dispatch_available_waitlist_offers
 from app.utils.reminder_engine import (
     send_daily_nudge,
     send_microchallenge_pushes,
@@ -39,6 +40,15 @@ def _daily_run_key(now: datetime | None = None) -> str:
     if current.tzinfo is None:
         current = india_tz.localize(current)
     return current.astimezone(india_tz).date().isoformat()
+
+
+def _interval_run_key(minutes: int, now: datetime | None = None) -> str:
+    current = now or datetime.now(UTC)
+    if current.tzinfo is None:
+        current = current.replace(tzinfo=UTC)
+    bucket_seconds = minutes * 60
+    bucket = int(current.timestamp()) // bucket_seconds
+    return f"{minutes}m/{bucket}"
 
 
 async def run_claimed_job(task_func, name: str, *, run_key: str | None = None):
@@ -143,6 +153,14 @@ async def run_reconciliation_job():
     return await run_claimed_job(run_payment_reconciliation, "payment_reconciliation")
 
 
+async def run_waitlist_offer_job():
+    return await run_claimed_job(
+        dispatch_available_waitlist_offers,
+        "waitlist_offer_dispatch",
+        run_key=_interval_run_key(2),
+    )
+
+
 async def record_heartbeat():
     async with AsyncSessionLocal() as db:
         await record_worker_heartbeat(
@@ -179,6 +197,14 @@ def start_scheduler() -> None:
         coalesce=True,
         max_instances=1,
     )
+    scheduler.add_job(
+        run_waitlist_offer_job,
+        IntervalTrigger(minutes=2),
+        id="waitlist_offer_dispatch",
+        replace_existing=True,
+        coalesce=True,
+        max_instances=1,
+    )
     for func, job_id, hour, minute in jobs:
         scheduler.add_job(
             func,
@@ -196,7 +222,7 @@ def start_scheduler() -> None:
         component="worker",
         operation="scheduler_start",
         outcome="success",
-        count=len(jobs) + 1,
+        count=len(jobs) + 2,
     )
 
 

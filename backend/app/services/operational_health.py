@@ -10,6 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings
 from app.database import AsyncSessionLocal
 from app.models import (
+    CohortEnrollment,
+    CohortWaitlistEntry,
     CohortWelcomeEmailDelivery,
     MembershipBillingEvent,
     MembershipEntitlement,
@@ -129,6 +131,17 @@ async def operational_snapshot(db: AsyncSession) -> dict:
         ).where(
             PaymentWebhookEvent.status.in_(["rejected", "capacity_conflict"]),
             PaymentWebhookEvent.created_at >= recent,
+        ),
+        "cohort_checkout_unknown": select(func.count(CohortEnrollment.id)).where(
+            CohortEnrollment.status == "checkout_unknown"
+        ),
+        "waitlist_offer_delivery_attention": select(
+            func.count(CohortWaitlistEntry.id)
+        ).where(
+            CohortWaitlistEntry.status == "offered",
+            CohortWaitlistEntry.offer_email_status.in_(
+                ["failed", "reconciliation_required"]
+            )
         ),
         "welcome_delivery_attention": select(
             (

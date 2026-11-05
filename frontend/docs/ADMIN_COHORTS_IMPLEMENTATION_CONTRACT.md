@@ -60,7 +60,28 @@ to a waitlist path and prevents further checkout creation.
 - Canonical enrolment states are `pending_payment`, `paid`, `active`,
   `completed`, `cancelled`, and `refunded`.
 - The waitlist is cohort-specific and ordered. Reaching capacity exposes the
-  waitlist instead of accepting another payment.
+  waitlist instead of accepting another payment. Joining it creates no provider
+  order, payment reservation, or enrolment entitlement.
+- Capacity is configured per cohort. Each place opened by a confirmed pre-start
+  withdrawal is reserved for a different eligible account in FIFO order, with
+  entry ID as the deterministic tie-breaker. Existing waiters cannot be bypassed
+  by public checkout. Excess capacity may reopen publicly after every waiting
+  account has an offer, provided enrolment has not closed and the cohort has not
+  started. A post-start refund never opens a place or promotes the waitlist.
+- The next account receives an email at its authoritative account address with
+  an account-bound link. The 24-hour payment window begins only when the email
+  provider accepts delivery and is capped by enrolment close or cohort start,
+  whichever is earlier. Definite provider rejection is retryable and does not
+  start the clock; an ambiguous outcome reuses the same provider idempotency
+  identity. Pending, failed, and ambiguous delivery states remain visible to
+  operators while the place stays reserved. An ambiguous outcome that reaches
+  reconciliation requires an audited operator choice: confirm sent, confirm
+  absent and retry, or revoke the offer.
+- Payment begins only when the offered account starts normal checkout. A missed
+  offer ends that waitlist place and passes the seat to the next account; the
+  person may explicitly rejoin at the back. A two-minute worker check normally
+  creates and sends offers, and the cohort detail page can request an immediate
+  check.
 - The existing single-email `Participant.cohort` representation is legacy and
   must not remain the authoritative cohort/enrolment model.
 
@@ -74,6 +95,12 @@ to a waitlist path and prevents further checkout creation.
   and transition the enrolment to `paid`.
 - Duplicate, late, failed, or mismatched events must not create duplicate
   enrolments or exceed capacity.
+- One account can hold only one paid enrolment per cohort and at most one
+  unresolved order for that enrolment. Equivalent repeated checkout actions
+  reuse the safe current order; an uncertain order blocks another attempt.
+- If a late capture produces an extra payment after the account already has its
+  paid place, the enrolment remains single and the extra payment becomes a
+  visible refund/reconciliation obligation.
 - A captured payment that arrives after its reservation has expired enters
   visible reconciliation if capacity has gone; it never silently overbooks.
 - Automated refunds for that exceptional state remain a go-live prerequisite.
@@ -126,7 +153,8 @@ when entered from the portrait.
 - **AC-CAPACITY-01:** Concurrent purchase attempts cannot produce paid
   enrolments beyond hard capacity.
 - **AC-WAITLIST-01:** A full cohort offers a cohort-specific waitlist and cannot
-  create another checkout.
+  create another checkout. Joining the waitlist creates no payment object; a
+  later account-bound, expiring offer is required before that user can pay.
 - **AC-PAY-01:** Checkout requires a signed-in account and is tied to one user
   and one cohort.
 - **AC-PAY-02:** A redirect, client request, replayed webhook, or mismatched

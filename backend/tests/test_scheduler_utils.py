@@ -29,6 +29,30 @@ def test_daily_run_key_uses_india_calendar_day():
     assert scheduler._daily_run_key(value) == "2026-11-01"
 
 
+def test_interval_run_key_is_stable_within_two_minute_bucket():
+    first = datetime.fromisoformat("2026-11-01T12:00:01+00:00")
+    second = datetime.fromisoformat("2026-11-01T12:01:59+00:00")
+    next_bucket = datetime.fromisoformat("2026-11-01T12:02:00+00:00")
+
+    assert scheduler._interval_run_key(2, first) == scheduler._interval_run_key(2, second)
+    assert scheduler._interval_run_key(2, first) != scheduler._interval_run_key(2, next_bucket)
+
+
+def test_waitlist_job_uses_durable_interval_claim(monkeypatch):
+    claimed = AsyncMock(return_value={"offered": 1})
+    monkeypatch.setattr(scheduler, "run_claimed_job", claimed)
+    monkeypatch.setattr(scheduler, "_interval_run_key", lambda minutes: "2m/test")
+
+    result = asyncio.run(scheduler.run_waitlist_offer_job())
+
+    assert result == {"offered": 1}
+    claimed.assert_awaited_once_with(
+        scheduler.dispatch_available_waitlist_offers,
+        "waitlist_offer_dispatch",
+        run_key="2m/test",
+    )
+
+
 def test_claimed_job_completes_once(monkeypatch):
     run = SimpleNamespace(id=uuid.uuid4(), correlation_id=uuid.uuid4())
     claim = AsyncMock(return_value=run)
@@ -100,7 +124,8 @@ def test_start_scheduler_registers_worker_jobs(monkeypatch):
     scheduler.start_scheduler()
 
     add_calls = [call for call in calls if call[0] == "add"]
-    assert len(add_calls) == 5
+    assert len(add_calls) == 6
+    assert any(call[2]["id"] == "waitlist_offer_dispatch" for call in add_calls)
     assert all(call[2]["coalesce"] is True for call in add_calls)
     assert all(call[2]["max_instances"] == 1 for call in add_calls)
     assert ("start",) in calls

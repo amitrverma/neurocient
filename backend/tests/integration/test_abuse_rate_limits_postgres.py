@@ -11,7 +11,7 @@ from sqlalchemy import delete, select
 
 
 pytestmark = [
-    pytest.mark.asyncio(loop_scope="module"),
+    pytest.mark.asyncio(loop_scope="session"),
     pytest.mark.skipif(
         os.getenv("RUN_POSTGRES_INTEGRATION") != "1",
         reason="requires the local PostgreSQL integration database",

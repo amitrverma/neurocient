@@ -68,7 +68,7 @@ async def test_concurrent_checkout_creates_one_provider_subscription(monkeypatch
     user = User(id=user_id, email=f"billing-{user_id}@example.test")
     calls = 0
 
-    async def fetch_plan():
+    async def fetch_plan(_plan_id: str):
         return {
             "id": config["RAZORPAY_MEMBERSHIP_PLAN_ID"],
             "period": "monthly",
@@ -76,9 +76,10 @@ async def test_concurrent_checkout_creates_one_provider_subscription(monkeypatch
             "item": {"active": True, "amount": 49_900, "currency": "INR"},
         }
 
-    async def create_subscription(*, user_id: str, operation_id: str):
+    async def create_subscription(*, user_id: str, operation_id: str, plan_id: str):
         nonlocal calls
         calls += 1
+        assert plan_id == config["RAZORPAY_MEMBERSHIP_PLAN_ID"]
         await asyncio.sleep(0.15)
         return {
             "id": "sub_concurrent_once",
@@ -253,7 +254,7 @@ async def test_unknown_provider_outcome_blocks_automatic_duplicate(monkeypatch):
     user = User(id=user_id, email=f"unknown-{user_id}@example.test")
     calls = 0
 
-    async def fetch_plan():
+    async def fetch_plan(_plan_id: str):
         return {
             "id": config["RAZORPAY_MEMBERSHIP_PLAN_ID"],
             "period": "monthly",
@@ -337,6 +338,8 @@ async def test_failed_webhook_transaction_can_be_retried(monkeypatch):
             provider="razorpay",
             provider_plan_id=config["RAZORPAY_MEMBERSHIP_PLAN_ID"],
             provider_subscription_id=subscription_id,
+            price_minor=49_900,
+            currency="INR",
         ))
         await session.commit()
 
@@ -566,6 +569,8 @@ async def test_webhook_rejects_cross_object_and_customer_mismatches(monkeypatch)
             provider_plan_id=config["RAZORPAY_MEMBERSHIP_PLAN_ID"],
             provider_subscription_id=subscription_id,
             provider_customer_id="cust_expected",
+            price_minor=49_900,
+            currency="INR",
         ))
         await session.commit()
 

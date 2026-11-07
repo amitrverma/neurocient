@@ -49,7 +49,7 @@ async def test_article_access_is_authoritative_idempotent_and_concurrency_safe()
                 user_id=user_id,
                 status="canceled",
                 current_period_end=datetime.now(UTC).replace(tzinfo=None)
-                + timedelta(days=7),
+                - timedelta(seconds=1),
             )
         )
         await session.commit()

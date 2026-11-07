@@ -58,6 +58,16 @@ async def test_cancellation_is_period_end_intent_and_webhook_remains_authority(m
         "RAZORPAY_MEMBERSHIP_PLAN_ID",
         "plan_monthly",
     )
+    monkeypatch.setattr(
+        membership_routes.settings,
+        "RAZORPAY_MEMBERSHIP_AMOUNT_MINOR",
+        49_900,
+    )
+    monkeypatch.setattr(
+        membership_routes.settings,
+        "RAZORPAY_MEMBERSHIP_CURRENCY",
+        "INR",
+    )
 
     app = FastAPI()
     app.include_router(membership_cancellation_routes.router, prefix="/api")
@@ -77,6 +87,8 @@ async def test_cancellation_is_period_end_intent_and_webhook_remains_authority(m
                 provider="razorpay",
                 provider_subscription_id=f"sub_{user_id.hex}",
                 provider_plan_id="plan_monthly",
+                price_minor=49_900,
+                currency="INR",
                 current_period_end=datetime.utcnow() + timedelta(days=20),
             )
         )

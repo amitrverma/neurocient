@@ -58,6 +58,11 @@ SUPPORTED_EVENTS = {
     "payment.refunded",
     "payment.dispute.created",
 }
+WELCOME_TRIGGER_EVENTS = {
+    "subscription.activated",
+    "subscription.charged",
+    "subscription.resumed",
+}
 
 
 class MembershipCheckoutInput(BaseModel):
@@ -574,7 +579,7 @@ async def membership_webhook(
                 status_code=_webhook_rejection_status(prior.reason_code),
                 detail={"code": prior.reason_code},
             )
-        if prior and prior.user_id:
+        if prior and prior.user_id and prior.event_type in WELCOME_TRIGGER_EVENTS:
             entitlement = await db.get(MembershipEntitlement, prior.user_id)
             if entitlement_is_active(entitlement):
                 await membership_welcome_email.ensure_membership_welcome_delivery(
@@ -666,7 +671,10 @@ async def membership_webhook(
     event.reason_code = reason
     event.processed_at = datetime.utcnow()
     await _replay_unmatched(db, entitlement)
-    welcome_due = entitlement_is_active(entitlement)
+    welcome_due = (
+        event.event_type in WELCOME_TRIGGER_EVENTS
+        and entitlement_is_active(entitlement)
+    )
     if welcome_due:
         await membership_welcome_email.ensure_membership_welcome_delivery(
             db, entitlement.user_id

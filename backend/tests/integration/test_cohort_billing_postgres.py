@@ -318,6 +318,7 @@ async def test_cohort_capture_claim_is_atomic_and_price_is_authoritative(monkeyp
 
     monkeypatch.setattr(settings, "RAZORPAY_WEBHOOK_SECRET", "cohort-webhook-secret")
     monkeypatch.setattr(settings, "RAZORPAY_KEY_SECRET", "cohort-checkout-secret")
+    monkeypatch.setattr(settings, "RESEND_API_KEY", "re_test_cohort")
     monkeypatch.setattr(settings, "RESEND_FROM_EMAIL", "hello@neurocient.com")
     provider_calls = []
 
@@ -548,6 +549,7 @@ async def test_email_failure_preserves_payment_and_duplicate_webhook_retries(mon
     from app.services import cohort_welcome_email
 
     monkeypatch.setattr(settings, "RAZORPAY_WEBHOOK_SECRET", "cohort-webhook-secret")
+    monkeypatch.setattr(settings, "RESEND_API_KEY", "re_test_cohort")
     monkeypatch.setattr(settings, "RESEND_FROM_EMAIL", "hello@neurocient.com")
     attempts = 0
 

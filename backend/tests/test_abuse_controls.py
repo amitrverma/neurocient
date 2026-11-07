@@ -191,3 +191,17 @@ def test_domain_payload_boundaries():
         ContactRequest(name="n" * 101, email="user@example.com", message="ok")
     with pytest.raises(ValidationError):
         ContactRequest(name="ok", email="user@example.com", message="m" * 4001)
+
+
+def test_whatsapp_connection_rate_limit_policies_are_registered():
+    expected = {
+        "whatsapp_pair_ip": (10, 60 * 60),
+        "whatsapp_pair_user": (5, 60 * 60),
+        "whatsapp_disconnect_ip": (30, 60 * 60),
+        "whatsapp_disconnect_user": (10, 60 * 60),
+    }
+
+    assert {
+        name: (rate_limits.POLICIES[name].limit, rate_limits.POLICIES[name].window_seconds)
+        for name in expected
+    } == expected

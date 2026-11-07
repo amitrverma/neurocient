@@ -64,6 +64,10 @@ POLICIES = {
     "whatsapp_verify_request_number": Policy("whatsapp_verify_request_number", 3, 60 * 60),
     "whatsapp_verify_confirm_ip": Policy("whatsapp_verify_confirm_ip", 30, 60 * 60),
     "whatsapp_verify_confirm_user": Policy("whatsapp_verify_confirm_user", 10, 60 * 60),
+    "whatsapp_pair_ip": Policy("whatsapp_pair_ip", 10, 60 * 60),
+    "whatsapp_pair_user": Policy("whatsapp_pair_user", 5, 60 * 60),
+    "whatsapp_disconnect_ip": Policy("whatsapp_disconnect_ip", 30, 60 * 60),
+    "whatsapp_disconnect_user": Policy("whatsapp_disconnect_user", 10, 60 * 60),
 }
 
 

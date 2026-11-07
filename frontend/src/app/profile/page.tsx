@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import {
   ArrowRight,
   Bell,
-  Check,
   LoaderCircle,
   LogOut,
   Settings,
@@ -18,8 +17,8 @@ import { profileViewFromHash, type ProfileView } from "./profileViews";
 import PersonalHome from "./PersonalHome";
 import useWorkOverview from "./useWorkOverview";
 import {
-  PreferenceToggle,
-  WhatsAppVerificationControls,
+  ChannelButton,
+  DeliveryChannel,
 } from "./DeliveryPreferenceControls";
 import { InfoTile, Panel, SectionKicker } from "./ProfilePrimitives";
 
@@ -59,30 +58,16 @@ const ProfilePage = () => {
     return () => window.removeEventListener("hashchange", syncView);
   }, []);
 
-  const [nudgeEnabled, setNudgeEnabled] = useState(false);
-  const [spotReminderEnabled, setSpotReminderEnabled] = useState(false);
-  const [challengeEnabled, setChallengeEnabled] = useState(false);
   const [whatsAppEnabled, setWhatsAppEnabled] = useState(false);
-  const [showWhatsAppSetup, setShowWhatsAppSetup] = useState(false);
-  const [whatsAppNumber, setWhatsAppNumber] = useState("");
-  const [verifiedWhatsAppNumber, setVerifiedWhatsAppNumber] = useState("");
-  const [whatsAppVerified, setWhatsAppVerified] = useState(false);
-  const [verificationCode, setVerificationCode] = useState("");
-  const [verificationCodeSent, setVerificationCodeSent] = useState(false);
-  const [verifyingWhatsApp, setVerifyingWhatsApp] = useState(false);
+  const [whatsAppConnected, setWhatsAppConnected] = useState(false);
+  const [whatsAppDisplayNumber, setWhatsAppDisplayNumber] = useState("");
+  const [whatsAppPairingPending, setWhatsAppPairingPending] = useState(false);
+  const [whatsAppBusy, setWhatsAppBusy] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
   const [prefsLoading, setPrefsLoading] = useState(true);
   const [prefsError, setPrefsError] = useState(false);
   const [prefsReloadKey, setPrefsReloadKey] = useState(0);
-  const [savingPrefs, setSavingPrefs] = useState(false);
-  const [initialPrefs, setInitialPrefs] = useState<{
-    nudgeEnabled: boolean;
-    spotReminderEnabled: boolean;
-    challengeEnabled: boolean;
-    pushEnabled: boolean;
-    whatsAppEnabled: boolean;
-    whatsAppNumber: string;
-  } | null>(null);
+  const [pushBusy, setPushBusy] = useState(false);
 
   useEffect(() => {
     if (!ready) return;
@@ -102,26 +87,11 @@ const ProfilePage = () => {
         if (!res.ok) throw new Error(`Failed to load preferences: ${res.status}`);
         const data = await res.json();
         if (data) {
-          const pendingWhatsAppNumber = data.whatsapp_pending_number || "";
-          const prefs = {
-            nudgeEnabled: data.nudge_enabled,
-            spotReminderEnabled: data.spot_reminder_enabled,
-            challengeEnabled: data.microchallenge_enabled,
-            whatsAppEnabled: data.whatsapp_enabled,
-            whatsAppNumber: pendingWhatsAppNumber || data.whatsapp_number || "",
-            pushEnabled: data.push_enabled,
-          };
-          setNudgeEnabled(prefs.nudgeEnabled);
-          setSpotReminderEnabled(prefs.spotReminderEnabled);
-          setChallengeEnabled(prefs.challengeEnabled);
-          setWhatsAppEnabled(prefs.whatsAppEnabled);
-          setWhatsAppNumber(prefs.whatsAppNumber);
-          setShowWhatsAppSetup(Boolean(pendingWhatsAppNumber));
-          setPushEnabled(prefs.pushEnabled);
-          setWhatsAppVerified(data.whatsapp_verified);
-          setVerifiedWhatsAppNumber(data.whatsapp_number || "");
-          setVerificationCodeSent(Boolean(pendingWhatsAppNumber));
-          setInitialPrefs(prefs);
+          setPushEnabled(Boolean(data.push_enabled));
+          setWhatsAppEnabled(Boolean(data.whatsapp_enabled));
+          setWhatsAppConnected(Boolean(data.whatsapp_connected));
+          setWhatsAppDisplayNumber(data.whatsapp_display_number || "");
+          setWhatsAppPairingPending(Boolean(data.whatsapp_pairing_pending));
         }
       } catch (err) {
         console.error("Failed to load preferences:", err);
@@ -133,6 +103,21 @@ const ProfilePage = () => {
 
     loadPreferences();
   }, [ready, user, prefsReloadKey]);
+
+  useEffect(() => {
+    if (!ready || !user) return;
+    const refreshWhenReturning = () => {
+      if (document.visibilityState === "visible") {
+        setPrefsReloadKey((value) => value + 1);
+      }
+    };
+    window.addEventListener("focus", refreshWhenReturning);
+    document.addEventListener("visibilitychange", refreshWhenReturning);
+    return () => {
+      window.removeEventListener("focus", refreshWhenReturning);
+      document.removeEventListener("visibilitychange", refreshWhenReturning);
+    };
+  }, [ready, user]);
 
   useEffect(() => {
     if (!ready || !user) return;
@@ -152,135 +137,77 @@ const ProfilePage = () => {
     if (!response.ok) throw new Error(await responseMessage(response));
   };
 
-  const hasChanges = initialPrefs
-    ? nudgeEnabled !== initialPrefs.nudgeEnabled ||
-      spotReminderEnabled !== initialPrefs.spotReminderEnabled ||
-      challengeEnabled !== initialPrefs.challengeEnabled ||
-      pushEnabled !== initialPrefs.pushEnabled ||
-      whatsAppEnabled !== initialPrefs.whatsAppEnabled
-    : false;
-
-  const handleSave = async () => {
-    if (!initialPrefs) return;
-
-    const updates = {
-      nudge_enabled: nudgeEnabled,
-      spot_reminder_enabled: spotReminderEnabled,
-      microchallenge_enabled: challengeEnabled,
-      push_enabled: pushEnabled,
-      whatsapp_enabled: whatsAppEnabled,
-    };
-
-    if (whatsAppEnabled && !whatsAppVerified) {
-      notify("Verify this WhatsApp number before enabling the channel.", "error");
-      return;
-    }
-
-    setSavingPrefs(true);
+  const setPushChannel = async (enabled: boolean) => {
+    setPushBusy(true);
     try {
-      if (pushEnabled && !initialPrefs.pushEnabled) {
+      if (enabled) {
         if (Notification.permission === "default") {
-          const result = await Notification.requestPermission();
-          if (result !== "granted") {
-            notify("Please enable push in browser settings.", "error");
-            return;
-          }
+          const permission = await Notification.requestPermission();
+          if (permission !== "granted") throw new Error("Browser notifications were not allowed.");
         } else if (Notification.permission === "denied") {
-          notify(
-            "Push is blocked in your browser. Please allow it from site settings.",
-            "error",
-          );
-          return;
+          throw new Error("Browser notifications are blocked in your site settings.");
         }
         await subscribe();
+        try {
+          await savePrefs({ push_enabled: true });
+        } catch (error) {
+          await unsubscribe();
+          throw error;
+        }
+      } else {
+        await savePrefs({ push_enabled: false });
+        setPushEnabled(false);
+        try {
+          await unsubscribe();
+        } catch {
+          notify("Browser notifications are off. This browser's old subscription could not be removed yet.", "error");
+          return;
+        }
       }
-
-      if (!pushEnabled && initialPrefs.pushEnabled) {
-        await unsubscribe();
-      }
-
-      await savePrefs(updates);
-      setInitialPrefs({
-        nudgeEnabled,
-        spotReminderEnabled,
-        challengeEnabled,
-        pushEnabled,
-        whatsAppEnabled,
-        whatsAppNumber,
-      });
-      notify("Preferences saved.", "success");
-    } catch (err) {
-      console.error("Failed to save preferences:", err);
-      notify("Failed to save preferences.", "error");
-    } finally {
-      setSavingPrefs(false);
-    }
-  };
-
-  const requestWhatsAppCode = async () => {
-    setWhatsAppEnabled(false);
-    setVerifyingWhatsApp(true);
-    try {
-      const response = await fetch(
-        "/api/user/preferences/whatsapp-verification",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ number: whatsAppNumber.trim() }),
-        },
-      );
-      if (!response.ok) throw new Error(await responseMessage(response));
-      setWhatsAppVerified(false);
-      setVerifiedWhatsAppNumber("");
-      setVerificationCode("");
-      setVerificationCodeSent(true);
-      setWhatsAppEnabled(false);
-      setShowWhatsAppSetup(true);
-      setInitialPrefs((current) => current ? {
-        ...current,
-        whatsAppEnabled: false,
-        whatsAppNumber: whatsAppNumber.trim(),
-      } : current);
-      notify("Verification code sent on WhatsApp.", "success");
+      setPushEnabled(enabled);
+      notify(enabled ? "Browser notifications are on." : "Browser notifications are off.", "success");
     } catch (error) {
-      notify(error instanceof Error ? error.message : "Code could not be sent.", "error");
+      notify(error instanceof Error ? error.message : "The channel could not be updated.", "error");
     } finally {
-      setVerifyingWhatsApp(false);
+      setPushBusy(false);
     }
   };
 
-  const confirmWhatsAppCode = async () => {
-    setVerifyingWhatsApp(true);
+  const connectWhatsApp = async () => {
+    setWhatsAppBusy(true);
     try {
-      const response = await fetch(
-        "/api/user/preferences/whatsapp-verification/confirm",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ code: verificationCode.trim() }),
-        },
-      );
+      const response = await fetch("/api/user/preferences/whatsapp-pairing", {
+        method: "POST",
+        credentials: "include",
+      });
       if (!response.ok) throw new Error(await responseMessage(response));
       const data = await response.json();
-      const verifiedNumber = data.whatsapp_number || whatsAppNumber.trim();
-      setWhatsAppNumber(verifiedNumber);
-      setVerifiedWhatsAppNumber(verifiedNumber);
-      setWhatsAppVerified(true);
-      setWhatsAppEnabled(Boolean(data.whatsapp_enabled));
-      setVerificationCodeSent(false);
-      setVerificationCode("");
-      setInitialPrefs((current) => current ? {
-        ...current,
-        whatsAppEnabled: Boolean(data.whatsapp_enabled),
-        whatsAppNumber: verifiedNumber,
-      } : current);
-      notify("WhatsApp number verified. Turn on the channel and save when you are ready.", "success");
+      setWhatsAppPairingPending(true);
+      setWhatsAppBusy(false);
+      window.location.assign(data.whatsapp_url);
     } catch (error) {
-      notify(error instanceof Error ? error.message : "Code could not be confirmed.", "error");
+      notify(error instanceof Error ? error.message : "WhatsApp could not be opened.", "error");
+      setWhatsAppBusy(false);
+    }
+  };
+
+  const disconnectWhatsApp = async () => {
+    setWhatsAppBusy(true);
+    try {
+      const response = await fetch("/api/user/preferences/whatsapp-connection", {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error(await responseMessage(response));
+      setWhatsAppConnected(false);
+      setWhatsAppEnabled(false);
+      setWhatsAppDisplayNumber("");
+      setWhatsAppPairingPending(false);
+      notify("WhatsApp is disconnected.", "success");
+    } catch (error) {
+      notify(error instanceof Error ? error.message : "WhatsApp could not be disconnected.", "error");
     } finally {
-      setVerifyingWhatsApp(false);
+      setWhatsAppBusy(false);
     }
   };
 
@@ -288,7 +215,7 @@ const ProfilePage = () => {
   const pageTitle = activeTab === "evidence"
     ? user ? `Welcome back, ${firstName}.` : "Your work, kept together."
     : activeTab === "preferences"
-        ? "Delivery preferences"
+        ? "Stay connected"
         : "Your account";
 
   const content = (
@@ -373,7 +300,7 @@ const ProfilePage = () => {
                 {activeTab === "preferences" && (
                   <Panel>
                     <SectionKicker icon={<Bell className="h-5 w-5" />}>
-                      Delivery preferences
+                      Alerts & reminders
                     </SectionKicker>
 
                     {prefsLoading ? (
@@ -397,83 +324,49 @@ const ProfilePage = () => {
                       </div>
                     ) : (
                       <>
+                        <p className="mt-6 max-w-3xl font-sans text-sm leading-7 text-brand-dark/72">
+                          Neurocient chooses relevant nudges and check-ins from what you are currently working on. Choose how they can reach you outside the app.
+                        </p>
                         <div className="mt-6 divide-y divide-brand-dark/10 border-y border-brand-dark/10">
-                          <PreferenceToggle
-                            title="Daily nudges"
-                            text="Small prompts that keep the work visible between longer reads."
-                            checked={nudgeEnabled}
-                            onChange={setNudgeEnabled}
+                          <DeliveryChannel
+                            title="Browser notifications"
+                            text="Receive timely nudges and check-ins on this device."
+                            status={pushEnabled ? "On" : "Off"}
+                            action={
+                              <ChannelButton onClick={() => setPushChannel(!pushEnabled)} disabled={pushBusy} quiet={pushEnabled}>
+                                {pushBusy ? "Updating" : pushEnabled ? "Turn off" : "Enable"}
+                              </ChannelButton>
+                            }
                           />
-                          <PreferenceToggle
-                            title="Spot reminders"
-                            text="A short check-in that helps you notice automatic responses in daily life."
-                            checked={spotReminderEnabled}
-                            onChange={setSpotReminderEnabled}
+                          <DeliveryChannel
+                            title="WhatsApp companion"
+                            text={
+                              whatsAppConnected ? (
+                                <>
+                                  {whatsAppEnabled
+                                    ? "Receive nudges and reminders, and record microchallenge check-ins directly in WhatsApp."
+                                    : "Connected, but messages are paused. Reply START in WhatsApp to turn them on again."}
+                                  {whatsAppDisplayNumber ? <span className="mt-1 block">Connected as {whatsAppDisplayNumber}</span> : null}
+                                </>
+                              ) : whatsAppPairingPending ? (
+                                "Waiting for the consent message from WhatsApp. The link expires after 10 minutes."
+                              ) : (
+                                "Receive nudges and reminders, and record microchallenge check-ins directly in WhatsApp. You will send one clear consent message to connect."
+                              )
+                            }
+                            status={whatsAppConnected ? (whatsAppEnabled ? "Connected" : "Paused") : whatsAppPairingPending ? "Waiting" : "Not connected"}
+                            action={
+                              whatsAppConnected ? (
+                                <ChannelButton onClick={disconnectWhatsApp} disabled={whatsAppBusy} quiet>
+                                  {whatsAppBusy ? "Disconnecting" : "Disconnect"}
+                                </ChannelButton>
+                              ) : (
+                                <ChannelButton onClick={connectWhatsApp} disabled={whatsAppBusy}>
+                                  {whatsAppBusy ? "Opening WhatsApp" : whatsAppPairingPending ? "Open WhatsApp again" : "Connect WhatsApp"}
+                                </ChannelButton>
+                              )
+                            }
                           />
-                          <PreferenceToggle
-                            title="Microchallenge reminders"
-                            text="Reminders for practical behavior experiments."
-                            checked={challengeEnabled}
-                            onChange={setChallengeEnabled}
-                          />
-                          <PreferenceToggle
-                            title="Push notifications"
-                            text="Browser notifications for nudges and reminders."
-                            checked={pushEnabled}
-                            onChange={setPushEnabled}
-                          />
-                          <div className="py-5">
-                            <PreferenceToggle
-                              title="WhatsApp notifications"
-                              text="Use WhatsApp as an additional delivery channel."
-                              checked={whatsAppEnabled}
-                              onChange={(enabled) => {
-                                if (enabled && !whatsAppVerified) {
-                                  setShowWhatsAppSetup(true);
-                                  return;
-                                }
-                                setWhatsAppEnabled(enabled);
-                              }}
-                              compact
-                            />
-                            {(showWhatsAppSetup || verificationCodeSent || whatsAppVerified) && (
-                              <WhatsAppVerificationControls
-                                number={whatsAppNumber}
-                                verifiedNumber={verifiedWhatsAppNumber}
-                                verified={whatsAppVerified}
-                                code={verificationCode}
-                                codeSent={verificationCodeSent}
-                                busy={verifyingWhatsApp}
-                                onNumberChange={(value) => {
-                                  setWhatsAppNumber(value);
-                                  setShowWhatsAppSetup(true);
-                                  if (value !== verifiedWhatsAppNumber) {
-                                    setWhatsAppEnabled(false);
-                                    setWhatsAppVerified(false);
-                                    setVerificationCodeSent(false);
-                                  }
-                                }}
-                                onCodeChange={setVerificationCode}
-                                onRequestCode={requestWhatsAppCode}
-                                onConfirmCode={confirmWhatsAppCode}
-                              />
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="mt-7 flex items-center gap-3">
-                          <button
-                            onClick={handleSave}
-                            disabled={!hasChanges || savingPrefs}
-                            className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:bg-brand-primary disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-40"
-                          >
-                            {savingPrefs ? "Saving" : "Save preferences"}
-                            {savingPrefs ? (
-                              <LoaderCircle className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Check className="h-4 w-4" />
-                            )}
-                          </button>
                         </div>
                       </>
                     )}

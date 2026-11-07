@@ -10,7 +10,9 @@ def _disable_whatsapp(monkeypatch):
         "WHATSAPP_VERIFY_TOKEN",
         "WHATSAPP_BUSINESS_ACCOUNT_ID",
         "WHATSAPP_PHONE_NUMBER_ID",
+        "WHATSAPP_BUSINESS_NUMBER",
         "WHATSAPP_GRAPH_API_VERSION",
+        "CONSENT_PAIRING_SECRET",
     ):
         monkeypatch.setattr(Settings, name, None)
 
@@ -29,7 +31,7 @@ def test_production_configuration_rejects_missing_secrets(monkeypatch):
     assert "DATABASE_URL" in message
     assert "JWT_SECRET" in message
     assert "OPENAI_API_KEY" in message
-    assert "CONSENT_VERIFICATION_SECRET" in message
+    assert "CONSENT_PAIRING_SECRET" in message
 
 
 def test_development_configuration_only_requires_database(monkeypatch):
@@ -58,6 +60,7 @@ def test_production_requires_complete_whatsapp_configuration(monkeypatch):
     assert "WHATSAPP_VERIFY_TOKEN" in message
     assert "WHATSAPP_BUSINESS_ACCOUNT_ID" in message
     assert "WHATSAPP_PHONE_NUMBER_ID" in message
+    assert "WHATSAPP_BUSINESS_NUMBER" in message
     assert "WHATSAPP_GRAPH_API_VERSION" in message
 
 
@@ -82,6 +85,8 @@ def test_whatsapp_graph_api_version_is_explicit_and_versioned(monkeypatch):
     monkeypatch.setattr(Settings, "WHATSAPP_VERIFY_TOKEN", "verify-token")
     monkeypatch.setattr(Settings, "WHATSAPP_BUSINESS_ACCOUNT_ID", "123456789")
     monkeypatch.setattr(Settings, "WHATSAPP_PHONE_NUMBER_ID", "987654321")
+    monkeypatch.setattr(Settings, "WHATSAPP_BUSINESS_NUMBER", "919209830485")
+    monkeypatch.setattr(Settings, "CONSENT_PAIRING_SECRET", "p" * 32)
     monkeypatch.setattr(Settings, "WHATSAPP_GRAPH_API_VERSION", "latest")
 
     with pytest.raises(RuntimeError) as exc_info:
@@ -111,6 +116,8 @@ def test_complete_whatsapp_configuration_rejects_malformed_values(
     monkeypatch.setattr(Settings, "WHATSAPP_VERIFY_TOKEN", "c" * 32)
     monkeypatch.setattr(Settings, "WHATSAPP_BUSINESS_ACCOUNT_ID", "123456789")
     monkeypatch.setattr(Settings, "WHATSAPP_PHONE_NUMBER_ID", "987654321")
+    monkeypatch.setattr(Settings, "WHATSAPP_BUSINESS_NUMBER", "919209830485")
+    monkeypatch.setattr(Settings, "CONSENT_PAIRING_SECRET", "p" * 32)
     monkeypatch.setattr(Settings, "WHATSAPP_GRAPH_API_VERSION", "v24.0")
     monkeypatch.setattr(Settings, name, value)
 
@@ -127,6 +134,8 @@ def test_whatsapp_app_and_verify_secrets_must_be_independent(monkeypatch):
     monkeypatch.setattr(Settings, "WHATSAPP_VERIFY_TOKEN", "s" * 32)
     monkeypatch.setattr(Settings, "WHATSAPP_BUSINESS_ACCOUNT_ID", "123456789")
     monkeypatch.setattr(Settings, "WHATSAPP_PHONE_NUMBER_ID", "987654321")
+    monkeypatch.setattr(Settings, "WHATSAPP_BUSINESS_NUMBER", "919209830485")
+    monkeypatch.setattr(Settings, "CONSENT_PAIRING_SECRET", "p" * 32)
     monkeypatch.setattr(Settings, "WHATSAPP_GRAPH_API_VERSION", "v24.0")
 
     with pytest.raises(RuntimeError, match="must be independent"):

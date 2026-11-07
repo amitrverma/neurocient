@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import re
 from datetime import UTC, datetime
 from uuid import UUID
 
@@ -8,9 +9,11 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse, PlainTextResponse
 from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.Routes.preferences_route import CONSENT_VERSION, pairing_token_hash
 from app.models import (
     NotificationDispatch,
     UserPreferences,
@@ -39,8 +42,9 @@ ACCEPTED_RESPONSE = {"status": "accepted"}
 HELP_MESSAGE = (
     "I can save what you noticed in Spot the Inner Caveman or update today's "
     "experiment. Send 'spot: ...', or reply Done, Partly, or Didn't happen "
-    "to an experiment reminder."
+    "to an experiment reminder. Reply STOP to pause WhatsApp messages."
 )
+PAIRING_PATTERN = re.compile(r"(?:^|\n)CONNECT ([A-Za-z0-9_-]{32,128})\s*$")
 MICROCHALLENGE_RESPONSES = {
     "done": "done",
     "1": "done",
@@ -74,6 +78,11 @@ def parse_obstacle_note(message: str) -> str | None:
         return None
     note = normalized[5:].strip()
     return note or None
+
+
+def parse_pairing_token(message: str) -> str | None:
+    match = PAIRING_PATTERN.search(message.strip())
+    return match.group(1) if match else None
 
 
 def microchallenge_acknowledgement(outcome: str) -> str:
@@ -169,17 +178,87 @@ async def _process_inbound_message(
     )
     microchallenge_outcome = parse_microchallenge_response(normalized_body)
     obstacle_note = parse_obstacle_note(normalized_body)
+    pairing_token = parse_pairing_token(normalized_body)
     acknowledgement: str | None = None
 
+    if pairing_token:
+        prefs = await db.scalar(
+            select(UserPreferences)
+            .where(
+                UserPreferences.whatsapp_pairing_token_hash
+                == pairing_token_hash(pairing_token),
+                UserPreferences.whatsapp_pairing_expires_at > _utcnow(),
+            )
+            .with_for_update()
+        )
+        if prefs is None:
+            acknowledgement = (
+                "This connection link is invalid or expired. Return to Neurocient "
+                "and choose Connect WhatsApp again."
+            )
+        else:
+            existing_owner = await db.scalar(
+                select(UserPreferences.user_id).where(
+                    UserPreferences.whatsapp_number == message.from_number,
+                    UserPreferences.user_id != prefs.user_id,
+                )
+            )
+            if existing_owner is not None:
+                acknowledgement = (
+                    "This WhatsApp number is already connected to another "
+                    "Neurocient account. Disconnect it there before trying again."
+                )
+            else:
+                savepoint = await db.begin_nested()
+                try:
+                    prefs.whatsapp_number = message.from_number
+                    prefs.whatsapp_verified = True
+                    prefs.whatsapp_enabled = True
+                    prefs.whatsapp_consent_at = _utcnow()
+                    prefs.whatsapp_consent_version = CONSENT_VERSION
+                    prefs.whatsapp_pairing_token_hash = None
+                    prefs.whatsapp_pairing_expires_at = None
+                    await db.flush()
+                except IntegrityError:
+                    await savepoint.rollback()
+                    acknowledgement = (
+                        "This WhatsApp number is already connected to another "
+                        "Neurocient account. Disconnect it there before trying again."
+                    )
+                else:
+                    await savepoint.commit()
+                    acknowledgement = (
+                        "You're connected to Neurocient. You'll receive relevant "
+                        "nudges and reminders here. When a microchallenge check-in "
+                        "arrives, reply Done, Partly, or Didn't happen. Reply STOP "
+                        "at any time."
+                    )
+
     result = await db.execute(
-        select(UserPreferences.user_id).where(
+        select(UserPreferences).where(
             UserPreferences.whatsapp_number == message.from_number,
             UserPreferences.whatsapp_verified.is_(True),
         )
     )
-    user_id = result.scalar_one_or_none()
-    if user_id is not None:
-        if description:
+    linked_preferences = result.scalar_one_or_none()
+    if pairing_token is None and linked_preferences is not None:
+        user_id = linked_preferences.user_id
+        command = normalized_body.casefold()
+        if command == "stop":
+            linked_preferences.whatsapp_enabled = False
+            acknowledgement = (
+                "WhatsApp messages are off. Your saved progress is unchanged. "
+                "Reply START to turn them on again."
+            )
+        elif command == "start":
+            linked_preferences.whatsapp_enabled = True
+            linked_preferences.whatsapp_consent_at = _utcnow()
+            linked_preferences.whatsapp_consent_version = CONSENT_VERSION
+            acknowledgement = (
+                "WhatsApp messages are on. You'll receive relevant Neurocient "
+                "nudges and reminders here. Reply STOP at any time."
+            )
+        elif description:
             capture = await capture_spot(
                 db,
                 user_id=user_id,

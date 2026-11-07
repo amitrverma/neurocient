@@ -187,7 +187,7 @@ def test_daily_nudge_yields_to_due_microchallenge_reminder(monkeypatch):
         ("microchallenge", "microchallenge_enabled"),
     ],
 )
-def test_disabled_purpose_never_reaches_provider(
+def test_legacy_purpose_flags_do_not_override_enabled_channels(
     monkeypatch,
     purpose,
     purpose_field,
@@ -220,13 +220,13 @@ def test_disabled_purpose_never_reaches_provider(
     )
 
     assert result == {
-        "push_success": 0,
+        "push_success": 1,
         "push_failed": 0,
-        "whatsapp_success": 0,
+        "whatsapp_success": 1,
         "whatsapp_failed": 0,
     }
-    send_push.assert_not_awaited()
-    send_whatsapp.assert_not_awaited()
+    send_push.assert_awaited_once()
+    send_whatsapp.assert_awaited_once()
 
 
 def test_enabled_purpose_delivers_only_enabled_verified_channels(monkeypatch):
@@ -549,8 +549,8 @@ def test_scheduled_candidate_is_rechecked_after_opt_out(monkeypatch):
     db = DeliverySession(
         preferences(
             spot_reminder_enabled=False,
-            push_enabled=True,
-            whatsapp_enabled=True,
+            push_enabled=False,
+            whatsapp_enabled=False,
             whatsapp_verified=True,
             whatsapp_number="+919876543210",
         )
@@ -583,7 +583,8 @@ def test_opt_out_after_target_selection_stops_adapter_call(monkeypatch):
 
     class RevokingSession(DeliverySession):
         async def refresh(self, _value, attribute_names=None):
-            prefs.nudge_enabled = False
+            prefs.push_enabled = False
+            prefs.whatsapp_enabled = False
 
     db = RevokingSession(
         prefs,

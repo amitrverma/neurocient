@@ -1,110 +1,47 @@
 "use client";
 
-export const PreferenceToggle = ({
-  title,
-  text,
-  checked,
-  onChange,
-  compact = false,
-}: {
+import type { ReactNode } from "react";
+
+export const DeliveryChannel = ({ title, text, status, action, secondaryAction }: {
   title: string;
-  text: string;
-  checked: boolean;
-  onChange: (value: boolean) => void;
-  compact?: boolean;
+  text: ReactNode;
+  status: string;
+  action: ReactNode;
+  secondaryAction?: ReactNode;
 }) => (
-  <label
-    className={`flex cursor-pointer items-center justify-between gap-5 ${
-      compact ? "" : "py-5"
-    }`}
-  >
-    <span>
-      <span className="block font-sans text-sm font-semibold text-brand-dark">
-        {title}
-      </span>
-      <span className="mt-1 block max-w-xl font-sans text-sm leading-6 text-brand-dark/64">
-        {text}
-      </span>
-    </span>
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={(event) => onChange(event.target.checked)}
-      className="h-5 w-5 shrink-0 accent-brand-accent"
-    />
-  </label>
+  <div className="py-6">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
+      <div>
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="font-sans text-sm font-semibold text-brand-dark">{title}</h3>
+          <span className="rounded-full bg-brand-dark/6 px-2.5 py-1 font-sans text-[11px] font-semibold uppercase tracking-[0.08em] text-brand-dark/60">
+            {status}
+          </span>
+        </div>
+        <div className="mt-2 max-w-2xl font-sans text-sm leading-6 text-brand-dark/68">{text}</div>
+      </div>
+      <div className="flex shrink-0 flex-wrap items-center gap-3">
+        {action}
+        {secondaryAction}
+      </div>
+    </div>
+  </div>
 );
 
-export const WhatsAppVerificationControls = ({
-  number,
-  verifiedNumber,
-  verified,
-  code,
-  codeSent,
-  busy,
-  onNumberChange,
-  onCodeChange,
-  onRequestCode,
-  onConfirmCode,
-}: {
-  number: string;
-  verifiedNumber: string;
-  verified: boolean;
-  code: string;
-  codeSent: boolean;
-  busy: boolean;
-  onNumberChange: (value: string) => void;
-  onCodeChange: (value: string) => void;
-  onRequestCode: () => void;
-  onConfirmCode: () => void;
+export const ChannelButton = ({ children, onClick, disabled = false, quiet = false }: {
+  children: ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
+  quiet?: boolean;
 }) => (
-  <div className="mt-4 space-y-3">
-    <label className="block font-sans text-xs font-semibold uppercase tracking-[0.12em] text-brand-teal">
-      WhatsApp number
-      <input
-        type="tel"
-        inputMode="tel"
-        placeholder="+919876543210"
-        value={number}
-        onChange={(event) => onNumberChange(event.target.value)}
-        className="mt-2 w-full rounded-lg border border-brand-dark/15 px-4 py-3 font-sans text-sm normal-case tracking-normal text-brand-dark outline-none transition placeholder:text-brand-dark/40 focus:border-brand-teal"
-      />
-    </label>
-    {verified && number === verifiedNumber ? (
-      <p className="font-sans text-sm text-brand-dark/64">
-        Verified. Optional reminders may use this number only while WhatsApp
-        and the relevant reminder are enabled.
-      </p>
-    ) : codeSent ? (
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <input
-          aria-label="Six-digit WhatsApp verification code"
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          maxLength={6}
-          placeholder="Six-digit code"
-          value={code}
-          onChange={(event) => onCodeChange(event.target.value.replace(/\D/g, ""))}
-          className="min-w-0 flex-1 rounded-lg border border-brand-dark/15 px-4 py-3 font-sans text-sm text-brand-dark outline-none focus:border-brand-teal"
-        />
-        <button
-          type="button"
-          onClick={onConfirmCode}
-          disabled={code.length !== 6 || busy}
-          className="rounded-full border border-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark disabled:opacity-40"
-        >
-          Confirm code
-        </button>
-      </div>
-    ) : (
-      <button
-        type="button"
-        onClick={onRequestCode}
-        disabled={!number.trim() || busy}
-        className="rounded-full border border-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark disabled:opacity-40"
-      >
-        {busy ? "Sending code" : "Verify this number"}
-      </button>
-    )}
-  </div>
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    className={quiet
+      ? "rounded-full border border-brand-dark/20 px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-dark/50 disabled:opacity-40"
+      : "rounded-full bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:bg-brand-primary disabled:opacity-40"}
+  >
+    {children}
+  </button>
 );

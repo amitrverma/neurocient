@@ -32,11 +32,6 @@ from app.utils.pushnotification import send_push
 logger = logging.getLogger("notification_delivery")
 
 Purpose = Literal["nudge", "spot_reminder", "microchallenge"]
-PURPOSE_FIELDS = {
-    "nudge": "nudge_enabled",
-    "spot_reminder": "spot_reminder_enabled",
-    "microchallenge": "microchallenge_enabled",
-}
 
 
 def _dispatch_date() -> date:
@@ -71,12 +66,7 @@ async def has_logged_micro_today(user_id, db: AsyncSession):
 
 
 async def microchallenge_reminder_due(user_id, db: AsyncSession) -> bool:
-    enabled = await db.scalar(
-        select(UserPreferences.microchallenge_enabled).where(
-            UserPreferences.user_id == user_id
-        )
-    )
-    if not enabled or await has_logged_micro_today(user_id, db):
+    if await has_logged_micro_today(user_id, db):
         return False
     return await active_microchallenge(db, user_id) is not None
 
@@ -98,10 +88,8 @@ def microchallenge_reminder_copy(
 
 
 async def _candidate_user_ids(db: AsyncSession, purpose: Purpose) -> list:
-    purpose_column = getattr(UserPreferences, PURPOSE_FIELDS[purpose])
     result = await db.execute(
         select(UserPreferences.user_id).where(
-            purpose_column.is_(True),
             or_(
                 UserPreferences.push_enabled.is_(True),
                 and_(
@@ -129,9 +117,9 @@ async def _deliver_to_user(
     prefs = await db.scalar(
         select(UserPreferences).where(UserPreferences.user_id == user_id)
     )
-    if prefs is None or not getattr(prefs, PURPOSE_FIELDS[purpose]):
+    if prefs is None:
         logger.info(
-            "notification_skipped purpose=%s reason=purpose_disabled",
+            "notification_skipped purpose=%s reason=preferences_missing",
             purpose,
         )
         return {
@@ -175,11 +163,9 @@ async def _deliver_to_user(
             for subscription in subscriptions:
                 await db.refresh(
                     prefs,
-                    attribute_names=[PURPOSE_FIELDS[purpose], "push_enabled"],
+                    attribute_names=["push_enabled"],
                 )
-                if not (
-                    getattr(prefs, PURPOSE_FIELDS[purpose]) and prefs.push_enabled
-                ):
+                if not prefs.push_enabled:
                     consent_revoked = True
                     break
                 try:
@@ -244,15 +230,13 @@ async def _deliver_to_user(
     await db.refresh(
         prefs,
         attribute_names=[
-            PURPOSE_FIELDS[purpose],
             "whatsapp_enabled",
             "whatsapp_verified",
             "whatsapp_number",
         ],
     )
     if (
-        getattr(prefs, PURPOSE_FIELDS[purpose])
-        and prefs.whatsapp_enabled
+        prefs.whatsapp_enabled
         and prefs.whatsapp_verified
         and prefs.whatsapp_number
     ):

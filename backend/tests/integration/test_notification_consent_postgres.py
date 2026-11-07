@@ -1,8 +1,9 @@
-import asyncio
+import hashlib
+import hmac
+import json
 import os
-import re
-import threading
 from datetime import UTC, datetime, timedelta
+from urllib.parse import parse_qs, urlsplit
 from uuid import uuid4
 
 import httpx
@@ -19,48 +20,94 @@ pytestmark = [
     ),
 ]
 
+APP_SECRET = "integration-meta-app-secret-value"
+WABA_ID = "123456789012345"
+PHONE_NUMBER_ID = "987654321098765"
+BUSINESS_NUMBER = "919209830485"
 
-async def test_notification_consent_persistence_and_verification(monkeypatch):
-    from app.Routes import preferences_route, webpush_routes
+
+def _payload(message_id: str, sender: str, body: str) -> dict:
+    return {
+        "object": "whatsapp_business_account",
+        "entry": [{
+            "id": WABA_ID,
+            "changes": [{
+                "field": "messages",
+                "value": {
+                    "messaging_product": "whatsapp",
+                    "metadata": {
+                        "display_phone_number": BUSINESS_NUMBER,
+                        "phone_number_id": PHONE_NUMBER_ID,
+                    },
+                    "messages": [{
+                        "from": sender.removeprefix("+"),
+                        "id": message_id,
+                        "timestamp": "1730678400",
+                        "type": "text",
+                        "text": {"body": body},
+                    }],
+                },
+            }],
+        }],
+    }
+
+
+def _signed(payload: dict) -> tuple[bytes, dict[str, str]]:
+    raw = json.dumps(payload, separators=(",", ":")).encode()
+    digest = hmac.new(APP_SECRET.encode(), raw, hashlib.sha256).hexdigest()
+    return raw, {
+        "Content-Type": "application/json",
+        "X-Hub-Signature-256": f"sha256={digest}",
+    }
+
+
+async def test_channel_consent_and_inbound_whatsapp_pairing(monkeypatch):
+    from app.Routes import preferences_route, whatsapp_routes
     from app.config import settings
     from app.database import AsyncSessionLocal, engine
-    from app.models import AuthSession, User, UserPreferences, WebPushSubscription
+    from app.models import AuthSession, User, UserPreferences, WhatsAppWebhookEvent
     from app.utils.auth import issue_session
 
     user_id = uuid4()
     other_user_id = uuid4()
-    email = f"consent-{user_id}@example.test"
-    other_email = f"consent-{other_user_id}@example.test"
-    phone = "+919876543210"
-    captured_codes: list[str] = []
+    sender = "+919876543210"
+    message_ids = [
+        "wamid.pair",
+        "wamid.pair-replay",
+        "wamid.owner-conflict",
+        "wamid.stop",
+        "wamid.start",
+        "wamid.expired",
+    ]
+    sent: list[tuple[str, str]] = []
 
-    def capture_verification(_number: str, message: str, **_kwargs) -> bool:
-        match = re.search(r"\b([0-9]{6})\b", message)
-        assert match is not None
-        captured_codes.append(match.group(1))
-        return True
-
-    monkeypatch.setattr(settings, "CONSENT_VERIFICATION_SECRET", "v" * 32)
+    monkeypatch.setattr(settings, "RATE_LIMIT_ENABLED", False)
+    monkeypatch.setattr(settings, "CONSENT_PAIRING_SECRET", "p" * 32)
+    monkeypatch.setattr(settings, "WHATSAPP_ACCESS_TOKEN", "a" * 40)
+    monkeypatch.setattr(settings, "WHATSAPP_APP_SECRET", APP_SECRET)
+    monkeypatch.setattr(settings, "WHATSAPP_VERIFY_TOKEN", "v" * 32)
+    monkeypatch.setattr(settings, "WHATSAPP_BUSINESS_ACCOUNT_ID", WABA_ID)
+    monkeypatch.setattr(settings, "WHATSAPP_PHONE_NUMBER_ID", PHONE_NUMBER_ID)
+    monkeypatch.setattr(settings, "WHATSAPP_BUSINESS_NUMBER", BUSINESS_NUMBER)
+    monkeypatch.setattr(settings, "WHATSAPP_GRAPH_API_VERSION", "v25.0")
     monkeypatch.setattr(
-        preferences_route,
+        whatsapp_routes,
         "send_whatsapp_message",
-        capture_verification,
+        lambda number, message, **_kwargs: sent.append((number, message)) or True,
     )
 
     app = FastAPI()
     app.include_router(preferences_route.router, prefix="/user")
-    app.include_router(webpush_routes.router, prefix="/api")
+    app.include_router(whatsapp_routes.router, prefix="/wa")
     transport = httpx.ASGITransport(app=app)
 
     async with AsyncSessionLocal() as session:
-        session.add_all(
-            [
-                User(id=user_id, email=email),
-                User(id=other_user_id, email=other_email),
-                UserPreferences(user_id=user_id),
-                UserPreferences(user_id=other_user_id),
-            ]
-        )
+        session.add_all([
+            User(id=user_id, email=f"pair-{user_id}@example.test"),
+            User(id=other_user_id, email=f"pair-{other_user_id}@example.test"),
+            UserPreferences(user_id=user_id),
+            UserPreferences(user_id=other_user_id),
+        ])
         await session.commit()
         tokens = await issue_session(session, user_id)
         other_tokens = await issue_session(session, other_user_id)
@@ -68,313 +115,96 @@ async def test_notification_consent_persistence_and_verification(monkeypatch):
     headers = {"Authorization": f"Bearer {tokens.access}"}
     other_headers = {"Authorization": f"Bearer {other_tokens.access}"}
 
+    async def webhook(client, message_id: str, body: str):
+        raw, signed_headers = _signed(_payload(message_id, sender, body))
+        return await client.post("/wa/webhook/whatsapp", content=raw, headers=signed_headers)
+
     try:
         async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
             defaults = await client.get("/user/preferences", headers=headers)
             assert defaults.status_code == 200
-            for field in (
-                "nudge_enabled",
-                "spot_reminder_enabled",
-                "microchallenge_enabled",
-                "push_enabled",
-                "whatsapp_enabled",
-                "whatsapp_verified",
-            ):
-                assert defaults.json()[field] is False
+            assert defaults.json()["push_enabled"] is False
+            assert defaults.json()["whatsapp_connected"] is False
+            assert "nudge_enabled" not in defaults.json()
+            assert "whatsapp_number" not in defaults.json()
 
-            forbidden = await client.patch(
-                "/user/preferences",
-                headers=headers,
-                json={"nudge_enabled": True, "whatsapp_verified": True},
+            forbidden_purpose = await client.patch(
+                "/user/preferences", headers=headers, json={"nudge_enabled": True}
             )
-            assert forbidden.status_code == 422
-            unchanged = await client.get("/user/preferences", headers=headers)
-            assert unchanged.json()["nudge_enabled"] is False
-            assert unchanged.json()["whatsapp_verified"] is False
+            assert forbidden_purpose.status_code == 422
+            push = await client.patch(
+                "/user/preferences", headers=headers, json={"push_enabled": True}
+            )
+            assert push.status_code == 200
+            assert push.json()["push_enabled"] is True
 
-            explicit_null = await client.patch(
-                "/user/preferences",
-                headers=headers,
-                json={"nudge_enabled": True, "push_enabled": None},
-            )
-            assert explicit_null.status_code == 422
-            unchanged_after_null = await client.get("/user/preferences", headers=headers)
-            assert unchanged_after_null.json()["nudge_enabled"] is False
-            assert unchanged_after_null.json()["push_enabled"] is False
-
-            enabled_purposes = await client.patch(
-                "/user/preferences",
-                headers=headers,
-                json={
-                    "nudge_enabled": True,
-                    "spot_reminder_enabled": True,
-                    "microchallenge_enabled": True,
-                },
-            )
-            assert enabled_purposes.status_code == 200
-
-            premature = await client.patch(
-                "/user/preferences",
-                headers=headers,
-                json={"whatsapp_enabled": True},
-            )
-            assert premature.status_code == 409
-
-            malformed = await client.post(
-                "/user/preferences/whatsapp-verification",
-                headers=headers,
-                json={"number": "9876543210"},
-            )
-            assert malformed.status_code == 422
-            assert captured_codes == []
-
-            requested = await client.post(
-                "/user/preferences/whatsapp-verification",
-                headers=headers,
-                json={"number": phone},
-            )
-            assert requested.status_code == 202
-            assert len(captured_codes) == 1
-
-            opted_out_while_pending = await client.patch(
-                "/user/preferences",
-                headers=headers,
-                json={"whatsapp_enabled": False},
-            )
-            assert opted_out_while_pending.status_code == 200
+            pairing = await client.post("/user/preferences/whatsapp-pairing", headers=headers)
+            assert pairing.status_code == 201
+            url = pairing.json()["whatsapp_url"]
+            assert urlsplit(url).netloc == "wa.me"
+            assert urlsplit(url).path == f"/{BUSINESS_NUMBER}"
+            consent_message = parse_qs(urlsplit(url).query)["text"][0]
+            assert "Neurocient" in consent_message
+            assert "nudges and reminders" in consent_message
+            assert "microchallenge check-ins" in consent_message
+            assert "STOP" in consent_message
+            token = consent_message.rsplit("CONNECT ", 1)[1]
 
             async with AsyncSessionLocal() as session:
                 pending = await session.scalar(
                     select(UserPreferences).where(UserPreferences.user_id == user_id)
                 )
-                assert pending.whatsapp_pending_number == phone
-                assert pending.whatsapp_verification_code_hash != captured_codes[0]
-                assert captured_codes[0] not in pending.whatsapp_verification_code_hash
-                assert pending.whatsapp_verified is False
-                assert pending.whatsapp_enabled is False
+                assert pending.whatsapp_pairing_token_hash == preferences_route.pairing_token_hash(token)
+                assert token not in pending.whatsapp_pairing_token_hash
 
-            wrong = await client.post(
-                "/user/preferences/whatsapp-verification/confirm",
-                headers=headers,
-                json={"code": "000000" if captured_codes[0] != "000000" else "111111"},
-            )
-            assert wrong.status_code == 400
+            connected = await webhook(client, message_ids[0], consent_message)
+            assert connected.status_code == 200
+            state = (await client.get("/user/preferences", headers=headers)).json()
+            assert state["whatsapp_connected"] is True
+            assert state["whatsapp_enabled"] is True
+            assert state["whatsapp_display_number"].endswith("3210")
+            assert sender not in json.dumps(state)
 
-            confirmed = await client.post(
-                "/user/preferences/whatsapp-verification/confirm",
-                headers=headers,
-                json={"code": captured_codes[0]},
-            )
-            assert confirmed.status_code == 200
-            assert confirmed.json()["whatsapp_verified"] is True
-            assert confirmed.json()["whatsapp_enabled"] is False
-            assert confirmed.json()["whatsapp_number"] == phone
+            replay = await webhook(client, message_ids[0], consent_message)
+            assert replay.status_code == 200
+            assert len([message for _, message in sent if "You're connected" in message]) == 1
 
-            explicitly_enabled = await client.patch(
-                "/user/preferences",
-                headers=headers,
-                json={"whatsapp_enabled": True},
+            other_pairing = await client.post(
+                "/user/preferences/whatsapp-pairing", headers=other_headers
             )
-            assert explicitly_enabled.status_code == 200
-            assert explicitly_enabled.json()["whatsapp_enabled"] is True
+            other_message = parse_qs(urlsplit(other_pairing.json()["whatsapp_url"]).query)["text"][0]
+            conflict = await webhook(client, message_ids[2], other_message)
+            assert conflict.status_code == 200
+            assert (await client.get("/user/preferences", headers=other_headers)).json()["whatsapp_connected"] is False
 
-            replay = await client.post(
-                "/user/preferences/whatsapp-verification/confirm",
-                headers=headers,
-                json={"code": captured_codes[0]},
-            )
-            assert replay.status_code == 409
+            assert (await webhook(client, message_ids[3], "STOP")).status_code == 200
+            assert (await client.get("/user/preferences", headers=headers)).json()["whatsapp_enabled"] is False
+            assert (await webhook(client, message_ids[4], "START")).status_code == 200
+            assert (await client.get("/user/preferences", headers=headers)).json()["whatsapp_enabled"] is True
 
-            duplicate_request = await client.post(
-                "/user/preferences/whatsapp-verification",
-                headers=other_headers,
-                json={"number": phone},
+            disconnected = await client.delete(
+                "/user/preferences/whatsapp-connection", headers=headers
             )
-            assert duplicate_request.status_code == 202
-            duplicate_confirm = await client.post(
-                "/user/preferences/whatsapp-verification/confirm",
-                headers=other_headers,
-                json={"code": captured_codes[-1]},
-            )
-            assert duplicate_confirm.status_code == 409
+            assert disconnected.status_code == 200
+            assert disconnected.json()["whatsapp_connected"] is False
 
-            new_request = await client.post(
-                "/user/preferences/whatsapp-verification",
-                headers=headers,
-                json={"number": "+919876543211"},
+            expired_pairing = await client.post(
+                "/user/preferences/whatsapp-pairing", headers=other_headers
             )
-            assert new_request.status_code == 202
+            expired_message = parse_qs(urlsplit(expired_pairing.json()["whatsapp_url"]).query)["text"][0]
             async with AsyncSessionLocal() as session:
-                pending = await session.scalar(
-                    select(UserPreferences).where(UserPreferences.user_id == user_id)
+                prefs = await session.scalar(
+                    select(UserPreferences).where(UserPreferences.user_id == other_user_id)
                 )
-                pending.whatsapp_verification_expires_at = (
-                    datetime.now(UTC).replace(tzinfo=None) - timedelta(seconds=1)
-                )
+                prefs.whatsapp_pairing_expires_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(seconds=1)
                 await session.commit()
-            expired = await client.post(
-                "/user/preferences/whatsapp-verification/confirm",
-                headers=headers,
-                json={"code": captured_codes[-1]},
-            )
-            assert expired.status_code == 409
-
-            monkeypatch.setattr(
-                preferences_route,
-                "send_whatsapp_message",
-                lambda *_args, **_kwargs: False,
-            )
-            provider_failed = await client.post(
-                "/user/preferences/whatsapp-verification",
-                headers=headers,
-                json={"number": "+919876543212"},
-            )
-            assert provider_failed.status_code == 502
-            async with AsyncSessionLocal() as session:
-                failed_preferences = await session.scalar(
-                    select(UserPreferences).where(UserPreferences.user_id == user_id)
-                )
-                assert failed_preferences.whatsapp_pending_number is None
-                assert failed_preferences.whatsapp_verified is False
-                assert failed_preferences.whatsapp_enabled is False
-
-            # An older provider failure must not clear a newer successfully
-            # delivered challenge for the same account.
-            first_number = "+919876543214"
-            second_number = "+919876543215"
-            first_started = threading.Event()
-            release_first = threading.Event()
-
-            def out_of_order_delivery(number: str, message: str, **kwargs) -> bool:
-                if number == first_number:
-                    first_started.set()
-                    assert release_first.wait(timeout=5)
-                    return False
-                return capture_verification(number, message, **kwargs)
-
-            rate_limit_enabled = settings.RATE_LIMIT_ENABLED
-            monkeypatch.setattr(settings, "RATE_LIMIT_ENABLED", False)
-            monkeypatch.setattr(
-                preferences_route,
-                "send_whatsapp_message",
-                out_of_order_delivery,
-            )
-            older_request = asyncio.create_task(
-                client.post(
-                    "/user/preferences/whatsapp-verification",
-                    headers=headers,
-                    json={"number": first_number},
-                )
-            )
-            assert await asyncio.to_thread(first_started.wait, 5)
-            newer_request = await client.post(
-                "/user/preferences/whatsapp-verification",
-                headers=headers,
-                json={"number": second_number},
-            )
-            assert newer_request.status_code == 202
-            newer_code = captured_codes[-1]
-            release_first.set()
-            assert (await older_request).status_code == 502
-
-            async with AsyncSessionLocal() as session:
-                latest = await session.scalar(
-                    select(UserPreferences).where(UserPreferences.user_id == user_id)
-                )
-                assert latest.whatsapp_pending_number == second_number
-                assert latest.whatsapp_verification_code_hash == (
-                    preferences_route._verification_hash(second_number, newer_code)
-                )
-
-            latest_confirmed = await client.post(
-                "/user/preferences/whatsapp-verification/confirm",
-                headers=headers,
-                json={"code": newer_code},
-            )
-            assert latest_confirmed.status_code == 200
-            assert latest_confirmed.json()["whatsapp_number"] == second_number
-            assert latest_confirmed.json()["whatsapp_enabled"] is False
-
-            monkeypatch.setattr(
-                preferences_route,
-                "send_whatsapp_message",
-                capture_verification,
-            )
-            monkeypatch.setattr(settings, "RATE_LIMIT_ENABLED", rate_limit_enabled)
-            bounded_request = await client.post(
-                "/user/preferences/whatsapp-verification",
-                headers=headers,
-                json={"number": "+919876543213"},
-            )
-            assert bounded_request.status_code == 202
-            bounded_code = captured_codes[-1]
-            wrong_code = "000000" if bounded_code != "000000" else "111111"
-            for _ in range(preferences_route.MAX_VERIFICATION_ATTEMPTS):
-                rejected = await client.post(
-                    "/user/preferences/whatsapp-verification/confirm",
-                    headers=headers,
-                    json={"code": wrong_code},
-                )
-                assert rejected.status_code == 400
-            after_limit = await client.post(
-                "/user/preferences/whatsapp-verification/confirm",
-                headers=headers,
-                json={"code": bounded_code},
-            )
-            assert after_limit.status_code == 409
-
-            push_payload = {
-                "endpoint": "https://fcm.googleapis.com/subscription-1",
-                "keys": {"p256dh": "p" * 32, "auth": "a" * 16},
-            }
-            registered = await client.post(
-                "/api/register-webpush",
-                headers=headers,
-                json=push_payload,
-            )
-            assert registered.status_code == 200
-            async with AsyncSessionLocal() as session:
-                registered_preferences = await session.scalar(
-                    select(UserPreferences).where(UserPreferences.user_id == user_id)
-                )
-                assert registered_preferences.push_enabled is False
-            stolen = await client.post(
-                "/api/register-webpush",
-                headers=other_headers,
-                json=push_payload,
-            )
-            assert stolen.status_code == 409
-            removed = await client.post(
-                "/api/unregister-webpush",
-                headers=headers,
-            )
-            assert removed.status_code == 200
-
-        async with AsyncSessionLocal() as session:
-            owner_prefs = await session.scalar(
-                select(UserPreferences).where(UserPreferences.user_id == user_id)
-            )
-            assert owner_prefs.push_enabled is False
-            assert await session.scalar(
-                select(WebPushSubscription).where(
-                    WebPushSubscription.user_id == user_id
-                )
-            ) is None
+            assert (await webhook(client, message_ids[5], expired_message)).status_code == 200
+            assert (await client.get("/user/preferences", headers=other_headers)).json()["whatsapp_connected"] is False
     finally:
         async with AsyncSessionLocal() as session:
-            await session.execute(
-                delete(WebPushSubscription).where(
-                    WebPushSubscription.user_id.in_([user_id, other_user_id])
-                )
-            )
-            await session.execute(
-                delete(AuthSession).where(AuthSession.user_id.in_([user_id, other_user_id]))
-            )
-            await session.execute(
-                delete(UserPreferences).where(
-                    UserPreferences.user_id.in_([user_id, other_user_id])
-                )
-            )
+            await session.execute(delete(WhatsAppWebhookEvent).where(WhatsAppWebhookEvent.provider_message_id.in_(message_ids)))
+            await session.execute(delete(AuthSession).where(AuthSession.user_id.in_([user_id, other_user_id])))
+            await session.execute(delete(UserPreferences).where(UserPreferences.user_id.in_([user_id, other_user_id])))
             await session.execute(delete(User).where(User.id.in_([user_id, other_user_id])))
             await session.commit()
         await engine.dispose()

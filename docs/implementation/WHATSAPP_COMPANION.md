@@ -86,7 +86,7 @@ This is a deterministic companion, not an open-ended AI chatbot.
   Microchallenge title or instruction must not remove the three response
   options. When Meta accepts a scheduled dispatch and returns a well-formed
   `wamid`, that identifier is retained on the durable dispatch record.
-- Phone numbers, message text, notes, verification codes, signatures, and
+- Phone numbers, message text, notes, pairing tokens, signatures, and
   provider response bodies must not appear in application logs.
 
 ## Acceptance criteria

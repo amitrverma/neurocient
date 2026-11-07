@@ -1677,3 +1677,25 @@ Amounts and currencies remain fixed server-owned invariants. Browser callbacks
 do not grant access, and verified provider events continue to update the existing
 provider-neutral entitlement or enrolment. USD availability fails closed when
 its required Razorpay plan or account capability is absent.
+
+## 2026-11-07: Consent is channel-first and WhatsApp pairing starts inbound
+
+Daily nudges, Spot check-ins, and microchallenge check-ins are parts of the
+Neurocient product loop, not three user preferences. Product state decides what
+is relevant; the user decides whether Neurocient may reach them through browser
+notifications or WhatsApp.
+
+WhatsApp connects through one explicit user-sent message. Neurocient creates a
+short-lived account-bound link whose prefilled text names the product, nudges
+and reminders, microchallenge check-ins, and STOP. The signed webhook uses the
+actual sender to link and enable the companion atomically. There is no phone
+field, outbound OTP, confirmation field, second toggle, or save step. STOP
+pauses delivery, START resumes it, and Profile Disconnect revokes the link.
+
+The WhatsApp companion remains two-way: a relevant microchallenge reminder asks
+for `Done`, `Partly`, or `Didn't happen`, and the response updates the same
+durable progress record as the web experience. This supersedes the
+purpose-toggle and outbound-code parts of the 2026-10-31 decision and the
+"preserve existing consent model" implication in the 2026-11-04 transport
+decision. Safe defaults, signed webhooks, dispatch-time channel re-checks, and
+privacy-safe logging remain unchanged.

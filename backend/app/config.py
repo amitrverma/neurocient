@@ -98,8 +98,9 @@ class Settings:
     WHATSAPP_VERIFY_TOKEN = os.getenv("WHATSAPP_VERIFY_TOKEN")
     WHATSAPP_BUSINESS_ACCOUNT_ID = os.getenv("WHATSAPP_BUSINESS_ACCOUNT_ID")
     WHATSAPP_PHONE_NUMBER_ID = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
+    WHATSAPP_BUSINESS_NUMBER = os.getenv("WHATSAPP_BUSINESS_NUMBER")
     WHATSAPP_GRAPH_API_VERSION = os.getenv("WHATSAPP_GRAPH_API_VERSION")
-    CONSENT_VERIFICATION_SECRET = os.getenv("CONSENT_VERIFICATION_SECRET")
+    CONSENT_PAIRING_SECRET = os.getenv("CONSENT_PAIRING_SECRET")
     RESEND_API_KEY = os.getenv("RESEND_API_KEY")
     RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL")
     PASSWORD_RESET_BASE_URL = os.getenv("PASSWORD_RESET_BASE_URL")
@@ -127,7 +128,6 @@ class Settings:
             for name in (
                 "RATE_LIMIT_KEY_SECRET",
                 "ABUSE_PROXY_SECRET",
-                "CONSENT_VERIFICATION_SECRET",
             ):
                 value = getattr(self, name)
                 if not value:
@@ -157,7 +157,9 @@ class Settings:
             "WHATSAPP_VERIFY_TOKEN",
             "WHATSAPP_BUSINESS_ACCOUNT_ID",
             "WHATSAPP_PHONE_NUMBER_ID",
+            "WHATSAPP_BUSINESS_NUMBER",
             "WHATSAPP_GRAPH_API_VERSION",
+            "CONSENT_PAIRING_SECRET",
         )
         if self.ENV == "prod" or any(getattr(self, name) for name in whatsapp_names):
             for name in whatsapp_names:
@@ -219,10 +221,17 @@ class Settings:
             raise RuntimeError(
                 "Invalid runtime configuration: WHATSAPP_PHONE_NUMBER_ID must be numeric"
             )
+        if self.WHATSAPP_BUSINESS_NUMBER and not re.fullmatch(
+            r"[1-9][0-9]{7,14}", self.WHATSAPP_BUSINESS_NUMBER
+        ):
+            raise RuntimeError(
+                "Invalid runtime configuration: WHATSAPP_BUSINESS_NUMBER must be an international number without +"
+            )
         for name in (
             "WHATSAPP_ACCESS_TOKEN",
             "WHATSAPP_APP_SECRET",
             "WHATSAPP_VERIFY_TOKEN",
+            "CONSENT_PAIRING_SECRET",
         ):
             value = getattr(self, name)
             if value and len(value) < 32:

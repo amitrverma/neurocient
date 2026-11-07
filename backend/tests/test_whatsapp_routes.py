@@ -3,6 +3,7 @@ import hmac
 import json
 import logging
 from unittest.mock import AsyncMock
+from types import SimpleNamespace
 from uuid import uuid4
 
 import httpx
@@ -28,6 +29,7 @@ def _configure(monkeypatch):
     monkeypatch.setattr(settings, "WHATSAPP_BUSINESS_ACCOUNT_ID", WABA_ID)
     monkeypatch.setattr(settings, "WHATSAPP_PHONE_NUMBER_ID", PHONE_NUMBER_ID)
     monkeypatch.setattr(settings, "WHATSAPP_GRAPH_API_VERSION", "v24.0")
+    monkeypatch.setattr(settings, "CONSENT_PAIRING_SECRET", "p" * 32)
 
 
 def _payload(message_id: str, phone: str, body: str) -> dict:
@@ -97,6 +99,15 @@ def test_help_copy_uses_canonical_inner_caveman_language():
     assert "Caveman Spot" not in whatsapp_routes.HELP_MESSAGE
 
 
+def test_pairing_token_parser_requires_explicit_final_connect_command():
+    token = "a" * 43
+    assert whatsapp_routes.parse_pairing_token(
+        f"Connect my WhatsApp to Neurocient.\n\nCONNECT {token}"
+    ) == token
+    assert whatsapp_routes.parse_pairing_token(f"CONNECT {token} trailing") is None
+    assert whatsapp_routes.parse_pairing_token("CONNECT short") is None
+
+
 @pytest.mark.parametrize(
     ("body", "expected"),
     [
@@ -139,7 +150,13 @@ class ScalarResult:
 
 class MicrochallengeSession:
     def __init__(self, message_id, user_id, assignment_id):
-        self.results = [ScalarResult(message_id), ScalarResult(user_id), ScalarResult()]
+        linked = SimpleNamespace(
+            user_id=user_id,
+            whatsapp_enabled=True,
+            whatsapp_consent_at=None,
+            whatsapp_consent_version=None,
+        )
+        self.results = [ScalarResult(message_id), ScalarResult(linked), ScalarResult()]
         self.assignment_id = assignment_id
         self.commits = 0
 

@@ -465,8 +465,9 @@ class UserPreferences(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), unique=True)
 
-    # Optional reinforcement is always opt-in. These columns are the only
-    # authority used by outbound reminder delivery.
+    # The three purpose flags are retained temporarily for migration
+    # compatibility. Product state, not these legacy booleans, determines
+    # which reinforcement is relevant. Channel flags are delivery consent.
     nudge_enabled = Column(Boolean, default=False, nullable=False)
     spot_reminder_enabled = Column(Boolean, default=False, nullable=False)
     microchallenge_enabled = Column(Boolean, default=False, nullable=False)
@@ -478,6 +479,10 @@ class UserPreferences(Base):
     whatsapp_verification_code_hash = Column(String, nullable=True)
     whatsapp_verification_expires_at = Column(DateTime, nullable=True)
     whatsapp_verification_attempts = Column(Integer, default=0, nullable=False)
+    whatsapp_pairing_token_hash = Column(String(64), nullable=True, unique=True)
+    whatsapp_pairing_expires_at = Column(DateTime, nullable=True)
+    whatsapp_consent_at = Column(DateTime, nullable=True)
+    whatsapp_consent_version = Column(String(64), nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

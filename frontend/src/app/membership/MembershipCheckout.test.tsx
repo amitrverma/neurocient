@@ -184,9 +184,9 @@ describe("membership checkout", () => {
     vi.stubGlobal("fetch", vi.fn(async () => response({
       is_active: true,
       status: "active",
-      current_period_end: "2026-11-30T18:30:00Z",
-      access_ends_at: "2026-11-30T18:30:00Z",
-      renewal_at: "2026-11-30T18:30:00Z",
+      current_period_end: "2026-12-01T12:00:00Z",
+      access_ends_at: "2026-12-01T12:00:00Z",
+      renewal_at: "2026-12-01T12:00:00Z",
       access_phase: "active",
       checkout_configured: true,
       checkout_state: "ready",
@@ -269,10 +269,10 @@ describe("membership checkout", () => {
         return response({
           is_active: true,
           status: "active",
-          current_period_end: "2026-11-30T18:30:00",
-          access_ends_at: "2026-11-30T18:30:00",
-          renewal_at: canceled ? null : "2026-11-30T18:30:00",
-          cancellation_effective_at: canceled ? "2026-11-30T18:30:00" : null,
+          current_period_end: "2026-12-01T12:00:00",
+          access_ends_at: "2026-12-01T12:00:00",
+          renewal_at: canceled ? null : "2026-12-01T12:00:00",
+          cancellation_effective_at: canceled ? "2026-12-01T12:00:00" : null,
           access_phase: canceled ? "cancellation_scheduled" : "active",
           cancellation_state: canceled ? "requested" : null,
           checkout_configured: true,
@@ -280,7 +280,7 @@ describe("membership checkout", () => {
       }
       if (String(input) === "/api/membership/cancel" && init?.method === "POST") {
         canceled = true;
-        return response({ status: "requested", effective_at: "2026-11-30T18:30:00" }, 202);
+        return response({ status: "requested", effective_at: "2026-12-01T12:00:00" }, 202);
       }
       throw new Error(`Unexpected request: ${String(input)}`);
     });

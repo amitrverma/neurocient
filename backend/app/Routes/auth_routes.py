@@ -67,8 +67,12 @@ elif firebase_creds_path and os.path.exists(firebase_creds_path):
         initialize_app(cred)
     except Exception as e:
         raise RuntimeError("Failed to initialize Firebase Admin SDK from file") from e
-else:
+elif os.getenv("ENV", "dev").strip().lower() == "prod":
     raise RuntimeError("Missing Firebase credentials")
+else:
+    logger.warning(
+        "Firebase credentials are not configured; Firebase authentication is unavailable"
+    )
 
 # ---------------- Router ----------------
 router = APIRouter()

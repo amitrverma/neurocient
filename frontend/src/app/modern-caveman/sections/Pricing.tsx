@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ArrowRight, Check, CircleAlert, LoaderCircle } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
 import AuthModal from "@/app/components/AuthModal";
+import { BRAND_NAME, PAYMENT_OPERATOR_STATEMENT } from "@/lib/businessIdentity";
 
 type Cohort = {
   id: string;
@@ -327,7 +328,7 @@ export default function Pricing() {
         order_id: data.order_id,
         amount: data.amount,
         currency: data.currency,
-        name: "Neurocient",
+        name: BRAND_NAME,
         description: data.cohort_title,
         prefill: { email: data.email },
         theme: { color: "#5EB1BF" },
@@ -541,6 +542,8 @@ export default function Pricing() {
             ) : null}
           </div>
         </div>
+
+        <p className="mc-checkout-note">{PAYMENT_OPERATOR_STATEMENT}</p>
 
         {message ? (
           <div

@@ -74,7 +74,7 @@ describe("Modern Caveman checkout", () => {
         return response({
           status: "offered",
           can_checkout: true,
-          offer_expires_at: "2026-11-06T12:00:00",
+          offer_expires_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
           offer_email_status: "sent",
         });
       }
@@ -190,6 +190,10 @@ describe("Modern Caveman checkout", () => {
       expect(mocks.open).toHaveBeenCalledOnce();
     });
     expect(mocks.razorpayOptions?.order_id).toBe("order_usd_server_created");
+    expect(mocks.razorpayOptions?.name).toBe("Neurocient Labs");
+    expect(screen.getByText(
+      /payments are collected by Xaltris Technologies, operating Neurocient Labs/i,
+    )).toBeInTheDocument();
     const checkoutCall = fetchMock.mock.calls.find(([url]) => String(url) === "/api/cohorts/cohort-1/checkout");
     expect(checkoutCall?.[1]).toMatchObject({
       method: "POST",

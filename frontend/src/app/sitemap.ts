@@ -17,6 +17,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/insights/all", changeFrequency: "daily", priority: 0.7 },
     { path: "/tags/inner-caveman", changeFrequency: "weekly", priority: 0.6 },
     { path: "/inner-caveman", changeFrequency: "weekly", priority: 0.6 },
+    { path: "/contact", changeFrequency: "monthly", priority: 0.3 },
+    { path: "/support", changeFrequency: "monthly", priority: 0.3 },
+    { path: "/privacy", changeFrequency: "monthly", priority: 0.2 },
+    { path: "/terms", changeFrequency: "monthly", priority: 0.2 },
+    { path: "/data-deletion", changeFrequency: "monthly", priority: 0.2 },
   ].map((e) => ({ url: `${base}${e.path}`, lastModified: now, changeFrequency: e.changeFrequency as MetadataRoute.Sitemap[0]["changeFrequency"], priority: e.priority }));
 
   const insightsDir = path.join(process.cwd(), "src/content/insights");

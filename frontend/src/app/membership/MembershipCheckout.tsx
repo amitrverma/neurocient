@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, CreditCard, LoaderCircle } from "lucide-react";
 import AuthModal from "@/app/components/AuthModal";
+import { PAYMENT_OPERATOR_STATEMENT } from "@/lib/businessIdentity";
 import { useAuth } from "@/app/context/AuthContext";
 
 declare global {
@@ -451,6 +452,9 @@ export default function MembershipCheckout() {
         {user ? "Join for US$6/month" : "Log in to join in USD"}
       </button>
       </div>
+      <p className="mt-3 font-sans text-xs leading-5 text-white/55">
+        {PAYMENT_OPERATOR_STATEMENT}
+      </p>
       {visibleMessage ? (
         <p className="mt-4 font-sans text-sm leading-6 text-white/70" role="status">
           {visibleMessage}

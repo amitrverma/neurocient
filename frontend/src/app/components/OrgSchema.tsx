@@ -1,9 +1,19 @@
+import {
+  BRAND_NAME,
+  LEGAL_BUSINESS_NAME,
+  LEGAL_IDENTITY_STATEMENT,
+  SUPPORT_EMAIL,
+} from "@/lib/businessIdentity";
+
 export default function OrgSchema() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
     "@id": "https://neurocient.com/#/org/neurocient-labs",
-    name: "Neurocient Labs",
+    name: BRAND_NAME,
+    legalName: LEGAL_BUSINESS_NAME,
+    description: LEGAL_IDENTITY_STATEMENT,
+    email: SUPPORT_EMAIL,
     url: "https://neurocient.com",
     logo: "https://neurocient.com/logo/neurocient.png",
     sameAs: [

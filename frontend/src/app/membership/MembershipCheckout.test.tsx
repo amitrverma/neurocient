@@ -52,6 +52,19 @@ describe("membership checkout", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("identifies the legal payment operator before checkout", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => response({
+      is_active: false,
+      checkout_configured: true,
+    })));
+
+    render(<MembershipCheckout />);
+
+    expect(await screen.findByText(
+      /payments are collected by Xaltris Technologies, operating Neurocient Labs/i,
+    )).toBeInTheDocument();
+  });
+
   it("opens the server-created subscription and treats the callback as pending only", async () => {
     let statusReads = 0;
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {

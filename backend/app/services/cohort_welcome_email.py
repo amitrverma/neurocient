@@ -9,6 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
+from app.business_identity import PAYMENT_OPERATOR_STATEMENT, SUPPORT_EMAIL
 from app.models import (
     Cohort,
     CohortEnrollment,
@@ -19,7 +20,6 @@ from app.models import (
 
 logger = logging.getLogger(__name__)
 ELIGIBLE_ENROLLMENT_STATUSES = ("paid", "active", "completed")
-SUPPORT_EMAIL = "support@neurocient.com"
 DISPATCH_LEASE = timedelta(seconds=30)
 IDEMPOTENCY_RETRY_LIMIT = timedelta(hours=23)
 
@@ -69,6 +69,7 @@ def build_welcome_email_payload(
         "to this email address before the cohort begins.\n\n"
         "Attend the first session. If the program does not feel right for you, "
         f"email {SUPPORT_EMAIL} within 48 hours of that session for a full refund.\n\n"
+        f"{PAYMENT_OPERATOR_STATEMENT}\n\n"
         "Welcome aboard,\nNeurocient"
     )
     email_html = f"""<!doctype html>
@@ -97,6 +98,7 @@ def build_welcome_email_payload(
             <h2 style="margin:0 0 10px;font-family:Georgia,serif;font-size:24px;font-weight:600;">What happens now?</h2>
             <p style="margin:0 0 24px;font-size:16px;line-height:1.65;">No further action is needed right now. We'll send the joining details to this email address before the cohort begins.</p>
             <p style="margin:0 0 24px;padding-top:22px;border-top:1px solid #d9d4c8;font-size:14px;line-height:1.6;color:#516869;">Attend the first session. If the program does not feel right for you, email <a href="mailto:{SUPPORT_EMAIL}" style="color:#082f30;font-weight:700;">{SUPPORT_EMAIL}</a> within 48 hours of that session for a full refund.</p>
+            <p style="margin:0 0 12px;font-size:12px;line-height:1.6;color:#6a7d7d;">{PAYMENT_OPERATOR_STATEMENT}</p>
             <p style="margin:0;font-size:16px;line-height:1.65;">Welcome aboard,<br><strong>Neurocient</strong></p>
           </td></tr>
         </table>

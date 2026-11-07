@@ -77,6 +77,8 @@ def test_offer_email_is_transactional_date_aware_and_account_bound():
     assert "waitlist_offer=entry-1" in payload["html"]
     assert "Amit &amp; Co" in payload["html"]
     assert "November &lt;Cohort&gt;" in payload["html"]
+    assert "Xaltris Technologies, operating Neurocient Labs" in payload["html"]
+    assert "Xaltris Technologies, operating Neurocient Labs" in payload["text"]
 
 
 def test_dispatch_isolates_cohort_failures_and_reports_the_run_failed(monkeypatch):

@@ -11,6 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
+from app.business_identity import PAYMENT_OPERATOR_STATEMENT, SUPPORT_EMAIL
 from app.models import Cohort, CohortWaitlistEntry, User
 from app.services.cohort_welcome_email import WelcomeEmailDeliveryError, send_resend_email
 from app.services.cohorts import PUBLIC_STATUSES, enrollment_window_is_open, occupied_seats
@@ -19,7 +20,6 @@ from app.services.cohorts import PUBLIC_STATUSES, enrollment_window_is_open, occ
 WAITLIST_OFFER_DURATION = timedelta(hours=24)
 DELIVERY_LEASE = timedelta(seconds=30)
 IDEMPOTENCY_RETRY_LIMIT = timedelta(hours=23)
-SUPPORT_EMAIL = "support@neurocient.com"
 logger = logging.getLogger(__name__)
 
 
@@ -366,7 +366,8 @@ def build_waitlist_offer_email_payload(
         "The link must be opened with the same Neurocient account that joined "
         "the waitlist. Joining the waitlist did not charge you; payment begins "
         "only if you choose a currency and open secure checkout.\n\n"
-        f"If anything looks wrong, email {SUPPORT_EMAIL}.\n\nNeurocient"
+        f"If anything looks wrong, email {SUPPORT_EMAIL}.\n\n"
+        f"{PAYMENT_OPERATOR_STATEMENT}\n\nNeurocient"
     )
     email_html = f"""<!doctype html>
 <html lang="en">
@@ -384,6 +385,7 @@ def build_waitlist_offer_email_payload(
             <p style="margin:0 0 24px;font-size:15px;line-height:1.6;">This offer is available through <strong>{safe_deadline}</strong>.</p>
             <a href="{safe_url}" style="display:inline-block;background:#f9dc5c;color:#082f30;padding:13px 21px;text-decoration:none;font-weight:700;border-radius:999px;">Choose payment and join</a>
             <p style="margin:26px 0 0;font-size:14px;line-height:1.6;color:#516869;">Open the link with the same Neurocient account that joined the waitlist. You have not been charged; payment begins only when you open secure checkout.</p>
+            <p style="margin:12px 0 0;font-size:12px;line-height:1.6;color:#6a7d7d;">{PAYMENT_OPERATOR_STATEMENT}</p>
           </td></tr>
         </table>
       </td></tr>

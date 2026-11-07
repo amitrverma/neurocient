@@ -8,6 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
+from app.business_identity import PAYMENT_OPERATOR_STATEMENT, SUPPORT_EMAIL
 from app.models import (
     MembershipEntitlement,
     MembershipWelcomeEmailDelivery,
@@ -21,7 +22,6 @@ from app.services.membership import entitlement_is_active
 
 
 logger = logging.getLogger(__name__)
-SUPPORT_EMAIL = "support@neurocient.com"
 DISPATCH_LEASE = timedelta(seconds=30)
 IDEMPOTENCY_RETRY_LIMIT = timedelta(hours=23)
 
@@ -53,6 +53,7 @@ def build_membership_welcome_email_payload(
         "to understand and work through it without rushing to action.\n\n"
         f"Your current paid period runs through {_display_date(current_period_end)}.\n\n"
         f"If anything looks wrong, email {SUPPORT_EMAIL}.\n\n"
+        f"{PAYMENT_OPERATOR_STATEMENT}\n\n"
         "Welcome in,\nNeurocient"
     )
     email_html = f"""<!doctype html>
@@ -82,6 +83,7 @@ def build_membership_welcome_email_payload(
             <p style="margin:0 0 25px;font-size:16px;line-height:1.65;">Open Practice and choose one real pattern you want to understand. Start with what actually happens; there is no need to rush into a fix.</p>
             <a href="https://neurocient.com/practice" style="display:inline-block;background:#f9dc5c;color:#082f30;padding:13px 21px;text-decoration:none;font-weight:700;border-radius:999px;">Begin with Practice</a>
             <p style="margin:28px 0 0;padding-top:22px;border-top:1px solid #d9d4c8;font-size:14px;line-height:1.6;color:#516869;">If anything looks wrong, email <a href="mailto:{SUPPORT_EMAIL}" style="color:#082f30;font-weight:700;">{SUPPORT_EMAIL}</a>.</p>
+            <p style="margin:12px 0 0;font-size:12px;line-height:1.6;color:#6a7d7d;">{PAYMENT_OPERATOR_STATEMENT}</p>
             <p style="margin:22px 0 0;font-size:16px;line-height:1.65;">Welcome in,<br><strong>Neurocient</strong></p>
           </td></tr>
         </table>

@@ -1,6 +1,14 @@
 import Link from "next/link";
+import { LEGAL_IDENTITY_STATEMENT } from "@/lib/businessIdentity";
 
 const sections = [
+  {
+    title: "Who is responsible",
+    paragraphs: [
+      `${LEGAL_IDENTITY_STATEMENT} Amit Ranjan Verma, proprietor of Xaltris Technologies and operator of Neurocient Labs, determines why and how the personal information described in this notice is processed.`,
+      "For privacy questions, requests, or grievances, email support@neurocient.com. This is also the contact for the person able to answer questions about Neurocient's processing of personal information.",
+    ],
+  },
   {
     title: "What we collect",
     paragraphs: [
@@ -32,6 +40,14 @@ const sections = [
     ],
   },
   {
+    title: "WhatsApp companion",
+    paragraphs: [
+      "If you connect WhatsApp, we process your connected WhatsApp number, the consent message and time, WhatsApp message content and delivery information, and the account activity needed to provide the companion. This lets you receive reminders you request, record a Spot or microchallenge check-in, and receive a relevant reply.",
+      "Connecting WhatsApp is optional. You initiate the connection by sending a clear consent message. You can reply STOP to pause optional messages, reply START to resume them, disconnect WhatsApp from Profile, or ask support@neurocient.com for help. Disconnecting WhatsApp does not by itself delete the rest of your Neurocient account.",
+      "WhatsApp messages are carried through Meta's WhatsApp Business Platform. Do not use WhatsApp to send payment-card details, government identifiers, medical records, or information you do not want processed as part of the companion.",
+    ],
+  },
+  {
     title: "Cookies and information on your device",
     paragraphs: [
       "We use secure account cookies to keep you signed in. PostHog uses cookies and local storage for analytics. Neurocient also uses local storage to remember usage limits, an unfinished Scan or Practice handoff, and newsletter state. Clearing browser data can remove information held only on that device, but it does not delete information already saved to your account.",
@@ -46,7 +62,8 @@ const sections = [
   {
     title: "Your choices and requests",
     paragraphs: [
-      "You can change reminder preferences from Profile and unsubscribe from newsletters using the link in each email. You may ask to access, correct, or erase personal data, withdraw consent where processing depends on consent, or raise a grievance by emailing privacy@neurocient.com. We may need to verify your identity before completing a request.",
+      "You can change reminder preferences from Profile and unsubscribe from newsletters using the link in each email. You may ask to access, correct, or erase personal data, withdraw consent where processing depends on consent, or raise a grievance by emailing support@neurocient.com. We may need to verify your identity before completing a request.",
+      "Data-deletion instructions are available at neurocient.com/data-deletion. We aim to acknowledge privacy requests promptly and resolve grievances within 30 days. If a request is unusually complex or a record must be retained by law, we will explain the position and next step.",
       "If you withdraw consent, we will explain any service feature that can no longer operate. You may also complain to the Data Protection Board of India when that remedy is available to you.",
     ],
   },
@@ -61,7 +78,7 @@ const sections = [
     title: "Changes and contact",
     paragraphs: [
       "We may update this notice as the product or law changes. We will change the effective date and provide additional notice when a change materially affects how we use personal data.",
-      "Neurocient Labs is responsible for the information described here. For privacy questions, requests, or grievances, email privacy@neurocient.com.",
+      "Questions about this notice, privacy rights, or a concern about personal information can be sent to support@neurocient.com.",
     ],
   },
 ];
@@ -72,7 +89,7 @@ export default function PrivacyPage() {
       <article className="mx-auto max-w-4xl">
         <p className="page-eyebrow text-brand-teal">Legal · plain-language notice</p>
         <h1 className="page-title mt-4">Privacy Policy</h1>
-        <p className="mt-4 font-sans text-sm text-brand-dark/60">Effective date: October 15, 2026</p>
+        <p className="mt-4 font-sans text-sm text-brand-dark/60">Effective date: November 7, 2026</p>
         <p className="mt-7 max-w-3xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark/76">
           Neurocient includes public reading, private behavior-change tools,
           paid membership, and facilitated programs. This notice explains what
@@ -94,7 +111,8 @@ export default function PrivacyPage() {
         </div>
 
         <div className="mt-8 flex flex-wrap gap-3">
-          <a href="mailto:privacy@neurocient.com" className="inline-flex rounded-full bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white">Contact privacy</a>
+          <a href="mailto:support@neurocient.com" className="inline-flex rounded-full bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white">Contact support</a>
+          <Link href="/data-deletion" className="inline-flex rounded-full border border-brand-dark/25 px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark">Data deletion</Link>
           <Link href="/terms" className="inline-flex rounded-full border border-brand-dark/25 px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark">Read terms</Link>
         </div>
       </article>

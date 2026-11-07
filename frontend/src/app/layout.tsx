@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-page-custom-font */
-import type { Metadata } from "next";
 import "./globals.css";
 import "./nav-surfaces.css";
 import Navbar from "./components/Navbar";
@@ -9,52 +8,14 @@ import { NotificationProvider } from "./components/NotificationProvider";
 import PostHogProvider from "./components/PostHogProvider";
 import OrgSchema from "./components/OrgSchema";
 import PersonSchema from "./components/PersonSchema";
+import { siteMetadata } from "./siteMetadata";
 
 import { Toaster } from "react-hot-toast";
 
 export const dynamic = "force-dynamic";
 
 // 📌 Metadata
-export const metadata: Metadata = {
-  metadataBase: new URL("https://neurocient.com"),
-  title: {
-    default: "The Neurocient Labs",
-    template: "%s | The Neurocient Labs",
-  },
-  alternates: {
-    canonical: "https://neurocient.com",
-  },
-  description: "Uncover. Discover. Work with your Inner Caveman.",
-  openGraph: {
-    type: "website",
-    siteName: "The Neurocient Labs",
-    url: "https://neurocient.com",
-    title: "The Neurocient Labs | Inner Caveman",
-    description: "Uncover. Discover. Work with your Inner Caveman.",
-    images: [
-      {
-        url: "/logo/neurocient.png",
-        width: 1200,
-        height: 630,
-        alt: "The Neurocient Labs",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "The Neurocient Labs | Inner Caveman",
-    description: "Uncover. Discover. Work with your Inner Caveman.",
-    images: ["/logo/neurocient.png"],
-  },
-  icons: {
-    icon: [
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon.ico", sizes: "any", type: "image/x-icon" },
-    ],
-    apple: "/icons/icon-192.png",
-  },
-};
+export const metadata = siteMetadata;
 
 export default function RootLayout({
   children,

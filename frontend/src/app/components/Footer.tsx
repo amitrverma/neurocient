@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { LEGAL_IDENTITY_STATEMENT } from "@/lib/businessIdentity";
 import Image from "next/image";
 import { Instagram, Linkedin, Twitter, X, Youtube } from "lucide-react";
 import Newsletter from "./Newsletter";
@@ -74,6 +75,9 @@ const Footer = () => {
           <p className="mt-4 text-xs text-brand-dark/54">
             &copy; {new Date().getFullYear()} Neurocient Labs. All rights reserved.
           </p>
+          <p className="mt-2 text-xs leading-5 text-brand-dark/54">
+            {LEGAL_IDENTITY_STATEMENT}
+          </p>
           <button
             type="button"
             onClick={() => setNewsletterOpen(true)}
@@ -129,6 +133,12 @@ const Footer = () => {
         </Link>
         <Link href="/terms" className="font-semibold transition hover:text-brand-primary">
           Terms
+        </Link>
+        <Link href="/support" className="font-semibold transition hover:text-brand-primary">
+          Support
+        </Link>
+        <Link href="/data-deletion" className="font-semibold transition hover:text-brand-primary">
+          Data deletion
         </Link>
       </div>
     </footer>

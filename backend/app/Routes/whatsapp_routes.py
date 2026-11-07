@@ -42,7 +42,8 @@ ACCEPTED_RESPONSE = {"status": "accepted"}
 HELP_MESSAGE = (
     "I can save what you noticed in Spot the Inner Caveman or update today's "
     "experiment. Send 'spot: ...', or reply Done, Partly, or Didn't happen "
-    "to an experiment reminder. Reply STOP to pause WhatsApp messages."
+    "to an experiment reminder. Reply STOP to pause WhatsApp messages. "
+    "For human support, email support@neurocient.com."
 )
 PAIRING_PATTERN = re.compile(r"(?:^|\n)CONNECT ([A-Za-z0-9_-]{32,128})\s*$")
 MICROCHALLENGE_RESPONSES = {

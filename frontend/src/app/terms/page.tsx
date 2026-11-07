@@ -1,6 +1,11 @@
 import Link from "next/link";
+import { LEGAL_IDENTITY_STATEMENT } from "@/lib/businessIdentity";
 
 const terms = [
+  {
+    title: "Who provides the service",
+    text: `${LEGAL_IDENTITY_STATEMENT} References to Neurocient, Neurocient Labs, we, or us in these terms mean Amit Ranjan Verma, proprietor of Xaltris Technologies, operating Neurocient Labs.`,
+  },
   {
     title: "Using Neurocient",
     text: "You may read public content without an account. An account is required to keep personal work, use signed-in allowances, buy membership, or enrol in a cohort. You must provide accurate information, keep your credentials secure, and tell us promptly if you suspect unauthorised access. Accounts and paid offerings are intended for people aged 18 or older.",
@@ -27,7 +32,7 @@ const terms = [
   },
   {
     title: "Our content and product",
-    text: "Neurocient’s articles, program material, visual design, software, trademarks, and other original content belong to Neurocient Labs or its licensors. Personal, non-commercial use is permitted. You may not copy, scrape, reproduce, resell, publish, reverse engineer, or build a competing dataset or service from them without permission, except where applicable law allows it.",
+    text: "Neurocient's articles, program material, visual design, software, trademarks, and other original content belong to Amit Ranjan Verma, proprietor of Xaltris Technologies and operator of Neurocient Labs, or to the relevant licensors. Personal, non-commercial use is permitted. You may not copy, scrape, reproduce, resell, publish, reverse engineer, or build a competing dataset or service from them without permission, except where applicable law allows it.",
   },
   {
     title: "Acceptable use",
@@ -53,7 +58,7 @@ export default function TermsPage() {
       <article className="mx-auto max-w-4xl">
         <p className="page-eyebrow text-brand-teal">Legal · service agreement</p>
         <h1 className="page-title mt-4">Terms of Service</h1>
-        <p className="mt-4 font-sans text-sm text-brand-dark/60">Effective date: October 15, 2026</p>
+        <p className="mt-4 font-sans text-sm text-brand-dark/60">Effective date: November 7, 2026</p>
         <p className="mt-7 max-w-3xl border-l-4 border-brand-secondary pl-5 font-sans text-base leading-8 text-brand-dark/76">
           These terms cover Neurocient’s public content, private account tools,
           membership, and facilitated cohort programs. By using the service,
@@ -75,6 +80,7 @@ export default function TermsPage() {
         <div className="mt-8 flex flex-wrap gap-3">
           <a href="mailto:support@neurocient.com" className="inline-flex rounded-full bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white">Contact support</a>
           <Link href="/privacy" className="inline-flex rounded-full border border-brand-dark/25 px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark">Read privacy policy</Link>
+          <Link href="/data-deletion" className="inline-flex rounded-full border border-brand-dark/25 px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark">Data deletion</Link>
         </div>
       </article>
     </main>

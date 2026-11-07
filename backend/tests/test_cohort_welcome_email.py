@@ -22,6 +22,8 @@ def test_welcome_email_payload_is_branded_personal_and_html_safe():
     assert "21 November 2026" in payload["html"]
     assert "No further action is needed right now" in payload["html"]
     assert "support@neurocient.com" in payload["html"]
+    assert "Xaltris Technologies, operating Neurocient Labs" in payload["html"]
+    assert "Xaltris Technologies, operating Neurocient Labs" in payload["text"]
     assert "Amit <Founder>" not in payload["html"]
 
 

@@ -97,6 +97,7 @@ def test_microchallenge_acknowledgements_are_light_and_truthful():
 def test_help_copy_uses_canonical_inner_caveman_language():
     assert "Spot the Inner Caveman" in whatsapp_routes.HELP_MESSAGE
     assert "Caveman Spot" not in whatsapp_routes.HELP_MESSAGE
+    assert "support@neurocient.com" in whatsapp_routes.HELP_MESSAGE
 
 
 def test_pairing_token_parser_requires_explicit_final_connect_command():

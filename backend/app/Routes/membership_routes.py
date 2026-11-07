@@ -55,7 +55,7 @@ SUPPORTED_EVENTS = {
     "subscription.paused",
     "subscription.cancelled",
     "subscription.completed",
-    "payment.refunded",
+    "refund.processed",
     "payment.dispute.created",
 }
 WELCOME_TRIGGER_EVENTS = {
@@ -63,6 +63,7 @@ WELCOME_TRIGGER_EVENTS = {
     "subscription.charged",
     "subscription.resumed",
 }
+PAYMENT_LINKED_EVENTS = {"refund.processed", "payment.dispute.created"}
 
 
 class MembershipCheckoutInput(BaseModel):
@@ -211,7 +212,7 @@ def _ownership_error(
         and event.provider_customer_id != entitlement.provider_customer_id
     ):
         return "customer_mismatch"
-    if event.event_type.startswith("payment.") and (
+    if event.event_type in PAYMENT_LINKED_EVENTS and (
         not event.provider_payment_id
         or event.amount_minor != entitlement.price_minor
         or event.currency != entitlement.currency
@@ -531,14 +532,18 @@ async def membership_webhook(
         provider_payload.get("subscription"), "subscription"
     )
     payment_wrapper = _payload_object(provider_payload.get("payment"), "payment")
+    refund_wrapper = _payload_object(provider_payload.get("refund"), "refund")
     subscription = _payload_object(subscription_wrapper.get("entity"), "subscription entity")
     payment = _payload_object(payment_wrapper.get("entity"), "payment entity")
+    refund = _payload_object(refund_wrapper.get("entity"), "refund entity")
     subscription_entity_id = _provider_text(subscription.get("id"), "subscription id")
     payment_subscription_id = _provider_text(
         payment.get("subscription_id"), "payment subscription id"
     )
     subscription_id = subscription_entity_id or payment_subscription_id
     payment_id = _provider_text(payment.get("id"), "payment id")
+    refund_payment_id = _provider_text(refund.get("payment_id"), "refund payment id")
+    refund_status = _provider_text(refund.get("status"), "refund status")
     payment_status = _provider_text(payment.get("status"), "payment status")
     subscription_customer_id = _provider_text(
         subscription.get("customer_id"), "subscription customer id"
@@ -611,6 +616,14 @@ async def membership_webhook(
         and subscription_customer_id != payment_customer_id
     ):
         await _reject_webhook_event(db, event, "customer_mismatch")
+    if event_type == "refund.processed" and (
+        not refund
+        or not refund_payment_id
+        or refund_status != "processed"
+        or not payment_id
+        or refund_payment_id != payment_id
+    ):
+        await _reject_webhook_event(db, event, "invalid_provider_data")
     if event_type == "subscription.charged" and (
         not payment or not payment_id or payment_status != "captured"
     ):
@@ -625,7 +638,7 @@ async def membership_webhook(
         await _reject_webhook_event(db, event, "price_mismatch")
     if (
         (event_type.startswith("subscription.") and not subscription_entity_id)
-        or (event_type.startswith("payment.") and not payment_id)
+        or (event_type in PAYMENT_LINKED_EVENTS and not payment_id)
         or not provider_created_at
         or (event_type.startswith("subscription.") and not customer_id)
     ):

@@ -696,15 +696,24 @@ async def test_provider_shaped_early_refund_is_replayed_after_charge(monkeypatch
     refund_body, refund_headers = signed(
         refund_id,
         {
-            "event": "payment.refunded",
+            "event": "refund.processed",
             "created_at": int((now + timedelta(seconds=1)).timestamp()),
-            "payload": {"payment": {"entity": {
-                "id": payment_id,
-                "customer_id": "cust_shape",
-                "amount": 49_900,
-                "currency": "INR",
-                "status": "refunded",
-            }}},
+            "payload": {
+                "refund": {"entity": {
+                    "id": f"rfnd_{uuid4().hex}",
+                    "payment_id": payment_id,
+                    "amount": 49_900,
+                    "currency": "INR",
+                    "status": "processed",
+                }},
+                "payment": {"entity": {
+                    "id": payment_id,
+                    "customer_id": "cust_shape",
+                    "amount": 49_900,
+                    "currency": "INR",
+                    "status": "captured",
+                }},
+            },
         },
     )
     charged_body, charged_headers = signed(

@@ -188,12 +188,12 @@ def test_refund_and_dispute_require_the_current_payment():
 
     unrelated = reduce_billing_event(
         current,
-        BillingEvent("payment.refunded", NOW + timedelta(minutes=1), None, "pay_old"),
+        BillingEvent("refund.processed", NOW + timedelta(minutes=1), None, "pay_old"),
         now=NOW,
     )
     refunded = reduce_billing_event(
         current,
-        BillingEvent("payment.refunded", NOW + timedelta(minutes=1), None, "pay_current"),
+        BillingEvent("refund.processed", NOW + timedelta(minutes=1), None, "pay_current"),
         now=NOW,
     )
     disputed = reduce_billing_event(

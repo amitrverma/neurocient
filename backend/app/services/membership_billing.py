@@ -57,7 +57,7 @@ _EVENT_STATUS = {
     "subscription.paused": "paused",
     "subscription.cancelled": "canceled",
     "subscription.completed": "expired",
-    "payment.refunded": "refunded",
+    "refund.processed": "refunded",
     "payment.dispute.created": "disputed",
 }
 
@@ -66,7 +66,7 @@ _GRANT_EVENTS = {
     "subscription.charged",
     "subscription.resumed",
 }
-_PAYMENT_TERMINAL_EVENTS = {"payment.refunded", "payment.dispute.created"}
+_PAYMENT_TERMINAL_EVENTS = {"refund.processed", "payment.dispute.created"}
 _TERMINAL_STATUSES = {"canceled", "expired", "refunded", "disputed"}
 
 # At an identical provider timestamp, a restrictive transition must win even

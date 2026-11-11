@@ -1,6 +1,6 @@
 # Neurocient search readiness
 
-Status: repository baseline implemented; production deployment and Search Console account checks remain operational steps.
+Status: repository baseline deployed and the production Search Console property configured on 2026-11-11. Ongoing crawling, validation, and query performance still require monitoring.
 
 ## Outcome
 
@@ -46,6 +46,13 @@ These checks live outside the repository and must be completed or confirmed in t
 7. Review **Core Web Vitals**, HTTPS, structured-data enhancements, Manual Actions, and Security Issues. Treat regressions as release defects, not content-reporting curiosities.
 8. Keep account ownership narrow: at least two trusted owners, and only the permissions each person needs.
 9. Do not use temporary removals as a canonicalization tool. Correct redirects, canonicals, or `noindex` at the source.
+
+Operational baseline completed on 2026-11-11:
+
+- resubmitted the apex sitemap and confirmed a successful read of 61 URLs;
+- removed the obsolete `www` sitemap submission;
+- started validation for the corrected 404 group and the crawled-but-not-indexed group;
+- requested priority crawling for the homepage, the Insight index, representative affected Insights, and the Caveman Scan landing page.
 
 ## Non-brand search strategy
 

@@ -1,6 +1,8 @@
 # Neurocient search readiness
 
-Status: repository baseline implemented; production deployment and Search Console account checks remain operational steps.
+Status: repository baseline implemented and canonical sitemap accepted in Google Search Console as of 2026-11-11.
+
+This is the technical implementation and release checklist. The governing discovery strategy, content inventory, authority plan, measurement model, and phased roadmap live in [DISCOVERY_STRATEGY.md](./DISCOVERY_STRATEGY.md).
 
 ## Outcome
 

@@ -95,6 +95,7 @@ Use these fields unless user requests otherwise:
 - `excerpt`
 - `description`
 - `date` (ISO format `YYYY-MM-DD`)
+- `updated` (optional ISO date for a substantial content change; sitemap `lastmod` uses this when present)
 - `author`
 - `tags`
 - `keywords`

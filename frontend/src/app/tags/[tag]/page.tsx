@@ -3,8 +3,10 @@ import path from "path";
 import matter from "gray-matter";
 import Link from "next/link";
 import type React from "react";
+import type { Metadata } from "next";
 import { ArrowRight, BookOpen } from "lucide-react";
 import { slugifyTag, unslugifyTag } from "../../utils/slug";
+import { createPublicMetadata, noIndexMetadata } from "@/lib/searchMetadata";
 
 const insightsDir = path.join(process.cwd(), "src/content/insights");
 
@@ -58,6 +60,35 @@ export async function generateStaticParams() {
   return [...new Set(tags)].map((tag) => ({
     tag: slugifyTag(tag),
   }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ tag: string }>;
+}): Promise<Metadata> {
+  const { tag } = await params;
+  const matchingArticles = readArticles().filter((article) =>
+    article.tags.some((articleTag) => slugifyTag(articleTag) === tag),
+  );
+  const displayTag =
+    matchingArticles[0]?.tags.find(
+      (articleTag) => slugifyTag(articleTag) === tag,
+    ) || unslugifyTag(tag);
+
+  if (matchingArticles.length < 2) {
+    return {
+      title: `${displayTag} Insights`,
+      description: `Neurocient articles about ${displayTag.toLowerCase()}.`,
+      ...noIndexMetadata,
+    };
+  }
+
+  return createPublicMetadata({
+    title: `${displayTag}: Behavior and Psychology Insights`,
+    description: `Explore ${matchingArticles.length} Neurocient explanations connecting ${displayTag.toLowerCase()} with concrete situations and recurring automatic responses.`,
+    path: `/tags/${tag}`,
+  });
 }
 
 export default async function TagPage({

@@ -8,11 +8,10 @@ import { NotificationProvider } from "./components/NotificationProvider";
 import PostHogProvider from "./components/PostHogProvider";
 import OrgSchema from "./components/OrgSchema";
 import PersonSchema from "./components/PersonSchema";
+import WebSiteSchema from "./components/WebSiteSchema";
 import { siteMetadata } from "./siteMetadata";
 
 import { Toaster } from "react-hot-toast";
-
-export const dynamic = "force-dynamic";
 
 // 📌 Metadata
 export const metadata = siteMetadata;
@@ -45,6 +44,7 @@ export default function RootLayout({
       <body className="antialiased bg-white text-[#042a2b]">
         <OrgSchema />
         <PersonSchema />
+        <WebSiteSchema />
 
         {/* 🔥 Place toaster here — globally available, no provider restrictions */}
         <Toaster

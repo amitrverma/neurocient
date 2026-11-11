@@ -24,7 +24,7 @@ describe("public business identity", () => {
 
   it("uses the registered unit name in site and installed-app metadata", () => {
     expect(siteMetadata.title).toMatchObject({
-      default: "Neurocient Labs",
+      default: "Why Change Is Hard—and What Makes It Stick",
       template: "%s | Neurocient Labs",
     });
     expect(siteMetadata.openGraph).toMatchObject({ siteName: "Neurocient Labs" });

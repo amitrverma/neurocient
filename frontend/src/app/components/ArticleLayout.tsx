@@ -3,7 +3,6 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import type React from "react";
 import Link from "next/link";
-import Script from "next/script";
 import {
   ArrowRight,
   Bookmark,
@@ -41,8 +40,6 @@ interface ArticleLayoutProps {
   title: string;
   date: string;
   excerpt?: string;
-  description?: string;
-  keywords?: string[];
   author?: string;
   tags?: string[];
   readingTime?: string;
@@ -62,8 +59,6 @@ const ArticleLayout = ({
   title,
   date,
   excerpt,
-  description,
-  keywords = [],
   author = "Amit R Verma",
   tags = [],
   readingTime,
@@ -78,36 +73,9 @@ const ArticleLayout = ({
   nextInPath,
   spotPrompt,
 }: ArticleLayoutProps) => {
-  const baseUrl = "https://neurocient.com/insights";
-  const articleUrl = slug ? `${baseUrl}/${slug}` : baseUrl;
-  const orgId = "https://neurocient.com/#/org/neurocient-labs";
-  const personId = "https://neurocient.com/#/person/amit-r-verma";
-
-  // JSON-LD structured data
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: title,
-    description: description || excerpt,
-    author:
-      author === "Amit R Verma"
-        ? { "@type": "Person", "@id": personId, name: author }
-        : { "@type": "Person", name: author },
-    datePublished: date,
-    keywords: [...keywords, ...(tags || [])].join(", "),
-    url: articleUrl,
-    image: ["https://neurocient.com/logo/neurocient.png"],
-    publisher: {
-      "@type": "Organization",
-      "@id": orgId,
-      name: "Neurocient Labs",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://neurocient.com/logo/neurocient.png",
-      },
-    },
-  };
-
+  const articleUrl = slug
+    ? `https://neurocient.com/insights/${slug}`
+    : "https://neurocient.com/insights";
   const { user, ready } = useAuth();
   const { notify } = useNotification();
   const [isSaved, setIsSaved] = useState(false);
@@ -435,12 +403,6 @@ const ArticleLayout = ({
           }
         }}
         disableEscape
-      />
-      {/* JSON-LD */}
-      <Script
-        id="article-jsonld"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
     </main>
   );

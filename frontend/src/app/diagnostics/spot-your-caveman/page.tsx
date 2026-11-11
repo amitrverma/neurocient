@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 
 export default function LegacySpotDiagnosticPage() {
-  redirect("/diagnostics/caveman-scan");
+  permanentRedirect("/diagnostics/caveman-scan");
 }

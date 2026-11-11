@@ -305,6 +305,13 @@ export default async function InsightPage(
         ? { "@type": "Person", "@id": personId, name: data.author || "Amit R Verma" }
         : { "@type": "Person", name: data.author },
     datePublished: data.date,
+    dateModified: data.updated || data.date,
+    isAccessibleForFree: false,
+    hasPart: {
+      "@type": "WebPageElement",
+      isAccessibleForFree: false,
+      cssSelector: ".metered-insight-content",
+    },
     keywords: (data.keywords || []).join(", "),
     url: `https://neurocient.com/insights/${slug}`,
     image: ["https://neurocient.com/logo/neurocient.png"],
@@ -346,7 +353,10 @@ export default async function InsightPage(
               reflection={conversation?.reflection}
             />
           )}
-          <div id={contentId} className={articleProseClass}>
+          <div
+            id={contentId}
+            className={`${articleProseClass} metered-insight-content`}
+          >
             <InnerCavemanHighlighter targetId={contentId} />
             {mdxContent}
           </div>

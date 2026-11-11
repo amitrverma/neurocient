@@ -4,19 +4,21 @@ import { BRAND_NAME } from "@/lib/businessIdentity";
 export const siteMetadata: Metadata = {
   metadataBase: new URL("https://neurocient.com"),
   title: {
-    default: BRAND_NAME,
+    default: "Why Change Is Hard—and What Makes It Stick",
     template: `%s | ${BRAND_NAME}`,
   },
-  alternates: {
-    canonical: "https://neurocient.com",
-  },
-  description: "Uncover. Discover. Work with your Inner Caveman.",
+  description:
+    "Understand the automatic responses behind procrastination, worry, comparison, scrolling, and other patterns—then work with what is actually driving them.",
+  verification: process.env.GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+    : undefined,
   openGraph: {
     type: "website",
     siteName: BRAND_NAME,
     url: "https://neurocient.com",
-    title: `${BRAND_NAME} | Inner Caveman`,
-    description: "Uncover. Discover. Work with your Inner Caveman.",
+    title: "Why Change Is Hard—and What Makes It Stick",
+    description:
+      "Understand the automatic responses behind procrastination, worry, comparison, scrolling, and other patterns.",
     images: [
       {
         url: "/logo/neurocient.png",
@@ -28,8 +30,9 @@ export const siteMetadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `${BRAND_NAME} | Inner Caveman`,
-    description: "Uncover. Discover. Work with your Inner Caveman.",
+    title: "Why Change Is Hard—and What Makes It Stick",
+    description:
+      "Understand the automatic responses behind procrastination, worry, comparison, scrolling, and other patterns.",
     images: ["/logo/neurocient.png"],
   },
   icons: {

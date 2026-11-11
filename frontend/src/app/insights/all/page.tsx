@@ -4,6 +4,14 @@ import matter from "gray-matter";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { slugifyTag } from "../../utils/slug";
+import { createPublicMetadata } from "@/lib/searchMetadata";
+
+export const metadata = createPublicMetadata({
+  title: "Behavior and Psychology Insight Library",
+  description:
+    "Browse every Neurocient explanation of worry, comparison, avoidance, scrolling, belonging, status, habits, and other recurring behavior patterns.",
+  path: "/insights/all",
+});
 
 interface ArticleMeta {
   slug: string;

@@ -2,6 +2,8 @@
 
 Status: repository baseline deployed and the production Search Console property configured on 2026-11-11. Ongoing crawling, validation, and query performance still require monitoring.
 
+This is the technical implementation and release checklist. The governing discovery strategy, content inventory, authority plan, measurement model, and phased roadmap live in [DISCOVERY_STRATEGY.md](./DISCOVERY_STRATEGY.md).
+
 ## Outcome
 
 Neurocient should be discoverable for the concrete problems it explains, not only for its brand name. Public search pages must be crawlable, indexable, internally linked, self-canonical, and useful for a specific search intent. Personalized, administrative, authentication, and result pages must stay out of search.

@@ -1,8 +1,10 @@
 # Neurocient search readiness
 
-Status: URL and metadata baseline deployed and the production Search Console property configured on 2026-11-11. The 2026-11-12 production audit found that crawler-visible Insight substance and the server-rendered Scan introduction still require implementation.
+Status: URL and metadata baseline deployed and the production Search Console property configured on 2026-11-11. Crawler-visible Insight leads, verified Googlebot access, the server-rendered Scan introduction, and automated acceptance checks were implemented and locally verified on 2026-11-12; production deployment and Google URL Inspection remain.
 
 This is the technical implementation and release checklist. The governing discovery strategy, content inventory, authority plan, measurement model, and phased roadmap live in [DISCOVERY_STRATEGY.md](./DISCOVERY_STRATEGY.md).
+
+Current scope: configure and monitor Google Search and Google's AI search features as the conventional search channel, while keeping the public HTML accessible to legitimate AI agents generally. Bing Webmaster Tools, IndexNow, and other direct search-engine programmes are deferred.
 
 ## Outcome
 
@@ -109,6 +111,15 @@ The checks shown by current audits are not all Google Search requirements:
 Revisit WebMCP only after an explicit product and security contract defines the allowed tool, actor, confirmation boundary, data exposure, failure behavior, and audit trail. Revisit ARD when Neurocient publishes a genuine agentic resource that needs discovery.
 
 ## Release verification
+
+Run the automated acceptance check against a deployed environment:
+
+```powershell
+$env:DISCOVERY_BASE_URL = "https://neurocient.com"
+npm.cmd run verify:discovery
+```
+
+For a local production server, set `DISCOVERY_BASE_URL` to `http://localhost:3000`. The check fetches every sitemap URL and verifies the response, redirect target, self-canonical, indexability, substantive initial HTML, Insight public lead and Article schema, and the server-rendered Scan explanation. It also checks `robots.txt`, `sitemap.xml`, and `llms.txt`. It intentionally does not simulate verified Googlebot access: confirm that separately with Search Console URL Inspection after deployment.
 
 After deployment, verify these URLs without an authenticated session:
 

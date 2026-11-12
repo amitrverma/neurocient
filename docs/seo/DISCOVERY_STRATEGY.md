@@ -1,11 +1,19 @@
 # Neurocient discovery strategy and map
 
-- Status: infrastructure approach confirmed; implementation pending
+- Status: repository implementation complete and locally verified; production deployment and Google inspection pending
 - Owner: Neurocient product and editorial team
 - Last reviewed: 2026-11-12
 - Review cadence: monthly, with a full quarterly remap
 
 This is the source of truth for how Neurocient becomes discoverable. It joins search strategy, AI discovery, content architecture, external authority, measurement, and the existing article inventory in one plan. The technical implementation checklist lives in [SEARCH_READINESS.md](./SEARCH_READINESS.md).
+
+Current channel scope:
+
+- Google Search, including Google's AI search features, is the only conventional search engine being actively configured and monitored;
+- AI agents and answer systems are broadly in scope, regardless of vendor;
+- direct Bing Webmaster Tools, IndexNow, and other search-engine programmes are deferred;
+- compatibility with an open-ended set of AI agents must come from accessible, semantic public HTML and standard crawl controls, not a hardcoded crawler list;
+- vendor-specific crawler access may be added only when the crawler can be verified securely and its gated-content policy supports the intended response.
 
 ## 1. The outcome
 
@@ -93,7 +101,6 @@ This model prevents content editing from being prescribed for what is actually a
 - [Google: subscription and paywalled-content markup](https://developers.google.com/search/docs/appearance/structured-data/paywalled-content)
 - [Google: flexible sampling guidance](https://developers.google.com/search/docs/appearance/flexible-sampling)
 - [OpenAI: ChatGPT Search and publisher eligibility](https://help.openai.com/en/articles/9237897-chatgpt-search)
-- [Bing: webmaster guidance for search, Copilot, grounding, and citations](https://www.bing.com/webmasters/help/webmaster-guidelines-30fba23a)
 
 ## 4. Discovery system
 
@@ -112,13 +119,13 @@ No single workstream substitutes for the others. Infrastructure creates eligibil
 
 ## 5. Current baseline
 
-The repository and production boundary were checked on 2026-11-12. Neurocient has a sound URL and metadata foundation, but it is **not yet discovery-infrastructure ready** because the most important Insight content is not present in crawler-visible responses.
+The repository and production boundary were checked on 2026-11-12. Neurocient has a sound URL and metadata foundation. The missing crawler-visible Insight substance and Scan introduction have now been implemented and verified in a local production build; deployment and post-deployment Google inspection remain before the production boundary can be called ready.
 
 ### Confirmed ready
 
 - HTTP and `www` permanently redirect to the canonical HTTPS apex host;
 - `robots.txt`, `sitemap.xml`, and `llms.txt` return `200` in production;
-- browser, Googlebot, Bingbot, and OAI-SearchBot user-agent checks can fetch the public host and discovery files;
+- browser, Googlebot, Bingbot, and OAI-SearchBot user-agent checks can fetch the public host and discovery files; Bingbot was diagnostic evidence only and does not place Bing search in the active programme;
 - the sitemap contains 61 URLs, and every entry returned `200`, remained on its submitted URL, exposed the expected self-canonical, and avoided `noindex` during the production audit;
 - sampled private or personalised routes, including profile, saved content, Scan results, and administration, expose `noindex, nofollow`;
 - the canonical apex sitemap is accepted in Google Search Console and reported 61 discovered URLs on 2026-11-11;
@@ -129,15 +136,15 @@ The repository and production boundary were checked on 2026-11-12. Neurocient ha
 
 User-agent checks prove that the application does not reject those user-agent strings. They do not prove that the CDN admits every crawler's published production IP ranges or that the requesting bot is authentic. Real crawler access and logs remain higher-fidelity evidence.
 
-### Critical infrastructure gap: Insight bodies are not retrievable
+### Prior production gap: Insight bodies were not retrievable
 
-An anonymous crawler request to a production Insight currently receives:
+Before this implementation, an anonymous crawler request to a production Insight received:
 
 - `200`, the intended title, self-canonical, and `index, follow`;
 - the Insight access gate; and
 - the global Organization, Person, and WebSite structured data.
 
-It does **not** receive the article body, its distinctive explanations, or Article structured data. The page therefore looks technically indexable while withholding the substance expected to match queries or support citations. This is an access-boundary issue, not a metadata issue.
+It did **not** receive the article body, its distinctive explanations, or Article structured data. The implementation now returns the substantive opening explanation and Article structured data in initial HTML, while retaining the deeper body behind the existing access decision. Production deployment and inspection must confirm the new boundary behaves identically at the public host.
 
 The current Insight access contract intentionally prevents denied responses from compiling or returning full Insight MDX. The first gate is registration, not membership. Discovery implementation must preserve the server-authoritative progression and must not expose gated content accidentally or trust a spoofable user-agent string as authorization.
 
@@ -153,7 +160,7 @@ The existing reader progression remains unchanged:
 
 Reopening an already granted Insight does not consume another allowance. Only the backend may grant or consume an allowance.
 
-Discovery readiness will be added around this model:
+Discovery readiness is implemented around this model:
 
 - every indexable Insight response contains a substantial, self-contained public lead in the initial HTML;
 - the public lead is available without authentication and does not create or consume an Insight grant;
@@ -166,14 +173,13 @@ Discovery readiness will be added around this model:
 - crawler-specific access must be decided at a trusted network boundary or through equivalent verification, never from user-agent text alone;
 - Article structured data and gated-content declarations must accurately describe the content present under the applicable response policy.
 
-The public lead is not an empty teaser. It must answer the concrete question sufficiently to be useful and retrievable while leaving the extended explanation, examples, applications, audio, exercises, or other deeper material inside the existing access progression. Its exact content boundary and presentation will be designed and tested during implementation; that decision must not silently reduce the current five/twenty/unlimited allowances.
+The public lead is not an empty teaser. It is the existing opening explanation before the first level-two section heading, with a frontmatter summary as the fail-closed fallback when a safe boundary is unavailable. The extended explanation, examples, applications, audio, exercises, and other deeper material remain inside the existing access progression. Automated tests assert that all 29 current Insights have a substantive lead and a separate metered body.
 
 ### Additional infrastructure gaps
 
-- the Caveman Scan's initial server response contains a loading shell; its meaningful introduction and H1 appear only after client-side JavaScript and are therefore weak for non-rendering crawlers;
-- Bing Webmaster Tools ownership and sitemap submission have not been confirmed;
-- IndexNow notification is not implemented;
-- no automated production acceptance check currently asserts status, final URL, canonical, robots directive, substantive rendered content, and structured data across the sitemap;
+- the Caveman Scan introduction and H1 are now server-rendered; production inspection remains required after deployment;
+- direct Bing Webmaster Tools and IndexNow work is intentionally deferred under the current Google-search-only scope;
+- the repository now includes an automated production acceptance check for status, final URL, canonical, robots directive, substantive rendered content, Insight schema, and the initial Scan explanation across the sitemap; it must still be run after each relevant deployment;
 - Search Console currently reports no external links; authority can develop later, but its absence limits selection rather than infrastructure eligibility;
 - internal linking is uneven and article bodies generally do not expose supporting references; these are content and authority constraints after infrastructure readiness is established.
 
@@ -269,18 +275,18 @@ If two drafts cannot be separated by a different primary question and a differen
 - Implement the confirmed public-lead plus metered-full-Insight model without changing the five/twenty/unlimited reader progression.
 - Make the public Insight lead and accurate Article structured data available in the initial HTML to people and legitimate discovery crawlers.
 - Server-render a meaningful Caveman Scan introduction instead of returning only a loading shell before JavaScript runs.
-- Add an automated discovery-infrastructure acceptance check covering every sitemap URL: response, redirect target, canonical, robots directive, substantive content, and expected structured data.
-- Confirm Bing Webmaster Tools ownership, submit the canonical sitemap, and implement or explicitly decline IndexNow with a recorded reason.
+- Run the automated discovery-infrastructure acceptance check after each relevant deployment and treat regressions as release defects.
+- Confirm Google Search Console settings, sitemap processing, rendered-content inspection, and Google's AI-search inclusion controls.
 - Verify access using actual engine inspection or crawler logs where possible; user-agent simulation remains a lower-fidelity check.
 - Record a baseline for indexed pages, exclusions, non-brand impressions, clicks, queries, referring domains, engaged visits, Scan starts, and relevant product progression.
 - Preserve the current private-route `noindex` boundary and ensure infrastructure work does not expose personalised, administrative, result, or API content.
 
-**Exit condition:** every intended public page returns meaningful, policy-approved content in its initial response; engines can crawl and index it under one canonical URL; private surfaces remain excluded; Google and Bing submission paths are configured; and a repeatable check can detect regressions.
+**Exit condition:** every intended public page returns meaningful, policy-approved content in its initial response; Google can crawl and index it under one canonical URL; legitimate AI retrievers receive at least the public lead; private surfaces remain excluded; Google Search Console is configured; and a repeatable check can detect regressions.
 
 ### Short term: establish retrieval fit and source quality (2 weeks–3 months)
 
 - Adopt the content map as the editorial inventory and assign an owner to every P1 page.
-- Build a discovery benchmark: a controlled set of relevant questions, the current Google/Bing results and AI citations, the sources selected, and Neurocient's current presence or absence.
+- Build a discovery benchmark: a controlled set of relevant questions, the current Google results and AI citations, the sources selected, and Neurocient's current presence or absence.
 - Define the hub architecture and contextual internal-link plan for the six territories.
 - Produce evidence-based upgrade plans for the five P1 reference pages only after observing the actual result and citation landscape.
 - Upgrade the five P1 reference pages for answer quality, evidence, authorship, visual explanation, internal links, and product progression.
@@ -430,9 +436,9 @@ The next review should record:
 
 1. the implemented public-lead content boundary and evidence that it preserves the five/twenty/unlimited Insight progression;
 2. the production evidence for crawler-visible Insight substance and a server-rendered Scan introduction;
-3. Bing Webmaster Tools ownership, sitemap status, and the IndexNow decision;
+3. Google Search Console sitemap, rendered-content, and AI-search inclusion status;
 4. the automated discovery-infrastructure acceptance contract and operating owner;
-5. the baseline Search Console, Bing, AI-citation-test, and product-progression figures;
+5. the baseline Google Search Console, AI-citation-test, and product-progression figures;
 6. named owner and evidence-based upgrade plan for each P1 page;
 7. the agreed territory hub and internal-link specification;
 8. the first-quarter authority shortlist and first linkable-asset hypothesis;

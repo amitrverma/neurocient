@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LoaderCircle } from "lucide-react";
 import { questionsBank } from "./questionsBank";
 
 import CavemanScanIntro from "./CavemanScanIntro";
@@ -115,27 +114,16 @@ export default function CavemanScan() {
     setStage("questions");
   };
 
-  if (!hasRestored) {
-    return (
-      <main className="journey-loading">
-        <div>
-          <LoaderCircle className="animate-spin" aria-hidden="true" />
-          <p>Preparing the first situation</p>
-        </div>
-      </main>
-    );
-  }
-
   return (
     <div className="caveman-scan-page">
-      {stage === "intro" && (
+      {(!hasRestored || stage === "intro") && (
         <CavemanScanIntro
           hasProgress={hasProgress}
           onStart={handleStart}
         />
       )}
 
-      {stage === "questions" && (
+      {hasRestored && stage === "questions" && (
         <>
           <CavemanScanQuestion
             question={question}

@@ -193,9 +193,12 @@ experience.
   all three approved Utility templates through Neurocient's configured number;
   Meta callbacks advanced all three to `delivered`. The owner exercised Spot,
   STOP/START, `Done`, duplicate `Done`, `Partly`, and `Didn't happen`; durable
-  state matched each contract. The owner also sent `note:`; its live webhook
-  arrived, while durable note behavior is retained as real-PostgreSQL integration
-  evidence because the disposable fixture was cleaned before inspection.
+  state matched each contract. After the parser correction, the owned-number
+  message `Spot : spacing regression test` created exactly one Spot; that
+  disposable record was then removed by its resolved ID. The owner also sent
+  `note:`; its live webhook arrived, while durable note behavior is retained as
+  real-PostgreSQL integration evidence because the disposable fixture was
+  cleaned before inspection.
 - Deployed dev-candidate verification and limited-cohort operation remain
   provider-staging evidence and are not claimed here.
 - On 2026-11-04, genuine Meta test-number inbound delivery and callback handling

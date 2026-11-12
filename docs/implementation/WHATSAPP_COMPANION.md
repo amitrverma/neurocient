@@ -1,18 +1,19 @@
 # WhatsApp companion implementation contract
 
-Status: implemented locally; owned-number provider path working; template and exact-candidate verification pending
+Status: implemented locally; three Utility templates submitted to Meta and pending approval; exact-candidate verification pending
 
 Owner: Amit
 
-Contract version: 1.2 (2026-11-04)
+Contract version: 1.3 (2026-11-12)
 
 Version 1.1 makes the daily nugget selection durable and shared across the web
 and outbound delivery. It also requires bounded outbound WhatsApp bodies and
 retention of accepted provider message identifiers for dispatch correlation.
 Version 1.2 replaces the pre-release Twilio transport with the direct Meta
 WhatsApp Cloud API without changing companion behavior or consent authority.
-Version 1.2 replaces the pre-release Twilio transport with the direct Meta
-WhatsApp Cloud API without changing companion behavior or consent authority.
+Version 1.3 separates inbound service-window replies from proactive template
+delivery, submits the three reminder templates, and records signed Meta delivery
+status callbacks against the durable dispatch.
 
 ## Outcome
 
@@ -72,6 +73,29 @@ This is a deterministic companion, not an open-ended AI chatbot.
   Microchallenge with reminders enabled, that reminder takes priority and the
   nugget is skipped for the day.
 
+## Proactive template contract
+
+Scheduled WhatsApp messages never fall back to free-form text. Inbound
+acknowledgements use service messages within the customer-service window;
+scheduled reminders use these Meta Utility templates in `en_GB`:
+
+- `neurocient_daily_nudge_v1` with title `{{1}}` and nudge content `{{2}}`;
+- `neurocient_spot_checkin_v1` with check-in title `{{1}}` and state-aware
+  prompt `{{2}}`; and
+- `neurocient_microchallenge_checkin_v1` with the active experiment title
+  `{{1}}` and first concrete instruction `{{2}}`.
+
+All three fixed bodies state that the user asked to receive the message and
+carry a STOP footer. The Microchallenge body permanently includes `Done`,
+`Partly`, and `Didn't happen`; template variables cannot remove those choices.
+The daily nudge contains no product link, membership prompt, promotion, or
+return-to-app call to action. Meta remains the final category authority.
+
+On 2026-11-12 the configured WABA accepted all three definitions as `UTILITY`
+with status `PENDING`. Repository configuration owns their names and language,
+and `python -m scripts.create_whatsapp_templates` provides a dry-run by default;
+`--apply` creates only missing definitions.
+
 ## Failure and privacy contract
 
 - The Meta webhook's raw-body HMAC-SHA256 signature, configured business and
@@ -80,14 +104,18 @@ This is a deterministic companion, not an open-ended AI chatbot.
 - The replay claim and any Spot or Microchallenge mutation commit in one database
   transaction before a reply is attempted.
 - A provider reply failure must not roll back a committed user record or invite
-  duplicate mutation. Reply delivery remains best-effort until durable outbound
-  replies and status callbacks are implemented.
+  duplicate mutation. It leaves a privacy-safe operational event; durable
+  service-reply retries remain deferred.
 - Product-authored outbound bodies remain bounded to 1,600 characters. A long
   Microchallenge title or instruction must not remove the three response
   options. When Meta accepts a scheduled dispatch and returns a well-formed
   `wamid`, that identifier is retained on the durable dispatch record.
 - Phone numbers, message text, notes, pairing tokens, signatures, and
   provider response bodies must not appear in application logs.
+- A successful Graph response records `accepted`, not delivered. Signed status
+  callbacks advance a matching provider `wamid` to `delivered` or `read`, or to
+  `failed` with a bounded Meta error code. Late or duplicate callbacks cannot
+  downgrade a stronger delivery state.
 
 ## Acceptance criteria
 
@@ -112,12 +140,16 @@ This is a deterministic companion, not an open-ended AI chatbot.
 - **WA-COMP-09:** Web and WhatsApp Spot capture enforce the same serialized
   free-account allowance; a denied WhatsApp write commits no Spot while keeping
   the webhook response generic.
+- **WA-COMP-10:** Every scheduled WhatsApp purpose uses its configured approved
+  template; service replies remain text messages and are never used as a
+  proactive fallback.
+- **WA-COMP-11:** Authentic delivery callbacks update only the dispatch matching
+  their provider `wamid`, preserve monotonic status, and store no provider text.
 
 ## Deferred provider work
 
-- approved WhatsApp authentication and reinforcement templates;
 - interactive reply buttons;
-- durable outbound reply records, delivery callbacks, retry, and reconciliation;
+- durable outbound service-reply records and retry;
 - exact-release-candidate WhatsApp journey evidence and limited-cohort rollout.
 
 ## Rollout and recovery
@@ -156,9 +188,9 @@ experience.
   796 physical lines. The new check-in rendering was extracted into its own
   covered component so this change does not add another render responsibility;
   the next material Microchallenge-page change should continue decomposition.
-- Genuine Meta outbound delivery, successful template behavior, delivery-status
-  reconciliation, and limited-cohort operation remain provider-staging evidence
-  and are not claimed here.
+- Genuine delivery of the three newly submitted templates, final category
+  approval, and limited-cohort operation remain provider-staging evidence and
+  are not claimed here.
 - On 2026-11-04, genuine Meta test-number inbound delivery and callback handling
   passed locally. Both direct Graph API text and Meta dashboard `hello_world`
   template requests were accepted, then failed in Meta's delivery callback with

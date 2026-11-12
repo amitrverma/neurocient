@@ -444,6 +444,9 @@ class NotificationDispatch(Base):
     first_attempt_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     last_attempt_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     completed_at = Column(DateTime, nullable=True)
+    delivered_at = Column(DateTime, nullable=True)
+    read_at = Column(DateTime, nullable=True)
+    failed_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
@@ -453,10 +456,17 @@ class NotificationDispatch(Base):
             name="uq_notification_dispatch_daily",
         ),
         CheckConstraint(
-            "status IN ('dispatching', 'sent', 'failed', 'skipped', 'reconciliation_required')",
+            "status IN ('dispatching', 'sent', 'accepted', 'delivered', 'read', "
+            "'failed', 'skipped', 'reconciliation_required')",
             name="ck_notification_dispatch_status",
         ),
         CheckConstraint("channel IN ('push', 'whatsapp')", name="ck_notification_dispatch_channel"),
+        Index(
+            "uq_notification_dispatch_provider_message_id",
+            "provider_message_id",
+            unique=True,
+            postgresql_where=provider_message_id.is_not(None),
+        ),
     )
 
 class UserPreferences(Base):

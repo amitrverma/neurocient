@@ -141,6 +141,15 @@ class EmptySession:
         return None
 
 
+class StatusSession(EmptySession):
+    def __init__(self, dispatch=None):
+        super().__init__()
+        self.dispatch = dispatch
+
+    async def scalar(self, _statement):
+        return self.dispatch
+
+
 class ScalarResult:
     def __init__(self, value=None):
         self.value = value
@@ -266,7 +275,7 @@ async def test_verified_microchallenge_response_uses_shared_checkin_and_acknowle
     monkeypatch.setattr(whatsapp_routes, "record_checkin", record_checkin)
     monkeypatch.setattr(
         whatsapp_routes,
-        "send_whatsapp_message",
+        "send_whatsapp_service_message",
         lambda number, message, *, emit_logs=True: sent.append(
             (number, message, emit_logs)
         ) or True,
@@ -309,7 +318,7 @@ async def test_response_without_today_prompt_cannot_mutate_active_work(monkeypat
     monkeypatch.setattr(whatsapp_routes, "record_checkin", record_checkin)
     monkeypatch.setattr(
         whatsapp_routes,
-        "send_whatsapp_message",
+        "send_whatsapp_service_message",
         lambda _number, message, *, emit_logs=True: sent.append(message) or True,
     )
     payload = _payload(message_id, "+919876543210", "Done")
@@ -332,13 +341,24 @@ async def test_response_without_today_prompt_cannot_mutate_active_work(monkeypat
 
 
 @pytest.mark.asyncio
-async def test_status_callback_is_acknowledged_without_database_lookup(monkeypatch):
+async def test_status_callback_updates_matching_dispatch(monkeypatch):
     _configure(monkeypatch)
-    db = EmptySession()
+    dispatch = SimpleNamespace(
+        status="accepted",
+        last_error_code=None,
+        delivered_at=None,
+        read_at=None,
+        failed_at=None,
+    )
+    db = StatusSession(dispatch)
     payload = _payload("wamid.ignored", "+919876543210", "ignored")
     value = payload["entry"][0]["changes"][0]["value"]
     value.pop("messages")
-    value["statuses"] = [{"id": "wamid.outbound", "status": "delivered"}]
+    value["statuses"] = [{
+        "id": "wamid.outbound",
+        "status": "delivered",
+        "timestamp": "1730678400",
+    }]
     raw_body, headers = _signed_request(payload)
     transport = httpx.ASGITransport(app=_app_with_db(db))
 
@@ -351,6 +371,56 @@ async def test_status_callback_is_acknowledged_without_database_lookup(monkeypat
 
     assert response.status_code == 200
     assert db.commits == 1
+    assert dispatch.status == "delivered"
+    assert dispatch.delivered_at is not None
+
+
+@pytest.mark.asyncio
+async def test_late_failed_status_does_not_downgrade_delivered_dispatch():
+    dispatch = SimpleNamespace(
+        status="delivered",
+        last_error_code=None,
+        delivered_at=None,
+        read_at=None,
+        failed_at=None,
+    )
+    changed = await whatsapp_routes._apply_delivery_status(
+        StatusSession(dispatch),
+        whatsapp_routes.MetaMessageStatus(
+            message_id="wamid.outbound",
+            status="failed",
+            timestamp=1730678400,
+            error_code="meta_131047",
+        ),
+    )
+
+    assert changed is False
+    assert dispatch.status == "delivered"
+    assert dispatch.last_error_code is None
+
+
+@pytest.mark.asyncio
+async def test_delivery_callback_resolves_uncertain_provider_outcome():
+    dispatch = SimpleNamespace(
+        status="reconciliation_required",
+        last_error_code="provider_outcome_unknown",
+        delivered_at=None,
+        read_at=None,
+        failed_at=None,
+    )
+    changed = await whatsapp_routes._apply_delivery_status(
+        StatusSession(dispatch),
+        whatsapp_routes.MetaMessageStatus(
+            message_id="wamid.outbound",
+            status="delivered",
+            timestamp=1730678400,
+            error_code=None,
+        ),
+    )
+
+    assert changed is True
+    assert dispatch.status == "delivered"
+    assert dispatch.last_error_code is None
 
 
 @pytest.mark.asyncio

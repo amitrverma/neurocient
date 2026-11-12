@@ -13,6 +13,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.observability import log_event, safe_exception_fields
 from app.Routes.preferences_route import CONSENT_VERSION, pairing_token_hash
 from app.models import (
     NotificationDispatch,
@@ -27,9 +28,11 @@ from app.services.microchallenge_progress import (
 from app.services.spot_capture import capture_spot
 from app.services.meta_whatsapp import (
     MetaInboundMessage,
+    MetaMessageStatus,
     extract_meta_messages,
+    extract_meta_statuses,
     meta_whatsapp_ready,
-    send_whatsapp_message,
+    send_whatsapp_service_message,
     validate_meta_signature,
     verify_meta_challenge,
 )
@@ -108,7 +111,14 @@ async def _prompted_assignment_id(db: AsyncSession, user_id) -> UUID | None:
             NotificationDispatch.channel == "whatsapp",
             NotificationDispatch.dispatch_date == product_today(),
             NotificationDispatch.status.in_(
-                ["dispatching", "sent", "reconciliation_required"]
+                [
+                    "dispatching",
+                    "sent",
+                    "accepted",
+                    "delivered",
+                    "read",
+                    "reconciliation_required",
+                ]
             ),
         )
     )
@@ -326,6 +336,55 @@ async def _process_inbound_message(
     return acknowledgement
 
 
+async def _apply_delivery_status(
+    db: AsyncSession,
+    provider_status: MetaMessageStatus,
+) -> bool:
+    dispatch = await db.scalar(
+        select(NotificationDispatch)
+        .where(
+            NotificationDispatch.channel == "whatsapp",
+            NotificationDispatch.provider_message_id
+            == provider_status.message_id,
+        )
+        .with_for_update()
+    )
+    if dispatch is None:
+        return False
+
+    provider_time = datetime.fromtimestamp(
+        provider_status.timestamp,
+        UTC,
+    ).replace(tzinfo=None)
+    if provider_status.status == "failed":
+        if dispatch.status in {"delivered", "read"}:
+            return False
+        dispatch.status = "failed"
+        dispatch.last_error_code = provider_status.error_code or "meta_failed"
+        dispatch.failed_at = provider_time
+        return True
+
+    target_status = {
+        "sent": "accepted",
+        "delivered": "delivered",
+        "read": "read",
+    }[provider_status.status]
+    rank = {"sent": 0, "accepted": 1, "delivered": 2, "read": 3}
+    current_rank = rank.get(dispatch.status)
+    if dispatch.status in {"dispatching", "reconciliation_required"}:
+        current_rank = 0
+    if current_rank is None or rank[target_status] <= current_rank:
+        return False
+    dispatch.status = target_status
+    dispatch.last_error_code = None
+    if target_status == "delivered":
+        dispatch.delivered_at = provider_time
+    elif target_status == "read":
+        dispatch.delivered_at = dispatch.delivered_at or provider_time
+        dispatch.read_at = provider_time
+    return True
+
+
 @router.post("/webhook/whatsapp")
 async def whatsapp_webhook(
     request: Request,
@@ -358,6 +417,7 @@ async def whatsapp_webhook(
     try:
         payload = json.loads(raw_body)
         messages = extract_meta_messages(payload)
+        statuses = extract_meta_statuses(payload)
     except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
         logger.warning("whatsapp_webhook_rejected reason=malformed_payload")
         return _safe_error(400)
@@ -368,6 +428,8 @@ async def whatsapp_webhook(
             acknowledgement = await _process_inbound_message(db, message)
             if acknowledgement:
                 acknowledgements.append((message.from_number, acknowledgement))
+        for provider_status in statuses:
+            await _apply_delivery_status(db, provider_status)
         await db.commit()
         logger.info("whatsapp_webhook_accepted")
     except Exception:
@@ -378,14 +440,23 @@ async def whatsapp_webhook(
     for from_number, acknowledgement in acknowledgements:
         try:
             await asyncio.to_thread(
-                send_whatsapp_message,
+                send_whatsapp_service_message,
                 from_number,
                 acknowledgement,
                 emit_logs=False,
             )
-        except Exception:
+        except Exception as error:
             # The durable inbound write is already committed. A provider or
             # worker failure must not expose details or invite a replay.
-            pass
+            log_event(
+                logger,
+                "whatsapp_acknowledgement_failed",
+                level=logging.WARNING,
+                component="api",
+                operation="whatsapp_service_reply",
+                outcome="uncertain",
+                reason_code="provider_outcome_unknown",
+                **safe_exception_fields(error),
+            )
 
     return JSONResponse(ACCEPTED_RESPONSE)

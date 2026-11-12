@@ -92,7 +92,7 @@ async def test_channel_consent_and_inbound_whatsapp_pairing(monkeypatch):
     monkeypatch.setattr(settings, "WHATSAPP_GRAPH_API_VERSION", "v25.0")
     monkeypatch.setattr(
         whatsapp_routes,
-        "send_whatsapp_message",
+        "send_whatsapp_service_message",
         lambda number, message, **_kwargs: sent.append((number, message)) or True,
     )
 

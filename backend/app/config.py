@@ -30,6 +30,14 @@ def valid_graph_api_version(value: str | None) -> bool:
     return bool(value and re.fullmatch(r"v[1-9][0-9]*\.0", value))
 
 
+def valid_whatsapp_template_name(value: str | None) -> bool:
+    return bool(value and re.fullmatch(r"[a-z0-9_]{1,512}", value))
+
+
+def valid_whatsapp_language_code(value: str | None) -> bool:
+    return bool(value and re.fullmatch(r"[a-z]{2,3}(?:_[A-Z]{2})?", value))
+
+
 def parse_csrf_trusted_origins(value: str | None, env: str) -> tuple[str, ...]:
     if not value:
         if env == "prod":
@@ -100,6 +108,19 @@ class Settings:
     WHATSAPP_PHONE_NUMBER_ID = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
     WHATSAPP_BUSINESS_NUMBER = os.getenv("WHATSAPP_BUSINESS_NUMBER")
     WHATSAPP_GRAPH_API_VERSION = os.getenv("WHATSAPP_GRAPH_API_VERSION")
+    WHATSAPP_TEMPLATE_LANGUAGE = os.getenv(
+        "WHATSAPP_TEMPLATE_LANGUAGE", "en_GB"
+    ).strip()
+    WHATSAPP_NUDGE_TEMPLATE_NAME = os.getenv(
+        "WHATSAPP_NUDGE_TEMPLATE_NAME", "neurocient_daily_nudge_v1"
+    ).strip()
+    WHATSAPP_SPOT_TEMPLATE_NAME = os.getenv(
+        "WHATSAPP_SPOT_TEMPLATE_NAME", "neurocient_spot_checkin_v1"
+    ).strip()
+    WHATSAPP_MICROCHALLENGE_TEMPLATE_NAME = os.getenv(
+        "WHATSAPP_MICROCHALLENGE_TEMPLATE_NAME",
+        "neurocient_microchallenge_checkin_v1",
+    ).strip()
     CONSENT_PAIRING_SECRET = os.getenv("CONSENT_PAIRING_SECRET")
     RESEND_API_KEY = os.getenv("RESEND_API_KEY")
     RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL")
@@ -206,6 +227,21 @@ class Settings:
             raise RuntimeError(
                 "Invalid runtime configuration: "
                 "WHATSAPP_GRAPH_API_VERSION must use the form v<major>.0"
+            )
+        for name in (
+            "WHATSAPP_NUDGE_TEMPLATE_NAME",
+            "WHATSAPP_SPOT_TEMPLATE_NAME",
+            "WHATSAPP_MICROCHALLENGE_TEMPLATE_NAME",
+        ):
+            if not valid_whatsapp_template_name(getattr(self, name)):
+                raise RuntimeError(
+                    f"Invalid runtime configuration: {name} must contain only "
+                    "lowercase letters, digits, and underscores"
+                )
+        if not valid_whatsapp_language_code(self.WHATSAPP_TEMPLATE_LANGUAGE):
+            raise RuntimeError(
+                "Invalid runtime configuration: WHATSAPP_TEMPLATE_LANGUAGE "
+                "must use a Meta language code such as en_GB"
             )
         if (
             self.WHATSAPP_BUSINESS_ACCOUNT_ID

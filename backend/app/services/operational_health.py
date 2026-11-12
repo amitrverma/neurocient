@@ -86,6 +86,7 @@ async def operational_snapshot(db: AsyncSession) -> dict:
     now = datetime.utcnow()
     recent = now - timedelta(hours=24)
     stuck_cutoff = now - timedelta(minutes=15)
+    delivery_cutoff = now - timedelta(minutes=30)
 
     statements = {
         "reconciliation_open": select(func.count(ReconciliationIssue.id)).where(
@@ -109,6 +110,13 @@ async def operational_snapshot(db: AsyncSession) -> dict:
         "notifications_failed_recent": select(func.count(NotificationDispatch.id)).where(
             NotificationDispatch.status == "failed",
             NotificationDispatch.updated_at >= recent,
+        ),
+        "whatsapp_delivery_pending": select(
+            func.count(NotificationDispatch.id)
+        ).where(
+            NotificationDispatch.channel == "whatsapp",
+            NotificationDispatch.status == "accepted",
+            NotificationDispatch.updated_at < delivery_cutoff,
         ),
         "membership_stuck": select(func.count(MembershipEntitlement.user_id)).where(
             or_(

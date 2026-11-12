@@ -1699,3 +1699,24 @@ purpose-toggle and outbound-code parts of the 2026-10-31 decision and the
 "preserve existing consent model" implication in the 2026-11-04 transport
 decision. Safe defaults, signed webhooks, dispatch-time channel re-checks, and
 privacy-safe logging remain unchanged.
+
+## 2026-11-12: Proactive WhatsApp reminders use three Utility templates
+
+Daily nudges, Spot the Inner Caveman check-ins, and active-Microchallenge
+check-ins are three reminder purposes. A due Microchallenge continues to replace
+the daily nudge so those two messages never compete. This behavior is not
+changed by the provider template boundary.
+
+Each proactive purpose uses its own Meta Utility template. The fixed copy says
+that the person asked to receive it, contains no promotion or membership prompt,
+and allows STOP. The Microchallenge template keeps `Done`, `Partly`, and
+`Didn't happen`; only `Done` advances completed-day progress. Inbound
+acknowledgements remain service-window text and cannot be used as a fallback for
+scheduled delivery.
+
+Provider acceptance is not delivery. The dispatch stores Meta's `wamid` as
+`accepted`; signed callbacks may advance it to `delivered` or `read`, or mark it
+`failed` with a bounded provider code. Later callbacks cannot downgrade a
+stronger state. Meta owns the final template category decision, so scheduled
+production delivery remains disabled until all three templates are approved and
+the exact-candidate consent, reminder, status, and reply journey is retained.

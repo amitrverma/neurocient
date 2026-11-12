@@ -142,6 +142,23 @@ def test_whatsapp_app_and_verify_secrets_must_be_independent(monkeypatch):
         Settings().validate_for_startup()
 
 
+@pytest.mark.parametrize(
+    ("name", "value", "expected"),
+    [
+        ("WHATSAPP_NUDGE_TEMPLATE_NAME", "Daily-Nudge", "lowercase letters"),
+        ("WHATSAPP_SPOT_TEMPLATE_NAME", "", "lowercase letters"),
+        ("WHATSAPP_TEMPLATE_LANGUAGE", "english", "Meta language code"),
+    ],
+)
+def test_whatsapp_template_configuration_is_provider_valid(
+    monkeypatch, name, value, expected
+):
+    monkeypatch.setattr(Settings, name, value)
+
+    with pytest.raises(RuntimeError, match=expected):
+        Settings().validate_for_startup()
+
+
 def test_membership_currency_plans_must_be_distinct(monkeypatch):
     monkeypatch.setattr(Settings, "ENV", "dev")
     monkeypatch.setattr(Settings, "RAZORPAY_MEMBERSHIP_PLAN_ID", "plan_same")

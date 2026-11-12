@@ -83,6 +83,82 @@ async def _post(client, payload: dict) -> httpx.Response:
     )
 
 
+def _status_payload(message_id: str, status: str) -> dict:
+    return {
+        "object": "whatsapp_business_account",
+        "entry": [{
+            "id": WABA_ID,
+            "changes": [{
+                "field": "messages",
+                "value": {
+                    "messaging_product": "whatsapp",
+                    "metadata": {
+                        "display_phone_number": "15551234567",
+                        "phone_number_id": PHONE_NUMBER_ID,
+                    },
+                    "statuses": [{
+                        "id": message_id,
+                        "status": status,
+                        "timestamp": "1730678400",
+                    }],
+                },
+            }],
+        }],
+    }
+
+
+async def test_meta_delivery_status_updates_durable_dispatch(monkeypatch):
+    from app.Routes import whatsapp_routes
+    from app.config import settings
+    from app.database import AsyncSessionLocal, engine
+    from app.models import NotificationDispatch, User
+    from app.services.product_clock import product_today
+
+    _configure(settings, monkeypatch)
+    user_id = uuid4()
+    dispatch_id = uuid4()
+    provider_message_id = _message_id()
+
+    async with AsyncSessionLocal() as db:
+        db.add(User(id=user_id, email=f"meta-status-{uuid4()}@example.com"))
+        await db.commit()
+        db.add(NotificationDispatch(
+            id=dispatch_id,
+            user_id=user_id,
+            purpose="nudge",
+            channel="whatsapp",
+            destination_key="verified-account-number",
+            dispatch_date=product_today(),
+            status="accepted",
+            correlation_id=uuid4(),
+            provider_message_id=provider_message_id,
+        ))
+        await db.commit()
+
+    app = FastAPI()
+    app.include_router(whatsapp_routes.router, prefix="/wa")
+    transport = httpx.ASGITransport(app=app)
+    try:
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await _post(
+                client,
+                _status_payload(provider_message_id, "delivered"),
+            )
+        assert response.status_code == 200
+        async with AsyncSessionLocal() as db:
+            dispatch = await db.get(NotificationDispatch, dispatch_id)
+            assert dispatch.status == "delivered"
+            assert dispatch.delivered_at is not None
+    finally:
+        async with AsyncSessionLocal() as db:
+            await db.execute(
+                delete(NotificationDispatch).where(NotificationDispatch.id == dispatch_id)
+            )
+            await db.execute(delete(User).where(User.id == user_id))
+            await db.commit()
+        await engine.dispose()
+
+
 async def test_meta_whatsapp_boundary_is_private_and_replay_safe(monkeypatch, caplog):
     from app.Routes import whatsapp_routes
     from app.config import settings
@@ -100,7 +176,7 @@ async def test_meta_whatsapp_boundary_is_private_and_replay_safe(monkeypatch, ca
 
     monkeypatch.setattr(
         whatsapp_routes,
-        "send_whatsapp_message",
+        "send_whatsapp_service_message",
         lambda to_number, _message, *, emit_logs=True: sent_to.append(to_number) or True,
     )
     app = FastAPI()
@@ -220,7 +296,7 @@ async def test_meta_whatsapp_response_writes_shared_daily_outcome(monkeypatch):
     sent_messages: list[str] = []
     monkeypatch.setattr(
         whatsapp_routes,
-        "send_whatsapp_message",
+        "send_whatsapp_service_message",
         lambda _number, message, *, emit_logs=True: sent_messages.append(message) or True,
     )
 
@@ -323,7 +399,7 @@ async def test_meta_whatsapp_spot_respects_shared_free_limit(monkeypatch):
     sent_messages: list[str] = []
     monkeypatch.setattr(
         whatsapp_routes,
-        "send_whatsapp_message",
+        "send_whatsapp_service_message",
         lambda _number, message, *, emit_logs=True: sent_messages.append(message) or True,
     )
 
@@ -440,7 +516,7 @@ async def test_failed_transaction_releases_meta_claim_and_ack_is_not_retried(mon
             attempts.append(to_number)
             raise RuntimeError("provider failure")
 
-        monkeypatch.setattr(whatsapp_routes, "send_whatsapp_message", fail_ack)
+        monkeypatch.setattr(whatsapp_routes, "send_whatsapp_service_message", fail_ack)
         async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
             accepted = await _post(client, payload)
             replay = await _post(client, payload)

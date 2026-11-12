@@ -7,8 +7,10 @@ from app.config import settings
 from app.services.notification_provider import NotificationOutcomeUnknown
 from app.services.meta_whatsapp import (
     extract_meta_messages,
+    extract_meta_statuses,
     meta_whatsapp_ready,
-    send_whatsapp_message,
+    send_whatsapp_service_message,
+    send_whatsapp_template_message,
     validate_meta_signature,
     verify_meta_challenge,
 )
@@ -47,7 +49,11 @@ def _payload(*messages: dict) -> dict:
     if messages:
         value["messages"] = list(messages)
     else:
-        value["statuses"] = [{"id": "wamid.status", "status": "delivered"}]
+        value["statuses"] = [{
+            "id": "wamid.status",
+            "status": "delivered",
+            "timestamp": "1730678400",
+        }]
     return {
         "object": "whatsapp_business_account",
         "entry": [
@@ -115,6 +121,26 @@ def test_accepts_status_only_callbacks_without_creating_messages(monkeypatch):
     _configure(monkeypatch)
 
     assert extract_meta_messages(_payload()) == []
+    statuses = extract_meta_statuses(_payload())
+    assert len(statuses) == 1
+    assert statuses[0].message_id == "wamid.status"
+    assert statuses[0].status == "delivered"
+    assert statuses[0].error_code is None
+
+
+def test_extracts_bounded_failed_status_reason_without_provider_text(monkeypatch):
+    _configure(monkeypatch)
+    payload = _payload()
+    payload["entry"][0]["changes"][0]["value"]["statuses"] = [{
+        "id": "wamid.failed",
+        "status": "failed",
+        "timestamp": "1730678400",
+        "errors": [{"code": 131047, "title": "private provider detail"}],
+    }]
+
+    statuses = extract_meta_statuses(payload)
+
+    assert statuses[0].error_code == "meta_131047"
 
 
 @pytest.mark.parametrize("field", ["waba", "phone"])
@@ -168,7 +194,7 @@ def test_outbound_text_uses_graph_api_bearer_auth_and_returns_wamid(
 
     monkeypatch.setattr("app.services.meta_whatsapp.requests.post", capture_post)
 
-    result = send_whatsapp_message(
+    result = send_whatsapp_service_message(
         "+919876543210",
         "private outbound content " * 200,
     )
@@ -200,7 +226,7 @@ def test_success_without_a_valid_provider_message_id_is_uncertain(monkeypatch):
     )
 
     with pytest.raises(NotificationOutcomeUnknown):
-        send_whatsapp_message("+919876543210", "private outbound content")
+        send_whatsapp_service_message("+919876543210", "private outbound content")
 
 
 @pytest.mark.parametrize("status_code", [408, 500, 503])
@@ -219,7 +245,7 @@ def test_provider_timeout_or_server_failure_has_uncertain_outcome(
     )
 
     with pytest.raises(NotificationOutcomeUnknown):
-        send_whatsapp_message("+919876543210", "private outbound content")
+        send_whatsapp_service_message("+919876543210", "private outbound content")
 
 
 def test_provider_client_rejection_is_a_definite_failure(monkeypatch):
@@ -233,6 +259,79 @@ def test_provider_client_rejection_is_a_definite_failure(monkeypatch):
         lambda *_args, **_kwargs: Response(),
     )
 
-    assert send_whatsapp_message(
+    assert send_whatsapp_service_message(
         "+919876543210", "private outbound content"
     ) is False
+
+
+def test_outbound_template_uses_approved_name_language_and_body_parameters(
+    monkeypatch,
+):
+    _configure(monkeypatch)
+    captured = {}
+
+    class Response:
+        status_code = 200
+
+        @staticmethod
+        def json():
+            return {"messages": [{"id": "wamid.accepted-template"}]}
+
+    def capture_post(url, **kwargs):
+        captured["url"] = url
+        captured.update(kwargs)
+        return Response()
+
+    monkeypatch.setattr("app.services.meta_whatsapp.requests.post", capture_post)
+
+    result = send_whatsapp_template_message(
+        "+919876543210",
+        template_name="neurocient_microchallenge_checkin_v1",
+        language_code="en_GB",
+        body_parameters=("Put the phone away", "Leave it outside for ten minutes."),
+    )
+
+    assert result == "wamid.accepted-template"
+    assert captured["json"] == {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": "919876543210",
+        "type": "template",
+        "template": {
+            "name": "neurocient_microchallenge_checkin_v1",
+            "language": {"code": "en_GB"},
+            "components": [{
+                "type": "body",
+                "parameters": [
+                    {"type": "text", "text": "Put the phone away"},
+                    {"type": "text", "text": "Leave it outside for ten minutes."},
+                ],
+            }],
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    ("template_name", "language_code", "body_parameters"),
+    [
+        ("Invalid-Name", "en_GB", ("value",)),
+        ("valid_name", "english", ("value",)),
+        ("valid_name", "en_GB", ("",)),
+    ],
+)
+def test_invalid_template_contract_fails_before_provider_call(
+    monkeypatch, template_name, language_code, body_parameters
+):
+    _configure(monkeypatch)
+    provider_call = pytest.MonkeyPatch()
+    post = lambda *_args, **_kwargs: pytest.fail("provider must not be called")
+    provider_call.setattr("app.services.meta_whatsapp.requests.post", post)
+    try:
+        assert send_whatsapp_template_message(
+            "+919876543210",
+            template_name=template_name,
+            language_code=language_code,
+            body_parameters=body_parameters,
+        ) is False
+    finally:
+        provider_call.undo()

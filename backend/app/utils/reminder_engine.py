@@ -8,6 +8,7 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import settings
 from app.helper.common import get_daily_active_nudge
 from app.models import (
     CavemanSpot,
@@ -16,7 +17,7 @@ from app.models import (
     UserPreferences,
     WebPushSubscription,
 )
-from app.services.meta_whatsapp import send_whatsapp_message
+from app.services.meta_whatsapp import send_whatsapp_template_message
 from app.observability import log_event, safe_exception_fields
 from app.services.job_control import (
     claim_notification_dispatch,
@@ -26,12 +27,19 @@ from app.services.microchallenge_progress import active_microchallenge, product_
 from app.services.whatsapp_content import (
     bounded_whatsapp_message,
     microchallenge_whatsapp_message,
+    truncate_whatsapp_text,
 )
 from app.utils.pushnotification import send_push
 
 logger = logging.getLogger("notification_delivery")
 
 Purpose = Literal["nudge", "spot_reminder", "microchallenge"]
+
+TEMPLATE_NAME_BY_PURPOSE = {
+    "nudge": lambda: settings.WHATSAPP_NUDGE_TEMPLATE_NAME,
+    "spot_reminder": lambda: settings.WHATSAPP_SPOT_TEMPLATE_NAME,
+    "microchallenge": lambda: settings.WHATSAPP_MICROCHALLENGE_TEMPLATE_NAME,
+}
 
 
 def _dispatch_date() -> date:
@@ -87,6 +95,24 @@ def microchallenge_reminder_copy(
     return "Today's experiment", title, whatsapp_body
 
 
+def microchallenge_template_parameters(
+    title: str,
+    instructions: list[str] | None,
+) -> tuple[str, str]:
+    first_instruction = next(
+        (
+            step.strip()
+            for step in (instructions or [])
+            if isinstance(step, str) and step.strip()
+        ),
+        "Return to the small experiment you chose.",
+    )
+    return (
+        truncate_whatsapp_text(title, 300),
+        truncate_whatsapp_text(first_instruction, 1024),
+    )
+
+
 async def _candidate_user_ids(db: AsyncSession, purpose: Purpose) -> list:
     result = await db.execute(
         select(UserPreferences.user_id).where(
@@ -110,7 +136,7 @@ async def _deliver_to_user(
     purpose: Purpose,
     title: str,
     body: str,
-    whatsapp_body: str | None = None,
+    whatsapp_template_parameters: tuple[str, ...] | None = None,
     whatsapp_destination_key: str = "verified-account-number",
 ) -> dict[str, int]:
     """Re-read consent immediately before reaching either provider adapter."""
@@ -251,9 +277,11 @@ async def _deliver_to_user(
         if dispatch is not None:
             try:
                 provider_result = await asyncio.to_thread(
-                    send_whatsapp_message,
+                    send_whatsapp_template_message,
                     prefs.whatsapp_number,
-                    whatsapp_body or f"{title} {body}",
+                    template_name=TEMPLATE_NAME_BY_PURPOSE[purpose](),
+                    language_code=settings.WHATSAPP_TEMPLATE_LANGUAGE,
+                    body_parameters=whatsapp_template_parameters or (title, body),
                 )
                 delivered = bool(provider_result)
             except Exception as error:
@@ -278,7 +306,7 @@ async def _deliver_to_user(
                 whatsapp_failed = 1
             else:
                 finish_kwargs = {
-                    "status": "sent" if delivered else "failed",
+                    "status": "accepted" if delivered else "failed",
                     "error_code": None if delivered else "provider_rejected",
                 }
                 if delivered and isinstance(provider_result, str):
@@ -349,7 +377,7 @@ async def send_microchallenge_pushes(db: AsyncSession):
         if active is None:
             continue
         assignment, challenge = active
-        title, body, whatsapp_body = microchallenge_reminder_copy(
+        title, body, _whatsapp_body = microchallenge_reminder_copy(
             challenge.title,
             challenge.instructions,
         )
@@ -359,7 +387,10 @@ async def send_microchallenge_pushes(db: AsyncSession):
             purpose="microchallenge",
             title=title,
             body=body,
-            whatsapp_body=whatsapp_body,
+            whatsapp_template_parameters=microchallenge_template_parameters(
+                challenge.title,
+                challenge.instructions,
+            ),
             whatsapp_destination_key=f"microchallenge-assignment:{assignment.id}",
         )
         push_success += result["push_success"]
@@ -382,10 +413,10 @@ async def send_daily_nudge(db: AsyncSession):
         if nudge.paragraphs
         else "Return to one useful idea from your Neurocient work."
     )
-    message = f"*{title}*\n\n" + "\n\n".join(nudge.paragraphs or [])
+    message = "\n\n".join(nudge.paragraphs or [])
     if nudge.quote:
-        message += f"\n\n_{nudge.quote}_"
-    message = bounded_whatsapp_message(message)
+        message = f"{message}\n\n{nudge.quote}" if message else nudge.quote
+    message = bounded_whatsapp_message(message or body)
 
     push_success = 0
     push_failed = 0
@@ -404,7 +435,10 @@ async def send_daily_nudge(db: AsyncSession):
             purpose="nudge",
             title=title,
             body=body,
-            whatsapp_body=message,
+            whatsapp_template_parameters=(
+                truncate_whatsapp_text(title, 300),
+                truncate_whatsapp_text(message, 1024),
+            ),
         )
         push_success += result["push_success"]
         push_failed += result["push_failed"]

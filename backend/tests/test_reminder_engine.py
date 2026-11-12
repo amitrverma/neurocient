@@ -135,8 +135,10 @@ def test_microchallenge_job_sends_active_content_only_when_unreported(monkeypatc
     assert deliver.await_args.kwargs["whatsapp_destination_key"] == (
         "microchallenge-assignment:a1"
     )
-    assert "Put the phone away" in deliver.await_args.kwargs["whatsapp_body"]
-    assert "Leave it outside the room" in deliver.await_args.kwargs["whatsapp_body"]
+    assert deliver.await_args.kwargs["whatsapp_template_parameters"] == (
+        "Put the phone away",
+        "Leave it outside the room for ten minutes.",
+    )
 
 
 def test_daily_nudge_yields_to_due_microchallenge_reminder(monkeypatch):
@@ -227,6 +229,19 @@ def test_legacy_purpose_flags_do_not_override_enabled_channels(
     }
     send_push.assert_awaited_once()
     send_whatsapp.assert_awaited_once()
+    assert (
+        send_whatsapp.await_args.args[0]
+        is reminder_engine.send_whatsapp_template_message
+    )
+    assert send_whatsapp.await_args.kwargs == {
+        "template_name": {
+            "nudge": "neurocient_daily_nudge_v1",
+            "spot_reminder": "neurocient_spot_checkin_v1",
+            "microchallenge": "neurocient_microchallenge_checkin_v1",
+        }[purpose],
+        "language_code": "en_GB",
+        "body_parameters": ("Title", "Body"),
+    }
 
 
 def test_enabled_purpose_delivers_only_enabled_verified_channels(monkeypatch):
@@ -302,7 +317,7 @@ def test_whatsapp_provider_message_id_is_persisted(
 
     assert result["whatsapp_success"] == 1
     assert finish.await_args.kwargs == {
-        "status": "sent",
+        "status": "accepted",
         "error_code": None,
         "provider_message_id": provider_message_id,
     }

@@ -9,7 +9,12 @@ from typing import Any
 
 import requests
 
-from app.config import settings, valid_graph_api_version
+from app.config import (
+    settings,
+    valid_graph_api_version,
+    valid_whatsapp_language_code,
+    valid_whatsapp_template_name,
+)
 from app.services.notification_provider import NotificationOutcomeUnknown
 from app.services.whatsapp_content import bounded_whatsapp_message
 
@@ -20,9 +25,12 @@ PHONE_PATTERN = re.compile(r"^[1-9][0-9]{7,14}$")
 MAX_ENTRIES = 16
 MAX_CHANGES = 32
 MAX_MESSAGES = 32
+MAX_STATUSES = 64
+MAX_STATUS_ERRORS = 8
 MAX_PROVIDER_MESSAGE_ID_LENGTH = 255
 MAX_META_TEXT_LENGTH = 4096
 MAX_PRODUCT_TEXT_LENGTH = 1600
+MAX_TEMPLATE_PARAMETER_LENGTH = 1024
 
 
 @dataclass(frozen=True)
@@ -30,6 +38,14 @@ class MetaInboundMessage:
     message_id: str
     from_number: str
     body: str | None
+
+
+@dataclass(frozen=True)
+class MetaMessageStatus:
+    message_id: str
+    status: str
+    timestamp: int
+    error_code: str | None
 
 
 def meta_whatsapp_ready() -> bool:
@@ -157,9 +173,81 @@ def extract_meta_messages(payload: Any) -> list[MetaInboundMessage]:
     return inbound
 
 
-def send_whatsapp_message(
+def extract_meta_statuses(payload: Any) -> list[MetaMessageStatus]:
+    root = _require_mapping(payload, "payload")
+    if root.get("object") != "whatsapp_business_account":
+        raise ValueError("invalid object")
+
+    extracted: list[MetaMessageStatus] = []
+    entries = _require_bounded_list(root.get("entry"), "entry", MAX_ENTRIES)
+    for entry_value in entries:
+        entry = _require_mapping(entry_value, "entry item")
+        if entry.get("id") != settings.WHATSAPP_BUSINESS_ACCOUNT_ID:
+            raise ValueError("unexpected business account")
+        changes = _require_bounded_list(entry.get("changes"), "changes", MAX_CHANGES)
+        for change_value in changes:
+            change = _require_mapping(change_value, "change")
+            if change.get("field") != "messages":
+                continue
+            value = _require_mapping(change.get("value"), "change value")
+            metadata = _require_mapping(value.get("metadata"), "metadata")
+            if metadata.get("phone_number_id") != settings.WHATSAPP_PHONE_NUMBER_ID:
+                raise ValueError("unexpected phone number")
+
+            statuses_value = value.get("statuses")
+            if statuses_value is None:
+                continue
+            statuses = _require_bounded_list(
+                statuses_value, "statuses", MAX_STATUSES
+            )
+            if len(extracted) + len(statuses) > MAX_STATUSES:
+                raise ValueError("too many statuses")
+            for status_value in statuses:
+                provider_status = _require_mapping(status_value, "status")
+                message_id = provider_status.get("id")
+                status = provider_status.get("status")
+                timestamp = provider_status.get("timestamp")
+                if not _valid_message_id(message_id):
+                    raise ValueError("invalid status message id")
+                if status not in {"sent", "delivered", "read", "failed"}:
+                    raise ValueError("invalid provider status")
+                if (
+                    not isinstance(timestamp, str)
+                    or not timestamp.isdecimal()
+                    or len(timestamp) > 12
+                ):
+                    raise ValueError("invalid status timestamp")
+                timestamp_value = int(timestamp)
+                if not 946_684_800 <= timestamp_value <= 4_102_444_800:
+                    raise ValueError("status timestamp out of range")
+
+                error_code = None
+                errors_value = provider_status.get("errors")
+                if errors_value is not None:
+                    errors = _require_bounded_list(
+                        errors_value, "status errors", MAX_STATUS_ERRORS
+                    )
+                    if errors:
+                        error = _require_mapping(errors[0], "status error")
+                        code = error.get("code")
+                        if not isinstance(code, int) or code < 0:
+                            raise ValueError("invalid status error code")
+                        error_code = f"meta_{code}"
+
+                extracted.append(
+                    MetaMessageStatus(
+                        message_id=message_id,
+                        status=status,
+                        timestamp=timestamp_value,
+                        error_code=error_code,
+                    )
+                )
+    return extracted
+
+
+def _send_whatsapp_payload(
     to_number: str,
-    message: str,
+    payload: dict[str, Any],
     *,
     emit_logs: bool = True,
 ) -> bool | str:
@@ -178,22 +266,18 @@ def send_whatsapp_message(
         f"https://graph.facebook.com/{settings.WHATSAPP_GRAPH_API_VERSION}/"
         f"{settings.WHATSAPP_PHONE_NUMBER_ID}/messages"
     )
-    payload = {
+    provider_payload = {
         "messaging_product": "whatsapp",
         "recipient_type": "individual",
         "to": normalized_number,
-        "type": "text",
-        "text": {
-            "preview_url": False,
-            "body": bounded_whatsapp_message(message),
-        },
+        **payload,
     }
 
     try:
         response = requests.post(
             url,
             headers={"Authorization": f"Bearer {settings.WHATSAPP_ACCESS_TOKEN}"},
-            json=payload,
+            json=provider_payload,
             timeout=15,
         )
         if response.status_code == 200:
@@ -233,3 +317,71 @@ def send_whatsapp_message(
         raise NotificationOutcomeUnknown(
             "WhatsApp delivery outcome is unknown"
         ) from error
+
+
+def send_whatsapp_service_message(
+    to_number: str,
+    message: str,
+    *,
+    emit_logs: bool = True,
+) -> bool | str:
+    """Reply inside Meta's customer-service window using free-form text."""
+    return _send_whatsapp_payload(
+        to_number,
+        {
+            "type": "text",
+            "text": {
+                "preview_url": False,
+                "body": bounded_whatsapp_message(message),
+            },
+        },
+        emit_logs=emit_logs,
+    )
+
+
+def send_whatsapp_template_message(
+    to_number: str,
+    *,
+    template_name: str,
+    language_code: str,
+    body_parameters: tuple[str, ...] = (),
+    emit_logs: bool = True,
+) -> bool | str:
+    """Start a proactive conversation with an approved Meta template."""
+    normalized_parameters = tuple(
+        re.sub(r"\s+", " ", value).strip()
+        if isinstance(value, str)
+        else value
+        for value in body_parameters
+    )
+    if (
+        not valid_whatsapp_template_name(template_name)
+        or not valid_whatsapp_language_code(language_code)
+        or any(
+            not isinstance(value, str)
+            or not value
+            or len(value) > MAX_TEMPLATE_PARAMETER_LENGTH
+            for value in normalized_parameters
+        )
+    ):
+        if emit_logs:
+            logger.warning("whatsapp_send_failed reason=invalid_template_contract")
+        return False
+
+    template: dict[str, Any] = {
+        "name": template_name,
+        "language": {"code": language_code},
+    }
+    if body_parameters:
+        template["components"] = [{
+            "type": "body",
+            "parameters": [
+                {"type": "text", "text": value}
+                for value in normalized_parameters
+            ],
+        }]
+    return _send_whatsapp_payload(
+        to_number,
+        {"type": "template", "template": template},
+        emit_logs=emit_logs,
+    )

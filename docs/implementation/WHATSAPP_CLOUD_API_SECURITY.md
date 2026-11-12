@@ -4,7 +4,7 @@ Status: implemented locally; owned-number provider path working; exact-candidate
 
 Owner: Amit
 
-Contract version: 1.0 (2026-11-04)
+Contract version: 1.1 (2026-11-12)
 
 ## Outcome
 
@@ -22,8 +22,9 @@ message, account membership, signature, credentials, or provider response.
 - For POST callbacks, validate `X-Hub-Signature-256` as an HMAC-SHA256 over the
   exact raw request body using the Meta app secret before parsing JSON or
   accessing the database.
-- Accept messages only for the configured WhatsApp Business Account ID and
-  Phone Number ID. Status-only callbacks are valid no-ops.
+- Accept messages and delivery statuses only for the configured WhatsApp
+  Business Account ID and Phone Number ID. A status updates only the outbound
+  dispatch identified by its provider `wamid`.
 - Limit the complete JSON body to 64 KiB and bound entries, changes, messages,
   message IDs, sender numbers, and text before database access. Unsupported
   message types are acknowledged without treating their content as commands.
@@ -63,6 +64,9 @@ message, account membership, signature, credentials, or provider response.
 - **WA-07:** The replay-key migration is deployable before application code and
   blocks downgrade when a stored identifier cannot fit the legacy 34-character
   column.
+- **WA-08:** Bounded, authentic delivery callbacks advance a matching WhatsApp
+  dispatch monotonically through accepted, delivered, read, or failed state;
+  unknown identifiers and late weaker states cause no mutation.
 
 ## Required evidence
 
@@ -102,7 +106,7 @@ verification remains pending.
 
 ## Rollout and recovery
 
-Apply revision `20261104_0015` before the application code. Configure
+Apply revisions through `20261112_0021` before the application code. Configure
 `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN`,
 `WHATSAPP_BUSINESS_ACCOUNT_ID`, `WHATSAPP_PHONE_NUMBER_ID`, and
 `WHATSAPP_GRAPH_API_VERSION`. Start the backend on the candidate, expose its
@@ -115,7 +119,7 @@ column while any stored key exceeds 34 characters.
 
 - Consent, opt-out, templates, and scheduler ownership remain CONSENT-01 and
   `WHATSAPP_COMPANION.md`.
-- Durable outbound reply records, delivery-status reconciliation, and provider
-  retry orchestration remain deferred companion work.
+- Durable outbound service-reply records and provider retry orchestration remain
+  deferred companion work.
 - Edge/account rate limiting remains SEC-03; provider-wide live evidence
   remains TEST-02.

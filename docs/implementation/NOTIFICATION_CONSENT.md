@@ -75,13 +75,14 @@ and active-microchallenge check-ins are product behavior, not three preferences.
   WhatsApp disconnect; the production frontend build is required.
 - On 2026-11-12 the owner confirmed that testing through Neurocient's actual
   configured WhatsApp number works. The Meta test-number `131031` failure is not
-  a blocker. Pairing, STOP/START, disconnect, dispatch-time opt-out, approved
-  utility-template delivery, and reply handling still require one retained
-  end-to-end evidence set on the exact release candidate.
+  a blocker. Three Utility templates were submitted on 2026-11-12 and are
+  pending Meta approval. Pairing, STOP/START, disconnect, dispatch-time opt-out,
+  approved-template delivery/status callbacks, and reply handling still require
+  one retained end-to-end evidence set on the exact release candidate.
 
 ## Excluded scope
 
-- Meta template approval and production template selection.
+- Meta's final approval/category decision and exact-candidate template delivery.
 - Marketing campaigns or newsletter consent.
 - Removing the legacy purpose/OTP columns; that is a later cleanup migration
   after this application-compatible rollout is established.

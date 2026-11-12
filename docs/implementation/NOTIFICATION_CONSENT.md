@@ -1,6 +1,6 @@
 # Notification channel consent implementation contract
 
-Status: implemented locally; genuine-provider staging pending
+Status: implemented locally; owned-number provider path working; exact-candidate consent journey pending
 
 Contract version: 2.0 (2026-11-07)
 
@@ -73,6 +73,11 @@ and active-microchallenge check-ins are product behavior, not three preferences.
   authorize or suppress product-selected messages.
 - Profile tests cover the channel-only surface, immediate push mutation, and
   WhatsApp disconnect; the production frontend build is required.
+- On 2026-11-12 the owner confirmed that testing through Neurocient's actual
+  configured WhatsApp number works. The Meta test-number `131031` failure is not
+  a blocker. Pairing, STOP/START, disconnect, dispatch-time opt-out, approved
+  utility-template delivery, and reply handling still require one retained
+  end-to-end evidence set on the exact release candidate.
 
 ## Excluded scope
 

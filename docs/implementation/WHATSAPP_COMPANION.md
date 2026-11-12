@@ -1,6 +1,6 @@
 # WhatsApp companion implementation contract
 
-Status: implemented locally; genuine-provider staging pending
+Status: implemented locally; owned-number provider path working; template and exact-candidate verification pending
 
 Owner: Amit
 
@@ -118,7 +118,7 @@ This is a deterministic companion, not an open-ended AI chatbot.
 - approved WhatsApp authentication and reinforcement templates;
 - interactive reply buttons;
 - durable outbound reply records, delivery callbacks, retry, and reconciliation;
-- genuine Meta test-number/staging evidence and limited-cohort rollout.
+- exact-release-candidate WhatsApp journey evidence and limited-cohort rollout.
 
 ## Rollout and recovery
 
@@ -163,5 +163,9 @@ experience.
   passed locally. Both direct Graph API text and Meta dashboard `hello_world`
   template requests were accepted, then failed in Meta's delivery callback with
   `131031 Business Account locked`. The test WABA and portfolio showed no visible
-  issues, so outbound delivery remains a Meta account-recovery blocker rather
-  than an application failure.
+  issues. This remains useful historical test-number evidence but is not a
+  launch blocker: on 2026-11-12 the owner confirmed that testing through
+  Neurocient's actual configured WhatsApp number works. This update records
+  owner-observed provider-path evidence; it does not replace an exact-candidate
+  pairing, consent, utility-template, delivery-callback, and reply journey with
+  retained deployment evidence.

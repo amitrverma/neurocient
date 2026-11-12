@@ -199,9 +199,12 @@ Production-shaped smoke checks must not send real notifications:
 
 - The Alembic baseline is proven locally and adopted on hosted Supabase with zero managed drift. Durable off-machine backup retention and organizational recovery ownership remain open operational risks.
 - The Meta WhatsApp webhook verifies the raw-body HMAC signature and configured
-  business/phone identities, then uses durable `wamid` replay claims. Keep it
-  disabled until a genuine test-number/staging request validates the deployed
-  callback and acknowledgement path on the exact release candidate.
+  business/phone identities, then uses durable `wamid` replay claims. The owner
+  confirmed successful testing through Neurocient's actual configured number on
+  2026-11-12; the earlier Meta test-number `131031` failure is not a blocker.
+  Before scheduled delivery is enabled, retain an exact-candidate pairing,
+  consent, approved utility-template, delivery-callback, acknowledgement, and
+  reply journey with privacy-safe logs.
 - Direct Python dependencies are pinned, but transitive dependencies do not yet have a hash-locked requirements file.
 - The backend has no production-shaped integration suite using a real PostgreSQL database or provider sandboxes.
 - Health proves process availability, not database or provider readiness.

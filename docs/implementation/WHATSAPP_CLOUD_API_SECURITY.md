@@ -1,6 +1,6 @@
 # Meta WhatsApp Cloud API security implementation contract
 
-Status: implemented locally; genuine Meta test-number evidence pending
+Status: implemented locally; owned-number provider path working; exact-candidate evidence pending
 
 Owner: Amit
 
@@ -78,8 +78,11 @@ message, account membership, signature, credentials, or provider response.
   outcomes, and privacy-safe logging.
 - Alembic upgrade, guarded downgrade/re-upgrade, current, drift, and schema
   comparison must pass.
-- A genuine Meta test-number callback and send is required before this control
-  moves from `Implemented` to `Verified`.
+- A genuine callback and send using Neurocient's configured WhatsApp number is
+  required before this control moves from `Implemented` to `Verified`. The
+  owner confirmed that path working on 2026-11-12; retain exact deployment and
+  callback evidence during release-candidate verification before changing the
+  checklist status.
 
 Local evidence on 2026-11-04: 292 backend non-integration tests passed. The 60
 focused configuration, adapter, and webhook tests passed, as did four real
@@ -90,8 +93,12 @@ number message then passed the public challenge, HMAC-protected callback,
 configured-asset checks, durable replay claim, and status-callback response.
 Meta accepted outbound requests and returned a `wamid`, but its authoritative
 delivery callback failed them with `131031 Business Account locked`; Business
-Support Home showed no portfolio or WABA issues. Outbound provider delivery is
-therefore not claimed and remains blocked on Meta account recovery.
+Support Home showed no portfolio or WABA issues. This test-number-specific
+failure is historical and is not a launch blocker. On 2026-11-12 the owner
+confirmed successful testing through Neurocient's actual configured WhatsApp
+number. The repository does not yet retain the exact frontend, backend, schema,
+request, callback, and account-visible result for that run, so exact-candidate
+verification remains pending.
 
 ## Rollout and recovery
 

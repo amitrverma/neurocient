@@ -1,10 +1,10 @@
 # WhatsApp companion implementation contract
 
-Status: implemented locally; all three Utility templates approved; exact-candidate verification pending
+Status: local owned-number journey passed; deployed dev-candidate verification pending
 
 Owner: Amit
 
-Contract version: 1.3 (2026-11-12)
+Contract version: 1.4 (2026-11-12)
 
 Version 1.1 makes the daily nugget selection durable and shared across the web
 and outbound delivery. It also requires bounded outbound WhatsApp bodies and
@@ -91,8 +91,8 @@ carry a STOP footer. The Microchallenge body permanently includes `Done`,
 The daily nudge contains no product link, membership prompt, promotion, or
 return-to-app call to action. Meta remains the final category authority.
 
-On 2026-11-12 the configured WABA accepted all three definitions as `UTILITY`
-with status `PENDING`. Repository configuration owns their names and language,
+On 2026-11-12 the configured WABA approved all three definitions as `UTILITY`.
+Repository configuration owns their names and language,
 and `python -m scripts.create_whatsapp_templates` provides a dry-run by default;
 `--apply` creates only missing definitions.
 
@@ -120,7 +120,8 @@ and `python -m scripts.create_whatsapp_templates` provides a dry-run by default;
 ## Acceptance criteria
 
 - **WA-COMP-01:** An authentic `spot:` message from a verified number writes one
-  Spot across sequential and concurrent provider replay.
+  Spot across sequential and concurrent provider replay. Human spacing such as
+  `Spot : description` remains valid without broadening unrelated commands.
 - **WA-COMP-02:** An eligible user receives reminder copy containing their active
   Microchallenge rather than a generic reminder.
 - **WA-COMP-03:** Authentic `Done`, `Partly`, and `Didn't happen` responses write
@@ -188,16 +189,20 @@ experience.
   796 physical lines. The new check-in rendering was extracted into its own
   covered component so this change does not add another render responsibility;
   the next material Microchallenge-page change should continue decomposition.
-- Genuine delivery of the three approved templates and limited-cohort operation
-  remain provider-staging evidence and
-  are not claimed here.
+- On 2026-11-12 a local FastAPI/PostgreSQL candidate exposed through ngrok sent
+  all three approved Utility templates through Neurocient's configured number;
+  Meta callbacks advanced all three to `delivered`. The owner exercised Spot,
+  STOP/START, `Done`, duplicate `Done`, `Partly`, and `Didn't happen`; durable
+  state matched each contract. The owner also sent `note:`; its live webhook
+  arrived, while durable note behavior is retained as real-PostgreSQL integration
+  evidence because the disposable fixture was cleaned before inspection.
+- Deployed dev-candidate verification and limited-cohort operation remain
+  provider-staging evidence and are not claimed here.
 - On 2026-11-04, genuine Meta test-number inbound delivery and callback handling
   passed locally. Both direct Graph API text and Meta dashboard `hello_world`
   template requests were accepted, then failed in Meta's delivery callback with
   `131031 Business Account locked`. The test WABA and portfolio showed no visible
   issues. This remains useful historical test-number evidence but is not a
-  launch blocker: on 2026-11-12 the owner confirmed that testing through
-  Neurocient's actual configured WhatsApp number works. This update records
-  owner-observed provider-path evidence; it does not replace an exact-candidate
-  pairing, consent, utility-template, delivery-callback, and reply journey with
-  retained deployment evidence.
+  launch blocker. The later owned-number ngrok journey above supersedes it at
+  the local-provider boundary but does not replace a deployed dev-candidate
+  journey with retained release evidence.

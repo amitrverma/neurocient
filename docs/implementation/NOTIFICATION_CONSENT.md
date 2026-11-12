@@ -76,13 +76,15 @@ and active-microchallenge check-ins are product behavior, not three preferences.
 - On 2026-11-12 the owner confirmed that testing through Neurocient's actual
   configured WhatsApp number works. The Meta test-number `131031` failure is not
   a blocker. Three Utility templates were submitted and approved on 2026-11-12.
-  Pairing, STOP/START, disconnect, dispatch-time opt-out,
-  approved-template delivery/status callbacks, and reply handling still require
-  one retained end-to-end evidence set on the exact release candidate.
+  A local FastAPI/PostgreSQL candidate exposed through ngrok then proved all
+  three template deliveries, status callbacks, Spot, STOP/START, all three
+  Microchallenge outcomes, and duplicate-outcome protection. Disconnect and
+  dispatch-time opt-out still require the deployed dev-candidate journey, as
+  does repetition of the assembled evidence on the exact release candidate.
 
 ## Excluded scope
 
-- Exact-candidate template delivery for all three purposes.
+- Deployed exact-candidate template delivery for all three purposes.
 - Marketing campaigns or newsletter consent.
 - Removing the legacy purpose/OTP columns; that is a later cleanup migration
   after this application-compatible rollout is established.

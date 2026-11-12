@@ -1,10 +1,10 @@
 # Meta WhatsApp Cloud API security implementation contract
 
-Status: implemented locally; owned-number provider path working; exact-candidate evidence pending
+Status: local owned-number callback path passed; deployed dev-candidate evidence pending
 
 Owner: Amit
 
-Contract version: 1.1 (2026-11-12)
+Contract version: 1.2 (2026-11-12)
 
 ## Outcome
 
@@ -57,6 +57,10 @@ message, account membership, signature, credentials, or provider response.
   account membership or whether a record was written.
 - **WA-05:** Logs and durable replay records contain no phone number, message
   body, app secret, access/verify token, webhook signature, or provider body.
+  Third-party access loggers must remove query strings before formatting, and
+  the production process must not emit a parallel raw access log. The deployed
+  ingress/proxy must independently omit or redact query strings because it sees
+  Meta's verification request before application filtering can run.
 - **WA-06:** Production and partially enabled local configuration fail startup
   unless all six Meta settings are present, account/phone IDs are numeric,
   credentials meet minimum lengths, app and verify secrets are independent,
@@ -80,6 +84,8 @@ message, account membership, signature, credentials, or provider response.
 - Outbound adapter tests prove the versioned Graph URL, bearer authentication,
   destination normalization, returned `wamid`, provider rejection, uncertain
   outcomes, and privacy-safe logging.
+- Access-logger tests prove both Uvicorn tuple arguments and Gunicorn access
+  atoms remove query strings before formatting.
 - Alembic upgrade, guarded downgrade/re-upgrade, current, drift, and schema
   comparison must pass.
 - A genuine callback and send using Neurocient's configured WhatsApp number is
@@ -100,9 +106,16 @@ delivery callback failed them with `131031 Business Account locked`; Business
 Support Home showed no portfolio or WABA issues. This test-number-specific
 failure is historical and is not a launch blocker. On 2026-11-12 the owner
 confirmed successful testing through Neurocient's actual configured WhatsApp
-number. The repository does not yet retain the exact frontend, backend, schema,
-request, callback, and account-visible result for that run, so exact-candidate
-verification remains pending.
+number. Later that day a local FastAPI/PostgreSQL candidate exposed through
+ngrok retained callback, dispatch, consent, Spot, and Microchallenge evidence
+for all three approved Utility templates. During that run, the default Uvicorn
+access logger was found to include the GET verification query string. The
+application now redacts Uvicorn and Gunicorn query strings, and the production
+Gunicorn command no longer emits its duplicate raw access log. A repeated
+public challenge returned the expected value while the token was absent from
+the corrected logs. Rotate the exposed local verification token before the
+next provider configuration change. Deployed dev-candidate verification and
+inspection of ingress/proxy access-log settings remain pending.
 
 ## Rollout and recovery
 
@@ -114,6 +127,9 @@ HTTPS callback, then use Meta's webhook verification flow and subscribe to the
 `messages` field. If forward repair is needed, unsubscribe or disable the
 callback before rolling back application code. Do not downgrade the replay-key
 column while any stored key exceeds 34 characters.
+
+The verification token used during the pre-redaction local run must be rotated
+in both runtime configuration and Meta before dev-candidate evidence is taken.
 
 ## Excluded scope
 

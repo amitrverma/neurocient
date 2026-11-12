@@ -49,6 +49,7 @@ HELP_MESSAGE = (
     "For human support, email support@neurocient.com."
 )
 PAIRING_PATTERN = re.compile(r"(?:^|\n)CONNECT ([A-Za-z0-9_-]{32,128})\s*$")
+SPOT_PATTERN = re.compile(r"^spot[ \t]*:[ \t]*(.*)$", re.IGNORECASE | re.DOTALL)
 MICROCHALLENGE_RESPONSES = {
     "done": "done",
     "1": "done",
@@ -74,6 +75,14 @@ def _safe_error(status_code: int) -> JSONResponse:
 
 def parse_microchallenge_response(message: str) -> str | None:
     return MICROCHALLENGE_RESPONSES.get(message.strip().lower())
+
+
+def parse_spot_description(message: str) -> str | None:
+    match = SPOT_PATTERN.fullmatch(message.strip())
+    if match is None:
+        return None
+    description = match.group(1).strip()
+    return description or None
 
 
 def parse_obstacle_note(message: str) -> str | None:
@@ -182,11 +191,7 @@ async def _process_inbound_message(
         return None
 
     normalized_body = (message.body or "").strip()
-    description = (
-        normalized_body[5:].strip()
-        if normalized_body.lower().startswith("spot:")
-        else ""
-    )
+    description = parse_spot_description(normalized_body)
     microchallenge_outcome = parse_microchallenge_response(normalized_body)
     obstacle_note = parse_obstacle_note(normalized_body)
     pairing_token = parse_pairing_token(normalized_body)

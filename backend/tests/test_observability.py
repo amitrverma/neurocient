@@ -7,11 +7,54 @@ import pytest
 
 from app.middleware import CorrelationMiddleware
 from app.observability import (
+    AccessLogQueryRedactionFilter,
     JsonFormatter,
     current_correlation_id,
     log_event,
     normalize_correlation_id,
 )
+
+
+def test_uvicorn_access_log_redacts_query_string_before_formatting():
+    record = logging.LogRecord(
+        "uvicorn.access",
+        logging.INFO,
+        __file__,
+        1,
+        '%s - "%s %s HTTP/%s" %d',
+        (
+            "127.0.0.1:1234",
+            "GET",
+            "/wa/webhook/whatsapp?hub.verify_token=private-token&hub.challenge=1",
+            "1.1",
+            200,
+        ),
+        None,
+    )
+
+    assert AccessLogQueryRedactionFilter().filter(record) is True
+    assert record.args[2] == "/wa/webhook/whatsapp"
+    assert "private-token" not in record.getMessage()
+
+
+def test_gunicorn_access_log_redacts_request_line_and_query_atom():
+    record = logging.LogRecord(
+        "gunicorn.access",
+        logging.INFO,
+        __file__,
+        1,
+        '%(r)s %(q)s',
+        {
+            "r": "GET /wa/webhook/whatsapp?hub.verify_token=private-token HTTP/1.1",
+            "q": "?hub.verify_token=private-token",
+        },
+        None,
+    )
+
+    assert AccessLogQueryRedactionFilter().filter(record) is True
+    assert record.args["r"] == "GET /wa/webhook/whatsapp HTTP/1.1"
+    assert record.args["q"] == ""
+    assert "private-token" not in record.getMessage()
 
 
 def test_correlation_id_preserves_only_valid_uuid_values():

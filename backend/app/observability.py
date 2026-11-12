@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextvars
 import json
 import logging
+import re
 import sys
 import traceback
 import uuid
@@ -58,7 +59,42 @@ class CorrelationFilter(logging.Filter):
         return True
 
 
+class AccessLogQueryRedactionFilter(logging.Filter):
+    """Remove query strings before third-party access loggers format records."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        if isinstance(record.args, tuple) and len(record.args) >= 3:
+            args = list(record.args)
+            if isinstance(args[2], str):
+                args[2] = args[2].partition("?")[0]
+                record.args = tuple(args)
+        elif isinstance(record.args, dict):
+            args = dict(record.args)
+            request_line = args.get("r")
+            if isinstance(request_line, str):
+                args["r"] = re.sub(
+                    r"^(\S+\s+)(\S+?)\?\S+(\s+HTTP/\S+)$",
+                    r"\1\2\3",
+                    request_line,
+                )
+            if "q" in args:
+                args["q"] = ""
+            record.args = args
+        return True
+
+
+def _install_access_log_query_redaction() -> None:
+    for logger_name in ("uvicorn.access", "gunicorn.access"):
+        access_logger = logging.getLogger(logger_name)
+        if not any(
+            isinstance(item, AccessLogQueryRedactionFilter)
+            for item in access_logger.filters
+        ):
+            access_logger.addFilter(AccessLogQueryRedactionFilter())
+
+
 def configure_logging(level: int = logging.INFO) -> None:
+    _install_access_log_query_redaction()
     root = logging.getLogger()
     if any(getattr(handler, "_neurocient_json", False) for handler in root.handlers):
         root.setLevel(level)

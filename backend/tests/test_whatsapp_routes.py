@@ -86,6 +86,21 @@ def test_microchallenge_response_parser_is_explicit(body, expected):
     assert whatsapp_routes.parse_microchallenge_response(body) == expected
 
 
+@pytest.mark.parametrize(
+    ("body", "expected"),
+    [
+        ("spot: I switched tasks", "I switched tasks"),
+        (" Spot : I switched tasks ", "I switched tasks"),
+        ("SPOT   :   I opened another tab", "I opened another tab"),
+        ("spot:", None),
+        ("spot :   ", None),
+        ("spotting: I switched tasks", None),
+    ],
+)
+def test_spot_parser_tolerates_human_spacing_without_broadening_command(body, expected):
+    assert whatsapp_routes.parse_spot_description(body) == expected
+
+
 def test_microchallenge_acknowledgements_are_light_and_truthful():
     assert whatsapp_routes.microchallenge_acknowledgement("done") == "Recorded for today."
     assert "Partial attempts" in whatsapp_routes.microchallenge_acknowledgement("partly")

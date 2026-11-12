@@ -1,6 +1,6 @@
 # Neurocient discovery strategy and map
 
-- Status: repository implementation complete and locally verified; production deployment and Google inspection pending
+- Status: discovery infrastructure deployed and production-verified; indexing and selection monitoring ongoing
 - Owner: Neurocient product and editorial team
 - Last reviewed: 2026-11-12
 - Review cadence: monthly, with a full quarterly remap
@@ -119,7 +119,7 @@ No single workstream substitutes for the others. Infrastructure creates eligibil
 
 ## 5. Current baseline
 
-The repository and production boundary were checked on 2026-11-12. Neurocient has a sound URL and metadata foundation. The missing crawler-visible Insight substance and Scan introduction have now been implemented and verified in a local production build; deployment and post-deployment Google inspection remain before the production boundary can be called ready.
+The repository and production boundary were checked on 2026-11-12. Neurocient now has a production-verified URL, metadata, crawler-visible content, and monitoring foundation. The live acceptance check passed all 61 sitemap URLs. Google Search Console live tests found both the Scan and a representative Insight available to Google, and Google's tested Insight HTML contained the metered article section under verified crawler access.
 
 ### Confirmed ready
 
@@ -144,7 +144,7 @@ Before this implementation, an anonymous crawler request to a production Insight
 - the Insight access gate; and
 - the global Organization, Person, and WebSite structured data.
 
-It did **not** receive the article body, its distinctive explanations, or Article structured data. The implementation now returns the substantive opening explanation and Article structured data in initial HTML, while retaining the deeper body behind the existing access decision. Production deployment and inspection must confirm the new boundary behaves identically at the public host.
+It did **not** receive the article body, its distinctive explanations, or Article structured data. The deployed implementation now returns the substantive opening explanation and Article structured data in initial HTML, while retaining the deeper body behind the existing access decision. A Google Search Console live test of `/insights/doomscrolling` confirmed that the URL is available to Google and that Google's tested HTML contains the metered article section.
 
 The current Insight access contract intentionally prevents denied responses from compiling or returning full Insight MDX. The first gate is registration, not membership. Discovery implementation must preserve the server-authoritative progression and must not expose gated content accidentally or trust a spoofable user-agent string as authorization.
 
@@ -177,7 +177,7 @@ The public lead is not an empty teaser. It is the existing opening explanation b
 
 ### Additional infrastructure gaps
 
-- the Caveman Scan introduction and H1 are now server-rendered; production inspection remains required after deployment;
+- the Caveman Scan introduction and H1 are server-rendered; the production acceptance check and Google live test both passed;
 - direct Bing Webmaster Tools and IndexNow work is intentionally deferred under the current Google-search-only scope;
 - the repository now includes an automated production acceptance check for status, final URL, canonical, robots directive, substantive rendered content, Insight schema, and the initial Scan explanation across the sitemap; it must still be run after each relevant deployment;
 - Search Console currently reports no external links; authority can develop later, but its absence limits selection rather than infrastructure eligibility;

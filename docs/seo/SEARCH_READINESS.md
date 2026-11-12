@@ -1,6 +1,6 @@
 # Neurocient search readiness
 
-Status: URL and metadata baseline deployed and the production Search Console property configured on 2026-11-11. Crawler-visible Insight leads, verified Googlebot access, the server-rendered Scan introduction, and automated acceptance checks were implemented and locally verified on 2026-11-12; production deployment and Google URL Inspection remain.
+Status: URL and metadata baseline deployed and the production Search Console property configured on 2026-11-11. Crawler-visible Insight leads, verified Googlebot access, the server-rendered Scan introduction, and automated acceptance checks were deployed and production-verified on 2026-11-12. Indexing and selection monitoring remain ongoing.
 
 This is the technical implementation and release checklist. The governing discovery strategy, content inventory, authority plan, measurement model, and phased roadmap live in [DISCOVERY_STRATEGY.md](./DISCOVERY_STRATEGY.md).
 
@@ -60,6 +60,16 @@ Operational baseline completed on 2026-11-11:
 - removed the obsolete `www` sitemap submission;
 - started validation for the corrected 404 group and the crawled-but-not-indexed group;
 - requested priority crawling for the homepage, the Insight index, representative affected Insights, and the Caveman Scan landing page.
+
+Production discovery release verified on 2026-11-12:
+
+- deployed commit `8e3d7c3` from `main` and passed the automated production check for all 61 sitemap URLs;
+- confirmed the Caveman Scan is already indexed, passed Google's live URL test with the new response, and requested a priority recrawl;
+- found `/insights/doomscrolling` was still unknown to Google despite being present in the submitted sitemap;
+- confirmed the live Insight is available to Google and that Google's tested HTML contains the full metered article section under verified crawler access;
+- submitted `/insights/doomscrolling` to Google's priority crawl queue.
+
+Priority crawling does not guarantee indexing or ranking. Recheck the representative Insight and the broader Page indexing report after Google has had time to process the request.
 
 ## Non-brand search strategy
 

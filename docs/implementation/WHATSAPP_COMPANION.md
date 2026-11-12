@@ -1,6 +1,6 @@
 # WhatsApp companion implementation contract
 
-Status: implemented locally; Daily Nudge and Spot Utility templates approved, Microchallenge Utility template pending; exact-candidate verification pending
+Status: implemented locally; all three Utility templates approved; exact-candidate verification pending
 
 Owner: Amit
 
@@ -188,8 +188,8 @@ experience.
   796 physical lines. The new check-in rendering was extracted into its own
   covered component so this change does not add another render responsibility;
   the next material Microchallenge-page change should continue decomposition.
-- Genuine delivery of the three submitted templates, final Microchallenge
-  approval, and limited-cohort operation remain provider-staging evidence and
+- Genuine delivery of the three approved templates and limited-cohort operation
+  remain provider-staging evidence and
   are not claimed here.
 - On 2026-11-04, genuine Meta test-number inbound delivery and callback handling
   passed locally. Both direct Graph API text and Meta dashboard `hello_world`

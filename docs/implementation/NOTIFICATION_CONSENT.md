@@ -75,16 +75,14 @@ and active-microchallenge check-ins are product behavior, not three preferences.
   WhatsApp disconnect; the production frontend build is required.
 - On 2026-11-12 the owner confirmed that testing through Neurocient's actual
   configured WhatsApp number works. The Meta test-number `131031` failure is not
-  a blocker. Three Utility templates were submitted on 2026-11-12. Daily Nudge
-  and Spot were approved that day; Microchallenge remains pending Meta approval.
+  a blocker. Three Utility templates were submitted and approved on 2026-11-12.
   Pairing, STOP/START, disconnect, dispatch-time opt-out,
   approved-template delivery/status callbacks, and reply handling still require
   one retained end-to-end evidence set on the exact release candidate.
 
 ## Excluded scope
 
-- Meta's final Microchallenge approval/category decision and exact-candidate
-  template delivery for all three purposes.
+- Exact-candidate template delivery for all three purposes.
 - Marketing campaigns or newsletter consent.
 - Removing the legacy purpose/OTP columns; that is a later cleanup migration
   after this application-compatible rollout is established.

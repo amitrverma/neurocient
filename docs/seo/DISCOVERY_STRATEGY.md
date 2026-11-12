@@ -1,11 +1,19 @@
 # Neurocient discovery strategy and map
 
-- Status: active operating document
+- Status: discovery infrastructure deployed and production-verified; indexing and selection monitoring ongoing
 - Owner: Neurocient product and editorial team
-- Last reviewed: 2026-11-11
+- Last reviewed: 2026-11-12
 - Review cadence: monthly, with a full quarterly remap
 
 This is the source of truth for how Neurocient becomes discoverable. It joins search strategy, AI discovery, content architecture, external authority, measurement, and the existing article inventory in one plan. The technical implementation checklist lives in [SEARCH_READINESS.md](./SEARCH_READINESS.md).
+
+Current channel scope:
+
+- Google Search, including Google's AI search features, is the only conventional search engine being actively configured and monitored;
+- AI agents and answer systems are broadly in scope, regardless of vendor;
+- direct Bing Webmaster Tools, IndexNow, and other search-engine programmes are deferred;
+- compatibility with an open-ended set of AI agents must come from accessible, semantic public HTML and standard crawl controls, not a hardcoded crawler list;
+- vendor-specific crawler access may be added only when the crawler can be verified securely and its gated-content policy supports the intended response.
 
 ## 1. The outcome
 
@@ -23,54 +31,161 @@ It should then lead through a coherent progression:
 
 > concrete problem -> useful explanation -> recognition of the underlying pattern -> relevant diagnostic or tool -> Practice or another appropriate next step
 
-Traffic alone is not the objective. The objective is qualified discovery that helps people understand Neurocient's distinctive approach and gives them a useful next action.
+Traffic alone is not the objective. The objective is qualified discovery that helps people understand Neurocient's distinctive approach and gives them a useful next action. A relevant article does not become visible merely because it exists: the discovery system must first be able to find, retrieve, understand, and select it.
 
 ## 2. Discovery principles
 
-1. **Lead with demand language.** Use the words people search and ask, not proprietary vocabulary they cannot know yet.
-2. **Earn the introduction to Neurocient's model.** First answer the concrete question; then show how evolved automatic processing and modern conditions help explain it.
-3. **One page, one primary job.** Related pages may support one another, but each must own a distinct intent.
-4. **Build territories, not isolated posts.** A credible cluster has a clear hub, supporting explanations, deliberate internal links, and a relevant next step.
-5. **Make important pages reference-worthy.** Original synthesis, evidence, diagrams, frameworks, examples, or data make a page worth citing.
-6. **Use precise product language.** The Inner Caveman means evolved automatic processing. It is not a protector, guardian, personality, or intentional actor.
-7. **Protect trust.** Claims must be supportable, nuance must survive optimisation, and content must remain useful even if a visitor never converts.
-8. **Design for people and machines together.** Clear headings, direct answers, semantic HTML, structured data, stable URLs, and explicit relationships improve comprehension by search engines and AI systems as well as readers.
-9. **Treat distribution as part of publishing.** A good page does not acquire attention or citations merely by existing.
-10. **Measure progression, not only reach.** Impressions matter, but so do qualified visits, engaged reading, Scan starts, tool use, Practice entry, return visits, and earned citations.
+1. **Establish eligibility before expecting visibility.** Crawlability, indexability, retrievable content, canonical clarity, crawler access, and monitoring are prerequisites; none guarantees selection.
+2. **Lead with demand language.** Use the words people search and ask, not proprietary vocabulary they cannot know yet.
+3. **Earn the introduction to Neurocient's model.** First answer the concrete question; then show how evolved automatic processing and modern conditions help explain it.
+4. **One page, one primary job.** Related pages may support one another, but each must own a distinct intent.
+5. **Build territories, not isolated posts.** A credible cluster has a clear hub, supporting explanations, deliberate internal links, and a relevant next step.
+6. **Make important pages reference-worthy.** Original synthesis, evidence, diagrams, frameworks, examples, or data make a page worth citing.
+7. **Use precise product language.** The Inner Caveman means evolved automatic processing. It is not a protector, guardian, personality, or intentional actor.
+8. **Protect trust.** Claims must be supportable, nuance must survive optimisation, and content must remain useful even if a visitor never converts.
+9. **Design for people and machines together.** Clear headings, direct answers, semantic HTML, structured data, stable URLs, and explicit relationships improve comprehension by search engines and AI systems as well as readers.
+10. **Treat distribution as part of publishing.** A good page does not acquire attention or citations merely by existing.
+11. **Measure progression, not only reach.** Impressions matter, but so do qualified visits, engaged reading, Scan starts, tool use, Practice entry, return visits, and earned citations.
 
-## 3. Discovery system
+## 3. How discovery actually happens
+
+Search and AI discovery are selection systems, not publishing systems. Neurocient controls its eligibility and the quality of the source it offers; the engine controls whether that source is crawled, indexed, retrieved, ranked, and cited.
+
+### Search-engine pipeline
+
+| Stage | What the engine does | What Neurocient can control | What success means |
+| --- | --- | --- | --- |
+| URL discovery | Learns that a URL exists | Sitemap, internal links, external links, URL notification | The intended canonical URL is known to the engine |
+| Crawling and rendering | Fetches the response and may render JavaScript | Robots policy, server availability, response codes, HTML rendering, resource access | The crawler can fetch the same meaningful public source a visitor can access |
+| Indexing | Analyses the content, selects a canonical, and decides whether to store it | Unique substantive content, canonical consistency, index directives, semantic structure | The canonical page and its useful content are present in the index |
+| Candidate retrieval | Matches a query to possible pages or passages | Clear subject, concrete language, entities, headings, passage structure, internal relationships | Neurocient enters the candidate set for the relevant non-brand question |
+| Ranking and selection | Compares candidates using relevance, usefulness, authority, links, context, freshness, and other signals | Source quality, evidence, reputation, independent links and mentions, page experience | Neurocient is selected ahead of competing sources |
+| Presentation and choice | Produces a title, snippet, feature, or other search treatment | Accurate metadata, structured data, preview controls, recognisable identity | The appearance is accurate and earns an appropriate visit |
+
+Submission is not selection. A sitemap can improve URL discovery but does not guarantee crawling, indexing, ranking, or inclusion in a search feature.
+
+### AI-search and chatbot pipeline
+
+An AI system may rewrite a person's prompt into one or more searches, retrieve pages or passages from its own index or a search partner, rerank the candidates for relevance and reliability, synthesize an answer, and select a small number of citations. Some answers use no live web retrieval at all.
+
+For a current Neurocient page to be cited, it generally must be:
+
+1. accessible to the relevant search or retrieval crawler;
+2. present in an index or otherwise available to the retrieval provider;
+3. relevant to the system's rewritten query, not only the user's original wording;
+4. clear enough for the useful passage and claim to be extracted correctly;
+5. credible enough to be selected over alternatives; and
+6. available under a stable URL that the system can cite and a user can open.
+
+`llms.txt`, schema, crawler allow rules, WebMCP, and ARD can improve access or machine interpretation in specific circumstances. None creates authority, forces retrieval, or guarantees citation.
+
+### Diagnostic interpretation
+
+The stage at which a page disappears determines the appropriate response:
+
+| Observation | Likely class of problem |
+| --- | --- |
+| URL is unknown or never fetched | Discovery, linking, sitemap, notification, or crawler-access problem |
+| URL is crawled but not indexed | Content availability, duplication, canonical, quality, or indexing-policy problem |
+| URL is indexed but receives no relevant impressions | Retrieval fit, entity understanding, demand, or competition problem |
+| URL receives impressions but ranks poorly | Relative usefulness, authority, reputation, linking, or experience problem |
+| URL ranks but earns few visits | Search appearance or intent mismatch |
+| URL performs in web search but is not cited in AI answers | Retrieval-provider coverage, passage extractability, reliability, or citation-selection problem |
+
+This model prevents content editing from being prescribed for what is actually a crawling, indexing, authority, or selection problem.
+
+### Mechanism references
+
+- [Google: how Search works](https://developers.google.com/search/docs/fundamentals/how-search-works)
+- [Google: ranking systems, including link analysis and PageRank](https://developers.google.com/search/docs/appearance/ranking-systems-guide)
+- [Google: subscription and paywalled-content markup](https://developers.google.com/search/docs/appearance/structured-data/paywalled-content)
+- [Google: flexible sampling guidance](https://developers.google.com/search/docs/appearance/flexible-sampling)
+- [OpenAI: ChatGPT Search and publisher eligibility](https://help.openai.com/en/articles/9237897-chatgpt-search)
+
+## 4. Discovery system
 
 Discovery is a connected system with six workstreams:
 
 | Workstream | Purpose | Primary outputs |
 | --- | --- | --- |
-| Technical search | Make public pages reliably crawlable, indexable, canonical, and understandable | Sitemap, robots rules, canonicals, metadata, schema, redirects, index monitoring |
+| Discovery infrastructure | Make the intended public substance reliably crawlable, indexable, canonical, retrievable, and monitorable | Server-rendered HTML, crawler policy, sitemap, canonicals, metadata, schema, redirects, engine integrations, acceptance monitoring |
 | Content architecture | Match real demand and give every page a distinct role | Territories, hubs, intent ownership, internal links, content briefs |
 | Page quality | Become the best useful answer for a narrow problem | Clear answer, evidence, examples, distinctive explanation, next step |
 | Entity and authority | Help systems understand who Neurocient is and why it is credible | Consistent profiles, authorship, citations, relevant referring domains, mentions |
 | Distribution and relationships | Put useful work in front of people who can use, share, or cite it | LinkedIn-native ideas, partner outreach, expert contributions, communities, media |
 | Measurement and learning | Use evidence to choose what to improve next | Search Console, analytics, referral data, product progression, quarterly remap |
 
-No single workstream substitutes for the others. Technical correctness makes discovery possible; content relevance and authority make it probable; a strong product path makes it valuable.
+No single workstream substitutes for the others. Infrastructure creates eligibility; relevance creates a candidate; authority and relative usefulness influence selection; a strong product path makes discovery valuable.
 
-## 4. Current baseline
+## 5. Current baseline
 
-As of 2026-11-11:
+The repository and production boundary were checked on 2026-11-12. Neurocient now has a production-verified URL, metadata, crawler-visible content, and monitoring foundation. The live acceptance check passed all 61 sitemap URLs. Google Search Console live tests found both the Scan and a representative Insight available to Google, and Google's tested Insight HTML contained the metered article section under verified crawler access.
 
-- the repository implements public-page metadata, self-canonicals, sitemap and robots controls, structured data, legacy redirects, and `noindex` treatment for private or personalised routes;
-- `llms.txt` provides a concise machine-readable description of the public site;
-- the canonical apex sitemap is accepted in Google Search Console and reports 61 discovered URLs;
-- the obsolete `www` sitemap entry has been removed;
-- validation has been started for the previously reported not-found and crawled-not-indexed groups;
-- priority crawling has been requested for the homepage, the insight index, two representative insights, and the Caveman Scan;
-- the content inventory contains 29 insight articles;
-- internal linking is uneven: many articles have no contextual internal link, so the library does not yet behave as a strong cluster system;
-- article bodies generally do not expose supporting external references, reducing their present reference value and the transparency of evidence-heavy claims;
-- Google Search Console currently reports no external links. This is a starting point, not an emergency, but earned authority is now a material constraint.
+### Confirmed ready
 
-WebMCP and Agentic Resource Discovery are not current launch requirements. They should be added only when Neurocient exposes a real, safe agent-facing capability with clear schemas, authentication, privacy, rate limits, and abuse controls. Files created only to satisfy an audit would not improve discovery.
+- HTTP and `www` permanently redirect to the canonical HTTPS apex host;
+- `robots.txt`, `sitemap.xml`, and `llms.txt` return `200` in production;
+- browser, Googlebot, Bingbot, and OAI-SearchBot user-agent checks can fetch the public host and discovery files; Bingbot was diagnostic evidence only and does not place Bing search in the active programme;
+- the sitemap contains 61 URLs, and every entry returned `200`, remained on its submitted URL, exposed the expected self-canonical, and avoided `noindex` during the production audit;
+- sampled private or personalised routes, including profile, saved content, Scan results, and administration, expose `noindex, nofollow`;
+- the canonical apex sitemap is accepted in Google Search Console and reported 61 discovered URLs on 2026-11-11;
+- the obsolete `www` sitemap submission was removed;
+- validation was started for the previously reported not-found and crawled-not-indexed groups;
+- priority crawling was requested for the homepage, Insight index, representative Insights, and Caveman Scan;
+- the repository implements page metadata, canonical controls, structured data, redirects, public/private indexing rules, and an optional `llms.txt` map.
 
-## 5. Discovery territories
+User-agent checks prove that the application does not reject those user-agent strings. They do not prove that the CDN admits every crawler's published production IP ranges or that the requesting bot is authentic. Real crawler access and logs remain higher-fidelity evidence.
+
+### Prior production gap: Insight bodies were not retrievable
+
+Before this implementation, an anonymous crawler request to a production Insight received:
+
+- `200`, the intended title, self-canonical, and `index, follow`;
+- the Insight access gate; and
+- the global Organization, Person, and WebSite structured data.
+
+It did **not** receive the article body, its distinctive explanations, or Article structured data. The deployed implementation now returns the substantive opening explanation and Article structured data in initial HTML, while retaining the deeper body behind the existing access decision. A Google Search Console live test of `/insights/doomscrolling` confirmed that the URL is available to Google and that Google's tested HTML contains the metered article section.
+
+The current Insight access contract intentionally prevents denied responses from compiling or returning full Insight MDX. The first gate is registration, not membership. Discovery implementation must preserve the server-authoritative progression and must not expose gated content accidentally or trust a spoofable user-agent string as authorization.
+
+### Confirmed Insight access and discovery approach
+
+The existing reader progression remains unchanged:
+
+| Reader state | Full Insight access |
+| --- | --- |
+| Anonymous visitor | Five distinct Insights |
+| Signed-in free account | Twenty distinct Insights |
+| Account with an active membership entitlement | Unlimited Insights |
+
+Reopening an already granted Insight does not consume another allowance. Only the backend may grant or consume an allowance.
+
+Discovery readiness is implemented around this model:
+
+- every indexable Insight response contains a substantial, self-contained public lead in the initial HTML;
+- the public lead is available without authentication and does not create or consume an Insight grant;
+- when the existing backend access decision grants the article, the response also contains the full Insight body;
+- when access is denied or cannot be established, the response contains the public lead and the appropriate sign-in or membership continuation, but not the gated MDX;
+- after five distinct anonymous Insights, the reader is asked to sign in and receives the larger free-account allowance;
+- membership is requested only after the signed-in free allowance is exhausted and continues to provide unlimited access;
+- a securely verified search or retrieval crawler may receive the full article without creating a guest identity or consuming an allowance, but only where that engine's policies support gated-content indexing;
+- a crawler that cannot be securely verified receives the same meaningful public lead as any other unauthenticated request;
+- crawler-specific access must be decided at a trusted network boundary or through equivalent verification, never from user-agent text alone;
+- Article structured data and gated-content declarations must accurately describe the content present under the applicable response policy.
+
+The public lead is not an empty teaser. It is the existing opening explanation before the first level-two section heading, with a frontmatter summary as the fail-closed fallback when a safe boundary is unavailable. The extended explanation, examples, applications, audio, exercises, and other deeper material remain inside the existing access progression. Automated tests assert that all 29 current Insights have a substantive lead and a separate metered body.
+
+### Additional infrastructure gaps
+
+- the Caveman Scan introduction and H1 are server-rendered; the production acceptance check and Google live test both passed;
+- direct Bing Webmaster Tools and IndexNow work is intentionally deferred under the current Google-search-only scope;
+- the repository now includes an automated production acceptance check for status, final URL, canonical, robots directive, substantive rendered content, Insight schema, and the initial Scan explanation across the sitemap; it must still be run after each relevant deployment;
+- Search Console currently reports no external links; authority can develop later, but its absence limits selection rather than infrastructure eligibility;
+- internal linking is uneven and article bodies generally do not expose supporting references; these are content and authority constraints after infrastructure readiness is established.
+
+WebMCP and Agentic Resource Discovery are not infrastructure-readiness requirements for the present website. They should be added only when Neurocient exposes a real, safe agent-facing capability with clear schemas, authentication, privacy, rate limits, and abuse controls. Files created only to satisfy an audit would not improve discovery.
+
+## 6. Discovery territories
 
 These are the initial territories inferred from the existing library. Search Console evidence may change their names, boundaries, or priority.
 
@@ -85,7 +200,7 @@ These are the initial territories inferred from the existing library. Search Con
 
 The territories are entry doors, not navigation labels that must be forced on visitors. Language should stay concrete and problem-led.
 
-## 6. Existing-content discovery map
+## 7. Existing-content discovery map
 
 Priority meanings:
 
@@ -153,22 +268,27 @@ Before updating or commissioning content, preserve these distinctions:
 
 If two drafts cannot be separated by a different primary question and a different useful answer, improve the existing page instead of publishing another URL.
 
-## 7. Phased roadmap
+## 8. Phased roadmap
 
-### Now: establish control (0–2 weeks)
+### Now: make the infrastructure genuinely ready (0–2 weeks)
 
-- Adopt this map as the editorial inventory and assign an owner to every P1 page.
-- Record a baseline for indexed pages, non-brand impressions, clicks, queries, referring domains, engaged visits, Scan starts, and relevant product progression.
-- Confirm Bing Webmaster Tools ownership, submit the canonical sitemap, and assess IndexNow support in the deployment stack.
-- Standardise Neurocient's public entity facts across owned profiles: name, description, canonical URL, logo, founder/author information, and topical focus.
+- Implement the confirmed public-lead plus metered-full-Insight model without changing the five/twenty/unlimited reader progression.
+- Make the public Insight lead and accurate Article structured data available in the initial HTML to people and legitimate discovery crawlers.
+- Server-render a meaningful Caveman Scan introduction instead of returning only a loading shell before JavaScript runs.
+- Run the automated discovery-infrastructure acceptance check after each relevant deployment and treat regressions as release defects.
+- Confirm Google Search Console settings, sitemap processing, rendered-content inspection, and Google's AI-search inclusion controls.
+- Verify access using actual engine inspection or crawler logs where possible; user-agent simulation remains a lower-fidelity check.
+- Record a baseline for indexed pages, exclusions, non-brand impressions, clicks, queries, referring domains, engaged visits, Scan starts, and relevant product progression.
+- Preserve the current private-route `noindex` boundary and ensure infrastructure work does not expose personalised, administrative, result, or API content.
+
+**Exit condition:** every intended public page returns meaningful, policy-approved content in its initial response; Google can crawl and index it under one canonical URL; legitimate AI retrievers receive at least the public lead; private surfaces remain excluded; Google Search Console is configured; and a repeatable check can detect regressions.
+
+### Short term: establish retrieval fit and source quality (2 weeks–3 months)
+
+- Adopt the content map as the editorial inventory and assign an owner to every P1 page.
+- Build a discovery benchmark: a controlled set of relevant questions, the current Google results and AI citations, the sources selected, and Neurocient's current presence or absence.
 - Define the hub architecture and contextual internal-link plan for the six territories.
-- Produce upgrade briefs for the five P1 reference pages, including intent, evidence, distinct claim, examples, visuals or original synthesis, links, and next step.
-- Audit high-priority copy for legacy protector, personality, or intentional-agent language.
-
-**Exit condition:** we can explain what each existing page owns, how priority pages connect, what success means, and what will be changed first.
-
-### Short term: build the discovery foundation (2 weeks–3 months)
-
+- Produce evidence-based upgrade plans for the five P1 reference pages only after observing the actual result and citation landscape.
 - Upgrade the five P1 reference pages for answer quality, evidence, authorship, visual explanation, internal links, and product progression.
 - Create or improve territory hubs only where they add genuine orientation; do not create thin category pages merely to hold keywords.
 - Add reciprocal, contextual internal links across every cluster and ensure no valuable article is orphaned.
@@ -180,7 +300,7 @@ If two drafts cannot be separated by a different primary question and a differen
 
 **Initial authority target:** earn 3–5 genuinely relevant referring domains in the first quarter. This is a quality target, not a quota to be met through low-value directories or exchanges.
 
-**Exit condition:** priority territories have a strong entry page, connected support, credible evidence, real distribution, and early non-brand discovery signals.
+**Exit condition:** Neurocient is technically eligible, priority pages enter the candidate set for relevant questions, their role is distinct, and early non-brand retrieval signals are observable.
 
 ### Medium term: earn authority and fill proven gaps (3–6 months)
 
@@ -203,7 +323,7 @@ If two drafts cannot be separated by a different primary question and a differen
 
 **Exit condition:** relevant people and systems recognise Neurocient as a useful source before they encounter the brand directly.
 
-## 8. External authority and links
+## 9. External authority and links
 
 External links remain important because they can provide discovery, referral traffic, corroboration, and authority. The goal is not “more backlinks”; it is more relevant independent sources choosing to cite useful Neurocient work.
 
@@ -220,7 +340,7 @@ LinkedIn is primarily a distribution and relationship channel. A link in a Linke
 
 Do not buy links, automate mass outreach, use indiscriminate directories, arrange scaled exchanges, or commission low-quality guest posts for anchor text. These tactics weaken trust and create risk without building a real audience.
 
-## 9. AI discovery
+## 10. AI discovery
 
 AI discovery uses much of the same foundation as search discovery: accessible pages, clear entity identity, useful answers, credible claims, stable URLs, meaningful internal relationships, and independent citations.
 
@@ -233,12 +353,13 @@ Optimise for accurate understanding and citation:
 - use semantic headings and structured data that accurately reflect visible content;
 - maintain a useful `llms.txt`, while recognising that it is not a substitute for content quality or authority;
 - allow legitimate crawlers deliberately through `robots.txt`, subject to product, privacy, and commercial policy;
-- keep important public explanations available without requiring client-side interaction or authentication;
+- include the approved public explanation in the initial HTML without requiring client-side interaction;
+- if a crawler receives gated content that an ordinary visitor cannot receive, verify the crawler at a trusted network boundary and follow the engine's paywall policy rather than trusting its user-agent string;
 - prefer durable reference pages over a large volume of shallow posts.
 
 No configuration can guarantee inclusion in an AI answer. The strongest strategy is to become a source that systems can retrieve, understand, verify, and safely cite.
 
-## 10. Measurement model
+## 11. Measurement model
 
 ### North-star question
 
@@ -248,7 +369,9 @@ Are more of the right people discovering Neurocient through relevant non-brand p
 
 | Layer | Measures | Interpretation |
 | --- | --- | --- |
-| Availability | Valid indexed pages, sitemap status, crawl/index exclusions, Core Web Vitals | Can discovery systems access and use the site reliably? |
+| Infrastructure eligibility | Sitemap health, response and redirect status, canonical agreement, robots policy, initial-HTML substance, schema validity, real crawler access | Can discovery systems reach and understand the intended public source? |
+| Index coverage | Valid indexed pages, exclusions by reason, discovered-versus-indexed URLs, canonical selection | Did the engine accept and store the intended source? |
+| Retrieval | Impressions by relevant query thread, landing-page coverage, AI citation test set, engine/source coverage | Does Neurocient enter the candidate set for relevant questions? |
 | Demand visibility | Non-brand impressions, query diversity, average position by territory, AI/search mentions where observable | Is Neurocient appearing for relevant problems? |
 | Qualified acquisition | Organic clicks, click-through rate, landing pages, engaged sessions, returning organic visitors | Are the right search appearances producing useful visits? |
 | Authority | Relevant referring domains, deep-page links, unlinked mentions, referral quality, citations | Are independent sources treating Neurocient as useful? |
@@ -259,10 +382,11 @@ Segment reporting by territory, landing page, brand versus non-brand query, audi
 
 The first reporting cycle establishes the baseline; targets should be set only after the data is trustworthy. Rankings and backlinks are leading indicators, not the final product outcome.
 
-## 11. Operating cadence
+## 12. Operating cadence
 
 ### Weekly
 
+- run or review the discovery-infrastructure acceptance check and investigate any content, canonical, status, or indexing regression;
 - review Search Console for indexing changes, new queries, impression movement, and material errors;
 - inspect priority landing-page engagement and product progression;
 - distribute one or more useful ideas from current priority work;
@@ -288,8 +412,13 @@ The first reporting cycle establishes the baseline; targets should be set only a
 - revisit AI crawler and protocol choices against actual product capabilities;
 - record outcomes, not just activity.
 
-## 12. Decision rules
+## 13. Decision rules
 
+- Do not treat a `200` response, sitemap entry, canonical, or metadata tag as proof that substantive content is retrievable.
+- Do not begin the article-upgrade programme until the public-lead boundary is implemented and crawler-visible content is verified.
+- Do not weaken the five-anonymous, twenty-signed-in, unlimited-member access contract or expose full gated MDX to denied readers.
+- Do not authorize crawler access from a user-agent string alone; use a trusted verification boundary where bot-specific access is required.
+- Do not serve structured data that describes substantive content absent from the response available under the applicable access policy.
 - Do not scale new article production until the existing 29 pages have clear roles and connected journeys.
 - Improve or consolidate an existing URL when it already addresses the intent.
 - Do not begin broad link outreach until the destination is genuinely reference-worthy.
@@ -301,16 +430,18 @@ The first reporting cycle establishes the baseline; targets should be set only a
 - Prefer a smaller number of strong territories over superficial coverage of every adjacent topic.
 - When evidence contradicts this plan, update the plan.
 
-## 13. Next recorded decisions
+## 14. Next recorded decisions
 
 The next review should record:
 
-1. named owner and upgrade brief for each P1 page;
-2. baseline Search Console and product-progression figures;
-3. agreed territory hub structure and internal-link specification;
-4. Bing Webmaster Tools and IndexNow decision;
-5. the first-quarter relationship and authority shortlist;
-6. the first linkable asset hypothesis;
-7. pages selected for consolidation, reframing, or scientific review.
+1. the implemented public-lead content boundary and evidence that it preserves the five/twenty/unlimited Insight progression;
+2. the production evidence for crawler-visible Insight substance and a server-rendered Scan introduction;
+3. Google Search Console sitemap, rendered-content, and AI-search inclusion status;
+4. the automated discovery-infrastructure acceptance contract and operating owner;
+5. the baseline Google Search Console, AI-citation-test, and product-progression figures;
+6. named owner and evidence-based upgrade plan for each P1 page;
+7. the agreed territory hub and internal-link specification;
+8. the first-quarter authority shortlist and first linkable-asset hypothesis;
+9. pages selected for consolidation, reframing, or scientific review.
 
 This document is intentionally a living strategy rather than a one-off SEO audit. Update its status, evidence, map, and decisions as Neurocient learns what people seek, what the site can answer exceptionally well, and which discovery paths lead to meaningful use.

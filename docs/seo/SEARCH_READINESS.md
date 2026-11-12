@@ -1,8 +1,10 @@
 # Neurocient search readiness
 
-Status: repository baseline implemented and canonical sitemap accepted in Google Search Console as of 2026-11-11.
+Status: URL and metadata baseline deployed and the production Search Console property configured on 2026-11-11. Crawler-visible Insight leads, verified Googlebot access, the server-rendered Scan introduction, and automated acceptance checks were deployed and production-verified on 2026-11-12. Indexing and selection monitoring remain ongoing.
 
 This is the technical implementation and release checklist. The governing discovery strategy, content inventory, authority plan, measurement model, and phased roadmap live in [DISCOVERY_STRATEGY.md](./DISCOVERY_STRATEGY.md).
+
+Current scope: configure and monitor Google Search and Google's AI search features as the conventional search channel, while keeping the public HTML accessible to legitimate AI agents generally. Bing Webmaster Tools, IndexNow, and other direct search-engine programmes are deferred.
 
 ## Outcome
 
@@ -23,8 +25,11 @@ The repository owns these controls:
 - Public discovery pages emit a self-referential canonical URL.
 - Admin, account, saved-content, authentication, personalized-tool, and diagnostic-result routes emit `noindex, nofollow`.
 - Legacy duplicate routes use permanent redirects.
-- Organization, person, website, and article structured data describe the visible page content.
-- Metered Insights declare `isAccessibleForFree: false` and identify the metered article section. This is required because some readers must register or subscribe for access.
+- Organization, person, website, and article structured data must describe the content present under the applicable response policy.
+- The Insight access progression remains five distinct Insights for an anonymous visitor, twenty for a signed-in free account, and unlimited for an account with active membership access.
+- Every indexable Insight must return a substantial public lead in its initial HTML without creating or consuming an access grant. Granted readers may also receive the full body; denied readers must not receive gated MDX.
+- Metered Insights declare `isAccessibleForFree: false` and identify the metered article section. This is required because some readers must register or subscribe for full access.
+- Full crawler access must use secure crawler verification and the engine's gated-content policy. Never authorize it from user-agent text alone, and never create a guest grant for a crawler.
 - `/llms.txt` provides an optional Markdown map of Neurocient's public explanations. It is not a ranking control and does not replace HTML, structured data, robots, or the sitemap.
 - `GOOGLE_SITE_VERIFICATION` can supply an HTML verification token when DNS verification is unavailable. It is optional and must not replace an already working Domain-property verification.
 
@@ -43,11 +48,28 @@ These checks live outside the repository and must be completed or confirmed in t
    - one newly published Insight
    - `https://neurocient.com/inner-caveman`
    - `https://neurocient.com/diagnostics/caveman-scan`
-5. In the rendered HTML from URL Inspection, confirm the selected canonical matches the declared canonical and that a representative Insight contains the article body, not only an access gate. This is especially important because Insights use metered access.
+5. In the rendered HTML from URL Inspection, confirm the selected canonical matches the declared canonical and that a representative Insight contains at least the substantive public lead, not only an access gate. Where verified Googlebot access is enabled, confirm the full article, Article schema, and gated-content declaration are present without creating an access grant.
 6. Review **Page indexing** for accidental `noindex`, duplicate/canonical disagreements, soft 404s, blocked resources, and crawled-but-not-indexed pages.
 7. Review **Core Web Vitals**, HTTPS, structured-data enhancements, Manual Actions, and Security Issues. Treat regressions as release defects, not content-reporting curiosities.
 8. Keep account ownership narrow: at least two trusted owners, and only the permissions each person needs.
 9. Do not use temporary removals as a canonicalization tool. Correct redirects, canonicals, or `noindex` at the source.
+
+Operational baseline completed on 2026-11-11:
+
+- resubmitted the apex sitemap and confirmed a successful read of 61 URLs;
+- removed the obsolete `www` sitemap submission;
+- started validation for the corrected 404 group and the crawled-but-not-indexed group;
+- requested priority crawling for the homepage, the Insight index, representative affected Insights, and the Caveman Scan landing page.
+
+Production discovery release verified on 2026-11-12:
+
+- deployed commit `8e3d7c3` from `main` and passed the automated production check for all 61 sitemap URLs;
+- confirmed the Caveman Scan is already indexed, passed Google's live URL test with the new response, and requested a priority recrawl;
+- found `/insights/doomscrolling` was still unknown to Google despite being present in the submitted sitemap;
+- confirmed the live Insight is available to Google and that Google's tested HTML contains the full metered article section under verified crawler access;
+- submitted `/insights/doomscrolling` to Google's priority crawl queue.
+
+Priority crawling does not guarantee indexing or ranking. Recheck the representative Insight and the broader Page indexing report after Google has had time to process the request.
 
 ## Non-brand search strategy
 
@@ -99,6 +121,15 @@ The checks shown by current audits are not all Google Search requirements:
 Revisit WebMCP only after an explicit product and security contract defines the allowed tool, actor, confirmation boundary, data exposure, failure behavior, and audit trail. Revisit ARD when Neurocient publishes a genuine agentic resource that needs discovery.
 
 ## Release verification
+
+Run the automated acceptance check against a deployed environment:
+
+```powershell
+$env:DISCOVERY_BASE_URL = "https://neurocient.com"
+npm.cmd run verify:discovery
+```
+
+For a local production server, set `DISCOVERY_BASE_URL` to `http://localhost:3000`. The check fetches every sitemap URL and verifies the response, redirect target, self-canonical, indexability, substantive initial HTML, Insight public lead and Article schema, and the server-rendered Scan explanation. It also checks `robots.txt`, `sitemap.xml`, and `llms.txt`. It intentionally does not simulate verified Googlebot access: confirm that separately with Search Console URL Inspection after deployment.
 
 After deployment, verify these URLs without an authenticated session:
 

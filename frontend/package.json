@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run --coverage"
+    "test": "vitest run --coverage",
+    "verify:discovery": "node scripts/check-discovery.mjs"
   },
   "dependencies": {
     "@azure/storage-blob": "^12.29.1",

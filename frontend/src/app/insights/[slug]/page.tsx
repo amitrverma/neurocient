@@ -2,10 +2,10 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { compileMDX } from "next-mdx-remote/rsc";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import Script from "next/script";
 import ArticleLayout from "../../components/ArticleLayout";
 import { pathways, type PathwayId, type Pathway, type ArticleRef } from "@/content/pathways";
 import MicrochallengeBox from "../../components/tools/MicrochallengeBox";
@@ -15,6 +15,8 @@ import InnerCavemanHighlighter from "../../components/InnerCavemanHighlighter";
 import { generateAudioSasUrl } from "@/lib/azureAudioSas";
 import InsightAccessGate from "./InsightAccessGate";
 import { requestArticleAccess } from "./articleAccess";
+import { isVerifiedGooglebotRequest } from "@/lib/googleCrawler";
+import { splitInsightContent } from "@/lib/insightPublicLead";
 
 export const dynamic = "force-dynamic";
 
@@ -180,6 +182,59 @@ function toIsoDuration(value?: string) {
   return `PT${amount}${designator}`;
 }
 
+function buildArticleJsonLd({
+  data,
+  slug,
+  audioObject,
+  includesMeteredBody,
+}: {
+  data: Record<string, unknown>;
+  slug: string;
+  audioObject: Record<string, unknown> | null;
+  includesMeteredBody: boolean;
+}) {
+  const orgId = "https://neurocient.com/#/org/neurocient-labs";
+  const personId = "https://neurocient.com/#/person/amit-r-verma";
+  const author = data.author as string | undefined;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    mainEntityOfPage: `https://neurocient.com/insights/${slug}`,
+    headline: (data.title as string) || slug,
+    description: data.description || data.excerpt,
+    author:
+      author === "Amit R Verma" || !author
+        ? { "@type": "Person", "@id": personId, name: author || "Amit R Verma" }
+        : { "@type": "Person", name: author },
+    datePublished: data.date,
+    dateModified: data.updated || data.date,
+    isAccessibleForFree: false,
+    ...(includesMeteredBody
+      ? {
+          hasPart: {
+            "@type": "WebPageElement",
+            isAccessibleForFree: false,
+            cssSelector: ".metered-insight-content",
+          },
+        }
+      : {}),
+    keywords: Array.isArray(data.keywords) ? data.keywords.join(", ") : "",
+    url: `https://neurocient.com/insights/${slug}`,
+    image: ["https://neurocient.com/logo/neurocient.png"],
+    publisher: {
+      "@type": "Organization",
+      "@id": orgId,
+      name: "Neurocient Labs",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://neurocient.com/logo/neurocient.png",
+      },
+    },
+    ...(audioObject ? { audio: audioObject } : {}),
+  };
+}
+
 export default async function InsightPage(
   { params }: { params: Promise<{ slug: string }> }
 ) {
@@ -191,12 +246,47 @@ export default async function InsightPage(
   const raw = fs.readFileSync(filePath, "utf-8");
   const { content, data } = matter(raw);
   const displayTitle = (data.displayTitle as string) || (data.title as string) || slug;
-  const access = await requestArticleAccess(slug);
+  const typographyVariant = (data.typographyVariant as string | undefined) || "prologue";
+  const fallbackLead = String(data.publicLead || data.excerpt || data.description || "");
+  const { publicLead, meteredBody } = splitInsightContent(content, fallbackLead);
+  const longformComponents = createLongformComponents();
+  const { content: publicLeadContent } = await compileMDX({
+    source: publicLead,
+    options: { parseFrontmatter: false },
+    components: longformComponents,
+  });
+
+  const verifiedGooglebot = await isVerifiedGooglebotRequest(await headers());
+  const access = verifiedGooglebot
+    ? ({ granted: true } as const)
+    : await requestArticleAccess(slug);
   if (!access.granted) {
-    return <InsightAccessGate title={displayTitle} access={access} />;
+    const publicJsonLd = buildArticleJsonLd({
+      data,
+      slug,
+      audioObject: null,
+      includesMeteredBody: false,
+    });
+    return (
+      <>
+        <InsightAccessGate
+          title={displayTitle}
+          date={data.date as string}
+          excerpt={data.excerpt as string | undefined}
+          author={(data.author as string | undefined) || "Amit R Verma"}
+          typographyVariant={typographyVariant}
+          publicLead={publicLeadContent}
+          access={access}
+        />
+        <script
+          id="article-jsonld"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(publicJsonLd) }}
+        />
+      </>
+    );
   }
 
-  const typographyVariant = (data.typographyVariant as string | undefined) || "prologue";
   const usesStandardLongformVariant = typographyVariant === "prologue";
   const headings = getArticleHeadings(content);
 
@@ -209,12 +299,12 @@ export default async function InsightPage(
     ? generateAudioSasUrl(normalizedBlobName)
     : null;
 
-  const { content: mdxContent } = await compileMDX({
-    source: content,
+  const { content: meteredContent } = await compileMDX({
+    source: meteredBody,
     options: { parseFrontmatter: false },
     components: {
       MicrochallengeBox,
-      ...createLongformComponents(),
+      ...longformComponents,
       CavemanSpot,
       ConversationBreak: () =>
         usesStandardLongformVariant && conversationAudioUrl ? (
@@ -232,8 +322,6 @@ export default async function InsightPage(
     ? `prose prose-article prose-variant-${typographyVariant} max-w-none`
     : "prose prose-article max-w-none";
   const contentId = `insight-content-${slug}`;
-  const orgId = "https://neurocient.com/#/org/neurocient-labs";
-  const personId = "https://neurocient.com/#/person/amit-r-verma";
 
   // --- 📚 Random "Read Next"
   const allFiles = fs.readdirSync(insightsDir).filter((f) => f.endsWith(".mdx"));
@@ -294,38 +382,12 @@ export default async function InsightPage(
       }
     : null;
 
-  // JSON-LD for structured data
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: (data.title as string) || slug,
-    description: data.description || data.excerpt,
-    author:
-      (data.author as string) === "Amit R Verma" || !data.author
-        ? { "@type": "Person", "@id": personId, name: data.author || "Amit R Verma" }
-        : { "@type": "Person", name: data.author },
-    datePublished: data.date,
-    dateModified: data.updated || data.date,
-    isAccessibleForFree: false,
-    hasPart: {
-      "@type": "WebPageElement",
-      isAccessibleForFree: false,
-      cssSelector: ".metered-insight-content",
-    },
-    keywords: (data.keywords || []).join(", "),
-    url: `https://neurocient.com/insights/${slug}`,
-    image: ["https://neurocient.com/logo/neurocient.png"],
-    publisher: {
-      "@type": "Organization",
-      "@id": orgId,
-      name: "Neurocient Labs",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://neurocient.com/logo/neurocient.png",
-      },
-    },
-    ...(audioObject ? { audio: audioObject } : {}),
-  };
+  const jsonLd = buildArticleJsonLd({
+    data,
+    slug,
+    audioObject,
+    includesMeteredBody: true,
+  });
 
   return (
     <>
@@ -355,16 +417,17 @@ export default async function InsightPage(
           )}
           <div
             id={contentId}
-            className={`${articleProseClass} metered-insight-content`}
+            className={articleProseClass}
           >
             <InnerCavemanHighlighter targetId={contentId} />
-            {mdxContent}
+            <div className="public-insight-lead">{publicLeadContent}</div>
+            <div className="metered-insight-content">{meteredContent}</div>
           </div>
         </>
       </ArticleLayout>
 
       {/* JSON-LD structured data */}
-      <Script
+      <script
         id="article-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

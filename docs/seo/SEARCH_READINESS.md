@@ -1,6 +1,6 @@
 # Neurocient search readiness
 
-Status: repository baseline deployed and the production Search Console property configured on 2026-11-11. Ongoing crawling, validation, and query performance still require monitoring.
+Status: URL and metadata baseline deployed and the production Search Console property configured on 2026-11-11. The 2026-11-12 production audit found that crawler-visible Insight substance and the server-rendered Scan introduction still require implementation.
 
 This is the technical implementation and release checklist. The governing discovery strategy, content inventory, authority plan, measurement model, and phased roadmap live in [DISCOVERY_STRATEGY.md](./DISCOVERY_STRATEGY.md).
 
@@ -23,8 +23,11 @@ The repository owns these controls:
 - Public discovery pages emit a self-referential canonical URL.
 - Admin, account, saved-content, authentication, personalized-tool, and diagnostic-result routes emit `noindex, nofollow`.
 - Legacy duplicate routes use permanent redirects.
-- Organization, person, website, and article structured data describe the visible page content.
-- Metered Insights declare `isAccessibleForFree: false` and identify the metered article section. This is required because some readers must register or subscribe for access.
+- Organization, person, website, and article structured data must describe the content present under the applicable response policy.
+- The Insight access progression remains five distinct Insights for an anonymous visitor, twenty for a signed-in free account, and unlimited for an account with active membership access.
+- Every indexable Insight must return a substantial public lead in its initial HTML without creating or consuming an access grant. Granted readers may also receive the full body; denied readers must not receive gated MDX.
+- Metered Insights declare `isAccessibleForFree: false` and identify the metered article section. This is required because some readers must register or subscribe for full access.
+- Full crawler access must use secure crawler verification and the engine's gated-content policy. Never authorize it from user-agent text alone, and never create a guest grant for a crawler.
 - `/llms.txt` provides an optional Markdown map of Neurocient's public explanations. It is not a ranking control and does not replace HTML, structured data, robots, or the sitemap.
 - `GOOGLE_SITE_VERIFICATION` can supply an HTML verification token when DNS verification is unavailable. It is optional and must not replace an already working Domain-property verification.
 
@@ -43,7 +46,7 @@ These checks live outside the repository and must be completed or confirmed in t
    - one newly published Insight
    - `https://neurocient.com/inner-caveman`
    - `https://neurocient.com/diagnostics/caveman-scan`
-5. In the rendered HTML from URL Inspection, confirm the selected canonical matches the declared canonical and that a representative Insight contains the article body, not only an access gate. This is especially important because Insights use metered access.
+5. In the rendered HTML from URL Inspection, confirm the selected canonical matches the declared canonical and that a representative Insight contains at least the substantive public lead, not only an access gate. Where verified Googlebot access is enabled, confirm the full article, Article schema, and gated-content declaration are present without creating an access grant.
 6. Review **Page indexing** for accidental `noindex`, duplicate/canonical disagreements, soft 404s, blocked resources, and crawled-but-not-indexed pages.
 7. Review **Core Web Vitals**, HTTPS, structured-data enhancements, Manual Actions, and Security Issues. Treat regressions as release defects, not content-reporting curiosities.
 8. Keep account ownership narrow: at least two trusted owners, and only the permissions each person needs.

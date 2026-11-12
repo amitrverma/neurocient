@@ -1,6 +1,6 @@
 # Neurocient discovery strategy and map
 
-- Status: infrastructure readiness audit active; implementation decision pending
+- Status: infrastructure approach confirmed; implementation pending
 - Owner: Neurocient product and editorial team
 - Last reviewed: 2026-11-12
 - Review cadence: monthly, with a full quarterly remap
@@ -139,15 +139,34 @@ An anonymous crawler request to a production Insight currently receives:
 
 It does **not** receive the article body, its distinctive explanations, or Article structured data. The page therefore looks technically indexable while withholding the substance expected to match queries or support citations. This is an access-boundary issue, not a metadata issue.
 
-The current membership contract intentionally prevents denied responses from compiling or returning full Insight MDX. Discovery implementation must preserve or deliberately amend that product rule; it must not expose paid content accidentally or trust a spoofable user-agent string as authorization.
+The current Insight access contract intentionally prevents denied responses from compiling or returning full Insight MDX. The first gate is registration, not membership. Discovery implementation must preserve the server-authoritative progression and must not expose gated content accidentally or trust a spoofable user-agent string as authorization.
 
-The content-access choice is pending:
+### Confirmed Insight access and discovery approach
 
-1. make Insights fully public and reserve membership for deeper product experiences;
-2. expose a substantial, self-contained public explanation while gating extended material; or
-3. retain the complete meter and grant full access only to cryptographically or network-verified crawlers under each engine's paywall policies.
+The existing reader progression remains unchanged:
 
-Option 2 is the current recommendation because it gives people and machines the same useful public source while preserving room for membership value. It is not approved until the product owner confirms it.
+| Reader state | Full Insight access |
+| --- | --- |
+| Anonymous visitor | Five distinct Insights |
+| Signed-in free account | Twenty distinct Insights |
+| Account with an active membership entitlement | Unlimited Insights |
+
+Reopening an already granted Insight does not consume another allowance. Only the backend may grant or consume an allowance.
+
+Discovery readiness will be added around this model:
+
+- every indexable Insight response contains a substantial, self-contained public lead in the initial HTML;
+- the public lead is available without authentication and does not create or consume an Insight grant;
+- when the existing backend access decision grants the article, the response also contains the full Insight body;
+- when access is denied or cannot be established, the response contains the public lead and the appropriate sign-in or membership continuation, but not the gated MDX;
+- after five distinct anonymous Insights, the reader is asked to sign in and receives the larger free-account allowance;
+- membership is requested only after the signed-in free allowance is exhausted and continues to provide unlimited access;
+- a securely verified search or retrieval crawler may receive the full article without creating a guest identity or consuming an allowance, but only where that engine's policies support gated-content indexing;
+- a crawler that cannot be securely verified receives the same meaningful public lead as any other unauthenticated request;
+- crawler-specific access must be decided at a trusted network boundary or through equivalent verification, never from user-agent text alone;
+- Article structured data and gated-content declarations must accurately describe the content present under the applicable response policy.
+
+The public lead is not an empty teaser. It must answer the concrete question sufficiently to be useful and retrievable while leaving the extended explanation, examples, applications, audio, exercises, or other deeper material inside the existing access progression. Its exact content boundary and presentation will be designed and tested during implementation; that decision must not silently reduce the current five/twenty/unlimited allowances.
 
 ### Additional infrastructure gaps
 
@@ -247,8 +266,8 @@ If two drafts cannot be separated by a different primary question and a differen
 
 ### Now: make the infrastructure genuinely ready (0–2 weeks)
 
-- Obtain a product decision on the public/gated Insight boundary before changing the current membership contract.
-- Make the approved public Insight substance and Article structured data available in the initial HTML to people and legitimate discovery crawlers.
+- Implement the confirmed public-lead plus metered-full-Insight model without changing the five/twenty/unlimited reader progression.
+- Make the public Insight lead and accurate Article structured data available in the initial HTML to people and legitimate discovery crawlers.
 - Server-render a meaningful Caveman Scan introduction instead of returning only a loading shell before JavaScript runs.
 - Add an automated discovery-infrastructure acceptance check covering every sitemap URL: response, redirect target, canonical, robots directive, substantive content, and expected structured data.
 - Confirm Bing Webmaster Tools ownership, submit the canonical sitemap, and implement or explicitly decline IndexNow with a recorded reason.
@@ -390,8 +409,8 @@ The first reporting cycle establishes the baseline; targets should be set only a
 ## 13. Decision rules
 
 - Do not treat a `200` response, sitemap entry, canonical, or metadata tag as proof that substantive content is retrievable.
-- Do not begin the article-upgrade programme until the approved public/gated content boundary is implemented and crawler-visible content is verified.
-- Do not weaken the membership access contract or expose full gated MDX without an explicit product decision.
+- Do not begin the article-upgrade programme until the public-lead boundary is implemented and crawler-visible content is verified.
+- Do not weaken the five-anonymous, twenty-signed-in, unlimited-member access contract or expose full gated MDX to denied readers.
 - Do not authorize crawler access from a user-agent string alone; use a trusted verification boundary where bot-specific access is required.
 - Do not serve structured data that describes substantive content absent from the response available under the applicable access policy.
 - Do not scale new article production until the existing 29 pages have clear roles and connected journeys.
@@ -409,8 +428,8 @@ The first reporting cycle establishes the baseline; targets should be set only a
 
 The next review should record:
 
-1. the approved public/gated Insight content model and its effect on the membership contract;
-2. the implementation and production evidence for crawler-visible Insight substance and a server-rendered Scan introduction;
+1. the implemented public-lead content boundary and evidence that it preserves the five/twenty/unlimited Insight progression;
+2. the production evidence for crawler-visible Insight substance and a server-rendered Scan introduction;
 3. Bing Webmaster Tools ownership, sitemap status, and the IndexNow decision;
 4. the automated discovery-infrastructure acceptance contract and operating owner;
 5. the baseline Search Console, Bing, AI-citation-test, and product-progression figures;

@@ -244,10 +244,9 @@ async def _process_inbound_message(
                 else:
                     await savepoint.commit()
                     acknowledgement = (
-                        "You're connected to Neurocient. You'll receive relevant "
-                        "nudges and reminders here. When a microchallenge check-in "
-                        "arrives, reply Done, Partly, or Didn't happen. Reply STOP "
-                        "at any time."
+                        "You're connected to Neurocient. When a microchallenge check-in "
+                        "arrives, reply Done, Partly, or Didn't happen. You can also "
+                        "send 'spot: ...' with what you noticed."
                     )
 
     result = await db.execute(
@@ -271,8 +270,8 @@ async def _process_inbound_message(
             linked_preferences.whatsapp_consent_at = _utcnow()
             linked_preferences.whatsapp_consent_version = CONSENT_VERSION
             acknowledgement = (
-                "WhatsApp messages are on. You'll receive relevant Neurocient "
-                "nudges and reminders here. Reply STOP at any time."
+                "WhatsApp messages are on again. You'll receive relevant Neurocient "
+                "nudges and check-ins here."
             )
         elif description:
             capture = await capture_spot(

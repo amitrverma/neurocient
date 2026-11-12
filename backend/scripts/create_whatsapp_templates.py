@@ -20,6 +20,13 @@ class TemplateDefinition:
     name: str
     body: str
     examples: tuple[str, ...]
+    footer: str | None = None
+
+
+def _footer_for(template_name: str) -> str | None:
+    if template_name.endswith("_v1"):
+        return "Reply STOP to pause WhatsApp reminders."
+    return None
 
 
 def template_definitions() -> tuple[TemplateDefinition, ...]:
@@ -35,6 +42,7 @@ def template_definitions() -> tuple[TemplateDefinition, ...]:
                 "An unclear next action makes delay easier. Write down the next "
                 "physical action before opening another tab.",
             ),
+            footer=_footer_for(settings.WHATSAPP_NUDGE_TEMPLATE_NAME),
         ),
         TemplateDefinition(
             name=settings.WHATSAPP_SPOT_TEMPLATE_NAME,
@@ -47,6 +55,7 @@ def template_definitions() -> tuple[TemplateDefinition, ...]:
                 "Spot check",
                 "Did an automatic response show up today?",
             ),
+            footer=_footer_for(settings.WHATSAPP_SPOT_TEMPLATE_NAME),
         ),
         TemplateDefinition(
             name=settings.WHATSAPP_MICROCHALLENGE_TEMPLATE_NAME,
@@ -59,8 +68,22 @@ def template_definitions() -> tuple[TemplateDefinition, ...]:
                 "Put the phone away",
                 "Leave your phone outside the room for the first ten minutes.",
             ),
+            footer=_footer_for(settings.WHATSAPP_MICROCHALLENGE_TEMPLATE_NAME),
         ),
     )
+
+
+def template_components(definition: TemplateDefinition) -> list[dict]:
+    components = [
+        {
+            "type": "BODY",
+            "text": definition.body,
+            "example": {"body_text": [list(definition.examples)]},
+        }
+    ]
+    if definition.footer:
+        components.append({"type": "FOOTER", "text": definition.footer})
+    return components
 
 
 def _ready() -> bool:
@@ -104,17 +127,7 @@ def _create(definition: TemplateDefinition) -> dict:
             "name": definition.name,
             "language": settings.WHATSAPP_TEMPLATE_LANGUAGE,
             "category": "UTILITY",
-            "components": [
-                {
-                    "type": "BODY",
-                    "text": definition.body,
-                    "example": {"body_text": [list(definition.examples)]},
-                },
-                {
-                    "type": "FOOTER",
-                    "text": "Reply STOP to pause WhatsApp reminders.",
-                },
-            ],
+            "components": template_components(definition),
         },
         timeout=20,
     )

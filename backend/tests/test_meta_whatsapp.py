@@ -286,7 +286,7 @@ def test_outbound_template_uses_approved_name_language_and_body_parameters(
 
     result = send_whatsapp_template_message(
         "+919876543210",
-        template_name="neurocient_microchallenge_checkin_v1",
+        template_name="neurocient_microchallenge_checkin_v2",
         language_code="en_GB",
         body_parameters=("Put the phone away", "Leave it outside for ten minutes."),
     )
@@ -298,7 +298,7 @@ def test_outbound_template_uses_approved_name_language_and_body_parameters(
         "to": "919876543210",
         "type": "template",
         "template": {
-            "name": "neurocient_microchallenge_checkin_v1",
+            "name": "neurocient_microchallenge_checkin_v2",
             "language": {"code": "en_GB"},
             "components": [{
                 "type": "body",

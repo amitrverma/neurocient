@@ -19,10 +19,11 @@ from app.utils.auth import get_current_user
 router = APIRouter()
 logger = logging.getLogger("notification_consent")
 PAIRING_TTL = timedelta(minutes=10)
-CONSENT_VERSION = "whatsapp-companion-v1"
+CONSENT_VERSION = "whatsapp-companion-v2"
 CONSENT_MESSAGE = (
-    "Connect my WhatsApp to Neurocient. Send me relevant nudges and reminders, "
-    "and let me record my microchallenge check-ins here. I can reply STOP at any time."
+    "Connect this WhatsApp number to my Neurocient account. Send me relevant "
+    "nudges and check-ins, and let me record my microchallenge progress here. "
+    "I can pause messages at any time by replying STOP."
 )
 
 

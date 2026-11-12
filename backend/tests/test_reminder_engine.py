@@ -235,9 +235,9 @@ def test_legacy_purpose_flags_do_not_override_enabled_channels(
     )
     assert send_whatsapp.await_args.kwargs == {
         "template_name": {
-            "nudge": "neurocient_daily_nudge_v1",
-            "spot_reminder": "neurocient_spot_checkin_v1",
-            "microchallenge": "neurocient_microchallenge_checkin_v1",
+            "nudge": "neurocient_daily_nudge_v2",
+            "spot_reminder": "neurocient_spot_checkin_v2",
+            "microchallenge": "neurocient_microchallenge_checkin_v2",
         }[purpose],
         "language_code": "en_GB",
         "body_parameters": ("Title", "Body"),

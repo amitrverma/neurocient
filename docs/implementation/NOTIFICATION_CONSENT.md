@@ -2,7 +2,7 @@
 
 Status: implemented locally; owned-number provider path working; exact-candidate consent journey pending
 
-Contract version: 2.0 (2026-11-07)
+Contract version: 2.1 (2026-11-12)
 
 ## Outcome
 
@@ -20,8 +20,14 @@ and active-microchallenge check-ins are product behavior, not three preferences.
   current `whatsapp_enabled=true` at provider dispatch.
 - A signed-in user starts WhatsApp pairing. The server creates a random,
   short-lived, single-use token and returns a `wa.me` link with an explicit
-  prefilled message naming Neurocient, nudges/reminders, microchallenge
-  check-ins, and STOP.
+  prefilled message naming Neurocient, relevant nudges/check-ins,
+  microchallenge progress, and STOP. STOP is explained at pairing and in Help,
+  while Profile retains a direct Disconnect control; it is not repeated on
+  every Utility reminder.
+- Mobile users may open the prepared message directly. Desktop users remain on
+  Neurocient and can scan a QR code with their phone without configuring
+  WhatsApp Web. The page checks for the completed connection while the handoff
+  is open.
 - The user sends that message from WhatsApp. The signed Meta webhook binds the
   actual sender number to the token's account and enables the channel in one
   transaction. No typed phone number, outbound OTP, second toggle, or save step
@@ -54,6 +60,9 @@ and active-microchallenge check-ins are product behavior, not three preferences.
 - **CONSENT-02-H:** A WhatsApp microchallenge reply updates only the durable
   assignment referenced by that day's sent reminder. `Done`, `Partly`, and
   `Didn't happen` remain truthful progress evidence.
+- **CONSENT-02-I:** Pairing never depends on WhatsApp Web. The direct link and
+  QR code encode the same short-lived prepared message, reveal no token in page
+  copy, and leave the Neurocient page available to confirm connection.
 
 ## Failure and recovery
 
@@ -71,8 +80,9 @@ and active-microchallenge check-ins are product behavior, not three preferences.
   Disconnect, expiry, and response privacy.
 - Reminder tests cover channel re-read and prove legacy purpose flags no longer
   authorize or suppress product-selected messages.
-- Profile tests cover the channel-only surface, immediate push mutation, and
-  WhatsApp disconnect; the production frontend build is required.
+- Profile tests cover the channel-only surface, immediate push mutation,
+  WhatsApp disconnect, and the direct-link/QR pairing handoff; the production
+  frontend build is required.
 - On 2026-11-12 the owner confirmed that testing through Neurocient's actual
   configured WhatsApp number works. The Meta test-number `131031` failure is not
   a blocker. Three Utility templates were submitted and approved on 2026-11-12.

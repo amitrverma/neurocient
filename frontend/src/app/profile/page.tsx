@@ -16,6 +16,7 @@ import { useNotification } from "../components/NotificationProvider";
 import { profileViewFromHash, type ProfileView } from "./profileViews";
 import PersonalHome from "./PersonalHome";
 import useWorkOverview from "./useWorkOverview";
+import WhatsAppPairingDialog from "./WhatsAppPairingDialog";
 import {
   ChannelButton,
   DeliveryChannel,
@@ -63,6 +64,7 @@ const ProfilePage = () => {
   const [whatsAppDisplayNumber, setWhatsAppDisplayNumber] = useState("");
   const [whatsAppPairingPending, setWhatsAppPairingPending] = useState(false);
   const [whatsAppBusy, setWhatsAppBusy] = useState(false);
+  const [whatsAppPairingUrl, setWhatsAppPairingUrl] = useState("");
   const [pushEnabled, setPushEnabled] = useState(false);
   const [prefsLoading, setPrefsLoading] = useState(true);
   const [prefsError, setPrefsError] = useState(false);
@@ -118,6 +120,42 @@ const ProfilePage = () => {
       document.removeEventListener("visibilitychange", refreshWhenReturning);
     };
   }, [ready, user]);
+
+  useEffect(() => {
+    if (!whatsAppPairingUrl || whatsAppConnected) return;
+
+    let active = true;
+    let checking = false;
+    const checkConnection = async () => {
+      if (checking) return;
+      checking = true;
+      try {
+        const response = await fetch("/api/user/preferences", {
+          credentials: "include",
+          cache: "no-store",
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!active || !data.whatsapp_connected) return;
+        setWhatsAppConnected(true);
+        setWhatsAppEnabled(Boolean(data.whatsapp_enabled));
+        setWhatsAppDisplayNumber(data.whatsapp_display_number || "");
+        setWhatsAppPairingPending(false);
+        setWhatsAppPairingUrl("");
+        notify("WhatsApp is connected.", "success");
+      } catch {
+        // Keep the handoff available; the next bounded poll may succeed.
+      } finally {
+        checking = false;
+      }
+    };
+
+    const interval = window.setInterval(checkConnection, 2500);
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
+  }, [notify, whatsAppConnected, whatsAppPairingUrl]);
 
   useEffect(() => {
     if (!ready || !user) return;
@@ -183,10 +221,10 @@ const ProfilePage = () => {
       if (!response.ok) throw new Error(await responseMessage(response));
       const data = await response.json();
       setWhatsAppPairingPending(true);
-      setWhatsAppBusy(false);
-      window.location.assign(data.whatsapp_url);
+      setWhatsAppPairingUrl(data.whatsapp_url);
     } catch (error) {
       notify(error instanceof Error ? error.message : "WhatsApp could not be opened.", "error");
+    } finally {
       setWhatsAppBusy(false);
     }
   };
@@ -203,6 +241,7 @@ const ProfilePage = () => {
       setWhatsAppEnabled(false);
       setWhatsAppDisplayNumber("");
       setWhatsAppPairingPending(false);
+      setWhatsAppPairingUrl("");
       notify("WhatsApp is disconnected.", "success");
     } catch (error) {
       notify(error instanceof Error ? error.message : "WhatsApp could not be disconnected.", "error");
@@ -349,9 +388,9 @@ const ProfilePage = () => {
                                   {whatsAppDisplayNumber ? <span className="mt-1 block">Connected as {whatsAppDisplayNumber}</span> : null}
                                 </>
                               ) : whatsAppPairingPending ? (
-                                "Waiting for the consent message from WhatsApp. The link expires after 10 minutes."
+                                "Waiting for you to send the prepared WhatsApp message. The link expires after 10 minutes."
                               ) : (
-                                "Receive nudges and reminders, and record microchallenge check-ins directly in WhatsApp. You will send one clear consent message to connect."
+                                "Receive relevant nudges and check-ins, and record microchallenge progress directly in WhatsApp."
                               )
                             }
                             status={whatsAppConnected ? (whatsAppEnabled ? "Connected" : "Paused") : whatsAppPairingPending ? "Waiting" : "Not connected"}
@@ -362,7 +401,7 @@ const ProfilePage = () => {
                                 </ChannelButton>
                               ) : (
                                 <ChannelButton onClick={connectWhatsApp} disabled={whatsAppBusy}>
-                                  {whatsAppBusy ? "Opening WhatsApp" : whatsAppPairingPending ? "Open WhatsApp again" : "Connect WhatsApp"}
+                                  {whatsAppBusy ? "Preparing WhatsApp" : whatsAppPairingPending ? "Continue pairing" : "Connect WhatsApp"}
                                 </ChannelButton>
                               )
                             }
@@ -378,6 +417,11 @@ const ProfilePage = () => {
       </section>
 
       <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
+      <WhatsAppPairingDialog
+        open={Boolean(whatsAppPairingUrl)}
+        whatsappUrl={whatsAppPairingUrl}
+        onClose={() => setWhatsAppPairingUrl("")}
+      />
     </main>
   );
 

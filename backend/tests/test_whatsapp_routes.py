@@ -10,7 +10,7 @@ import httpx
 import pytest
 from fastapi import FastAPI
 
-from app.Routes import whatsapp_routes
+from app.Routes import preferences_route, whatsapp_routes
 from app.config import settings
 from app.database import get_db
 from app.services.microchallenge_progress import CheckinResult
@@ -122,6 +122,17 @@ def test_pairing_token_parser_requires_explicit_final_connect_command():
     ) == token
     assert whatsapp_routes.parse_pairing_token(f"CONNECT {token} trailing") is None
     assert whatsapp_routes.parse_pairing_token("CONNECT short") is None
+
+
+def test_pairing_consent_is_concise_and_explains_opt_out_once():
+    message = preferences_route.CONSENT_MESSAGE
+
+    assert message == (
+        "Connect this WhatsApp number to my Neurocient account. Send me relevant "
+        "nudges and check-ins, and let me record my microchallenge progress here. "
+        "I can pause messages at any time by replying STOP."
+    )
+    assert message.count("STOP") == 1
 
 
 @pytest.mark.parametrize(

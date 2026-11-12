@@ -1720,3 +1720,18 @@ Provider acceptance is not delivery. The dispatch stores Meta's `wamid` as
 stronger state. Meta owns the final template category decision, so scheduled
 production delivery remains disabled until all three templates are approved and
 the exact-candidate consent, reminder, status, and reply journey is retained.
+
+## 2026-11-12: Explain WhatsApp opt-out once and make desktop pairing phone-first
+
+The WhatsApp connection message is the explicit consent point. It names the
+Neurocient account, relevant nudges and check-ins, microchallenge progress, and
+the ability to pause by replying STOP. Help and the account's Disconnect
+control keep user control discoverable. Routine Utility reminders do not repeat
+STOP because the repetition adds clutter and makes every useful check-in read
+like an exit prompt.
+
+Pairing must also work when a desktop user has not configured WhatsApp Web.
+Neurocient therefore keeps the account page open and presents the same
+short-lived prepared message as both a phone-scannable QR code and a direct
+WhatsApp link. Sending that message remains the proof of number ownership; the
+QR code does not introduce a parallel consent or identity path.

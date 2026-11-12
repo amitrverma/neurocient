@@ -145,8 +145,8 @@ async def test_channel_consent_and_inbound_whatsapp_pairing(monkeypatch):
             assert urlsplit(url).path == f"/{BUSINESS_NUMBER}"
             consent_message = parse_qs(urlsplit(url).query)["text"][0]
             assert "Neurocient" in consent_message
-            assert "nudges and reminders" in consent_message
-            assert "microchallenge check-ins" in consent_message
+            assert "relevant nudges" in consent_message
+            assert "microchallenge progress" in consent_message
             assert "STOP" in consent_message
             token = consent_message.rsplit("CONNECT ", 1)[1]
 

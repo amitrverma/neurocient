@@ -4,7 +4,7 @@ Status: local owned-number journey passed; deployed dev-candidate verification p
 
 Owner: Amit
 
-Contract version: 1.4 (2026-11-12)
+Contract version: 1.5 (2026-11-12)
 
 Version 1.1 makes the daily nugget selection durable and shared across the web
 and outbound delivery. It also requires bounded outbound WhatsApp bodies and
@@ -14,6 +14,8 @@ WhatsApp Cloud API without changing companion behavior or consent authority.
 Version 1.3 separates inbound service-window replies from proactive template
 delivery, submits the three reminder templates, and records signed Meta delivery
 status callbacks against the durable dispatch.
+Version 1.5 removes repeated opt-out copy from proactive reminders and makes
+desktop pairing a phone handoff rather than a dependency on WhatsApp Web.
 
 ## Outcome
 
@@ -79,14 +81,16 @@ Scheduled WhatsApp messages never fall back to free-form text. Inbound
 acknowledgements use service messages within the customer-service window;
 scheduled reminders use these Meta Utility templates in `en_GB`:
 
-- `neurocient_daily_nudge_v1` with title `{{1}}` and nudge content `{{2}}`;
-- `neurocient_spot_checkin_v1` with check-in title `{{1}}` and state-aware
+- `neurocient_daily_nudge_v2` with title `{{1}}` and nudge content `{{2}}`;
+- `neurocient_spot_checkin_v2` with check-in title `{{1}}` and state-aware
   prompt `{{2}}`; and
-- `neurocient_microchallenge_checkin_v1` with the active experiment title
+- `neurocient_microchallenge_checkin_v2` with the active experiment title
   `{{1}}` and first concrete instruction `{{2}}`.
 
-All three fixed bodies state that the user asked to receive the message and
-carry a STOP footer. The Microchallenge body permanently includes `Done`,
+All three fixed bodies state that the user asked to receive the message. The
+approved `v2` templates omit the repeated STOP footer: STOP is explained during
+pairing and remains available at any time without turning every Utility reminder
+into an exit prompt. The Microchallenge body permanently includes `Done`,
 `Partly`, and `Didn't happen`; template variables cannot remove those choices.
 The daily nudge contains no product link, membership prompt, promotion, or
 return-to-app call to action. Meta remains the final category authority.
@@ -95,6 +99,11 @@ On 2026-11-12 the configured WABA approved all three definitions as `UTILITY`.
 Repository configuration owns their names and language,
 and `python -m scripts.create_whatsapp_templates` provides a dry-run by default;
 `--apply` creates only missing definitions.
+
+All three `v2` templates were submitted as `UTILITY` on 2026-11-12 without a
+STOP footer and are approved. Repository defaults now select the `v2` set. The
+approved `v1` templates remain in Meta as rollback assets and retain their
+original STOP footer.
 
 ## Failure and privacy contract
 

@@ -108,4 +108,57 @@ describe("profile delivery channels", () => {
       expect.objectContaining({ method: "DELETE" }),
     ));
   });
+
+  it("keeps Neurocient open and offers a phone handoff when pairing WhatsApp", async () => {
+    const whatsappUrl = "https://wa.me/919999999999?text=connect";
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url === "/api/user/preferences" && !init?.method) return jsonResponse(preferences);
+      if (url === "/api/cohorts/my") return jsonResponse({ enrollments: [] });
+      if (url === "/api/user/preferences/whatsapp-pairing" && init?.method === "POST") {
+        return jsonResponse({ whatsapp_url: whatsappUrl }, 201);
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    render(<ProfilePage />);
+    fireEvent.click(await screen.findByRole("button", { name: "Connect WhatsApp" }));
+
+    expect(await screen.findByRole("heading", { name: "Continue on WhatsApp" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open WhatsApp" })).toHaveAttribute("href", whatsappUrl);
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    expect(screen.getByRole("button", { name: "Continue pairing" })).toBeEnabled();
+  });
+
+  it("recognises a phone-completed connection without a desktop reload", async () => {
+    const whatsappUrl = "https://wa.me/919999999999?text=connect";
+    let preferenceReads = 0;
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url === "/api/user/preferences" && !init?.method) {
+        preferenceReads += 1;
+        return jsonResponse(preferenceReads === 1 ? preferences : {
+          ...preferences,
+          whatsapp_connected: true,
+          whatsapp_enabled: true,
+          whatsapp_display_number: "+••••••3210",
+        });
+      }
+      if (url === "/api/cohorts/my") return jsonResponse({ enrollments: [] });
+      if (url === "/api/user/preferences/whatsapp-pairing" && init?.method === "POST") {
+        return jsonResponse({ whatsapp_url: whatsappUrl }, 201);
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    render(<ProfilePage />);
+    fireEvent.click(await screen.findByRole("button", { name: "Connect WhatsApp" }));
+    expect(await screen.findByRole("heading", { name: "Continue on WhatsApp" })).toBeInTheDocument();
+
+    expect(await screen.findByText("Connected", {}, { timeout: 4000 })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Continue on WhatsApp" })).not.toBeInTheDocument();
+    expect(mocks.notify).toHaveBeenCalledWith("WhatsApp is connected.", "success");
+  });
 });

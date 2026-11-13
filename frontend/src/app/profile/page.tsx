@@ -85,6 +85,7 @@ const ProfilePage = () => {
       try {
         const res = await fetch("/api/user/preferences", {
           credentials: "include",
+          cache: "no-store",
         });
         if (!res.ok) throw new Error(`Failed to load preferences: ${res.status}`);
         const data = await res.json();
@@ -122,6 +123,13 @@ const ProfilePage = () => {
   }, [ready, user]);
 
   useEffect(() => {
+    if (!whatsAppConnected || !whatsAppPairingUrl) return;
+    setWhatsAppPairingPending(false);
+    setWhatsAppPairingUrl("");
+    notify("WhatsApp is connected.", "success");
+  }, [notify, whatsAppConnected, whatsAppPairingUrl]);
+
+  useEffect(() => {
     if (!whatsAppPairingUrl || whatsAppConnected) return;
 
     let active = true;
@@ -141,21 +149,20 @@ const ProfilePage = () => {
         setWhatsAppEnabled(Boolean(data.whatsapp_enabled));
         setWhatsAppDisplayNumber(data.whatsapp_display_number || "");
         setWhatsAppPairingPending(false);
-        setWhatsAppPairingUrl("");
-        notify("WhatsApp is connected.", "success");
       } catch {
-        // Keep the handoff available; the next bounded poll may succeed.
+        // Keep the handoff available; the next connection check may succeed.
       } finally {
         checking = false;
       }
     };
 
+    void checkConnection();
     const interval = window.setInterval(checkConnection, 2500);
     return () => {
       active = false;
       window.clearInterval(interval);
     };
-  }, [notify, whatsAppConnected, whatsAppPairingUrl]);
+  }, [whatsAppConnected, whatsAppPairingUrl]);
 
   useEffect(() => {
     if (!ready || !user) return;

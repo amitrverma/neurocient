@@ -4,7 +4,7 @@ Status: local owned-number journey passed; deployed dev-candidate verification p
 
 Owner: Amit
 
-Contract version: 1.7 (2026-11-13)
+Contract version: 1.8 (2026-11-13)
 
 Version 1.1 makes the daily nugget selection durable and shared across the web
 and outbound delivery. It also requires bounded outbound WhatsApp bodies and
@@ -20,6 +20,8 @@ Version 1.6 moves opt-out guidance to the connection confirmation and lets a
 person add an obstacle note as an ordinary follow-up reply.
 Version 1.7 presents the account-binding credential as a short, human-readable
 connection code while preserving one-time use, expiry, and hashed storage.
+Version 1.8 requires the originating browser to reconcile a phone-completed
+pairing and leave the handoff state without a manual refresh.
 
 ## Outcome
 
@@ -166,6 +168,10 @@ original STOP footer.
   connection confirmation, not in the person's prefilled consent sentence.
 - **WA-COMP-13:** `Partly` and `Didn't happen` open a 15-minute obstacle-note
   reply state; the next ordinary text is stored once on that day's outcome.
+- **WA-COMP-14:** When pairing completes on a phone, the originating browser
+  closes the handoff and shows the connected state after an immediate check,
+  periodic polling, or a focus/visibility refresh. It must not announce success
+  before the backend reports the durable connection.
 
 ## Deferred provider work
 

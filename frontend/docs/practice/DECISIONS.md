@@ -1778,3 +1778,13 @@ the person is not asked to type `note:`. `Done` does not invite or open a note
 state. The older explicit `note:` form remains accepted only for compatibility.
 STOP, START, Spot capture, and microchallenge outcome controls keep priority over
 pending free text so an unfinished follow-up cannot swallow another action.
+
+## 2026-11-13: Cross-device WhatsApp pairing completes on the originating screen
+
+Scanning the pairing QR moves the person to WhatsApp on their phone, but the
+desktop remains part of the same journey. Once the signed webhook durably links
+the number, the originating browser must close the handoff, show the connected
+state, and provide one success notification without requiring a refresh or a
+manual close. It checks immediately, continues periodic polling while the
+handoff is open, and reconciles again when a backgrounded tab becomes visible
+or focused. The interface never infers success merely because WhatsApp opened.

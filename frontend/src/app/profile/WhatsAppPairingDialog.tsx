@@ -34,7 +34,7 @@ const WhatsAppPairingDialog = ({ open, whatsappUrl, onClose }: {
           </div>
 
           <p className="mt-4 text-sm leading-6 text-brand-dark/72">
-            Scan the code or open WhatsApp below. Send the prepared message within 10 minutes to connect your account.
+            Scan the code with your phone to open WhatsApp, or use the button below. Send the prepared message within 10 minutes to connect your account.
           </p>
 
           <div className="mx-auto my-6 hidden w-fit rounded-2xl border border-brand-dark/10 bg-white p-4 sm:block">

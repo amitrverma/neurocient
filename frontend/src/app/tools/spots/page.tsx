@@ -96,7 +96,7 @@ const SpotsPage = () => {
 
   const content = (
     <main className="surface-page tool-detail-page">
-      <section className="tool-detail-hero">
+      <section className="tool-detail-hero tool-detail-hero--task-first">
         <div>
           <SectionLabel>Awareness log</SectionLabel>
           <h1 className="tool-detail-title">
@@ -111,92 +111,58 @@ const SpotsPage = () => {
         </div>
 
         <aside className="tool-detail-summary">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-                Your log
-              </p>
-              <h2 className="mt-2 text-3xl font-bold leading-tight text-brand-dark">
-                {loading
-                  ? "Loading your evidence"
-                  : loadFailed
-                    ? "Your log is unavailable"
-                    : !user
-                      ? "Sign in to see your log"
-                      : `${spots.length} ${spots.length === 1 ? "spot" : "spots"} recorded`}
-              </h2>
+          {loading ? (
+            <div className="flex items-center gap-3 font-sans text-sm font-semibold text-brand-dark">
+              <LoaderCircle className="h-5 w-5 animate-spin text-brand-accent" />
+              Loading your evidence
             </div>
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-brand-teal/35 text-brand-accent">
-              {loading ? (
-                <LoaderCircle className="h-5 w-5 animate-spin" />
-              ) : (
-                <NotebookPen className="h-5 w-5" />
-              )}
-            </span>
-          </div>
-          <p className="mt-4 font-sans text-sm leading-7 text-brand-dark/72">
-            Name what happened in plain language. A useful spot is specific
-            enough to recognise if a similar situation appears again.
-          </p>
-        </aside>
-      </section>
-
-      <section className="tool-detail-content grid gap-8 md:grid-cols-[0.78fr_1.22fr] md:items-start">
-        <div>
-          {loadFailed ? (
+          ) : loadFailed ? (
             <EmptyBlock
               title="Your spots could not be loaded."
               text="Your saved evidence has not been replaced or counted as zero. Refresh when the connection is available."
             />
-          ) : user && !hasReachedLimit && (
-            <CavemanSpot
-              prompt="What happened, what did you do next, and what did that response change immediately?"
-              onAdded={(spot) => setSpots((prev) => [spot, ...prev])}
-            />
-          )}
-
-          {hasReachedLimit && (
-            <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-sm">
-              <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-                Limit reached
-              </p>
-              <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
-                You have reached your free limit of {userLimit} spots.
-              </p>
-              <Link
-                href="/membership"
-                className="mt-5 inline-flex items-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:opacity-90"
-              >
-                Become a member
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          )}
-
-          {!loading && !user && (
-            <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-sm">
-              <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-                Sign in required
-              </p>
+          ) : !user ? (
+            <div>
+              <p className="page-eyebrow text-brand-primary">Private log</p>
               <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
-                Log in to start your awareness log.
+                Sign in to record what happened.
               </h2>
-              <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
-                Your spots are private entries. Sign in to save them, revisit
-                these moments, and build a record of which responses repeat
-                under which conditions.
-              </p>
-              <button
-                onClick={() => setShowAuth(true)}
-                className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:opacity-90"
-              >
+              <button onClick={() => setShowAuth(true)} className="surface-action mt-5">
                 Log in
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>
+          ) : hasReachedLimit ? (
+            <div>
+              <p className="page-eyebrow text-brand-primary">Limit reached</p>
+              <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
+                Your {userLimit} free spots are saved.
+              </h2>
+              <Link href="/membership" className="surface-action mt-5">
+                Become a member
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          ) : (
+            <div>
+              <div className="mb-5 flex items-center justify-between gap-4 border-b border-brand-dark/12 pb-4">
+                <p className="page-eyebrow text-brand-primary">Record a spot</p>
+                <span className="inline-flex items-center gap-2 font-sans text-xs font-semibold text-brand-dark/62">
+                  <NotebookPen className="h-4 w-4 text-brand-accent" />
+                  {spots.length} saved
+                </span>
+              </div>
+              <CavemanSpot
+                compact
+                prompt="What happened, what did you do next, and what changed immediately?"
+                onAdded={(spot) => setSpots((prev) => [spot, ...prev])}
+              />
+            </div>
           )}
-        </div>
+        </aside>
+      </section>
 
+      <section className="tool-detail-content" aria-label="Recent spots">
         <div>
           <div className="mb-5 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
             <span>Recent spots</span>

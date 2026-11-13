@@ -1,5 +1,27 @@
 # Practice Decisions
 
+## 2026-11-13: Return surfaces put the usable action before history
+
+The signed-in Home pairs the Nudge of the Day with one vertical stack of the
+person's current work. The item selected by the existing continuation priority is
+visually first, while Practice, Microchallenges, Spots, and saved Scan continuity
+remain available in the same compact group. Weekly reflection remains secondary
+to today's nudge and current work rather than competing as an equal dashboard
+tile.
+
+Microchallenges and Spot the Inner Caveman are task-first tools. An active
+Microchallenge presents today's `Done`, `Partly`, and `Didn't happen` check-in in
+the opening task area; full experiment explanation and history remain under
+progressive disclosure. The Spots surface presents the observation field in the
+opening task area before the saved log. Loading, unavailable, signed-out, limit,
+and completed states keep their truthful alternatives in the same position.
+
+This removes navigation and scrolling friction without changing assignment,
+progress, access, usage-limit, or persistence rules. Mobile document order is the
+source order: orientation first, then the current action, then history. Desktop
+expands the same order into adjacent columns rather than defining a different
+journey.
+
 ## 2026-10-17: Scan personalisation stops at the person's selected answers
 
 The Scan brings the Inner Caveman into view; it does not map a drive, type,

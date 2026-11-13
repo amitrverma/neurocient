@@ -74,9 +74,14 @@ describe("Microchallenge daily outcomes", () => {
 
     render(<MicrochallengesPage />);
 
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Open active challenge" }),
-    );
+    expect(
+      await screen.findByRole("group", {
+        name: "How did today's experiment go?",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Open active challenge" }),
+    ).not.toBeInTheDocument();
     fireEvent.change(screen.getByPlaceholderText("Quick reflection, optional"), {
       target: { value: "The phone was still beside me." },
     });

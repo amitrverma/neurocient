@@ -67,9 +67,11 @@ export default function PersonalHome({
   }
 
   const continuation = chooseAccountContinuation(overview);
-  const workItems = buildWorkItems(overview).filter(
-    (item) => item.kind !== continuation.kind,
-  );
+  const workItems = buildWorkItems(overview);
+  const orderedWorkItems = [
+    ...workItems.filter((item) => item.kind === continuation.kind),
+    ...workItems.filter((item) => item.kind !== continuation.kind),
+  ];
 
   return (
     <div className="grid gap-14 md:gap-16">
@@ -78,26 +80,20 @@ export default function PersonalHome({
           eyebrow="For you"
           id="for-you-title"
         />
-        <div className="mt-7 grid gap-5 lg:grid-cols-2 lg:items-start">
+        <div className="mt-7 grid gap-7 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
           <NudgeOfTheDay />
-          <WeeklyReflections />
-        </div>
-      </section>
-
-      <section aria-labelledby="current-work-title">
-        <SectionHeading
-          eyebrow="Continue your work"
-          title="Pick up from where you left off."
-          id="current-work-title"
-        />
-
-        <div className="mt-7 grid border-y border-brand-dark/12 lg:grid-cols-[1.05fr_0.95fr]">
-          <PrimaryContinuation continuation={continuation} />
-          <div className="border-t border-brand-dark/12 lg:border-l lg:border-t-0 lg:pl-8">
-            {workItems.map((item) => (
-              <WorkLink key={item.kind} item={item} />
+          <nav aria-label="Continue your work" className="border-y border-brand-dark/12">
+            <div className="flex items-center gap-3 border-b border-brand-dark/12 py-4">
+              <span className="page-eyebrow text-brand-teal">Continue your work</span>
+              <span className="h-px flex-1 bg-brand-dark/12" />
+            </div>
+            {orderedWorkItems.map((item, index) => (
+              <WorkLink key={item.kind} item={item} primary={index === 0} />
             ))}
-          </div>
+          </nav>
+        </div>
+        <div className="mt-5">
+          <WeeklyReflections />
         </div>
       </section>
 
@@ -234,46 +230,42 @@ const buildWorkItems = (overview: WorkOverview): WorkItem[] => [
   },
 ];
 
-const PrimaryContinuation = ({
-  continuation,
+const WorkLink = ({
+  item,
+  primary = false,
 }: {
-  continuation: AccountContinuation;
+  item: WorkItem;
+  primary?: boolean;
 }) => (
-  <div className="bg-brand-dark px-6 py-8 text-white md:px-8 md:py-10">
-    <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-secondary">
-      One next step
-    </p>
-    <h3 className="mt-4 text-3xl font-bold leading-tight md:text-4xl">
-      {continuation.label}
-    </h3>
-    <p className="mt-4 max-w-xl font-sans text-sm leading-7 text-white/72">
-      {continuation.text}
-    </p>
-    <Link
-      href={continuation.href}
-      className="mt-7 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand-secondary px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark transition hover:bg-white"
-    >
-      Continue
-      <ArrowRight className="h-4 w-4" />
-    </Link>
-  </div>
-);
-
-const WorkLink = ({ item }: { item: WorkItem }) => (
   <Link
     href={item.href}
-    className="group grid grid-cols-[2.5rem_1fr_auto] gap-4 border-b border-brand-dark/12 py-6 last:border-b-0"
+    className={`group grid grid-cols-[2.5rem_1fr_auto] gap-4 border-b border-brand-dark/12 px-1 py-5 last:border-b-0 ${
+      primary ? "bg-brand-dark px-5 text-white" : ""
+    }`}
   >
-    <span className="text-brand-accent [&>svg]:h-5 [&>svg]:w-5">{item.icon}</span>
+    <span className={`${primary ? "text-brand-secondary" : "text-brand-accent"} [&>svg]:h-5 [&>svg]:w-5`}>
+      {item.icon}
+    </span>
     <span>
-      <strong className="block font-sans text-sm text-brand-dark transition group-hover:text-brand-primary">
+      {primary ? (
+        <span className="mb-1 block font-sans text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-brand-secondary">
+          Next up
+        </span>
+      ) : null}
+      <strong className={`block font-sans text-sm transition ${
+        primary ? "text-white group-hover:text-brand-secondary" : "text-brand-dark group-hover:text-brand-primary"
+      }`}>
         {item.label}
       </strong>
-      <span className="mt-1 block font-sans text-sm leading-6 text-brand-dark/68">
+      <span className={`mt-1 block font-sans text-sm leading-6 ${
+        primary ? "text-white/72" : "text-brand-dark/68"
+      }`}>
         {item.status}
       </span>
     </span>
-    <ArrowRight className="h-4 w-4 text-brand-accent transition group-hover:translate-x-1" />
+    <ArrowRight className={`h-4 w-4 transition group-hover:translate-x-1 ${
+      primary ? "text-brand-secondary" : "text-brand-accent"
+    }`} />
   </Link>
 );
 

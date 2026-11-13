@@ -4,7 +4,7 @@ Status: local owned-number journey passed; deployed dev-candidate verification p
 
 Owner: Amit
 
-Contract version: 1.5 (2026-11-12)
+Contract version: 1.6 (2026-11-13)
 
 Version 1.1 makes the daily nugget selection durable and shared across the web
 and outbound delivery. It also requires bounded outbound WhatsApp bodies and
@@ -16,6 +16,8 @@ delivery, submits the three reminder templates, and records signed Meta delivery
 status callbacks against the durable dispatch.
 Version 1.5 removes repeated opt-out copy from proactive reminders and makes
 desktop pairing a phone handoff rather than a dependency on WhatsApp Web.
+Version 1.6 moves opt-out guidance to the connection confirmation and lets a
+person add an obstacle note as an ordinary follow-up reply.
 
 ## Outcome
 
@@ -44,8 +46,10 @@ This is a deterministic companion, not an open-ended AI chatbot.
 - `Done` records a completed repetition and advances the existing 21-day
   progress calculation. `Partly` and `Didn't happen` record truthful evidence
   for the day without advancing completed-day progress.
-- After `Partly` or `Didn't happen`, the user may attach one optional obstacle
-  note with `note: <what got in the way>`; it is stored on that same daily log.
+- After `Partly` or `Didn't happen`, Neurocient invites one optional ordinary
+  text reply about what got in the way. A 15-minute, account-bound pending state
+  stores that reply on the same daily log. The legacy `note:` command remains
+  accepted for compatibility but is not shown to users.
 - Only one outcome may be recorded for an assignment and calendar day. Provider
   replay, repeated replies, and concurrent web/WhatsApp submissions must not
   create duplicate progress.
@@ -155,6 +159,11 @@ original STOP footer.
   proactive fallback.
 - **WA-COMP-11:** Authentic delivery callbacks update only the dispatch matching
   their provider `wamid`, preserve monotonic status, and store no provider text.
+- **WA-COMP-12:** Pairing keeps the account-bound `CONNECT` token but places STOP
+  guidance in Neurocient's successful connection confirmation, not in the
+  person's prefilled consent sentence.
+- **WA-COMP-13:** `Partly` and `Didn't happen` open a 15-minute obstacle-note
+  reply state; the next ordinary text is stored once on that day's outcome.
 
 ## Deferred provider work
 

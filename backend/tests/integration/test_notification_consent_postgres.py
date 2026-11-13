@@ -145,9 +145,9 @@ async def test_channel_consent_and_inbound_whatsapp_pairing(monkeypatch):
             assert urlsplit(url).path == f"/{BUSINESS_NUMBER}"
             consent_message = parse_qs(urlsplit(url).query)["text"][0]
             assert "Neurocient" in consent_message
-            assert "relevant nudges" in consent_message
+            assert "nudges and check-ins" in consent_message
             assert "microchallenge progress" in consent_message
-            assert "STOP" in consent_message
+            assert "STOP" not in consent_message
             token = consent_message.rsplit("CONNECT ", 1)[1]
 
             async with AsyncSessionLocal() as session:
@@ -164,10 +164,21 @@ async def test_channel_consent_and_inbound_whatsapp_pairing(monkeypatch):
             assert state["whatsapp_enabled"] is True
             assert state["whatsapp_display_number"].endswith("3210")
             assert sender not in json.dumps(state)
+            async with AsyncSessionLocal() as session:
+                connected_preferences = await session.scalar(
+                    select(UserPreferences).where(UserPreferences.user_id == user_id)
+                )
+                assert connected_preferences.whatsapp_consent_version == (
+                    "whatsapp-companion-v3"
+                )
 
             replay = await webhook(client, message_ids[0], consent_message)
             assert replay.status_code == 200
             assert len([message for _, message in sent if "You're connected" in message]) == 1
+            connected_reply = next(
+                message for _, message in sent if "You're connected" in message
+            )
+            assert "Reply STOP at any time" in connected_reply
 
             other_pairing = await client.post(
                 "/user/preferences/whatsapp-pairing", headers=other_headers

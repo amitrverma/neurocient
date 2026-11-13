@@ -1761,3 +1761,19 @@ is cleared when delivery is paused or resumed. Provider message identifiers
 continue to protect the webhook from replay. Approved older templates remain
 the runtime fallback until each replacement is approved; button components are
 never attached to an incompatible template.
+
+## 2026-11-13: WhatsApp follow-ups use ordinary language, not command syntax
+
+The prefilled pairing message is a short statement of what the person is asking
+for: Neurocient nudges and check-ins, with microchallenge progress recorded in
+WhatsApp. The final `CONNECT` token remains because it is the short-lived,
+account-bound key that lets the signed inbound sender prove which Neurocient
+account to link. It is routing data, not user guidance. STOP is explained once
+in Neurocient's successful connection reply and remains available at any time.
+
+After `Partly` or `Didn't happen`, Neurocient asks what got in the way. The next
+ordinary reply within 15 minutes is attached to that day's microchallenge log;
+the person is not asked to type `note:`. `Done` does not invite or open a note
+state. The older explicit `note:` form remains accepted only for compatibility.
+STOP, START, Spot capture, and microchallenge outcome controls keep priority over
+pending free text so an unfinished follow-up cannot swallow another action.

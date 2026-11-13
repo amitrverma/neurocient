@@ -516,7 +516,7 @@ class UserPreferences(Base):
         ),
         CheckConstraint(
             "whatsapp_pending_action IS NULL OR "
-            "whatsapp_pending_action = 'spot_capture'",
+            "whatsapp_pending_action IN ('spot_capture', 'microchallenge_note')",
             name="ck_user_preferences_whatsapp_pending_action",
         ),
         CheckConstraint(

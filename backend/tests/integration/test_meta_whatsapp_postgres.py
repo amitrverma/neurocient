@@ -612,7 +612,7 @@ async def test_meta_whatsapp_response_writes_shared_daily_outcome(monkeypatch):
                 await _post(client, first_payload),
                 await _post(
                     client,
-                    _payload(message_ids[1], phone, "note: The phone was still beside me"),
+                    _payload(message_ids[1], phone, "The phone was still beside me"),
                 ),
                 await _post(client, _payload(message_ids[2], phone, "Done")),
             ]
@@ -629,6 +629,7 @@ async def test_meta_whatsapp_response_writes_shared_daily_outcome(monkeypatch):
         assert logs[0].outcome == "partly"
         assert logs[0].note == "The phone was still beside me"
         assert "Partial attempts" in sent_messages[0]
+        assert "note:" not in sent_messages[0]
         assert sent_messages[1] == "Thanks. That's recorded with today's experiment."
         assert sent_messages[2] == "Today's experiment has already been recorded."
     finally:

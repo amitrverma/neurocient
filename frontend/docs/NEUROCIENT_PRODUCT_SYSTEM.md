@@ -82,8 +82,9 @@ The product movement is:
 ### Provider state, not product completion
 
 - The WhatsApp transport is the direct Meta Cloud API. Genuine inbound test
-  delivery and local callback handling work; outbound delivery is waiting on
-  Meta to resolve test WABA error `131031 Business Account locked`.
+  delivery, outbound Utility delivery, signed callback handling, and delivery
+  status updates work. The approved v2 templates remain active while concise
+  v3 templates with native quick-reply buttons await Meta approval.
 - Razorpay international card activation is shown as successful. A Test Mode USD
   membership plan, recurring international approval, and genuine buyer/webhook/
   settlement evidence remain external readiness requirements.

@@ -86,6 +86,26 @@ def test_microchallenge_response_parser_is_explicit(body, expected):
     assert whatsapp_routes.parse_microchallenge_response(body) == expected
 
 
+def test_quick_reply_payloads_map_to_canonical_actions():
+    assert whatsapp_routes.BUTTON_MICROCHALLENGE_RESPONSES == {
+        "micro_done_v1": "done",
+        "micro_partly_v1": "partly",
+        "micro_not_today_v1": "not_today",
+    }
+    assert whatsapp_routes.SPOT_CAPTURE_BUTTON_PAYLOAD == "spot_capture_v1"
+
+
+def test_button_payload_is_authoritative_over_visible_label():
+    message = whatsapp_routes.MetaInboundMessage(
+        message_id="wamid.button",
+        from_number="+919876543210",
+        body="Done",
+        button_payload="unknown_payload",
+    )
+
+    assert whatsapp_routes.microchallenge_outcome_for_message(message) is None
+
+
 @pytest.mark.parametrize(
     ("body", "expected"),
     [

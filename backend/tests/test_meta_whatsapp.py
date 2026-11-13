@@ -115,6 +115,54 @@ def test_extracts_batched_text_messages_and_normalizes_e164(monkeypatch):
         "+919876543210",
     ]
     assert messages[0].body.startswith("spot:")
+    assert messages[0].button_payload is None
+
+
+def test_extracts_template_quick_reply_text_and_payload(monkeypatch):
+    _configure(monkeypatch)
+    quick_reply = {
+        "from": "919876543210",
+        "id": "wamid.quick-reply",
+        "timestamp": "1730678400",
+        "type": "button",
+        "button": {
+            "text": "Done",
+            "payload": "micro_done_v1",
+        },
+    }
+
+    messages = extract_meta_messages(_payload(quick_reply))
+
+    assert messages == [
+        messages[0].__class__(
+            message_id="wamid.quick-reply",
+            from_number="+919876543210",
+            body="Done",
+            button_payload="micro_done_v1",
+        )
+    ]
+
+
+@pytest.mark.parametrize(
+    "button",
+    [
+        {"text": "Done"},
+        {"payload": "micro_done_v1"},
+        {"text": "Done", "payload": "x" * 257},
+    ],
+)
+def test_rejects_malformed_template_quick_reply(monkeypatch, button):
+    _configure(monkeypatch)
+    quick_reply = {
+        "from": "919876543210",
+        "id": "wamid.quick-reply-invalid",
+        "timestamp": "1730678400",
+        "type": "button",
+        "button": button,
+    }
+
+    with pytest.raises(ValueError):
+        extract_meta_messages(_payload(quick_reply))
 
 
 def test_accepts_status_only_callbacks_without_creating_messages(monkeypatch):
@@ -172,6 +220,7 @@ def test_non_text_message_is_claimable_but_has_no_command_body(monkeypatch):
 
     assert len(messages) == 1
     assert messages[0].body is None
+    assert messages[0].button_payload is None
 
 
 def test_outbound_text_uses_graph_api_bearer_auth_and_returns_wamid(
@@ -289,6 +338,11 @@ def test_outbound_template_uses_approved_name_language_and_body_parameters(
         template_name="neurocient_microchallenge_checkin_v2",
         language_code="en_GB",
         body_parameters=("Put the phone away", "Leave it outside for ten minutes."),
+        quick_reply_payloads=(
+            "micro_done_v1",
+            "micro_partly_v1",
+            "micro_not_today_v1",
+        ),
     )
 
     assert result == "wamid.accepted-template"
@@ -300,13 +354,33 @@ def test_outbound_template_uses_approved_name_language_and_body_parameters(
         "template": {
             "name": "neurocient_microchallenge_checkin_v2",
             "language": {"code": "en_GB"},
-            "components": [{
-                "type": "body",
-                "parameters": [
-                    {"type": "text", "text": "Put the phone away"},
-                    {"type": "text", "text": "Leave it outside for ten minutes."},
-                ],
-            }],
+            "components": [
+                {
+                    "type": "body",
+                    "parameters": [
+                        {"type": "text", "text": "Put the phone away"},
+                        {"type": "text", "text": "Leave it outside for ten minutes."},
+                    ],
+                },
+                {
+                    "type": "button",
+                    "sub_type": "quick_reply",
+                    "index": "0",
+                    "parameters": [{"type": "payload", "payload": "micro_done_v1"}],
+                },
+                {
+                    "type": "button",
+                    "sub_type": "quick_reply",
+                    "index": "1",
+                    "parameters": [{"type": "payload", "payload": "micro_partly_v1"}],
+                },
+                {
+                    "type": "button",
+                    "sub_type": "quick_reply",
+                    "index": "2",
+                    "parameters": [{"type": "payload", "payload": "micro_not_today_v1"}],
+                },
+            ],
         },
     }
 
@@ -335,3 +409,28 @@ def test_invalid_template_contract_fails_before_provider_call(
         ) is False
     finally:
         provider_call.undo()
+
+
+@pytest.mark.parametrize(
+    "quick_reply_payloads",
+    [
+        ("",),
+        ("x" * 257,),
+        tuple(f"payload-{index}" for index in range(4)),
+    ],
+)
+def test_invalid_quick_reply_contract_fails_before_provider_call(
+    monkeypatch, quick_reply_payloads
+):
+    _configure(monkeypatch)
+    monkeypatch.setattr(
+        "app.services.meta_whatsapp.requests.post",
+        lambda *_args, **_kwargs: pytest.fail("provider must not be called"),
+    )
+
+    assert send_whatsapp_template_message(
+        "+919876543210",
+        template_name="valid_name",
+        language_code="en_GB",
+        quick_reply_payloads=quick_reply_payloads,
+    ) is False

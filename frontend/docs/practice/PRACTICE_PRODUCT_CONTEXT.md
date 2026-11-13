@@ -122,7 +122,9 @@ Existing primitives include:
 - microchallenge assignment, daily outcomes, and progress through
   `/api/challenges/**`; `Done`, `Partly`, and `Didn't happen` share one daily
   record, while only `Done` advances completed-day progress
-- "Spot the Inner Caveman" logging through spots APIs and WhatsApp `spot:` messages
+- "Spot the Inner Caveman" logging through spots APIs and WhatsApp; the current
+  quick reply opens a short-lived natural-language capture, while legacy
+  `spot:` messages remain supported
 - IKEA worksheet and tracker models through `IkeaWorksheet`, `IkeaTracker`, and `/ikea/**`
 - nudges, push notifications, and reminder utilities through existing notification routes
 - insight access, saved articles, and content gating through the current auth/content mechanisms

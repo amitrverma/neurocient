@@ -2,7 +2,7 @@ import asyncio
 import json
 import logging
 import re
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Request
@@ -44,8 +44,8 @@ MAX_WEBHOOK_BYTES = 65_536
 ACCEPTED_RESPONSE = {"status": "accepted"}
 HELP_MESSAGE = (
     "I can save what you noticed in Spot the Inner Caveman or update today's "
-    "experiment. Send 'spot: ...', or reply Done, Partly, or Didn't happen "
-    "to an experiment reminder. Reply STOP to pause WhatsApp messages. "
+    "experiment. Use the buttons in a Neurocient check-in, or send "
+    "'spot: ...'. Reply STOP to pause WhatsApp messages. "
     "For human support, email support@neurocient.com."
 )
 PAIRING_PATTERN = re.compile(r"(?:^|\n)CONNECT ([A-Za-z0-9_-]{32,128})\s*$")
@@ -60,6 +60,13 @@ MICROCHALLENGE_RESPONSES = {
     "not today": "not_today",
     "3": "not_today",
 }
+BUTTON_MICROCHALLENGE_RESPONSES = {
+    "micro_done_v1": "done",
+    "micro_partly_v1": "partly",
+    "micro_not_today_v1": "not_today",
+}
+SPOT_CAPTURE_BUTTON_PAYLOAD = "spot_capture_v1"
+SPOT_CAPTURE_WINDOW = timedelta(minutes=15)
 
 
 def _utcnow() -> datetime:
@@ -75,6 +82,12 @@ def _safe_error(status_code: int) -> JSONResponse:
 
 def parse_microchallenge_response(message: str) -> str | None:
     return MICROCHALLENGE_RESPONSES.get(message.strip().lower())
+
+
+def microchallenge_outcome_for_message(message: MetaInboundMessage) -> str | None:
+    if message.button_payload is not None:
+        return BUTTON_MICROCHALLENGE_RESPONSES.get(message.button_payload)
+    return parse_microchallenge_response(message.body or "")
 
 
 def parse_spot_description(message: str) -> str | None:
@@ -192,7 +205,7 @@ async def _process_inbound_message(
 
     normalized_body = (message.body or "").strip()
     description = parse_spot_description(normalized_body)
-    microchallenge_outcome = parse_microchallenge_response(normalized_body)
+    microchallenge_outcome = microchallenge_outcome_for_message(message)
     obstacle_note = parse_obstacle_note(normalized_body)
     pairing_token = parse_pairing_token(normalized_body)
     acknowledgement: str | None = None
@@ -234,6 +247,8 @@ async def _process_inbound_message(
                     prefs.whatsapp_consent_version = CONSENT_VERSION
                     prefs.whatsapp_pairing_token_hash = None
                     prefs.whatsapp_pairing_expires_at = None
+                    prefs.whatsapp_pending_action = None
+                    prefs.whatsapp_pending_action_expires_at = None
                     await db.flush()
                 except IntegrityError:
                     await savepoint.rollback()
@@ -244,16 +259,17 @@ async def _process_inbound_message(
                 else:
                     await savepoint.commit()
                     acknowledgement = (
-                        "You're connected to Neurocient. When a microchallenge check-in "
-                        "arrives, reply Done, Partly, or Didn't happen. You can also "
-                        "send 'spot: ...' with what you noticed."
+                        "You're connected to Neurocient. You can record your progress "
+                        "or what you notice here."
                     )
 
     result = await db.execute(
-        select(UserPreferences).where(
+        select(UserPreferences)
+        .where(
             UserPreferences.whatsapp_number == message.from_number,
             UserPreferences.whatsapp_verified.is_(True),
         )
+        .with_for_update()
     )
     linked_preferences = result.scalar_one_or_none()
     if pairing_token is None and linked_preferences is not None:
@@ -261,6 +277,8 @@ async def _process_inbound_message(
         command = normalized_body.casefold()
         if command == "stop":
             linked_preferences.whatsapp_enabled = False
+            linked_preferences.whatsapp_pending_action = None
+            linked_preferences.whatsapp_pending_action_expires_at = None
             acknowledgement = (
                 "WhatsApp messages are off. Your saved progress is unchanged. "
                 "Reply START to turn them on again."
@@ -269,11 +287,21 @@ async def _process_inbound_message(
             linked_preferences.whatsapp_enabled = True
             linked_preferences.whatsapp_consent_at = _utcnow()
             linked_preferences.whatsapp_consent_version = CONSENT_VERSION
+            linked_preferences.whatsapp_pending_action = None
+            linked_preferences.whatsapp_pending_action_expires_at = None
             acknowledgement = (
                 "WhatsApp messages are on again. You'll receive relevant Neurocient "
                 "nudges and check-ins here."
             )
+        elif message.button_payload == SPOT_CAPTURE_BUTTON_PAYLOAD:
+            linked_preferences.whatsapp_pending_action = "spot_capture"
+            linked_preferences.whatsapp_pending_action_expires_at = (
+                _utcnow() + SPOT_CAPTURE_WINDOW
+            )
+            acknowledgement = "What did you notice? Reply in your own words."
         elif description:
+            linked_preferences.whatsapp_pending_action = None
+            linked_preferences.whatsapp_pending_action_expires_at = None
             capture = await capture_spot(
                 db,
                 user_id=user_id,
@@ -292,6 +320,8 @@ async def _process_inbound_message(
                     "Open Neurocient to continue with membership."
                 )
         elif microchallenge_outcome is not None:
+            linked_preferences.whatsapp_pending_action = None
+            linked_preferences.whatsapp_pending_action_expires_at = None
             prompted_assignment_id = await _prompted_assignment_id(db, user_id)
             if prompted_assignment_id is None:
                 acknowledgement = (
@@ -319,6 +349,8 @@ async def _process_inbound_message(
                         "Open Neurocient to check what is active now."
                     )
         elif obstacle_note is not None:
+            linked_preferences.whatsapp_pending_action = None
+            linked_preferences.whatsapp_pending_action_expires_at = None
             note_recorded = await add_obstacle_note(
                 db,
                 user_id=user_id,
@@ -329,7 +361,34 @@ async def _process_inbound_message(
                 if note_recorded
                 else "There isn't a recent experiment response waiting for a note."
             )
+        elif (
+            normalized_body
+            and linked_preferences.whatsapp_pending_action == "spot_capture"
+            and linked_preferences.whatsapp_pending_action_expires_at is not None
+            and linked_preferences.whatsapp_pending_action_expires_at > _utcnow()
+        ):
+            linked_preferences.whatsapp_pending_action = None
+            linked_preferences.whatsapp_pending_action_expires_at = None
+            capture = await capture_spot(
+                db,
+                user_id=user_id,
+                description=normalized_body,
+                spot_date=product_today(),
+                created_at=_utcnow(),
+            )
+            acknowledgement = (
+                "Recorded in Spot the Inner Caveman."
+                if capture.result == "recorded"
+                else "Your free Spot the Inner Caveman limit has been reached. "
+                "Open Neurocient to continue with membership."
+            )
         else:
+            if (
+                linked_preferences.whatsapp_pending_action_expires_at is not None
+                and linked_preferences.whatsapp_pending_action_expires_at <= _utcnow()
+            ):
+                linked_preferences.whatsapp_pending_action = None
+                linked_preferences.whatsapp_pending_action_expires_at = None
             acknowledgement = HELP_MESSAGE
 
     await db.execute(

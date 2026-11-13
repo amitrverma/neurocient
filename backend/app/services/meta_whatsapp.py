@@ -31,6 +31,8 @@ MAX_PROVIDER_MESSAGE_ID_LENGTH = 255
 MAX_META_TEXT_LENGTH = 4096
 MAX_PRODUCT_TEXT_LENGTH = 1600
 MAX_TEMPLATE_PARAMETER_LENGTH = 1024
+MAX_BUTTON_PAYLOAD_LENGTH = 256
+MAX_QUICK_REPLY_BUTTONS = 3
 
 
 @dataclass(frozen=True)
@@ -38,6 +40,7 @@ class MetaInboundMessage:
     message_id: str
     from_number: str
     body: str | None
+    button_payload: str | None = None
 
 
 @dataclass(frozen=True)
@@ -155,6 +158,7 @@ def extract_meta_messages(payload: Any) -> list[MetaInboundMessage]:
                     raise ValueError("invalid sender")
 
                 body: str | None = None
+                button_payload: str | None = None
                 if message.get("type") == "text":
                     text = _require_mapping(message.get("text"), "text")
                     candidate = text.get("body")
@@ -162,12 +166,28 @@ def extract_meta_messages(payload: Any) -> list[MetaInboundMessage]:
                         raise ValueError("invalid text body")
                     if len(candidate) <= MAX_PRODUCT_TEXT_LENGTH:
                         body = candidate
+                elif message.get("type") == "button":
+                    button = _require_mapping(message.get("button"), "button")
+                    candidate = button.get("text")
+                    payload_value = button.get("payload")
+                    if (
+                        not isinstance(candidate, str)
+                        or not candidate
+                        or len(candidate) > MAX_PRODUCT_TEXT_LENGTH
+                        or not isinstance(payload_value, str)
+                        or not payload_value
+                        or len(payload_value) > MAX_BUTTON_PAYLOAD_LENGTH
+                    ):
+                        raise ValueError("invalid button reply")
+                    body = candidate
+                    button_payload = payload_value
 
                 inbound.append(
                     MetaInboundMessage(
                         message_id=message_id,
                         from_number=f"+{from_number}",
                         body=body,
+                        button_payload=button_payload,
                     )
                 )
     return inbound
@@ -345,6 +365,7 @@ def send_whatsapp_template_message(
     template_name: str,
     language_code: str,
     body_parameters: tuple[str, ...] = (),
+    quick_reply_payloads: tuple[str, ...] = (),
     emit_logs: bool = True,
 ) -> bool | str:
     """Start a proactive conversation with an approved Meta template."""
@@ -363,6 +384,13 @@ def send_whatsapp_template_message(
             or len(value) > MAX_TEMPLATE_PARAMETER_LENGTH
             for value in normalized_parameters
         )
+        or len(quick_reply_payloads) > MAX_QUICK_REPLY_BUTTONS
+        or any(
+            not isinstance(payload, str)
+            or not payload
+            or len(payload) > MAX_BUTTON_PAYLOAD_LENGTH
+            for payload in quick_reply_payloads
+        )
     ):
         if emit_logs:
             logger.warning("whatsapp_send_failed reason=invalid_template_contract")
@@ -372,14 +400,26 @@ def send_whatsapp_template_message(
         "name": template_name,
         "language": {"code": language_code},
     }
+    components: list[dict[str, Any]] = []
     if body_parameters:
-        template["components"] = [{
+        components.append({
             "type": "body",
             "parameters": [
                 {"type": "text", "text": value}
                 for value in normalized_parameters
             ],
-        }]
+        })
+    components.extend(
+        {
+            "type": "button",
+            "sub_type": "quick_reply",
+            "index": str(index),
+            "parameters": [{"type": "payload", "payload": payload}],
+        }
+        for index, payload in enumerate(quick_reply_payloads)
+    )
+    if components:
+        template["components"] = components
     return _send_whatsapp_payload(
         to_number,
         {"type": "template", "template": template},

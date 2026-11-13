@@ -21,6 +21,8 @@ class TemplateDefinition:
     body: str
     examples: tuple[str, ...]
     footer: str | None = None
+    header: str | None = None
+    buttons: tuple[str, ...] = ()
 
 
 def _footer_for(template_name: str) -> str | None:
@@ -30,59 +32,97 @@ def _footer_for(template_name: str) -> str | None:
 
 
 def template_definitions() -> tuple[TemplateDefinition, ...]:
+    nudge_v3 = settings.WHATSAPP_NUDGE_TEMPLATE_NAME.endswith("_v3")
+    spot_v3 = settings.WHATSAPP_SPOT_TEMPLATE_NAME.endswith("_v3")
+    microchallenge_v3 = settings.WHATSAPP_MICROCHALLENGE_TEMPLATE_NAME.endswith("_v3")
     return (
         TemplateDefinition(
             name=settings.WHATSAPP_NUDGE_TEMPLATE_NAME,
             body=(
+                "For today:\n\n{{1}}\n\nTake what helps."
+                if nudge_v3
+                else
                 "Here is the Neurocient daily nudge you asked to receive:\n\n"
                 "{{1}}\n\n{{2}}\n\nKeep what is useful today; leave what is not."
             ),
             examples=(
+                (
+                    "Make the next action visible\n\nAn unclear next action makes "
+                    "delay easier. Write down the next physical action before "
+                    "opening another tab."
+                ),
+            ) if nudge_v3 else (
                 "Make the next action visible",
                 "An unclear next action makes delay easier. Write down the next "
                 "physical action before opening another tab.",
             ),
             footer=_footer_for(settings.WHATSAPP_NUDGE_TEMPLATE_NAME),
+            header="Today's nudge" if nudge_v3 else None,
         ),
         TemplateDefinition(
             name=settings.WHATSAPP_SPOT_TEMPLATE_NAME,
             body=(
+                "Did an automatic response show up today?"
+                if spot_v3
+                else
                 "Here is the Neurocient Spot the Inner Caveman check-in you "
                 "asked to receive:\n\n{{1}}\n\n{{2}}\n\nTo record something, "
                 "reply spot: followed by what you noticed."
             ),
-            examples=(
+            examples=() if spot_v3 else (
                 "Spot check",
                 "Did an automatic response show up today?",
             ),
             footer=_footer_for(settings.WHATSAPP_SPOT_TEMPLATE_NAME),
+            header="Spot the Inner Caveman" if spot_v3 else None,
+            buttons=("Record what I noticed",) if spot_v3 else (),
         ),
         TemplateDefinition(
             name=settings.WHATSAPP_MICROCHALLENGE_TEMPLATE_NAME,
             body=(
+                "Your experiment:\n\n{{1}}\n\nHow did it go?"
+                if microchallenge_v3
+                else
                 "Here is the Neurocient experiment check-in you asked to "
                 "receive:\n\n{{1}}\n\n{{2}}\n\nHow did it go? Reply:\n"
                 "1. Done\n2. Partly\n3. Didn't happen"
             ),
             examples=(
+                "Put the phone away\n\nLeave your phone outside the room for the "
+                "first ten minutes.",
+            ) if microchallenge_v3 else (
                 "Put the phone away",
                 "Leave your phone outside the room for the first ten minutes.",
             ),
             footer=_footer_for(settings.WHATSAPP_MICROCHALLENGE_TEMPLATE_NAME),
+            header="Microchallenge check-in" if microchallenge_v3 else None,
+            buttons=("Done", "Partly", "Didn't happen") if microchallenge_v3 else (),
         ),
     )
 
 
 def template_components(definition: TemplateDefinition) -> list[dict]:
-    components = [
-        {
-            "type": "BODY",
-            "text": definition.body,
-            "example": {"body_text": [list(definition.examples)]},
-        }
-    ]
+    components = []
+    if definition.header:
+        components.append({
+            "type": "HEADER",
+            "format": "TEXT",
+            "text": definition.header,
+        })
+    body_component = {"type": "BODY", "text": definition.body}
+    if definition.examples:
+        body_component["example"] = {"body_text": [list(definition.examples)]}
+    components.append(body_component)
     if definition.footer:
         components.append({"type": "FOOTER", "text": definition.footer})
+    if definition.buttons:
+        components.append({
+            "type": "BUTTONS",
+            "buttons": [
+                {"type": "QUICK_REPLY", "text": label}
+                for label in definition.buttons
+            ],
+        })
     return components
 
 

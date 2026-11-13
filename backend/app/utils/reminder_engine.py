@@ -41,6 +41,22 @@ TEMPLATE_NAME_BY_PURPOSE = {
     "microchallenge": lambda: settings.WHATSAPP_MICROCHALLENGE_TEMPLATE_NAME,
 }
 
+QUICK_REPLY_PAYLOADS_BY_PURPOSE = {
+    "nudge": (),
+    "spot_reminder": ("spot_capture_v1",),
+    "microchallenge": (
+        "micro_done_v1",
+        "micro_partly_v1",
+        "micro_not_today_v1",
+    ),
+}
+
+
+def quick_reply_payloads_for(purpose: Purpose, template_name: str) -> tuple[str, ...]:
+    if not template_name.endswith("_v3"):
+        return ()
+    return QUICK_REPLY_PAYLOADS_BY_PURPOSE[purpose]
+
 
 def _dispatch_date() -> date:
     return datetime.now(ZoneInfo("Asia/Kolkata")).date()
@@ -276,12 +292,33 @@ async def _deliver_to_user(
         )
         if dispatch is not None:
             try:
+                template_name = TEMPLATE_NAME_BY_PURPOSE[purpose]()
+                template_parameters = (
+                    whatsapp_template_parameters
+                    if whatsapp_template_parameters is not None
+                    else (title, body)
+                )
+                if template_name.endswith("_v3"):
+                    template_parameters = (
+                        ()
+                        if purpose == "spot_reminder"
+                        else (
+                            truncate_whatsapp_text(
+                                "\n\n".join(template_parameters),
+                                1024,
+                            ),
+                        )
+                    )
                 provider_result = await asyncio.to_thread(
                     send_whatsapp_template_message,
                     prefs.whatsapp_number,
-                    template_name=TEMPLATE_NAME_BY_PURPOSE[purpose](),
+                    template_name=template_name,
                     language_code=settings.WHATSAPP_TEMPLATE_LANGUAGE,
-                    body_parameters=whatsapp_template_parameters or (title, body),
+                    body_parameters=template_parameters,
+                    quick_reply_payloads=quick_reply_payloads_for(
+                        purpose,
+                        template_name,
+                    ),
                 )
                 delivered = bool(provider_result)
             except Exception as error:

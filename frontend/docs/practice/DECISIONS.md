@@ -1735,3 +1735,25 @@ Neurocient therefore keeps the account page open and presents the same
 short-lived prepared message as both a phone-scannable QR code and a direct
 WhatsApp link. Sending that message remains the proof of number ownership; the
 QR code does not introduce a parallel consent or identity path.
+
+## 2026-11-13: WhatsApp check-ins use concise templates and quick replies
+
+Proactive WhatsApp messages should use the channel's native hierarchy instead
+of reproducing a paragraph of instructions. Daily nudges have a short text
+header and one combined content block. Microchallenge check-ins present the
+three truthful outcomes as quick-reply buttons: `Done`, `Partly`, and
+`Didn't happen`. The provider payload, not the visible button label, is the
+authoritative outcome; typed replies remain supported for compatibility.
+
+Spot the Inner Caveman needs free text, so one fixed button cannot complete the
+entry. `Record what I noticed` opens a 15-minute, account-bound capture state
+and asks the person to reply in their own words. The next ordinary text reply
+uses the same Spot allowance and persistence path as web capture, then clears
+the pending state. STOP, START, Microchallenge outcomes, and explicit legacy
+commands take precedence so a pending Spot cannot swallow another action.
+
+The pending capture is durable rather than process-local, expires safely, and
+is cleared when delivery is paused or resumed. Provider message identifiers
+continue to protect the webhook from replay. Approved v2 templates remain the
+runtime fallback until all three v3 Utility templates are approved; button
+components are never attached to a v2 send.

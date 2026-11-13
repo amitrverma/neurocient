@@ -4,6 +4,7 @@ import hmac
 import json
 import logging
 import os
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 import httpx
@@ -63,6 +64,21 @@ def _payload(message_id: str, phone: str, body: str) -> dict:
             }],
         }],
     }
+
+
+def _button_payload(
+    message_id: str,
+    phone: str,
+    *,
+    text: str,
+    payload: str,
+) -> dict:
+    event = _payload(message_id, phone, text)
+    message = event["entry"][0]["changes"][0]["value"]["messages"][0]
+    message["type"] = "button"
+    message.pop("text")
+    message["button"] = {"text": text, "payload": payload}
+    return event
 
 
 def _signed_content(payload: dict) -> tuple[bytes, dict[str, str]]:
@@ -274,6 +290,175 @@ async def test_meta_whatsapp_boundary_is_private_and_replay_safe(monkeypatch, ca
         await engine.dispose()
 
 
+async def test_spot_quick_reply_opens_bounded_natural_language_capture(monkeypatch):
+    from app.Routes import whatsapp_routes
+    from app.config import settings
+    from app.database import AsyncSessionLocal, engine
+    from app.models import CavemanSpot, User, UserPreferences, WhatsAppWebhookEvent
+
+    _configure(settings, monkeypatch)
+    phone = "+917" + str(uuid4().int)[:9]
+    user_id = uuid4()
+    button_id = _message_id()
+    reply_id = _message_id()
+    observation = "I opened another tab when the task became unclear."
+    acknowledgements: list[str] = []
+    monkeypatch.setattr(
+        whatsapp_routes,
+        "send_whatsapp_service_message",
+        lambda _number, message, *, emit_logs=True: acknowledgements.append(message) or True,
+    )
+    app = FastAPI()
+    app.include_router(whatsapp_routes.router, prefix="/wa")
+    transport = httpx.ASGITransport(app=app)
+
+    async with AsyncSessionLocal() as db:
+        db.add_all([
+            User(id=user_id, email=f"spot-button-{uuid4()}@example.com"),
+            UserPreferences(
+                user_id=user_id,
+                whatsapp_number=phone,
+                whatsapp_verified=True,
+                whatsapp_enabled=True,
+            ),
+        ])
+        await db.commit()
+
+    try:
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            opened = await _post(
+                client,
+                _button_payload(
+                    button_id,
+                    phone,
+                    text="Record what I noticed",
+                    payload="spot_capture_v1",
+                ),
+            )
+            assert opened.status_code == 200
+            async with AsyncSessionLocal() as db:
+                prefs = await db.scalar(
+                    select(UserPreferences).where(UserPreferences.user_id == user_id)
+                )
+                assert prefs.whatsapp_pending_action == "spot_capture"
+                assert prefs.whatsapp_pending_action_expires_at is not None
+
+            recorded = await _post(client, _payload(reply_id, phone, observation))
+            assert recorded.status_code == 200
+
+        async with AsyncSessionLocal() as db:
+            prefs = await db.scalar(
+                select(UserPreferences).where(UserPreferences.user_id == user_id)
+            )
+            spot = await db.scalar(
+                select(CavemanSpot).where(CavemanSpot.user_id == user_id)
+            )
+            assert prefs.whatsapp_pending_action is None
+            assert prefs.whatsapp_pending_action_expires_at is None
+            assert spot.description == observation
+        assert acknowledgements == [
+            "What did you notice? Reply in your own words.",
+            "Recorded in Spot the Inner Caveman.",
+        ]
+    finally:
+        async with AsyncSessionLocal() as db:
+            await db.execute(delete(CavemanSpot).where(CavemanSpot.user_id == user_id))
+            await db.execute(
+                delete(WhatsAppWebhookEvent).where(
+                    WhatsAppWebhookEvent.provider_message_id.in_([button_id, reply_id])
+                )
+            )
+            await db.execute(delete(UserPreferences).where(UserPreferences.user_id == user_id))
+            await db.execute(delete(User).where(User.id == user_id))
+            await db.commit()
+        await engine.dispose()
+
+
+async def test_expired_spot_capture_does_not_consume_unrelated_text(monkeypatch):
+    from app.Routes import whatsapp_routes
+    from app.config import settings
+    from app.database import AsyncSessionLocal, engine
+    from app.models import CavemanSpot, User, UserPreferences, WhatsAppWebhookEvent
+
+    _configure(settings, monkeypatch)
+    phone = "+917" + str(uuid4().int)[:9]
+    user_id = uuid4()
+    message_ids = [_message_id(), _message_id()]
+    acknowledgements: list[str] = []
+    monkeypatch.setattr(
+        whatsapp_routes,
+        "send_whatsapp_service_message",
+        lambda _number, message, *, emit_logs=True: acknowledgements.append(message) or True,
+    )
+    app = FastAPI()
+    app.include_router(whatsapp_routes.router, prefix="/wa")
+    transport = httpx.ASGITransport(app=app)
+
+    async with AsyncSessionLocal() as db:
+        db.add_all([
+            User(id=user_id, email=f"spot-expiry-{uuid4()}@example.com"),
+            UserPreferences(
+                user_id=user_id,
+                whatsapp_number=phone,
+                whatsapp_verified=True,
+                whatsapp_enabled=True,
+            ),
+        ])
+        await db.commit()
+
+    try:
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            await _post(
+                client,
+                _button_payload(
+                    message_ids[0],
+                    phone,
+                    text="Record what I noticed",
+                    payload="spot_capture_v1",
+                ),
+            )
+            async with AsyncSessionLocal() as db:
+                prefs = await db.scalar(
+                    select(UserPreferences).where(UserPreferences.user_id == user_id)
+                )
+                prefs.whatsapp_pending_action_expires_at = (
+                    datetime.now(UTC).replace(tzinfo=None) - timedelta(seconds=1)
+                )
+                await db.commit()
+
+            response = await _post(
+                client,
+                _payload(message_ids[1], phone, "This is an unrelated later message."),
+            )
+            assert response.status_code == 200
+
+        async with AsyncSessionLocal() as db:
+            prefs = await db.scalar(
+                select(UserPreferences).where(UserPreferences.user_id == user_id)
+            )
+            spot_count = await db.scalar(
+                select(func.count(CavemanSpot.id)).where(CavemanSpot.user_id == user_id)
+            )
+            assert prefs.whatsapp_pending_action is None
+            assert prefs.whatsapp_pending_action_expires_at is None
+            assert spot_count == 0
+        assert acknowledgements == [
+            "What did you notice? Reply in your own words.",
+            whatsapp_routes.HELP_MESSAGE,
+        ]
+    finally:
+        async with AsyncSessionLocal() as db:
+            await db.execute(
+                delete(WhatsAppWebhookEvent).where(
+                    WhatsAppWebhookEvent.provider_message_id.in_(message_ids)
+                )
+            )
+            await db.execute(delete(UserPreferences).where(UserPreferences.user_id == user_id))
+            await db.execute(delete(User).where(User.id == user_id))
+            await db.commit()
+        await engine.dispose()
+
+
 async def test_meta_whatsapp_response_writes_shared_daily_outcome(monkeypatch):
     from app.Routes import whatsapp_routes
     from app.config import settings
@@ -343,7 +528,12 @@ async def test_meta_whatsapp_response_writes_shared_daily_outcome(monkeypatch):
 
     try:
         async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
-            first_payload = _payload(message_ids[0], phone, "Partly")
+            first_payload = _button_payload(
+                message_ids[0],
+                phone,
+                text="Partly",
+                payload="micro_partly_v1",
+            )
             responses = [
                 await _post(client, first_payload),
                 await _post(client, first_payload),

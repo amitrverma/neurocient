@@ -493,6 +493,8 @@ class UserPreferences(Base):
     whatsapp_pairing_expires_at = Column(DateTime, nullable=True)
     whatsapp_consent_at = Column(DateTime, nullable=True)
     whatsapp_consent_version = Column(String(64), nullable=True)
+    whatsapp_pending_action = Column(String(32), nullable=True)
+    whatsapp_pending_action_expires_at = Column(DateTime, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -511,6 +513,16 @@ class UserPreferences(Base):
         CheckConstraint(
             "whatsapp_verification_attempts BETWEEN 0 AND 5",
             name="ck_user_preferences_verification_attempts",
+        ),
+        CheckConstraint(
+            "whatsapp_pending_action IS NULL OR "
+            "whatsapp_pending_action = 'spot_capture'",
+            name="ck_user_preferences_whatsapp_pending_action",
+        ),
+        CheckConstraint(
+            "(whatsapp_pending_action IS NULL) = "
+            "(whatsapp_pending_action_expires_at IS NULL)",
+            name="ck_user_preferences_whatsapp_pending_action_expiry",
         ),
     )
 

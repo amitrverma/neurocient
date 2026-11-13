@@ -158,6 +158,8 @@ async def disconnect_whatsapp(
     prefs.whatsapp_enabled = False
     prefs.whatsapp_verified = False
     prefs.whatsapp_number = None
+    prefs.whatsapp_pending_action = None
+    prefs.whatsapp_pending_action_expires_at = None
     _clear_pairing(prefs)
     await db.commit()
     await db.refresh(prefs)

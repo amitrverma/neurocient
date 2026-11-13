@@ -241,6 +241,67 @@ def test_legacy_purpose_flags_do_not_override_enabled_channels(
         }[purpose],
         "language_code": "en_GB",
         "body_parameters": ("Title", "Body"),
+        "quick_reply_payloads": (),
+    }
+
+
+def test_quick_reply_payloads_are_enabled_only_for_v3_templates():
+    assert reminder_engine.quick_reply_payloads_for(
+        "microchallenge", "neurocient_microchallenge_checkin_v2"
+    ) == ()
+    assert reminder_engine.quick_reply_payloads_for(
+        "microchallenge", "neurocient_microchallenge_checkin_v3"
+    ) == ("micro_done_v1", "micro_partly_v1", "micro_not_today_v1")
+
+
+@pytest.mark.parametrize(
+    ("purpose", "setting_name", "template_name", "expected_parameters"),
+    [
+        ("nudge", "WHATSAPP_NUDGE_TEMPLATE_NAME", "neurocient_daily_nudge_v3", ("Title\n\nBody",)),
+        ("spot_reminder", "WHATSAPP_SPOT_TEMPLATE_NAME", "neurocient_spot_checkin_v3", ()),
+        (
+            "microchallenge",
+            "WHATSAPP_MICROCHALLENGE_TEMPLATE_NAME",
+            "neurocient_microchallenge_checkin_v3",
+            ("Title\n\nBody",),
+        ),
+    ],
+)
+def test_v3_delivery_matches_approved_template_components(
+    monkeypatch,
+    purpose,
+    setting_name,
+    template_name,
+    expected_parameters,
+):
+    monkeypatch.setattr(reminder_engine.settings, setting_name, template_name)
+    send_whatsapp = AsyncMock(return_value=True)
+    monkeypatch.setattr(reminder_engine.asyncio, "to_thread", send_whatsapp)
+    db = DeliverySession(
+        preferences(
+            whatsapp_enabled=True,
+            whatsapp_verified=True,
+            whatsapp_number="+919876543210",
+        )
+    )
+
+    asyncio.run(
+        reminder_engine._deliver_to_user(
+            db,
+            user_id="u1",
+            purpose=purpose,
+            title="Title",
+            body="Body",
+        )
+    )
+
+    assert send_whatsapp.await_args.kwargs == {
+        "template_name": template_name,
+        "language_code": "en_GB",
+        "body_parameters": expected_parameters,
+        "quick_reply_payloads": reminder_engine.QUICK_REPLY_PAYLOADS_BY_PURPOSE[
+            purpose
+        ],
     }
 
 

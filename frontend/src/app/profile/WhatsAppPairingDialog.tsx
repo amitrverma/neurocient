@@ -34,7 +34,7 @@ const WhatsAppPairingDialog = ({ open, whatsappUrl, onClose }: {
           </div>
 
           <p className="mt-4 text-sm leading-6 text-brand-dark/72">
-            Scan this code with your phone, or open WhatsApp on this device. The message is ready—just send it within 10 minutes.
+            Scan the code or open WhatsApp below. Send the prepared message within 10 minutes to connect your account.
           </p>
 
           <div className="mx-auto my-6 hidden w-fit rounded-2xl border border-brand-dark/10 bg-white p-4 sm:block">
@@ -48,15 +48,11 @@ const WhatsAppPairingDialog = ({ open, whatsappUrl, onClose }: {
             ) : null}
           </div>
 
-          <p className="rounded-xl bg-brand-teal/8 px-4 py-3 text-sm leading-6 text-brand-dark/72">
-            Sending the prepared message confirms that the WhatsApp number belongs to you and connects it to this Neurocient account.
-          </p>
-
           <a
             href={whatsappUrl}
             target="_blank"
             rel="noreferrer"
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-dark px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-primary"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-dark px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-primary"
           >
             Open WhatsApp
             <ExternalLink className="h-4 w-4" />

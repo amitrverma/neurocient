@@ -50,6 +50,7 @@ const adminLinks = [
   { href: "/admin/newsletter", label: "Communications" },
   { href: "/admin/memberships", label: "Memberships" },
   { href: "/admin/content", label: "Content" },
+  { href: "/admin/nudges", label: "Nudges" },
   { href: "/admin/cohorts", label: "Cohorts" },
   { href: "/admin/payments", label: "Payments" },
   { href: "/admin/audit", label: "Audit" },

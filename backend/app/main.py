@@ -19,6 +19,7 @@ from app.Routes import (
     membership_routes,
     notifications_routes,
     nudge_routes,
+    admin_nudge_routes,
     preferences_route,
     reflections_routes,
     spot_routes,
@@ -123,3 +124,4 @@ app.include_router(
 app.include_router(membership_routes.router, prefix="/api", tags=["membership"])
 app.include_router(contact_routes.router, prefix="/api", tags=["contact"])
 app.include_router(admin_data_routes.router, prefix="/api", tags=["admin"])
+app.include_router(admin_nudge_routes.router, prefix="/api", tags=["admin-nudges"])

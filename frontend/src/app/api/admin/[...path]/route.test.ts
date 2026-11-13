@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { GET } from "./route";
+import { GET, PATCH } from "./route";
 
 describe("admin API proxy", () => {
   const originalApiBaseUrl = process.env.API_BASE_URL;
@@ -48,5 +48,45 @@ describe("admin API proxy", () => {
     );
     expect(response.status).toBe(502);
     await expect(response.json()).resolves.toEqual({ detail: "Admin service unavailable" });
+  });
+
+  it("forwards authenticated nudge mutations with their JSON body", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ id: "nudge-1" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const body = JSON.stringify({
+      title: "Edited nudge",
+      paragraphs: ["Body"],
+      quote: null,
+      link: null,
+      is_active: true,
+    });
+
+    const response = await PATCH(
+      new Request("http://localhost/api/admin/nudges/nudge-1", {
+        method: "PATCH",
+        headers: { cookie: "access_token=secret", "content-type": "application/json" },
+        body,
+      }),
+      { params: Promise.resolve({ path: ["nudges", "nudge-1"] }) },
+    );
+
+    expect(response.status).toBe(200);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://backend.example/api/admin/nudges/nudge-1",
+      expect.objectContaining({
+        method: "PATCH",
+        body,
+        headers: expect.objectContaining({
+          Cookie: "access_token=secret",
+          "Content-Type": "application/json",
+          Origin: "http://localhost",
+        }),
+      }),
+    );
   });
 });

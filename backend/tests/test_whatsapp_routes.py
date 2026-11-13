@@ -2,6 +2,7 @@ import hashlib
 import hmac
 import json
 import logging
+import re
 from unittest.mock import AsyncMock
 from types import SimpleNamespace
 from uuid import uuid4
@@ -124,9 +125,14 @@ def test_spot_parser_tolerates_human_spacing_without_broadening_command(body, ex
 def test_microchallenge_acknowledgements_are_light_and_truthful():
     assert whatsapp_routes.microchallenge_acknowledgement("done") == "Recorded for today."
     assert "Partial attempts" in whatsapp_routes.microchallenge_acknowledgement("partly")
+    assert "reply with what got in the way" in whatsapp_routes.microchallenge_acknowledgement(
+        "partly"
+    )
+    assert "note:" not in whatsapp_routes.microchallenge_acknowledgement("partly")
     assert "Nothing to make up for" in whatsapp_routes.microchallenge_acknowledgement(
         "not_today"
     )
+    assert "note:" not in whatsapp_routes.microchallenge_acknowledgement("not_today")
 
 
 def test_help_copy_uses_canonical_inner_caveman_language():
@@ -144,15 +150,32 @@ def test_pairing_token_parser_requires_explicit_final_connect_command():
     assert whatsapp_routes.parse_pairing_token("CONNECT short") is None
 
 
-def test_pairing_consent_is_concise_and_explains_opt_out_once():
+def test_pairing_token_parser_accepts_human_readable_connection_code():
+    code = "N7KF-4Q2P-X7RM-6TWD"
+
+    assert whatsapp_routes.parse_pairing_token(
+        f"I'd like to connect WhatsApp.\n\nConnection code: {code}"
+    ) == code
+    assert whatsapp_routes.parse_pairing_token(
+        f"Connection code: {code.lower()}"
+    ) == code
+    assert whatsapp_routes.parse_pairing_token(f"Connection code: {code} trailing") is None
+
+
+def test_generated_connection_code_has_eighty_bits_in_readable_groups():
+    code = preferences_route.generate_pairing_token()
+
+    assert re.fullmatch(r"[A-Z2-7]{4}(?:-[A-Z2-7]{4}){3}", code)
+
+
+def test_pairing_consent_is_concise_and_leaves_opt_out_to_confirmation():
     message = preferences_route.CONSENT_MESSAGE
 
     assert message == (
-        "Connect this WhatsApp number to my Neurocient account. Send me relevant "
-        "nudges and check-ins, and let me record my microchallenge progress here. "
-        "I can pause messages at any time by replying STOP."
+        "I'd like to connect WhatsApp to my Neurocient account for nudges, "
+        "check-ins, and microchallenge progress."
     )
-    assert message.count("STOP") == 1
+    assert "STOP" not in message
 
 
 @pytest.mark.parametrize(
@@ -211,7 +234,10 @@ class MicrochallengeSession:
             whatsapp_enabled=True,
             whatsapp_consent_at=None,
             whatsapp_consent_version=None,
+            whatsapp_pending_action=None,
+            whatsapp_pending_action_expires_at=None,
         )
+        self.linked = linked
         self.results = [ScalarResult(message_id), ScalarResult(linked), ScalarResult()]
         self.assignment_id = assignment_id
         self.commits = 0
@@ -348,9 +374,11 @@ async def test_verified_microchallenge_response_uses_shared_checkin_and_acknowle
     assert sent == [(
         "+919876543210",
         "Recorded. Partial attempts still show what makes the behaviour easier or harder. "
-        "If you want, reply 'note: ...' with what got in the way.",
+        "If you want, reply with what got in the way.",
         False,
     )]
+    assert db.linked.whatsapp_pending_action == "microchallenge_note"
+    assert db.linked.whatsapp_pending_action_expires_at is not None
 
 
 @pytest.mark.asyncio

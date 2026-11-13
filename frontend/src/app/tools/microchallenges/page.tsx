@@ -9,7 +9,6 @@ import {
   ChevronDown,
   ChevronUp,
   LoaderCircle,
-  Plus,
   Trash2,
 } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
@@ -157,9 +156,6 @@ const MicrochallengesPage = () => {
   }, [guidedEntry, guidedPattern, notify, ready, user]);
 
   const activeChallenge = challenges.find((c) => c.status === "active");
-  const completedCount = challenges.filter(
-    (c) => c.status === "success" || c.status === "completed",
-  ).length;
 
   const toggleOpen = (assignmentId: string) => {
     setOpenId(openId === assignmentId ? null : assignmentId);
@@ -341,7 +337,7 @@ const MicrochallengesPage = () => {
 
   const content = (
     <main className="surface-page tool-detail-page">
-      <section className="tool-detail-hero">
+      <section className="tool-detail-hero tool-detail-hero--task-first">
         <div>
           <SectionLabel>Small experiment</SectionLabel>
           <h1 className="tool-detail-title">
@@ -355,25 +351,73 @@ const MicrochallengesPage = () => {
           </p>
         </div>
 
-        {!guidedEntry && (
-          <aside className="tool-detail-summary grid gap-4 sm:grid-cols-3">
-            <Metric label="Active" value={loadFailed || !user ? "—" : activeChallenge ? "1" : "0"} />
-            <Metric label="Completed" value={loadFailed || !user ? "—" : String(completedCount)} />
-            <Metric label="Assigned" value={loading ? "..." : loadFailed || !user ? "—" : String(challenges.length)} />
+        {!guidedEntry ? (
+          <aside className="tool-detail-summary" aria-label="Today's microchallenge">
+            {loading ? (
+              <div className="flex items-center gap-3 font-sans text-sm font-semibold text-brand-dark">
+                <LoaderCircle className="h-5 w-5 animate-spin text-brand-accent" />
+                Loading today&apos;s experiment
+              </div>
+            ) : loadFailed ? (
+              <>
+                <p className="page-eyebrow text-brand-primary">Today</p>
+                <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
+                  Your experiment is temporarily unavailable.
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setReloadKey((value) => value + 1)}
+                  className="surface-action mt-5"
+                >
+                  Try again
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </>
+            ) : !user ? (
+              <>
+                <p className="page-eyebrow text-brand-primary">Today</p>
+                <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
+                  Sign in to continue an experiment.
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setShowAuth(true)}
+                  className="surface-action mt-5"
+                >
+                  Log in
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </>
+            ) : activeChallenge ? (
+              <ActiveChallengePanel
+                challenge={activeChallenge}
+                note={note}
+                onNoteChange={setNote}
+                onLog={(outcome) => handleLog(activeChallenge, outcome)}
+                onShowDetails={() => toggleOpen(activeChallenge.assignment_id)}
+                detailsOpen={openId === activeChallenge.assignment_id}
+              />
+            ) : (
+              <>
+                <p className="page-eyebrow text-brand-primary">Your next experiment</p>
+                <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
+                  Choose one small condition to change.
+                </h2>
+                <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
+                  Keep it small enough to repeat and observe in real life.
+                </p>
+                <button onClick={handleToggleCarousel} className="surface-action mt-5">
+                  Choose an experiment
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </>
+            )}
           </aside>
-        )}
+        ) : null}
       </section>
 
       <section className="tool-detail-content">
-        {loading ? (
-          <LoadingBlock />
-        ) : loadFailed ? (
-          <LoadErrorBlock onRetry={() => setReloadKey((value) => value + 1)} />
-        ) : !user ? (
-          <SignedOutBlock onLogin={() => setShowAuth(true)} />
-        ) : challenges.length === 0 && !guidedEntry ? (
-          <EmptyBlock onStart={handleToggleCarousel} />
-        ) : challenges.length === 0 ? (
+        {loading || loadFailed || !user ? null : challenges.length === 0 && !guidedEntry ? null : challenges.length === 0 ? (
           <div className="max-w-2xl border-l-4 border-brand-secondary pl-5">
             <h2 className="text-2xl font-bold leading-tight text-brand-dark">
               Choose the experiment that feels closest to the moments you spotted.
@@ -384,68 +428,21 @@ const MicrochallengesPage = () => {
             </p>
           </div>
         ) : (
-          <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
-            <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-sm">
-              <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-                Next action
-              </p>
-              {activeChallenge ? (
-                <>
-                  <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
-                    Keep going with {activeChallenge.title}
-                  </h2>
-                  <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
-                    Log one repetition today. Repeated observations show
-                    whether the changed condition helps in real situations.
-                  </p>
-                  <button
-                    onClick={() => toggleOpen(activeChallenge.assignment_id)}
-                    className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:opacity-90"
-                  >
-                    Open active challenge
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                </>
-              ) : (
-                <>
-                  <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
-                    Choose your next experiment.
-                  </h2>
-                  <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
-                    Pick one challenge that feels useful and small enough to
-                    repeat.
-                  </p>
-                </>
-              )}
-              <button
-                onClick={handleToggleCarousel}
-                disabled={Boolean(activeChallenge)}
-                className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark/25 px-5 py-2.5 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-primary hover:text-brand-primary disabled:pointer-events-none disabled:opacity-40"
-              >
-                <Plus className="h-4 w-4" />
-                {showNewChallenge ? "Close choices" : "Start a new challenge"}
-              </button>
+          <div>
+            <div className="mb-5 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
+              <span>Your experiments</span>
+              <span className="h-px flex-1 bg-brand-dark/15" />
             </div>
-
-            <div>
-              <div className="mb-5 flex items-center gap-3 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
-                <span>Your challenges</span>
-                <span className="h-px flex-1 bg-brand-dark/15" />
-              </div>
-              <div className="border-y border-brand-dark/12">
-                {challenges.map((challenge) => (
-                  <ChallengeRow
-                    key={challenge.assignment_id}
-                    challenge={challenge}
-                    isOpen={openId === challenge.assignment_id}
-                    note={note}
-                    onNoteChange={setNote}
-                    onToggle={() => toggleOpen(challenge.assignment_id)}
-                    onLog={(outcome) => handleLog(challenge, outcome)}
-                    onRemove={() => handleRemove(challenge.assignment_id)}
-                  />
-                ))}
-              </div>
+            <div className="border-y border-brand-dark/12">
+              {challenges.map((challenge) => (
+                <ChallengeRow
+                  key={challenge.assignment_id}
+                  challenge={challenge}
+                  isOpen={openId === challenge.assignment_id}
+                  onToggle={() => toggleOpen(challenge.assignment_id)}
+                  onRemove={() => handleRemove(challenge.assignment_id)}
+                />
+              ))}
             </div>
           </div>
         )}
@@ -486,21 +483,81 @@ const MicrochallengesPage = () => {
   return content;
 };
 
+const ActiveChallengePanel = ({
+  challenge,
+  note,
+  onNoteChange,
+  onLog,
+  onShowDetails,
+  detailsOpen,
+}: {
+  challenge: AssignedChallenge;
+  note: string;
+  onNoteChange: (value: string) => void;
+  onLog: (outcome: CheckinOutcome) => void;
+  onShowDetails: () => void;
+  detailsOpen: boolean;
+}) => {
+  const progress = Math.min(100, Math.round(challenge.progress || 0));
+  const firstStep = challenge.instructions?.[0];
+
+  return (
+    <div>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="page-eyebrow text-brand-primary">Today&apos;s experiment</p>
+          <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark md:text-3xl">
+            {challenge.title}
+          </h2>
+        </div>
+        <span className="shrink-0 font-sans text-sm font-semibold text-brand-dark">
+          {progress}%
+        </span>
+      </div>
+      <div className="mt-4 h-1.5 w-full overflow-hidden bg-brand-dark/10">
+        <div
+          className="h-full bg-brand-teal transition-all duration-700"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+      {firstStep ? (
+        <p className="mt-4 border-l-4 border-brand-secondary pl-4 font-sans text-sm leading-7 text-brand-dark/76">
+          {firstStep}
+        </p>
+      ) : null}
+      <MicrochallengeCheckin
+        loggedToday={Boolean(challenge.loggedToday)}
+        outcome={challenge.today_outcome}
+        note={note}
+        onNoteChange={onNoteChange}
+        onLog={onLog}
+      />
+      <button
+        type="button"
+        onClick={onShowDetails}
+        aria-expanded={detailsOpen}
+        className="mt-4 inline-flex min-h-11 cursor-pointer items-center gap-2 font-sans text-sm font-semibold text-brand-accent transition hover:text-brand-primary"
+      >
+        {detailsOpen ? "Hide experiment details" : "See experiment details"}
+        {detailsOpen ? (
+          <ChevronUp className="h-4 w-4" />
+        ) : (
+          <ChevronDown className="h-4 w-4" />
+        )}
+      </button>
+    </div>
+  );
+};
+
 const ChallengeRow = ({
   challenge,
   isOpen,
-  note,
-  onNoteChange,
   onToggle,
-  onLog,
   onRemove,
 }: {
   challenge: AssignedChallenge;
   isOpen: boolean;
-  note: string;
-  onNoteChange: (value: string) => void;
   onToggle: () => void;
-  onLog: (outcome: CheckinOutcome) => void;
   onRemove: () => void;
 }) => {
   const progress = Math.min(100, Math.round(challenge.progress || 0));
@@ -570,16 +627,6 @@ const ChallengeRow = ({
                 ))}
               </ul>
             </Block>
-          )}
-
-          {challenge.status === "active" && (
-            <MicrochallengeCheckin
-              loggedToday={Boolean(challenge.loggedToday)}
-              outcome={challenge.today_outcome}
-              note={note}
-              onNoteChange={onNoteChange}
-              onLog={onLog}
-            />
           )}
 
           {(challenge.status === "success" || challenge.status === "completed") &&
@@ -675,88 +722,6 @@ const AvailableChallenges = ({
       </div>
     )}
   </section>
-);
-
-const Metric = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-lg border border-brand-dark/12 bg-white p-5 shadow-sm">
-    <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-teal">
-      {label}
-    </p>
-    <p className="mt-3 font-sans text-4xl font-semibold tracking-[-0.03em] text-brand-dark">
-      {value}
-    </p>
-  </div>
-);
-
-const LoadingBlock = () => (
-  <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-sm">
-    <LoaderCircle className="h-6 w-6 animate-spin text-brand-accent" />
-    <p className="mt-3 font-sans text-sm font-semibold text-brand-dark">
-      Loading microchallenges...
-    </p>
-  </div>
-);
-
-const LoadErrorBlock = ({ onRetry }: { onRetry: () => void }) => (
-  <div className="border border-brand-dark/12 bg-white p-6">
-    <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-      Account data unavailable
-    </p>
-    <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
-      Your challenges could not be loaded.
-    </h2>
-    <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
-      Nothing has been counted as empty or reset. Try again when the connection is available.
-    </p>
-    <button onClick={onRetry} className="surface-action">
-      Try again
-      <ArrowRight aria-hidden="true" />
-    </button>
-  </div>
-);
-
-const SignedOutBlock = ({ onLogin }: { onLogin: () => void }) => (
-  <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-sm">
-    <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-      Sign in required
-    </p>
-    <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
-      Log in to start your microchallenges.
-    </h2>
-    <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
-      Microchallenges are small behavior experiments. Sign in to choose one,
-      track progress, and keep your practice history connected to your account.
-    </p>
-    <button
-      onClick={onLogin}
-      className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:opacity-90"
-    >
-      Log in
-      <ArrowRight className="h-4 w-4" />
-    </button>
-  </div>
-);
-
-const EmptyBlock = ({ onStart }: { onStart: () => void }) => (
-  <div className="rounded-lg border border-brand-dark/12 bg-white p-6 shadow-sm">
-    <p className="font-sans text-xs font-semibold uppercase tracking-[0.16em] text-brand-primary">
-      Empty state
-    </p>
-    <h2 className="mt-2 text-2xl font-bold leading-tight text-brand-dark">
-      No microchallenges assigned yet.
-    </h2>
-    <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72">
-      Start with one small experiment. The point is not intensity; it is
-      repetition.
-    </p>
-    <button
-      onClick={onStart}
-      className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brand-dark bg-brand-dark px-5 py-2.5 font-sans text-sm font-semibold text-white transition hover:opacity-90"
-    >
-      Choose a challenge
-      <ArrowRight className="h-4 w-4" />
-    </button>
-  </div>
 );
 
 const EmptyPanel = ({ text }: { text: string }) => (

@@ -4,7 +4,7 @@ Status: local owned-number journey passed; deployed dev-candidate verification p
 
 Owner: Amit
 
-Contract version: 1.5 (2026-11-12)
+Contract version: 1.8 (2026-11-13)
 
 Version 1.1 makes the daily nugget selection durable and shared across the web
 and outbound delivery. It also requires bounded outbound WhatsApp bodies and
@@ -16,6 +16,12 @@ delivery, submits the three reminder templates, and records signed Meta delivery
 status callbacks against the durable dispatch.
 Version 1.5 removes repeated opt-out copy from proactive reminders and makes
 desktop pairing a phone handoff rather than a dependency on WhatsApp Web.
+Version 1.6 moves opt-out guidance to the connection confirmation and lets a
+person add an obstacle note as an ordinary follow-up reply.
+Version 1.7 presents the account-binding credential as a short, human-readable
+connection code while preserving one-time use, expiry, and hashed storage.
+Version 1.8 requires the originating browser to reconcile a phone-completed
+pairing and leave the handoff state without a manual refresh.
 
 ## Outcome
 
@@ -44,8 +50,10 @@ This is a deterministic companion, not an open-ended AI chatbot.
 - `Done` records a completed repetition and advances the existing 21-day
   progress calculation. `Partly` and `Didn't happen` record truthful evidence
   for the day without advancing completed-day progress.
-- After `Partly` or `Didn't happen`, the user may attach one optional obstacle
-  note with `note: <what got in the way>`; it is stored on that same daily log.
+- After `Partly` or `Didn't happen`, Neurocient invites one optional ordinary
+  text reply about what got in the way. A 15-minute, account-bound pending state
+  stores that reply on the same daily log. The legacy `note:` command remains
+  accepted for compatibility but is not shown to users.
 - Only one outcome may be recorded for an assignment and calendar day. Provider
   replay, repeated replies, and concurrent web/WhatsApp submissions must not
   create duplicate progress.
@@ -155,6 +163,15 @@ original STOP footer.
   proactive fallback.
 - **WA-COMP-11:** Authentic delivery callbacks update only the dispatch matching
   their provider `wamid`, preserve monotonic status, and store no provider text.
+- **WA-COMP-12:** Pairing includes an account-bound, 80-bit connection code in
+  four readable groups and places STOP guidance in Neurocient's successful
+  connection confirmation, not in the person's prefilled consent sentence.
+- **WA-COMP-13:** `Partly` and `Didn't happen` open a 15-minute obstacle-note
+  reply state; the next ordinary text is stored once on that day's outcome.
+- **WA-COMP-14:** When pairing completes on a phone, the originating browser
+  closes the handoff and shows the connected state after an immediate check,
+  periodic polling, or a focus/visibility refresh. It must not announce success
+  before the backend reports the durable connection.
 
 ## Deferred provider work
 

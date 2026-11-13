@@ -27,6 +27,8 @@ from app.services.microchallenge_progress import (
 )
 from app.services.spot_capture import capture_spot
 from app.services.whatsapp_interactions import (
+    MICROCHALLENGE_NOTE_ACTION,
+    MICROCHALLENGE_NOTE_WINDOW,
     SPOT_CAPTURE_ACTION,
     SPOT_CAPTURE_BUTTON_PAYLOAD,
     SPOT_CAPTURE_WINDOW,
@@ -53,7 +55,13 @@ HELP_MESSAGE = (
     "'spot: ...'. Reply STOP to pause WhatsApp messages. "
     "For human support, email support@neurocient.com."
 )
-PAIRING_PATTERN = re.compile(r"(?:^|\n)CONNECT ([A-Za-z0-9_-]{32,128})\s*$")
+PAIRING_PATTERN = re.compile(
+    r"(?:^|\n)(?:"
+    r"CONNECT (?P<legacy>[A-Za-z0-9_-]{32,128})|"
+    r"Connection code:[ \t]*(?P<code>[A-Z2-7]{4}(?:-[A-Z2-7]{4}){3})"
+    r")\s*$",
+    re.IGNORECASE,
+)
 SPOT_PATTERN = re.compile(r"^spot[ \t]*:[ \t]*(.*)$", re.IGNORECASE | re.DOTALL)
 MICROCHALLENGE_RESPONSES = {
     "done": "done",
@@ -109,7 +117,10 @@ def parse_obstacle_note(message: str) -> str | None:
 
 def parse_pairing_token(message: str) -> str | None:
     match = PAIRING_PATTERN.search(message.strip())
-    return match.group(1) if match else None
+    if match is None:
+        return None
+    legacy = match.group("legacy")
+    return legacy if legacy is not None else match.group("code").upper()
 
 
 def microchallenge_acknowledgement(outcome: str) -> str:
@@ -118,11 +129,11 @@ def microchallenge_acknowledgement(outcome: str) -> str:
     if outcome == "partly":
         return (
             "Recorded. Partial attempts still show what makes the behaviour "
-            "easier or harder. If you want, reply 'note: ...' with what got in the way."
+            "easier or harder. If you want, reply with what got in the way."
         )
     return (
         "Recorded. Nothing to make up for. This helps show what got in the way. "
-        "If you want, reply 'note: ...' with what got in the way."
+        "If you want, reply with what got in the way."
     )
 
 
@@ -261,7 +272,8 @@ async def _process_inbound_message(
                     await savepoint.commit()
                     acknowledgement = (
                         "You're connected to Neurocient. You can record your progress "
-                        "or what you notice here."
+                        "or what you notice here. Reply STOP at any time to pause "
+                        "WhatsApp messages."
                     )
 
     result = await db.execute(
@@ -340,6 +352,13 @@ async def _process_inbound_message(
                     acknowledgement = microchallenge_acknowledgement(
                         microchallenge_outcome
                     )
+                    if microchallenge_outcome in {"partly", "not_today"}:
+                        linked_preferences.whatsapp_pending_action = (
+                            MICROCHALLENGE_NOTE_ACTION
+                        )
+                        linked_preferences.whatsapp_pending_action_expires_at = (
+                            _utcnow() + MICROCHALLENGE_NOTE_WINDOW
+                        )
                 elif checkin.result == "already_recorded":
                     acknowledgement = "Today's experiment has already been recorded."
                 elif checkin.result == "ended":
@@ -356,6 +375,25 @@ async def _process_inbound_message(
                 db,
                 user_id=user_id,
                 note=obstacle_note,
+            )
+            acknowledgement = (
+                "Thanks. That's recorded with today's experiment."
+                if note_recorded
+                else "There isn't a recent experiment response waiting for a note."
+            )
+        elif (
+            normalized_body
+            and linked_preferences.whatsapp_pending_action
+            == MICROCHALLENGE_NOTE_ACTION
+            and linked_preferences.whatsapp_pending_action_expires_at is not None
+            and linked_preferences.whatsapp_pending_action_expires_at > _utcnow()
+        ):
+            linked_preferences.whatsapp_pending_action = None
+            linked_preferences.whatsapp_pending_action_expires_at = None
+            note_recorded = await add_obstacle_note(
+                db,
+                user_id=user_id,
+                note=normalized_body,
             )
             acknowledgement = (
                 "Thanks. That's recorded with today's experiment."

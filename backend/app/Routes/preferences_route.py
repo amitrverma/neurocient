@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import hmac
 import logging
@@ -19,11 +20,10 @@ from app.utils.auth import get_current_user
 router = APIRouter()
 logger = logging.getLogger("notification_consent")
 PAIRING_TTL = timedelta(minutes=10)
-CONSENT_VERSION = "whatsapp-companion-v2"
+CONSENT_VERSION = "whatsapp-companion-v4"
 CONSENT_MESSAGE = (
-    "Connect this WhatsApp number to my Neurocient account. Send me relevant "
-    "nudges and check-ins, and let me record my microchallenge progress here. "
-    "I can pause messages at any time by replying STOP."
+    "I'd like to connect WhatsApp to my Neurocient account for nudges, "
+    "check-ins, and microchallenge progress."
 )
 
 
@@ -41,6 +41,11 @@ def pairing_token_hash(token: str) -> str:
     if not secret:
         raise RuntimeError("WhatsApp pairing is not configured")
     return hmac.new(secret.encode(), token.encode(), hashlib.sha256).hexdigest()
+
+
+def generate_pairing_token() -> str:
+    encoded = base64.b32encode(secrets.token_bytes(10)).decode("ascii")
+    return "-".join(encoded[index : index + 4] for index in range(0, 16, 4))
 
 
 def _masked_number(number: str | None) -> str | None:
@@ -127,11 +132,11 @@ async def create_whatsapp_pairing(
         ),
     )
     prefs = await _get_preferences(db, current_user.id, for_update=True)
-    token = secrets.token_urlsafe(32)
+    token = generate_pairing_token()
     prefs.whatsapp_pairing_token_hash = pairing_token_hash(token)
     prefs.whatsapp_pairing_expires_at = _utcnow() + PAIRING_TTL
     await db.commit()
-    message = f"{CONSENT_MESSAGE}\n\nCONNECT {token}"
+    message = f"{CONSENT_MESSAGE}\n\nConnection code: {token}"
     url = f"https://wa.me/{settings.WHATSAPP_BUSINESS_NUMBER}?text={quote(message, safe='')}"
     logger.info("whatsapp_pairing_created")
     return {

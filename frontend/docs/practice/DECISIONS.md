@@ -1,5 +1,27 @@
 # Practice Decisions
 
+## 2026-11-13: Return surfaces put the usable action before history
+
+The signed-in Home pairs the Nudge of the Day with one vertical stack of the
+person's current work. The item selected by the existing continuation priority is
+visually first, while Practice, Microchallenges, Spots, and saved Scan continuity
+remain available in the same compact group. Weekly reflection remains secondary
+to today's nudge and current work rather than competing as an equal dashboard
+tile.
+
+Microchallenges and Spot the Inner Caveman are task-first tools. An active
+Microchallenge presents today's `Done`, `Partly`, and `Didn't happen` check-in in
+the opening task area; full experiment explanation and history remain under
+progressive disclosure. The Spots surface presents the observation field in the
+opening task area before the saved log. Loading, unavailable, signed-out, limit,
+and completed states keep their truthful alternatives in the same position.
+
+This removes navigation and scrolling friction without changing assignment,
+progress, access, usage-limit, or persistence rules. Mobile document order is the
+source order: orientation first, then the current action, then history. Desktop
+expands the same order into adjacent columns rather than defining a different
+journey.
+
 ## 2026-10-17: Scan personalisation stops at the person's selected answers
 
 The Scan brings the Inner Caveman into view; it does not map a drive, type,
@@ -1761,3 +1783,30 @@ is cleared when delivery is paused or resumed. Provider message identifiers
 continue to protect the webhook from replay. Approved older templates remain
 the runtime fallback until each replacement is approved; button components are
 never attached to an incompatible template.
+
+## 2026-11-13: WhatsApp follow-ups use ordinary language, not command syntax
+
+The prefilled pairing message is a short statement of what the person is asking
+for: Neurocient nudges and check-ins, with microchallenge progress recorded in
+WhatsApp. A short connection code remains because it is the short-lived,
+account-bound key that lets the signed inbound sender prove which Neurocient
+account to link. It is shown as four readable groups, remains one-time and
+expires after 10 minutes; only its HMAC is stored. STOP is explained once in
+Neurocient's successful connection reply and remains available at any time.
+
+After `Partly` or `Didn't happen`, Neurocient asks what got in the way. The next
+ordinary reply within 15 minutes is attached to that day's microchallenge log;
+the person is not asked to type `note:`. `Done` does not invite or open a note
+state. The older explicit `note:` form remains accepted only for compatibility.
+STOP, START, Spot capture, and microchallenge outcome controls keep priority over
+pending free text so an unfinished follow-up cannot swallow another action.
+
+## 2026-11-13: Cross-device WhatsApp pairing completes on the originating screen
+
+Scanning the pairing QR moves the person to WhatsApp on their phone, but the
+desktop remains part of the same journey. Once the signed webhook durably links
+the number, the originating browser must close the handoff, show the connected
+state, and provide one success notification without requiring a refresh or a
+manual close. It checks immediately, continues periodic polling while the
+handoff is open, and reconciles again when a backgrounded tab becomes visible
+or focused. The interface never infers success merely because WhatsApp opened.

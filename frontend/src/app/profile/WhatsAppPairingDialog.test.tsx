@@ -20,8 +20,13 @@ describe("WhatsAppPairingDialog", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Continue on WhatsApp" })).toBeInTheDocument();
-    expect(screen.getByText(/Scan this code with your phone/i)).toBeInTheDocument();
-    expect(screen.getByText(/confirms that the WhatsApp number belongs to you/i)).toBeInTheDocument();
+    expect(screen.getByText(
+      "Tap Open WhatsApp below to continue in the app. Send the prepared message within 10 minutes.",
+    )).toHaveClass("sm:hidden");
+    expect(screen.getByText(
+      "Select Open WhatsApp below to continue in WhatsApp Web on this computer, or scan the code to continue in the app on your phone. Send the prepared message within 10 minutes.",
+    )).toBeInTheDocument();
+    expect(screen.queryByText(/confirms that the WhatsApp number belongs to you/i)).not.toBeInTheDocument();
     expect(screen.getByTitle("Scan to connect WhatsApp")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Open WhatsApp" })).toHaveAttribute("href", whatsappUrl);
 

@@ -161,4 +161,39 @@ describe("profile delivery channels", () => {
     expect(screen.queryByRole("heading", { name: "Continue on WhatsApp" })).not.toBeInTheDocument();
     expect(mocks.notify).toHaveBeenCalledWith("WhatsApp is connected.", "success");
   });
+
+  it("closes the handoff when the desktop regains focus after phone pairing", async () => {
+    const whatsappUrl = "https://wa.me/919999999999?text=connect";
+    let connected = false;
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url === "/api/user/preferences" && !init?.method) return jsonResponse(
+        connected ? {
+          ...preferences,
+          whatsapp_connected: true,
+          whatsapp_enabled: true,
+          whatsapp_display_number: "+••••••3210",
+        } : preferences,
+      );
+      if (url === "/api/cohorts/my") return jsonResponse({ enrollments: [] });
+      if (url === "/api/user/preferences/whatsapp-pairing" && init?.method === "POST") {
+        return jsonResponse({ whatsapp_url: whatsappUrl }, 201);
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    render(<ProfilePage />);
+    fireEvent.click(await screen.findByRole("button", { name: "Connect WhatsApp" }));
+    expect(await screen.findByRole("heading", { name: "Continue on WhatsApp" })).toBeInTheDocument();
+
+    connected = true;
+    fireEvent.focus(window);
+
+    await waitFor(() => expect(
+      screen.queryByRole("heading", { name: "Continue on WhatsApp" }),
+    ).not.toBeInTheDocument());
+    expect(screen.getByText("Connected")).toBeInTheDocument();
+    expect(mocks.notify).toHaveBeenCalledWith("WhatsApp is connected.", "success");
+  });
 });

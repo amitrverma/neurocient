@@ -5,7 +5,14 @@ from scripts.create_whatsapp_templates import (
 )
 
 
-def test_all_proactive_reminder_templates_are_utility_and_request_specific():
+def test_proactive_reminder_templates_use_provider_categories(monkeypatch):
+    monkeypatch.setattr(settings, "WHATSAPP_NUDGE_TEMPLATE_NAME", "neurocient_daily_nudge_v2")
+    monkeypatch.setattr(settings, "WHATSAPP_SPOT_TEMPLATE_NAME", "neurocient_spot_checkin_v2")
+    monkeypatch.setattr(
+        settings,
+        "WHATSAPP_MICROCHALLENGE_TEMPLATE_NAME",
+        "neurocient_microchallenge_checkin_v2",
+    )
     definitions = template_definitions()
 
     assert [definition.name for definition in definitions] == [
@@ -16,6 +23,11 @@ def test_all_proactive_reminder_templates_are_utility_and_request_specific():
     assert all("STOP" not in definition.body for definition in definitions)
     assert all(definition.body.count("{{1}}") == 1 for definition in definitions)
     assert all(definition.body.count("{{2}}") == 1 for definition in definitions)
+    assert [definition.category for definition in definitions] == [
+        "MARKETING",
+        "MARKETING",
+        "UTILITY",
+    ]
 
 
 def test_v1_utility_templates_preserve_their_approved_footer(monkeypatch):
@@ -76,6 +88,25 @@ def test_v3_templates_are_concise_and_use_quick_replies(monkeypatch):
         "type": "BUTTONS",
         "buttons": [{"type": "QUICK_REPLY", "text": "Record what I noticed"}],
     }
+
+
+def test_spot_v4_invites_a_text_reply_without_a_button(monkeypatch):
+    monkeypatch.setattr(
+        settings,
+        "WHATSAPP_SPOT_TEMPLATE_NAME",
+        "neurocient_spot_checkin_v4",
+    )
+
+    spot = template_definitions()[1]
+
+    assert spot.category == "MARKETING"
+    assert spot.header == "Spot the Inner Caveman"
+    assert spot.body == (
+        "Did you spot your Inner Caveman today? What automatic response "
+        "showed up? Reply in your own words."
+    )
+    assert spot.buttons == ()
+    assert template_components(spot)[-1]["type"] == "BODY"
 
 
 def test_legacy_microchallenge_template_preserves_three_truthful_outcomes(monkeypatch):

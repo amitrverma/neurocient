@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
@@ -53,6 +54,8 @@ def preferences(**overrides):
         "whatsapp_enabled": False,
         "whatsapp_verified": False,
         "whatsapp_number": None,
+        "whatsapp_pending_action": None,
+        "whatsapp_pending_action_expires_at": None,
     }
     values.update(overrides)
     return SimpleNamespace(**values)
@@ -194,6 +197,20 @@ def test_legacy_purpose_flags_do_not_override_enabled_channels(
     purpose,
     purpose_field,
 ):
+    template_name = {
+        "nudge": "neurocient_daily_nudge_v2",
+        "spot_reminder": "neurocient_spot_checkin_v2",
+        "microchallenge": "neurocient_microchallenge_checkin_v2",
+    }[purpose]
+    monkeypatch.setattr(
+        reminder_engine.settings,
+        {
+            "nudge": "WHATSAPP_NUDGE_TEMPLATE_NAME",
+            "spot_reminder": "WHATSAPP_SPOT_TEMPLATE_NAME",
+            "microchallenge": "WHATSAPP_MICROCHALLENGE_TEMPLATE_NAME",
+        }[purpose],
+        template_name,
+    )
     send_push = AsyncMock(return_value=True)
     send_whatsapp = AsyncMock(return_value=True)
     monkeypatch.setattr(reminder_engine, "send_push", send_push)
@@ -234,11 +251,7 @@ def test_legacy_purpose_flags_do_not_override_enabled_channels(
         is reminder_engine.send_whatsapp_template_message
     )
     assert send_whatsapp.await_args.kwargs == {
-        "template_name": {
-            "nudge": "neurocient_daily_nudge_v2",
-            "spot_reminder": "neurocient_spot_checkin_v2",
-            "microchallenge": "neurocient_microchallenge_checkin_v2",
-        }[purpose],
+        "template_name": template_name,
         "language_code": "en_GB",
         "body_parameters": ("Title", "Body"),
         "quick_reply_payloads": (),
@@ -303,6 +316,73 @@ def test_v3_delivery_matches_approved_template_components(
             purpose
         ],
     }
+
+
+def test_spot_v4_delivery_opens_capture_window_without_quick_reply(monkeypatch):
+    monkeypatch.setattr(
+        reminder_engine.settings,
+        "WHATSAPP_SPOT_TEMPLATE_NAME",
+        "neurocient_spot_checkin_v4",
+    )
+    sent_at = datetime(2026, 11, 13, 12, 0, 0)
+    monkeypatch.setattr(reminder_engine, "_utcnow", lambda: sent_at)
+    send_whatsapp = AsyncMock(return_value="wamid.test")
+    monkeypatch.setattr(reminder_engine.asyncio, "to_thread", send_whatsapp)
+    prefs = preferences(
+        whatsapp_enabled=True,
+        whatsapp_verified=True,
+        whatsapp_number="+919876543210",
+    )
+    db = DeliverySession(prefs)
+
+    result = asyncio.run(
+        reminder_engine._deliver_to_user(
+            db,
+            user_id="u1",
+            purpose="spot_reminder",
+            title="Spot check",
+            body="Did you spot your Inner Caveman today?",
+        )
+    )
+
+    assert result["whatsapp_success"] == 1
+    assert send_whatsapp.await_args.kwargs["body_parameters"] == ()
+    assert send_whatsapp.await_args.kwargs["quick_reply_payloads"] == ()
+    assert prefs.whatsapp_pending_action == "spot_capture"
+    assert prefs.whatsapp_pending_action_expires_at == (
+        sent_at + reminder_engine.SPOT_CAPTURE_WINDOW
+    )
+
+
+def test_failed_spot_v4_delivery_does_not_open_capture_window(monkeypatch):
+    monkeypatch.setattr(
+        reminder_engine.settings,
+        "WHATSAPP_SPOT_TEMPLATE_NAME",
+        "neurocient_spot_checkin_v4",
+    )
+    monkeypatch.setattr(
+        reminder_engine.asyncio,
+        "to_thread",
+        AsyncMock(return_value=False),
+    )
+    prefs = preferences(
+        whatsapp_enabled=True,
+        whatsapp_verified=True,
+        whatsapp_number="+919876543210",
+    )
+
+    asyncio.run(
+        reminder_engine._deliver_to_user(
+            DeliverySession(prefs),
+            user_id="u1",
+            purpose="spot_reminder",
+            title="Spot check",
+            body="Did you spot your Inner Caveman today?",
+        )
+    )
+
+    assert prefs.whatsapp_pending_action is None
+    assert prefs.whatsapp_pending_action_expires_at is None
 
 
 def test_enabled_purpose_delivers_only_enabled_verified_channels(monkeypatch):

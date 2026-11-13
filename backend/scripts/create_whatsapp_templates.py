@@ -18,6 +18,7 @@ from app.config import settings
 @dataclass(frozen=True)
 class TemplateDefinition:
     name: str
+    category: str
     body: str
     examples: tuple[str, ...]
     footer: str | None = None
@@ -34,10 +35,13 @@ def _footer_for(template_name: str) -> str | None:
 def template_definitions() -> tuple[TemplateDefinition, ...]:
     nudge_v3 = settings.WHATSAPP_NUDGE_TEMPLATE_NAME.endswith("_v3")
     spot_v3 = settings.WHATSAPP_SPOT_TEMPLATE_NAME.endswith("_v3")
+    spot_v4 = settings.WHATSAPP_SPOT_TEMPLATE_NAME.endswith("_v4")
+    spot_concise = spot_v3 or spot_v4
     microchallenge_v3 = settings.WHATSAPP_MICROCHALLENGE_TEMPLATE_NAME.endswith("_v3")
     return (
         TemplateDefinition(
             name=settings.WHATSAPP_NUDGE_TEMPLATE_NAME,
+            category="MARKETING",
             body=(
                 "For today:\n\n{{1}}\n\nTake what helps."
                 if nudge_v3
@@ -61,24 +65,31 @@ def template_definitions() -> tuple[TemplateDefinition, ...]:
         ),
         TemplateDefinition(
             name=settings.WHATSAPP_SPOT_TEMPLATE_NAME,
+            category="MARKETING",
             body=(
-                "Did an automatic response show up today?"
-                if spot_v3
+                (
+                    "Did you spot your Inner Caveman today? What automatic "
+                    "response showed up? Reply in your own words."
+                    if spot_v4
+                    else "Did an automatic response show up today?"
+                )
+                if spot_concise
                 else
                 "Here is the Neurocient Spot the Inner Caveman check-in you "
                 "asked to receive:\n\n{{1}}\n\n{{2}}\n\nTo record something, "
                 "reply spot: followed by what you noticed."
             ),
-            examples=() if spot_v3 else (
+            examples=() if spot_concise else (
                 "Spot check",
                 "Did an automatic response show up today?",
             ),
             footer=_footer_for(settings.WHATSAPP_SPOT_TEMPLATE_NAME),
-            header="Spot the Inner Caveman" if spot_v3 else None,
+            header="Spot the Inner Caveman" if spot_concise else None,
             buttons=("Record what I noticed",) if spot_v3 else (),
         ),
         TemplateDefinition(
             name=settings.WHATSAPP_MICROCHALLENGE_TEMPLATE_NAME,
+            category="UTILITY",
             body=(
                 "Your experiment:\n\n{{1}}\n\nHow did it go?"
                 if microchallenge_v3
@@ -166,7 +177,7 @@ def _create(definition: TemplateDefinition) -> dict:
         json={
             "name": definition.name,
             "language": settings.WHATSAPP_TEMPLATE_LANGUAGE,
-            "category": "UTILITY",
+            "category": definition.category,
             "components": template_components(definition),
         },
         timeout=20,

@@ -112,14 +112,14 @@ class Settings:
         "WHATSAPP_TEMPLATE_LANGUAGE", "en_GB"
     ).strip()
     WHATSAPP_NUDGE_TEMPLATE_NAME = os.getenv(
-        "WHATSAPP_NUDGE_TEMPLATE_NAME", "neurocient_daily_nudge_v2"
+        "WHATSAPP_NUDGE_TEMPLATE_NAME", "neurocient_daily_nudge_v3"
     ).strip()
     WHATSAPP_SPOT_TEMPLATE_NAME = os.getenv(
-        "WHATSAPP_SPOT_TEMPLATE_NAME", "neurocient_spot_checkin_v2"
+        "WHATSAPP_SPOT_TEMPLATE_NAME", "neurocient_spot_checkin_v4"
     ).strip()
     WHATSAPP_MICROCHALLENGE_TEMPLATE_NAME = os.getenv(
         "WHATSAPP_MICROCHALLENGE_TEMPLATE_NAME",
-        "neurocient_microchallenge_checkin_v2",
+        "neurocient_microchallenge_checkin_v3",
     ).strip()
     CONSENT_PAIRING_SECRET = os.getenv("CONSENT_PAIRING_SECRET")
     RESEND_API_KEY = os.getenv("RESEND_API_KEY")

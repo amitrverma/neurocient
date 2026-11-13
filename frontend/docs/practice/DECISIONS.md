@@ -1700,19 +1700,20 @@ purpose-toggle and outbound-code parts of the 2026-10-31 decision and the
 decision. Safe defaults, signed webhooks, dispatch-time channel re-checks, and
 privacy-safe logging remain unchanged.
 
-## 2026-11-12: Proactive WhatsApp reminders use three Utility templates
+## 2026-11-12: Proactive WhatsApp reminders use purpose-specific templates
 
 Daily nudges, Spot the Inner Caveman check-ins, and active-Microchallenge
 check-ins are three reminder purposes. A due Microchallenge continues to replace
 the daily nudge so those two messages never compete. This behavior is not
 changed by the provider template boundary.
 
-Each proactive purpose uses its own Meta Utility template. The fixed copy says
-that the person asked to receive it, contains no promotion or membership prompt,
-and allows STOP. The Microchallenge template keeps `Done`, `Partly`, and
-`Didn't happen`; only `Done` advances completed-day progress. Inbound
-acknowledgements remain service-window text and cannot be used as a fallback for
-scheduled delivery.
+Each proactive purpose uses its own Meta template. Category follows Meta's
+provider policy rather than Neurocient's product meaning: the proactive daily
+nudge and Spot conversation prompt are Marketing, while the follow-up to the
+person's active Microchallenge is Utility. The Microchallenge template keeps
+`Done`, `Partly`, and `Didn't happen`; only `Done` advances completed-day
+progress. Inbound acknowledgements remain service-window text and cannot be
+used as a fallback for scheduled delivery.
 
 Provider acceptance is not delivery. The dispatch stores Meta's `wamid` as
 `accepted`; signed callbacks may advance it to `delivered` or `read`, or mark it
@@ -1726,7 +1727,7 @@ the exact-candidate consent, reminder, status, and reply journey is retained.
 The WhatsApp connection message is the explicit consent point. It names the
 Neurocient account, relevant nudges and check-ins, microchallenge progress, and
 the ability to pause by replying STOP. Help and the account's Disconnect
-control keep user control discoverable. Routine Utility reminders do not repeat
+control keep user control discoverable. Routine reminders do not repeat
 STOP because the repetition adds clutter and makes every useful check-in read
 like an exit prompt.
 
@@ -1736,7 +1737,7 @@ short-lived prepared message as both a phone-scannable QR code and a direct
 WhatsApp link. Sending that message remains the proof of number ownership; the
 QR code does not introduce a parallel consent or identity path.
 
-## 2026-11-13: WhatsApp check-ins use concise templates and quick replies
+## 2026-11-13: WhatsApp check-ins use concise, response-appropriate templates
 
 Proactive WhatsApp messages should use the channel's native hierarchy instead
 of reproducing a paragraph of instructions. Daily nudges have a short text
@@ -1745,15 +1746,18 @@ three truthful outcomes as quick-reply buttons: `Done`, `Partly`, and
 `Didn't happen`. The provider payload, not the visible button label, is the
 authoritative outcome; typed replies remain supported for compatibility.
 
-Spot the Inner Caveman needs free text, so one fixed button cannot complete the
-entry. `Record what I noticed` opens a 15-minute, account-bound capture state
-and asks the person to reply in their own words. The next ordinary text reply
-uses the same Spot allowance and persistence path as web capture, then clears
-the pending state. STOP, START, Microchallenge outcomes, and explicit legacy
-commands take precedence so a pending Spot cannot swallow another action.
+Spot the Inner Caveman needs free text, so a quick-reply button is the wrong
+interaction: WhatsApp sends the button label as the person's message rather
+than opening text entry. The proactive Spot template instead asks, "Did you
+spot your Inner Caveman today? What automatic response showed up?" Delivery
+opens a 15-minute, account-bound capture state and invites a reply in the
+person's own words. The next ordinary text reply uses the same Spot allowance
+and persistence path as web capture, then clears the pending state. STOP,
+START, Microchallenge outcomes, and explicit legacy commands take precedence
+so a pending Spot cannot swallow another action.
 
 The pending capture is durable rather than process-local, expires safely, and
 is cleared when delivery is paused or resumed. Provider message identifiers
-continue to protect the webhook from replay. Approved v2 templates remain the
-runtime fallback until all three v3 Utility templates are approved; button
-components are never attached to a v2 send.
+continue to protect the webhook from replay. Approved older templates remain
+the runtime fallback until each replacement is approved; button components are
+never attached to an incompatible template.

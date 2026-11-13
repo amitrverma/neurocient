@@ -1,7 +1,7 @@
 import asyncio
 import json
 import logging
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from typing import Literal
 from zoneinfo import ZoneInfo
 
@@ -18,6 +18,10 @@ from app.models import (
     WebPushSubscription,
 )
 from app.services.meta_whatsapp import send_whatsapp_template_message
+from app.services.whatsapp_interactions import (
+    SPOT_CAPTURE_ACTION,
+    SPOT_CAPTURE_WINDOW,
+)
 from app.observability import log_event, safe_exception_fields
 from app.services.job_control import (
     claim_notification_dispatch,
@@ -56,6 +60,20 @@ def quick_reply_payloads_for(purpose: Purpose, template_name: str) -> tuple[str,
     if not template_name.endswith("_v3"):
         return ()
     return QUICK_REPLY_PAYLOADS_BY_PURPOSE[purpose]
+
+
+def _uses_concise_template(purpose: Purpose, template_name: str) -> bool:
+    return template_name.endswith("_v3") or (
+        purpose == "spot_reminder" and template_name.endswith("_v4")
+    )
+
+
+def _opens_spot_capture(purpose: Purpose, template_name: str) -> bool:
+    return purpose == "spot_reminder" and template_name.endswith("_v4")
+
+
+def _utcnow() -> datetime:
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 def _dispatch_date() -> date:
@@ -298,7 +316,7 @@ async def _deliver_to_user(
                     if whatsapp_template_parameters is not None
                     else (title, body)
                 )
-                if template_name.endswith("_v3"):
+                if _uses_concise_template(purpose, template_name):
                     template_parameters = (
                         ()
                         if purpose == "spot_reminder"
@@ -342,6 +360,11 @@ async def _deliver_to_user(
                 )
                 whatsapp_failed = 1
             else:
+                if delivered and _opens_spot_capture(purpose, template_name):
+                    prefs.whatsapp_pending_action = SPOT_CAPTURE_ACTION
+                    prefs.whatsapp_pending_action_expires_at = (
+                        _utcnow() + SPOT_CAPTURE_WINDOW
+                    )
                 finish_kwargs = {
                     "status": "accepted" if delivered else "failed",
                     "error_code": None if delivered else "provider_rejected",

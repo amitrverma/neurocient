@@ -2,7 +2,7 @@ import asyncio
 import json
 import logging
 import re
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Request
@@ -26,6 +26,11 @@ from app.services.microchallenge_progress import (
     record_checkin,
 )
 from app.services.spot_capture import capture_spot
+from app.services.whatsapp_interactions import (
+    SPOT_CAPTURE_ACTION,
+    SPOT_CAPTURE_BUTTON_PAYLOAD,
+    SPOT_CAPTURE_WINDOW,
+)
 from app.services.meta_whatsapp import (
     MetaInboundMessage,
     MetaMessageStatus,
@@ -65,10 +70,6 @@ BUTTON_MICROCHALLENGE_RESPONSES = {
     "micro_partly_v1": "partly",
     "micro_not_today_v1": "not_today",
 }
-SPOT_CAPTURE_BUTTON_PAYLOAD = "spot_capture_v1"
-SPOT_CAPTURE_WINDOW = timedelta(minutes=15)
-
-
 def _utcnow() -> datetime:
     return datetime.now(UTC).replace(tzinfo=None)
 
@@ -294,7 +295,7 @@ async def _process_inbound_message(
                 "nudges and check-ins here."
             )
         elif message.button_payload == SPOT_CAPTURE_BUTTON_PAYLOAD:
-            linked_preferences.whatsapp_pending_action = "spot_capture"
+            linked_preferences.whatsapp_pending_action = SPOT_CAPTURE_ACTION
             linked_preferences.whatsapp_pending_action_expires_at = (
                 _utcnow() + SPOT_CAPTURE_WINDOW
             )
@@ -363,7 +364,7 @@ async def _process_inbound_message(
             )
         elif (
             normalized_body
-            and linked_preferences.whatsapp_pending_action == "spot_capture"
+            and linked_preferences.whatsapp_pending_action == SPOT_CAPTURE_ACTION
             and linked_preferences.whatsapp_pending_action_expires_at is not None
             and linked_preferences.whatsapp_pending_action_expires_at > _utcnow()
         ):

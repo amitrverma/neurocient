@@ -5,6 +5,7 @@ import json
 import logging
 import os
 from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import httpx
@@ -169,6 +170,78 @@ async def test_meta_delivery_status_updates_durable_dispatch(monkeypatch):
         async with AsyncSessionLocal() as db:
             await db.execute(
                 delete(NotificationDispatch).where(NotificationDispatch.id == dispatch_id)
+            )
+            await db.execute(delete(User).where(User.id == user_id))
+            await db.commit()
+        await engine.dispose()
+
+
+async def test_spot_v4_delivery_durably_opens_fifteen_minute_reply_window(
+    monkeypatch,
+):
+    from app.config import settings
+    from app.database import AsyncSessionLocal, engine
+    from app.models import NotificationDispatch, User, UserPreferences
+    from app.services.whatsapp_interactions import (
+        SPOT_CAPTURE_ACTION,
+        SPOT_CAPTURE_WINDOW,
+    )
+    from app.utils import reminder_engine
+
+    user_id = uuid4()
+    phone = "+917" + str(uuid4().int)[:9]
+    sent_at = datetime(2026, 11, 13, 12, 0, 0)
+    monkeypatch.setattr(
+        settings,
+        "WHATSAPP_SPOT_TEMPLATE_NAME",
+        "neurocient_spot_checkin_v4",
+    )
+    monkeypatch.setattr(reminder_engine, "_utcnow", lambda: sent_at)
+    monkeypatch.setattr(
+        reminder_engine.asyncio,
+        "to_thread",
+        AsyncMock(return_value="wamid.spot-v4-test"),
+    )
+
+    try:
+        async with AsyncSessionLocal() as db:
+            db.add_all([
+                User(id=user_id, email=f"spot-v4-{uuid4()}@example.com"),
+                UserPreferences(
+                    user_id=user_id,
+                    whatsapp_number=phone,
+                    whatsapp_verified=True,
+                    whatsapp_enabled=True,
+                ),
+            ])
+            await db.commit()
+
+            result = await reminder_engine._deliver_to_user(
+                db,
+                user_id=user_id,
+                purpose="spot_reminder",
+                title="Spot check",
+                body="Did you spot your Inner Caveman today?",
+            )
+            assert result["whatsapp_success"] == 1
+
+        async with AsyncSessionLocal() as db:
+            prefs = await db.scalar(
+                select(UserPreferences).where(UserPreferences.user_id == user_id)
+            )
+            assert prefs.whatsapp_pending_action == SPOT_CAPTURE_ACTION
+            assert prefs.whatsapp_pending_action_expires_at == (
+                sent_at + SPOT_CAPTURE_WINDOW
+            )
+    finally:
+        async with AsyncSessionLocal() as db:
+            await db.execute(
+                delete(NotificationDispatch).where(
+                    NotificationDispatch.user_id == user_id
+                )
+            )
+            await db.execute(
+                delete(UserPreferences).where(UserPreferences.user_id == user_id)
             )
             await db.execute(delete(User).where(User.id == user_id))
             await db.commit()

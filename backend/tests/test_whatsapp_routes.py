@@ -2,6 +2,7 @@ import hashlib
 import hmac
 import json
 import logging
+import re
 from unittest.mock import AsyncMock
 from types import SimpleNamespace
 from uuid import uuid4
@@ -149,12 +150,30 @@ def test_pairing_token_parser_requires_explicit_final_connect_command():
     assert whatsapp_routes.parse_pairing_token("CONNECT short") is None
 
 
+def test_pairing_token_parser_accepts_human_readable_connection_code():
+    code = "N7KF-4Q2P-X7RM-6TWD"
+
+    assert whatsapp_routes.parse_pairing_token(
+        f"I'd like to connect WhatsApp.\n\nConnection code: {code}"
+    ) == code
+    assert whatsapp_routes.parse_pairing_token(
+        f"Connection code: {code.lower()}"
+    ) == code
+    assert whatsapp_routes.parse_pairing_token(f"Connection code: {code} trailing") is None
+
+
+def test_generated_connection_code_has_eighty_bits_in_readable_groups():
+    code = preferences_route.generate_pairing_token()
+
+    assert re.fullmatch(r"[A-Z2-7]{4}(?:-[A-Z2-7]{4}){3}", code)
+
+
 def test_pairing_consent_is_concise_and_leaves_opt_out_to_confirmation():
     message = preferences_route.CONSENT_MESSAGE
 
     assert message == (
-        "I'd like to receive Neurocient nudges and check-ins, and record my "
-        "microchallenge progress here."
+        "I'd like to connect WhatsApp to my Neurocient account for nudges, "
+        "check-ins, and microchallenge progress."
     )
     assert "STOP" not in message
 

@@ -2,6 +2,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 from datetime import UTC, datetime, timedelta
 from urllib.parse import parse_qs, urlsplit
 from uuid import uuid4
@@ -145,10 +146,11 @@ async def test_channel_consent_and_inbound_whatsapp_pairing(monkeypatch):
             assert urlsplit(url).path == f"/{BUSINESS_NUMBER}"
             consent_message = parse_qs(urlsplit(url).query)["text"][0]
             assert "Neurocient" in consent_message
-            assert "nudges and check-ins" in consent_message
+            assert "nudges, check-ins" in consent_message
             assert "microchallenge progress" in consent_message
             assert "STOP" not in consent_message
-            token = consent_message.rsplit("CONNECT ", 1)[1]
+            token = consent_message.rsplit("Connection code: ", 1)[1]
+            assert re.fullmatch(r"[A-Z2-7]{4}(?:-[A-Z2-7]{4}){3}", token)
 
             async with AsyncSessionLocal() as session:
                 pending = await session.scalar(
@@ -169,7 +171,7 @@ async def test_channel_consent_and_inbound_whatsapp_pairing(monkeypatch):
                     select(UserPreferences).where(UserPreferences.user_id == user_id)
                 )
                 assert connected_preferences.whatsapp_consent_version == (
-                    "whatsapp-companion-v3"
+                    "whatsapp-companion-v4"
                 )
 
             replay = await webhook(client, message_ids[0], consent_message)

@@ -55,7 +55,13 @@ HELP_MESSAGE = (
     "'spot: ...'. Reply STOP to pause WhatsApp messages. "
     "For human support, email support@neurocient.com."
 )
-PAIRING_PATTERN = re.compile(r"(?:^|\n)CONNECT ([A-Za-z0-9_-]{32,128})\s*$")
+PAIRING_PATTERN = re.compile(
+    r"(?:^|\n)(?:"
+    r"CONNECT (?P<legacy>[A-Za-z0-9_-]{32,128})|"
+    r"Connection code:[ \t]*(?P<code>[A-Z2-7]{4}(?:-[A-Z2-7]{4}){3})"
+    r")\s*$",
+    re.IGNORECASE,
+)
 SPOT_PATTERN = re.compile(r"^spot[ \t]*:[ \t]*(.*)$", re.IGNORECASE | re.DOTALL)
 MICROCHALLENGE_RESPONSES = {
     "done": "done",
@@ -111,7 +117,10 @@ def parse_obstacle_note(message: str) -> str | None:
 
 def parse_pairing_token(message: str) -> str | None:
     match = PAIRING_PATTERN.search(message.strip())
-    return match.group(1) if match else None
+    if match is None:
+        return None
+    legacy = match.group("legacy")
+    return legacy if legacy is not None else match.group("code").upper()
 
 
 def microchallenge_acknowledgement(outcome: str) -> str:

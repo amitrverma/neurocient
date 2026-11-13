@@ -1766,10 +1766,11 @@ never attached to an incompatible template.
 
 The prefilled pairing message is a short statement of what the person is asking
 for: Neurocient nudges and check-ins, with microchallenge progress recorded in
-WhatsApp. The final `CONNECT` token remains because it is the short-lived,
+WhatsApp. A short connection code remains because it is the short-lived,
 account-bound key that lets the signed inbound sender prove which Neurocient
-account to link. It is routing data, not user guidance. STOP is explained once
-in Neurocient's successful connection reply and remains available at any time.
+account to link. It is shown as four readable groups, remains one-time and
+expires after 10 minutes; only its HMAC is stored. STOP is explained once in
+Neurocient's successful connection reply and remains available at any time.
 
 After `Partly` or `Didn't happen`, Neurocient asks what got in the way. The next
 ordinary reply within 15 minutes is attached to that day's microchallenge log;

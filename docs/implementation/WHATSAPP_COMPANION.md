@@ -4,7 +4,7 @@ Status: local owned-number journey passed; deployed dev-candidate verification p
 
 Owner: Amit
 
-Contract version: 1.6 (2026-11-13)
+Contract version: 1.7 (2026-11-13)
 
 Version 1.1 makes the daily nugget selection durable and shared across the web
 and outbound delivery. It also requires bounded outbound WhatsApp bodies and
@@ -18,6 +18,8 @@ Version 1.5 removes repeated opt-out copy from proactive reminders and makes
 desktop pairing a phone handoff rather than a dependency on WhatsApp Web.
 Version 1.6 moves opt-out guidance to the connection confirmation and lets a
 person add an obstacle note as an ordinary follow-up reply.
+Version 1.7 presents the account-binding credential as a short, human-readable
+connection code while preserving one-time use, expiry, and hashed storage.
 
 ## Outcome
 
@@ -159,9 +161,9 @@ original STOP footer.
   proactive fallback.
 - **WA-COMP-11:** Authentic delivery callbacks update only the dispatch matching
   their provider `wamid`, preserve monotonic status, and store no provider text.
-- **WA-COMP-12:** Pairing keeps the account-bound `CONNECT` token but places STOP
-  guidance in Neurocient's successful connection confirmation, not in the
-  person's prefilled consent sentence.
+- **WA-COMP-12:** Pairing includes an account-bound, 80-bit connection code in
+  four readable groups and places STOP guidance in Neurocient's successful
+  connection confirmation, not in the person's prefilled consent sentence.
 - **WA-COMP-13:** `Partly` and `Didn't happen` open a 15-minute obstacle-note
   reply state; the next ordinary text is stored once on that day's outcome.
 

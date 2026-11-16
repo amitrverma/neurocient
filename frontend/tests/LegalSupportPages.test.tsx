@@ -9,7 +9,7 @@ import TermsPage from "../src/app/terms/page";
 
 afterEach(cleanup);
 
-const legalIdentity = /neurocient labs is a unit and brand of xaltris technologies, a sole proprietorship owned and operated by amit ranjan verma in india/i;
+const legalIdentity = /neurocient labs is a unit and brand of xaltris technologies\./i;
 
 describe("public legal and support pages", () => {
   it("identifies the proprietor and provides one support contact on the privacy page", () => {

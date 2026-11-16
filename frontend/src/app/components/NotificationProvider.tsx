@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
+import { apiErrorMessage } from "@/lib/apiError";
 
 export type NotificationType = "info" | "success" | "error";
 
@@ -11,7 +12,7 @@ interface Notification {
 }
 
 interface NotificationContextValue {
-  notify: (message: string, type?: NotificationType) => void;
+  notify: (message: unknown, type?: NotificationType) => void;
 }
 
 const NotificationContext = createContext<NotificationContextValue | undefined>(
@@ -28,9 +29,10 @@ export const NotificationProvider = ({
   const remove = (id: number) =>
     setNotifications((prev) => prev.filter((n) => n.id !== id));
 
-  const notify = (message: string, type: NotificationType = "info") => {
+  const notify = (message: unknown, type: NotificationType = "info") => {
     const id = Date.now();
-    setNotifications((prev) => [...prev, { id, message, type }]);
+    const safeMessage = apiErrorMessage(message, "Something went wrong.");
+    setNotifications((prev) => [...prev, { id, message: safeMessage, type }]);
     setTimeout(() => remove(id), 5000);
   };
 

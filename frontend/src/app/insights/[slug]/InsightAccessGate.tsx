@@ -56,33 +56,39 @@ export default function InsightAccessGate({
               {publicLead}
             </div>
 
-            <section className="mt-10 border-t border-brand-dark/15 pt-8">
-              <p className="font-sans text-xs font-bold uppercase tracking-[0.18em] text-brand-teal">
+            <section
+              aria-labelledby="insight-access-heading"
+              className="mt-10 rounded-lg border border-brand-dark/12 bg-white p-5 font-sans shadow-[0_20px_60px_rgba(4,42,43,0.06)] sm:p-6"
+            >
+              <h2
+                id="insight-access-heading"
+                className="font-sans text-xs font-bold uppercase tracking-[0.18em] text-brand-teal"
+              >
                 Continue reading
-              </p>
-              <p className="mt-4 text-base leading-7 text-brand-dark/75">
+              </h2>
+              <p className="mt-3 font-sans text-sm leading-7 text-brand-dark/72 sm:text-base">
                 {access.message}
               </p>
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 {needsAuth ? (
                   <button
                     type="button"
                     onClick={() => setAuthOpen(true)}
-                    className="min-h-12 rounded-full bg-brand-teal px-6 font-sans text-sm font-semibold text-white"
+                    className="min-h-12 rounded-lg border border-brand-secondary bg-brand-secondary px-6 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-dark hover:bg-brand-dark hover:text-white"
                   >
                     Sign in or create an account
                   </button>
                 ) : access.reason === "membership" ? (
                   <Link
                     href="/membership"
-                    className="inline-flex min-h-12 items-center justify-center rounded-full bg-brand-teal px-6 font-sans text-sm font-semibold text-white"
+                    className="inline-flex min-h-12 items-center justify-center rounded-lg border border-brand-secondary bg-brand-secondary px-6 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-dark hover:bg-brand-dark hover:text-white"
                   >
                     Explore Membership
                   </Link>
                 ) : null}
                 <Link
                   href="/insights"
-                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-brand-dark/15 px-6 font-sans text-sm font-semibold text-brand-dark"
+                  className="inline-flex min-h-12 items-center justify-center rounded-lg border border-brand-dark/25 px-6 font-sans text-sm font-semibold text-brand-dark transition hover:border-brand-dark hover:bg-brand-dark/5"
                 >
                   Browse Insights
                 </Link>

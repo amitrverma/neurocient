@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
+import { apiErrorMessage } from "@/lib/apiError";
 
 export default function ResetPasswordForm() {
   const [token, setToken] = useState<string | null>(null);
@@ -39,7 +40,9 @@ export default function ResetPasswordForm() {
       });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) {
-        setError(body?.detail || "This reset link could not be used.");
+        setError(
+          apiErrorMessage(body, "This reset link could not be used.", response),
+        );
         return;
       }
       setComplete(true);
@@ -52,8 +55,8 @@ export default function ResetPasswordForm() {
 
   if (complete) {
     return (
-      <div className="mt-7" role="status">
-        <p className="rounded-2xl bg-brand-teal/8 p-4 text-sm leading-6 text-brand-dark">
+      <div className="mt-6" role="status">
+        <p className="rounded-lg border border-brand-teal/25 bg-brand-teal/8 p-4 text-sm leading-6 text-brand-dark">
           Your password has been updated. Sign in again on your next protected
           action.
         </p>
@@ -68,7 +71,7 @@ export default function ResetPasswordForm() {
   }
 
   return (
-    <form onSubmit={submit} className="mt-7 space-y-4">
+    <form onSubmit={submit} className="mt-6 space-y-4 font-sans">
       <label className="block text-sm font-semibold text-brand-dark">
         New password
         <input
@@ -76,14 +79,14 @@ export default function ResetPasswordForm() {
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           autoComplete="new-password"
-          minLength={12}
+          minLength={8}
           maxLength={128}
           required
-          className="mt-2 w-full rounded-lg border border-brand-dark/35 px-4 py-3 font-normal outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+          className="mt-2 w-full rounded-lg border border-brand-dark/35 px-4 py-3 font-sans font-normal outline-none transition focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
         />
       </label>
       <p className="text-xs leading-5 text-brand-dark/60">
-        Use 12–128 characters. A long, memorable passphrase works well.
+        Use at least 8 characters.
       </p>
       <label className="block text-sm font-semibold text-brand-dark">
         Confirm new password
@@ -92,26 +95,32 @@ export default function ResetPasswordForm() {
           value={confirmation}
           onChange={(event) => setConfirmation(event.target.value)}
           autoComplete="new-password"
-          minLength={12}
+          minLength={8}
           maxLength={128}
           required
-          className="mt-2 w-full rounded-lg border border-brand-dark/35 px-4 py-3 font-normal outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+          className="mt-2 w-full rounded-lg border border-brand-dark/35 px-4 py-3 font-sans font-normal outline-none transition focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
         />
       </label>
       {error && (
-        <p role="alert" className="text-sm text-red-700">
+        <p
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm leading-5 text-red-800"
+        >
           {error}
         </p>
       )}
       <button
         type="submit"
         disabled={loading || !token || !tokenReady}
-        className="min-h-12 w-full rounded-full bg-brand-teal px-6 text-sm font-semibold text-white disabled:opacity-60"
+        className="min-h-12 w-full rounded-lg border border-brand-secondary bg-brand-secondary px-6 text-sm font-semibold text-brand-dark transition hover:border-brand-dark hover:bg-brand-dark hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? "Updating..." : "Update password"}
       </button>
       {tokenReady && !token && (
-        <p role="alert" className="text-sm text-red-700">
+        <p
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm leading-5 text-red-800"
+        >
           This reset link is incomplete. Request a new one.
         </p>
       )}

@@ -21,7 +21,7 @@ describe("Landing page platform narrative", () => {
     render(<LandingPage />);
 
     expect(
-      screen.getByText(/behaviour-change platform to bridge the gap between knowing and doing/i),
+      screen.getByText(/a platform to understand and work with human nature/i),
     ).toBeInTheDocument();
 
     [

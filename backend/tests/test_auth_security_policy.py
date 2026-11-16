@@ -23,6 +23,8 @@ def test_email_identity_is_trimmed_and_case_normalized(raw, normalized):
     "password",
     [
         "short",
+        "password",
+        "12345678",
         "password1234",
         "a" * 129,
     ],
@@ -36,6 +38,10 @@ def test_password_policy_allows_long_passphrases_without_composition_rules():
     assert validate_password("correct horse battery staple") == (
         "correct horse battery staple"
     )
+
+
+def test_password_policy_accepts_eight_characters():
+    assert validate_password("riveroak") == "riveroak"
 
 
 def test_secret_digest_is_deterministic_without_retaining_raw_secret():

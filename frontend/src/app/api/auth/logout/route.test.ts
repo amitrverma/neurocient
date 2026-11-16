@@ -22,7 +22,9 @@ describe("logout API boundary", () => {
     const response = await POST(
       new Request("https://neurocient.test/api/auth/logout", {
         method: "POST",
-        headers: { cookie: "refresh_token=copied" },
+        headers: {
+          cookie: "guest_access_id=guest-browser; refresh_token=copied",
+        },
       }),
     );
 
@@ -31,7 +33,7 @@ describe("logout API boundary", () => {
       expect.objectContaining({
         method: "POST",
         headers: expect.objectContaining({
-          Cookie: "refresh_token=copied",
+          Cookie: "guest_access_id=guest-browser; refresh_token=copied",
           "X-Neurocient-Auth-Request": "browser-bff",
         }),
       }),
@@ -39,5 +41,6 @@ describe("logout API boundary", () => {
     expect(response.headers.get("set-cookie")).toContain("access_token=");
     expect(response.headers.get("set-cookie")).toContain("refresh_token=");
     expect(response.headers.get("set-cookie")).toContain("session_present=");
+    expect(response.headers.get("set-cookie")).not.toContain("guest_access_id=");
   });
 });

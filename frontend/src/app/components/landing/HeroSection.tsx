@@ -68,7 +68,7 @@ export default function HeroSection() {
             </div>
 
             <p className="page-eyebrow mt-6 max-w-4xl text-brand-teal">
-              A behaviour-change platform to bridge the gap between knowing and doing
+              A platform to understand and work with human nature
             </p>
 
             <div className="mt-7 flex flex-col gap-3 font-sans sm:flex-row sm:items-center">

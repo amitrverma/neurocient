@@ -13,6 +13,7 @@ import {
   usageLimits,
 } from "../../utils/usage";
 import { trackEvent } from "../../utils/analytics";
+import { apiErrorMessage } from "@/lib/apiError";
 
 interface CavemanSpotProps {
   prompt?: string;
@@ -76,7 +77,7 @@ const CavemanSpot = ({
           setShowMembership(true);
           return;
         }
-        notify(data?.detail?.message || data.detail || "Failed to log spot", "error");
+        notify(apiErrorMessage(data, "Failed to log spot.", res), "error");
       }
     } catch (err) {
       console.error("Error saving spot:", err);

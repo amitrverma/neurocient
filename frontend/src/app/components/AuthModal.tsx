@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Dialog } from "@headlessui/react";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
@@ -9,6 +9,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNotification } from "./NotificationProvider";
 import { trackEvent } from "../utils/analytics";
 import usePushNotifications from "@/app/hooks/usePushNotifications";
+import { apiErrorMessage } from "@/lib/apiError";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -26,35 +27,46 @@ const AuthModal = ({
   context,
 }: AuthModalProps) => {
   const [mode, setMode] = useState<"login" | "signup">("login");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { login } = useAuth();
   const { notify } = useNotification();
   const { subscribe } = usePushNotifications(
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
   );
 
+  useEffect(() => {
+    if (!isOpen) setError(null);
+  }, [isOpen]);
+
   const finishAuth = async (eventName: string) => {
     if (!(await login())) {
-      notify("Sign-in completed, but the session could not be confirmed. Please try again.", "error");
+      setError(
+        "Sign-in completed, but the session could not be confirmed. Please try again.",
+      );
       return false;
     }
     onClose();
     onSuccess?.();
     trackEvent(eventName);
 
-    if (Notification.permission === "granted") {
-      await subscribe();
-    } else {
-      notify(
-        "Push notifications are disabled. You can enable them anytime from Profile -> Preferences.",
-      );
+    if (typeof Notification !== "undefined") {
+      if (Notification.permission === "granted") {
+        await subscribe();
+      } else {
+        notify(
+          "Push notifications are disabled. You can enable them anytime from Profile -> Preferences.",
+        );
+      }
     }
     return true;
   };
 
   const handleGoogleLogin = async () => {
+    setError(null);
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
@@ -72,19 +84,17 @@ const AuthModal = ({
       if (res.ok && data?.user?.id && data?.preview !== true) {
         await finishAuth("Login Completed");
       } else {
-        const detail = typeof data?.detail === "string"
-          ? data.detail
-          : "Google login failed.";
-        notify(detail, "error");
+        setError(apiErrorMessage(data, "Google login failed.", res));
       }
     } catch (err) {
       console.error("Google login failed:", err);
-      notify("Google login failed", "error");
+      setError("Google login failed. Please try again.");
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setLoading(true);
 
     try {
@@ -95,7 +105,11 @@ const AuthModal = ({
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(
+          mode === "signup"
+            ? { name: name.trim().replace(/\s+/g, " "), email, password }
+            : { email, password },
+        ),
       });
 
       if (res.ok) {
@@ -105,8 +119,10 @@ const AuthModal = ({
         );
       } else {
         const errData = await res.json().catch(() => ({}));
-        notify(errData?.detail || "Failed to authenticate.", "error");
+        setError(apiErrorMessage(errData, "Failed to authenticate.", res));
       }
+    } catch {
+      setError("Authentication is temporarily unavailable. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -134,27 +150,63 @@ const AuthModal = ({
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            {mode === "signup" && (
+              <input
+                type="text"
+                aria-label="Name"
+                autoComplete="name"
+                placeholder="Name"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  setError(null);
+                }}
+                className="rounded-lg border border-brand-dark/40 px-4 py-3 text-sm text-brand-dark outline-none transition placeholder:text-brand-dark/45 focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+                required
+                maxLength={100}
+              />
+            )}
             <input
               type="email"
+              aria-label="Email"
+              autoComplete="email"
               placeholder="Email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError(null);
+              }}
               className="rounded-lg border border-brand-dark/40 px-4 py-3 text-sm text-brand-dark outline-none transition placeholder:text-brand-dark/45 focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
               required
             />
             <input
               type="password"
+              aria-label="Password"
+              autoComplete={
+                mode === "signup" ? "new-password" : "current-password"
+              }
               placeholder="Password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError(null);
+              }}
               className="rounded-lg border border-brand-dark/40 px-4 py-3 text-sm text-brand-dark outline-none transition placeholder:text-brand-dark/45 focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
               required
-              minLength={mode === "signup" ? 12 : undefined}
+              minLength={mode === "signup" ? 8 : undefined}
               maxLength={128}
             />
             {mode === "signup" && (
               <p className="text-xs leading-5 text-brand-dark/60">
-                Use 12–128 characters. A long, memorable passphrase works well.
+                Use at least 8 characters.
+              </p>
+            )}
+            {error && (
+              <p
+                role="alert"
+                className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm leading-5 text-red-800"
+              >
+                {error}
               </p>
             )}
             <button
@@ -191,6 +243,7 @@ const AuthModal = ({
           </div>
 
           <button
+            type="button"
             onClick={handleGoogleLogin}
             className="inline-flex w-full cursor-pointer items-center justify-center gap-3 rounded-lg border border-brand-dark/35 bg-white px-5 py-3 text-sm font-semibold text-brand-dark transition hover:border-brand-teal hover:bg-brand-teal/5"
           >
@@ -201,7 +254,11 @@ const AuthModal = ({
           <p className="mt-5 text-center text-sm text-brand-dark/72">
             {mode === "login" ? "New here?" : "Already have an account?"}{" "}
             <button
-              onClick={() => setMode(mode === "login" ? "signup" : "login")}
+              type="button"
+              onClick={() => {
+                setMode(mode === "login" ? "signup" : "login");
+                setError(null);
+              }}
               className="cursor-pointer font-semibold text-brand-primary hover:underline"
             >
               {mode === "login" ? "Sign up" : "Log in"}

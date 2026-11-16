@@ -82,6 +82,10 @@ class AuthRequest(BaseModel):
     password: str = Field(min_length=1, max_length=128)
 
 
+class SignupRequest(AuthRequest):
+    name: str = Field(min_length=1, max_length=100)
+
+
 class PasswordResetRequest(BaseModel):
     email: EmailStr
 
@@ -112,7 +116,23 @@ def _now() -> datetime:
     return datetime.now(UTC).replace(tzinfo=None)
 
 
-def _verified_google_identity(decoded_token: dict) -> tuple[str, str, str]:
+def _normalized_name(value: object, *, required: bool = True) -> str | None:
+    if not isinstance(value, str):
+        if required:
+            raise HTTPException(status_code=422, detail="Name is required")
+        return None
+
+    normalized = " ".join(value.split())
+    if not normalized:
+        if required:
+            raise HTTPException(status_code=422, detail="Name is required")
+        return None
+    if len(normalized) > 100:
+        raise HTTPException(status_code=422, detail="Name must be 100 characters or fewer")
+    return normalized
+
+
+def _verified_google_identity(decoded_token: dict) -> tuple[str, str | None, str]:
     email = decoded_token.get("email")
     uid = decoded_token.get("uid")
     firebase_claims = decoded_token.get("firebase")
@@ -131,18 +151,22 @@ def _verified_google_identity(decoded_token: dict) -> tuple[str, str, str]:
     ):
         raise HTTPException(status_code=401, detail="Unverified Google identity")
 
-    name = decoded_token.get("name")
-    return normalize_email(email), name if isinstance(name, str) else "Anonymous", uid
+    return (
+        normalize_email(email),
+        _normalized_name(decoded_token.get("name"), required=False),
+        uid,
+    )
 
 # ---------------- Signup ----------------
 @router.post("/signup")
 async def signup(
-    req: AuthRequest,
+    req: SignupRequest,
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
     require_auth_request(request)
     email = normalize_email(str(req.email))
+    name = _normalized_name(req.name)
     await enforce(
         db,
         request_rules(request, ("signup_email", email), ip_policy="signup_ip"),
@@ -156,7 +180,12 @@ async def signup(
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    user = User(id=uuid.uuid4(), email=email, password_hash=hash_password(password))
+    user = User(
+        id=uuid.uuid4(),
+        email=email,
+        name=name,
+        password_hash=hash_password(password),
+    )
     db.add(user)
     await db.flush()
 
@@ -172,12 +201,17 @@ async def signup(
     tokens = await issue_session(db, user.id)
     response = JSONResponse(
         content={
-            "user": {"id": str(user.id), "email": user.email, "roles": roles},
+            "user": {
+                "id": str(user.id),
+                "email": user.email,
+                "name": user.name,
+                "roles": roles,
+            },
         }
     )
     set_auth_cookies(response, tokens)
 
-    identify_user(str(user.id), {"email": user.email})
+    identify_user(str(user.id), {"email": user.email, "name": user.name})
     track_event(str(user.id), "user_signup")
 
     return response
@@ -441,12 +475,25 @@ async def firebase_login(request: Request, db: AsyncSession = Depends(get_db)):
             raise HTTPException(status_code=401, detail="Google identity mismatch")
 
         if not user:
+            if name is None:
+                raise HTTPException(
+                    status_code=422,
+                    detail="Google account did not provide a name",
+                )
             user = User(id=uuid.uuid4(), email=email, name=name, google_id=google_id)
             db.add(user)
             await db.flush()
             db.add(UserPreferences(user_id=user.id))
-        elif not user.google_id:
-            user.google_id = google_id
+        else:
+            if not user.google_id:
+                user.google_id = google_id
+            if not (user.name or "").strip():
+                if name is None:
+                    raise HTTPException(
+                        status_code=422,
+                        detail="Google account did not provide a name",
+                    )
+                user.name = name
         await db.commit()
         await db.refresh(user)
 

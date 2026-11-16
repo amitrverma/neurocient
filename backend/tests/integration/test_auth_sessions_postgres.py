@@ -57,24 +57,37 @@ async def test_auth_sessions_rotate_revoke_and_recover_on_postgres(monkeypatch):
         async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
             missing_marker = await client.post(
                 "/auth/signup",
-                json={"email": email, "password": initial_password},
+                json={
+                    "name": "Security User",
+                    "email": email,
+                    "password": initial_password,
+                },
             )
             assert missing_marker.status_code == 403, missing_marker.text
 
             weak = await client.post(
                 "/auth/signup",
                 headers=auth_header,
-                json={"email": email, "password": "short"},
+                json={
+                    "name": "Security User",
+                    "email": email,
+                    "password": "short",
+                },
             )
             assert weak.status_code == 422
 
             signup = await client.post(
                 "/auth/signup",
                 headers=auth_header,
-                json={"email": f"  {email.upper()}  ", "password": initial_password},
+                json={
+                    "name": "  Security   User  ",
+                    "email": f"  {email.upper()}  ",
+                    "password": initial_password,
+                },
             )
             assert signup.status_code == 200
             assert signup.json()["user"]["email"] == email
+            assert signup.json()["user"]["name"] == "Security User"
             user_id = signup.json()["user"]["id"]
 
             async with httpx.AsyncClient(
@@ -277,7 +290,7 @@ async def test_auth_sessions_rotate_revoke_and_recover_on_postgres(monkeypatch):
             weak_reset = await client.post(
                 "/auth/password-reset/confirm",
                 headers=auth_header,
-                json={"token": reset_tokens[0], "password": "too-short"},
+                json={"token": reset_tokens[0], "password": "short"},
             )
             assert weak_reset.status_code == 422
 

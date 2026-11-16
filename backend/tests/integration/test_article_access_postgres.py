@@ -98,6 +98,9 @@ async def test_article_access_is_authoritative_idempotent_and_concurrency_safe()
             denied = next(response for response in contested if response.status_code == 402)
             assert denied.json()["detail"]["code"] == "account_required"
             assert denied.json()["detail"]["next_action"] == "sign_in"
+            assert denied.json()["detail"]["message"] == (
+                "You have read five free Insights. Sign in to continue."
+            )
 
             account_headers = {
                 **access_header,
@@ -177,6 +180,16 @@ async def test_article_access_is_authoritative_idempotent_and_concurrency_safe()
                 "remaining": None,
             }
 
+            # Logging out must not let an exhausted guest browser inherit an
+            # Insight that was granted only to the signed-in account.
+            logged_out_revisit = await client.post(
+                "/articles/account-new/access",
+                headers=guest_headers,
+            )
+            assert logged_out_revisit.status_code == 402
+            assert logged_out_revisit.json()["detail"]["code"] == "account_required"
+            assert logged_out_revisit.json()["detail"]["next_action"] == "sign_in"
+
         async with AsyncSessionLocal() as session:
             guest_count = await session.scalar(
                 select(func.count(ArticleAccessGrant.id)).where(
@@ -207,6 +220,134 @@ async def test_article_access_is_authoritative_idempotent_and_concurrency_safe()
             await session.execute(
                 delete(MembershipEntitlement).where(
                     MembershipEntitlement.user_id == user_id
+                )
+            )
+            await session.execute(delete(User).where(User.id == user_id))
+            await session.commit()
+        await engine.dispose()
+
+
+async def test_logout_returns_the_browser_to_its_existing_guest_allowance():
+    from app.Routes import article_routes, auth_routes
+    from app.database import AsyncSessionLocal, engine
+    from app.models import ArticleAccessGrant, AuthSession, User
+    from app.utils.auth import hash_password
+
+    user_id = uuid4()
+    guest_id = uuid4()
+    password = "a durable logout test passphrase"
+    guest_slugs = [
+        f"logout-guest-{index}"
+        for index in range(article_routes.GUEST_ARTICLE_LIMIT)
+    ]
+    account_slug = "logout-account-only"
+    app = FastAPI()
+    app.include_router(article_routes.router, prefix="/articles")
+    app.include_router(auth_routes.router, prefix="/auth")
+    transport = httpx.ASGITransport(app=app)
+    access_header = {
+        article_routes.ARTICLE_ACCESS_REQUEST_HEADER: "insight-page",
+    }
+    auth_header = {
+        auth_routes.AUTH_REQUEST_HEADER: auth_routes.AUTH_REQUEST_VALUE,
+    }
+
+    async with AsyncSessionLocal() as session:
+        email = f"logout-{user_id}@example.com"
+        session.add(
+            User(
+                id=user_id,
+                email=email,
+                password_hash=hash_password(password),
+            )
+        )
+        session.add_all(
+            ArticleAccessGrant(guest_id=guest_id, article_slug=slug)
+            for slug in guest_slugs
+        )
+        await session.commit()
+
+    try:
+        async with httpx.AsyncClient(
+            transport=transport,
+            base_url="http://test",
+        ) as client:
+            client.cookies.set(
+                "guest_access_id",
+                str(guest_id),
+                domain="test.local",
+                path="/",
+            )
+            login = await client.post(
+                "/auth/login",
+                headers=auth_header,
+                json={"email": email, "password": password},
+            )
+            assert login.status_code == 200
+            assert client.cookies.get("access_token")
+            assert client.cookies.get("refresh_token")
+            assert client.cookies.get("session_present") == "1"
+
+            signed_in = await client.post(
+                f"/articles/{account_slug}/access",
+                headers=access_header,
+            )
+            assert signed_in.status_code == 200
+
+            logout = await client.post("/auth/logout", headers=auth_header)
+            assert logout.status_code == 200
+            assert client.cookies.get("guest_access_id") == str(guest_id)
+            assert client.cookies.get("access_token") is None
+            assert client.cookies.get("refresh_token") is None
+            assert client.cookies.get("session_present") is None
+
+            account_only_after_logout = await client.post(
+                f"/articles/{account_slug}/access",
+                headers=access_header,
+            )
+            assert account_only_after_logout.status_code == 402
+            assert (
+                account_only_after_logout.json()["detail"]["next_action"]
+                == "sign_in"
+            )
+
+            new_guest_article = await client.post(
+                "/articles/logout-sixth-guest/access",
+                headers=access_header,
+            )
+            assert new_guest_article.status_code == 402
+
+            existing_guest_article = await client.post(
+                f"/articles/{guest_slugs[0]}/access",
+                headers=access_header,
+            )
+            assert existing_guest_article.status_code == 200
+
+        async with AsyncSessionLocal() as session:
+            guest_count = await session.scalar(
+                select(func.count(ArticleAccessGrant.id)).where(
+                    ArticleAccessGrant.guest_id == guest_id
+                )
+            )
+            account_count = await session.scalar(
+                select(func.count(ArticleAccessGrant.id)).where(
+                    ArticleAccessGrant.user_id == user_id
+                )
+            )
+            auth_session = await session.scalar(
+                select(AuthSession).where(AuthSession.user_id == user_id)
+            )
+            assert guest_count == article_routes.GUEST_ARTICLE_LIMIT
+            assert account_count == 1
+            assert auth_session is not None
+            assert auth_session.revoked_at is not None
+            assert auth_session.revocation_reason == "logout"
+    finally:
+        async with AsyncSessionLocal() as session:
+            await session.execute(
+                delete(ArticleAccessGrant).where(
+                    (ArticleAccessGrant.user_id == user_id)
+                    | (ArticleAccessGrant.guest_id == guest_id)
                 )
             )
             await session.execute(delete(User).where(User.id == user_id))

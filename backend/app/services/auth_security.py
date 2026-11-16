@@ -1,12 +1,15 @@
 import hashlib
 
 
-MIN_PASSWORD_LENGTH = 12
+MIN_PASSWORD_LENGTH = 8
 MAX_PASSWORD_LENGTH = 128
 COMMON_PASSWORDS = {
+    "12345678",
     "123456789012",
+    "password",
     "letmein12345",
     "password1234",
+    "qwertyui",
     "qwerty123456",
 }
 

@@ -158,7 +158,9 @@ describe("profile delivery channels", () => {
     expect(await screen.findByRole("heading", { name: "Continue on WhatsApp" })).toBeInTheDocument();
 
     expect(await screen.findByText("Connected", {}, { timeout: 4000 })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "Continue on WhatsApp" })).not.toBeInTheDocument();
+    await waitFor(() => expect(
+      screen.queryByRole("heading", { name: "Continue on WhatsApp" }),
+    ).not.toBeInTheDocument());
     expect(mocks.notify).toHaveBeenCalledWith("WhatsApp is connected.", "success");
   });
 

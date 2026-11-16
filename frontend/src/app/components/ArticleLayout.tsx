@@ -24,6 +24,7 @@ import { useNotification } from "./NotificationProvider";
 import { trackEvent } from "../utils/analytics";
 import { slugifyTag } from "../utils/slug";
 import CavemanSpot from "./ui/CavemanSpot";
+import { apiErrorMessage } from "@/lib/apiError";
 
 interface ResourceItem {
   title: string;
@@ -180,7 +181,7 @@ const ArticleLayout = ({
         if (!isSaved) trackEvent("Article Saved", { slug });
       } else {
         const data = await res.json();
-        notify(data.detail || "Something went wrong", "error");
+        notify(apiErrorMessage(data, "Could not save this article.", res), "error");
       }
     } catch (err) {
       console.error("❌ Error saving article:", err);

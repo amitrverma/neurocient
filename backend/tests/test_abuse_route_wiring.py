@@ -37,7 +37,14 @@ async def test_all_auth_surfaces_reach_limiter_before_sensitive_work(monkeypatch
     transport = httpx.ASGITransport(app=app)
     cases = [
         ("/auth/login", {"email": "user@example.com", "password": "not checked"}),
-        ("/auth/signup", {"email": "user@example.com", "password": "not checked"}),
+        (
+            "/auth/signup",
+            {
+                "name": "Test User",
+                "email": "user@example.com",
+                "password": "not checked",
+            },
+        ),
         ("/auth/refresh", None),
         ("/auth/password-reset/request", {"email": "user@example.com"}),
         ("/auth/password-reset/confirm", {"token": "x" * 32, "password": "not checked"}),

@@ -26,9 +26,14 @@ describe("ResetPasswordForm", () => {
     expect(window.location.hash).toBe("");
 
     const inputs = screen.getAllByLabelText(/password/i);
+    expect(inputs[0]).toHaveAttribute("minlength", "8");
+    expect(inputs[1]).toHaveAttribute("minlength", "8");
+    expect(screen.getByText(/use at least 8 characters/i)).toBeInTheDocument();
     fireEvent.change(inputs[0], { target: { value: "a secure new passphrase" } });
     fireEvent.change(inputs[1], { target: { value: "a secure new passphrase" } });
-    fireEvent.click(screen.getByRole("button", { name: "Update password" }));
+    const submit = screen.getByRole("button", { name: "Update password" });
+    expect(submit).toHaveClass("rounded-lg", "bg-brand-secondary", "text-brand-dark");
+    fireEvent.click(submit);
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/auth/password-reset/confirm",

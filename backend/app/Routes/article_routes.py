@@ -97,8 +97,7 @@ async def grant_article_access(
                     "code": "account_required",
                     "next_action": "sign_in",
                     "message": (
-                        "You have read five free Insights. Sign in to continue "
-                        "with a free account."
+                        "You have read five free Insights. Sign in to continue."
                     ),
                 }
             )

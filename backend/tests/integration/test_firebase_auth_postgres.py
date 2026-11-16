@@ -23,6 +23,7 @@ async def test_verified_google_user_is_provisioned_and_receives_session(monkeypa
 
     email = f"google-{uuid4()}@example.test"
     google_id = f"google-{uuid4()}"
+    provider_name = {"value": "Google User"}
 
     async def no_enforce(*_args, **_kwargs):
         return None
@@ -34,7 +35,7 @@ async def test_verified_google_user_is_provisioned_and_receives_session(monkeypa
         lambda *_args, **_kwargs: {
             "email": email,
             "email_verified": True,
-            "name": "Google User",
+            "name": provider_name["value"],
             "uid": google_id,
             "firebase": {"sign_in_provider": "google.com"},
         },
@@ -56,6 +57,7 @@ async def test_verified_google_user_is_provisioned_and_receives_session(monkeypa
 
             assert login.status_code == 200
             assert login.json()["user"]["email"] == email
+            assert login.json()["user"]["name"] == "Google User"
             assert login.json().get("preview") is not True
             assert client.cookies.get("access_token")
             assert client.cookies.get("refresh_token")
@@ -63,7 +65,15 @@ async def test_verified_google_user_is_provisioned_and_receives_session(monkeypa
             me = await client.get("/auth/me")
             assert me.status_code == 200
             assert me.json()["email"] == email
+            assert me.json()["name"] == "Google User"
 
+        async with AsyncSessionLocal() as db:
+            user = await db.scalar(select(User).where(User.email == email))
+            assert user is not None
+            user.name = None
+            await db.commit()
+
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
             repeated = await client.post(
                 "/auth/firebase-login",
                 headers=headers,
@@ -71,11 +81,29 @@ async def test_verified_google_user_is_provisioned_and_receives_session(monkeypa
             )
             assert repeated.status_code == 200
             assert repeated.json()["user"]["id"] == login.json()["user"]["id"]
+            assert repeated.json()["user"]["name"] == "Google User"
+
+        async with AsyncSessionLocal() as db:
+            user = await db.scalar(select(User).where(User.email == email))
+            assert user is not None
+            user.name = "Chosen Name"
+            await db.commit()
+
+        provider_name["value"] = "Different Google Name"
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            preserved = await client.post(
+                "/auth/firebase-login",
+                headers=headers,
+                json={"idToken": "synthetic-token"},
+            )
+            assert preserved.status_code == 200
+            assert preserved.json()["user"]["name"] == "Chosen Name"
 
         async with AsyncSessionLocal() as db:
             user = await db.scalar(select(User).where(User.email == email))
             assert user is not None
             assert user.google_id == google_id
+            assert user.name == "Chosen Name"
             assert await db.scalar(
                 select(UserPreferences).where(UserPreferences.user_id == user.id)
             ) is not None

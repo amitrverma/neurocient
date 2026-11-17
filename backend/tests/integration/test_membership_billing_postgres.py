@@ -216,7 +216,9 @@ async def test_webhook_replay_is_atomic_and_browser_callback_is_not_authority(mo
             replay = await client.post(
                 "/api/membership/razorpay/webhook", content=body, headers=headers
             )
-        assert all(response.status_code == 200 for response in responses)
+        assert [response.status_code for response in responses] == [200, 200], [
+            (response.status_code, response.json()) for response in responses
+        ]
         assert replay.json() == {"ok": True, "duplicate": True}
 
         async with AsyncSessionLocal() as session:

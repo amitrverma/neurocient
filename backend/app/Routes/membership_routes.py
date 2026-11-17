@@ -78,6 +78,12 @@ async def _deliver_membership_welcome(
     try:
         await membership_welcome_email.deliver_membership_welcome_email(db, user_id)
     except membership_welcome_email.WelcomeEmailDeliveryError as error:
+        if error.reason_code == "dispatch_in_progress":
+            logger.info(
+                "membership_welcome_email_dispatch_already_in_progress",
+                extra={"event_id": event_id, "user_id": str(user_id)},
+            )
+            return
         logger.error(
             "membership_payment_fulfilled_email_pending",
             extra={

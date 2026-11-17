@@ -49,8 +49,16 @@ describe("search metadata", () => {
 
   it("keeps the root metadata from leaking a homepage canonical to child routes", () => {
     expect(siteMetadata.alternates).toBeUndefined();
+    expect(siteMetadata.title).toMatchObject({
+      default: "A platform to understand and work with human nature",
+    });
     expect(siteMetadata.openGraph).toMatchObject({
+      title: "A platform to understand and work with human nature",
       images: [{ url: SOCIAL_IMAGE_URL, width: 1200, height: 630 }],
+    });
+    expect(siteMetadata.twitter).toMatchObject({
+      title: "A platform to understand and work with human nature",
+      images: [SOCIAL_IMAGE_URL],
     });
   });
 

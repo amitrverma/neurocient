@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const SITE_URL = "https://neurocient.com";
-export const SOCIAL_IMAGE_PATH = "/images/social/neurocient-share-card.png";
+export const SOCIAL_IMAGE_PATH = "/images/social/neurocient-share-card-v2.png";
 export const SOCIAL_IMAGE_URL = `${SITE_URL}${SOCIAL_IMAGE_PATH}`;
 export const SOCIAL_IMAGE_WIDTH = 1200;
 export const SOCIAL_IMAGE_HEIGHT = 630;

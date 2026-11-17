@@ -10,7 +10,7 @@ import {
 export const siteMetadata: Metadata = {
   metadataBase: new URL("https://neurocient.com"),
   title: {
-    default: "Why Change Is Hard—and What Makes It Stick",
+    default: "A platform to understand and work with human nature",
     template: `%s | ${BRAND_NAME}`,
   },
   description:
@@ -22,7 +22,7 @@ export const siteMetadata: Metadata = {
     type: "website",
     siteName: BRAND_NAME,
     url: "https://neurocient.com",
-    title: "Why Change Is Hard—and What Makes It Stick",
+    title: "A platform to understand and work with human nature",
     description:
       "Understand the automatic responses behind procrastination, worry, comparison, scrolling, and other patterns.",
     images: [
@@ -36,7 +36,7 @@ export const siteMetadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Why Change Is Hard—and What Makes It Stick",
+    title: "A platform to understand and work with human nature",
     description:
       "Understand the automatic responses behind procrastination, worry, comparison, scrolling, and other patterns.",
     images: [SOCIAL_IMAGE_URL],

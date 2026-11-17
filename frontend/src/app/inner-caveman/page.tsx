@@ -14,6 +14,12 @@ import {
   Users,
 } from "lucide-react";
 import Newsletter from "../components/Newsletter";
+import {
+  SOCIAL_IMAGE_ALT,
+  SOCIAL_IMAGE_HEIGHT,
+  SOCIAL_IMAGE_URL,
+  SOCIAL_IMAGE_WIDTH,
+} from "@/lib/searchMetadata";
 
 const innerCavemanAudioUrl =
   "https://neurocientblob.blob.core.windows.net/audio/inner-caveman.mp3?sp=r&st=2026-01-07T13:14:30Z&se=2029-01-07T21:29:30Z&spr=https&sv=2024-11-04&sr=b&sig=VBMEjoqZ06UnnDktbcRTOwyH%2BTdcq6QyHlpMWejuwc4%3D";
@@ -45,10 +51,10 @@ export const metadata: Metadata = {
       "Your Inner Caveman is ancient wiring shaping modern life. Understand its science and train your brain with Neurocient Labs' behavioral frameworks.",
     images: [
       {
-        url: "https://neurocient.com/assets/inner-caveman-five-drives.png",
-        width: 1200,
-        height: 630,
-        alt: "The Inner Caveman framework",
+        url: SOCIAL_IMAGE_URL,
+        width: SOCIAL_IMAGE_WIDTH,
+        height: SOCIAL_IMAGE_HEIGHT,
+        alt: SOCIAL_IMAGE_ALT,
       },
     ],
   },
@@ -57,7 +63,7 @@ export const metadata: Metadata = {
     title: "The Complete Guide to Your Inner Caveman",
     description:
       "Your Inner Caveman is ancient wiring shaping modern life. Understand its science and train your brain with Neurocient Labs' behavioral frameworks.",
-    images: ["https://neurocient.com/assets/inner-caveman-five-drives.png"],
+    images: [SOCIAL_IMAGE_URL],
   },
 };
 

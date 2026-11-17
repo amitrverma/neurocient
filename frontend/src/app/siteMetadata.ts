@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
 import { BRAND_NAME } from "@/lib/businessIdentity";
+import {
+  SOCIAL_IMAGE_ALT,
+  SOCIAL_IMAGE_HEIGHT,
+  SOCIAL_IMAGE_URL,
+  SOCIAL_IMAGE_WIDTH,
+} from "@/lib/searchMetadata";
 
 export const siteMetadata: Metadata = {
   metadataBase: new URL("https://neurocient.com"),
@@ -21,10 +27,10 @@ export const siteMetadata: Metadata = {
       "Understand the automatic responses behind procrastination, worry, comparison, scrolling, and other patterns.",
     images: [
       {
-        url: "/logo/neurocient.png",
-        width: 1200,
-        height: 630,
-        alt: BRAND_NAME,
+        url: SOCIAL_IMAGE_URL,
+        width: SOCIAL_IMAGE_WIDTH,
+        height: SOCIAL_IMAGE_HEIGHT,
+        alt: SOCIAL_IMAGE_ALT,
       },
     ],
   },
@@ -33,7 +39,7 @@ export const siteMetadata: Metadata = {
     title: "Why Change Is Hard—and What Makes It Stick",
     description:
       "Understand the automatic responses behind procrastination, worry, comparison, scrolling, and other patterns.",
-    images: ["/logo/neurocient.png"],
+    images: [SOCIAL_IMAGE_URL],
   },
   icons: {
     icon: [

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">Neurocient Labs</title>
+  <desc id="description">Get more life, from life. Understand what shapes behaviour and work with it in real life.</desc>
+  <rect width="1200" height="630" fill="#ffffff"/>
+  <rect x="0" y="0" width="24" height="630" fill="#f9dc5c"/>
+  <circle cx="1090" cy="58" r="190" fill="#f9dc5c" opacity="0.92"/>
+  <circle cx="1125" cy="590" r="250" fill="#0b5f60" opacity="0.10"/>
+  <path d="M746 72 C 858 20, 957 58, 1032 150 C 1095 228, 1140 240, 1200 202" fill="none" stroke="#042a2b" stroke-width="12" stroke-linecap="round" opacity="0.88"/>
+
+  <!-- The exported PNG composites the existing Neurocient logo in this area. -->
+  <text x="84" y="258" fill="#042a2b" font-family="Georgia, 'Times New Roman', serif" font-size="65" font-weight="700">
+    <tspan x="84" dy="0">Get more life,</tspan>
+    <tspan x="84" dy="75">from life.</tspan>
+  </text>
+  <text x="87" y="446" fill="#0b5f60" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="600" letter-spacing="0.2">
+    Understand what shapes behaviour. Work with it in real life.
+  </text>
+  <line x1="87" y1="490" x2="680" y2="490" stroke="#042a2b" stroke-width="2" opacity="0.18"/>
+  <text x="87" y="540" fill="#042a2b" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" letter-spacing="4">
+    NEUROCIENT.COM
+  </text>
+</svg>

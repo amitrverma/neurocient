@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 
 export const SITE_URL = "https://neurocient.com";
+export const SOCIAL_IMAGE_PATH = "/images/social/neurocient-share-card.png";
+export const SOCIAL_IMAGE_URL = `${SITE_URL}${SOCIAL_IMAGE_PATH}`;
+export const SOCIAL_IMAGE_WIDTH = 1200;
+export const SOCIAL_IMAGE_HEIGHT = 630;
+export const SOCIAL_IMAGE_ALT =
+  "Neurocient Labs — Get more life, from life.";
 
 type PublicMetadataInput = {
   title: string;
@@ -41,10 +47,10 @@ export function createPublicMetadata({
       siteName: "Neurocient Labs",
       images: [
         {
-          url: "/logo/neurocient.png",
-          width: 1200,
-          height: 630,
-          alt: "Neurocient Labs",
+          url: SOCIAL_IMAGE_URL,
+          width: SOCIAL_IMAGE_WIDTH,
+          height: SOCIAL_IMAGE_HEIGHT,
+          alt: SOCIAL_IMAGE_ALT,
         },
       ],
     },
@@ -52,7 +58,7 @@ export function createPublicMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: ["/logo/neurocient.png"],
+      images: [SOCIAL_IMAGE_URL],
     },
   };
 }

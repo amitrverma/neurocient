@@ -17,6 +17,12 @@ import InsightAccessGate from "./InsightAccessGate";
 import { requestArticleAccess } from "./articleAccess";
 import { isVerifiedGooglebotRequest } from "@/lib/googleCrawler";
 import { splitInsightContent } from "@/lib/insightPublicLead";
+import {
+  SOCIAL_IMAGE_ALT,
+  SOCIAL_IMAGE_HEIGHT,
+  SOCIAL_IMAGE_URL,
+  SOCIAL_IMAGE_WIDTH,
+} from "@/lib/searchMetadata";
 
 export const dynamic = "force-dynamic";
 
@@ -72,10 +78,10 @@ export async function generateMetadata(
       tags: (data.tags as string[]) || undefined,
       images: [
         {
-          url: "https://neurocient.com/logo/neurocient.png",
-          width: 1200,
-          height: 630,
-          alt: title,
+          url: SOCIAL_IMAGE_URL,
+          width: SOCIAL_IMAGE_WIDTH,
+          height: SOCIAL_IMAGE_HEIGHT,
+          alt: SOCIAL_IMAGE_ALT,
         },
       ],
     },
@@ -83,7 +89,7 @@ export async function generateMetadata(
       card: "summary_large_image",
       title,
       description,
-      images: ["https://neurocient.com/logo/neurocient.png"],
+      images: [SOCIAL_IMAGE_URL],
     },
   };
 }
@@ -221,7 +227,7 @@ function buildArticleJsonLd({
       : {}),
     keywords: Array.isArray(data.keywords) ? data.keywords.join(", ") : "",
     url: `https://neurocient.com/insights/${slug}`,
-    image: ["https://neurocient.com/logo/neurocient.png"],
+    image: [SOCIAL_IMAGE_URL],
     publisher: {
       "@type": "Organization",
       "@id": orgId,
